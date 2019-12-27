@@ -18,14 +18,18 @@ function Merge-Module {
     AddedWebsite: https://evotec.xyz/powershell-single-psm1-file-versus-multi-file-modules/
     AddedTwitter:
     REVISIONS
+    * 1:23 PM 12/27/2019 pulled regex sig replace with simple start/end detect and throw error (was leaving dangling curlies in psm1)
+    * 12:11 PM 12/27/2019 swapped write-error in catch blocks with write-warning - we seems to be failing to exec the bal of the catch
+    * 7:46 AM 12/27/2019 Merge-Module(): added included file demarc comments to improve merged file visual parsing, accumulating $PrivateFunctions now as well, explicit echos
+    * 8:51 AM 12/20/2019 removed plural from ModuleSourcePaths -> ModuleSourcePath (matches all the calls etc)
     *8:50 PM 12/18/2019 sorted hard-coded verb-aad typo 
     2:54 PM 12/11/2019 rewrote, added backup of psm1, parsing out the stock dyn-include code from the orig psm1, leverages fault-tolerant set-fileContent(), switched sourcepaths to array type, and looped, detecting public/internal by path and prepping for the export list.
     * 2018/11/06 Przemyslaw Klys posted version
     .DESCRIPTION
     .PARAMETER  ModuleName
     Module Name (used to name the ModuleName.psm1 file)[-ModuleName verb-XXX]
-    .PARAMETER  ModuleSourcePaths
-    Directory containing .ps1 function files to be combined [-ModuleSourcePaths c:\path-to\module\Public]
+    .PARAMETER  ModuleSourcePath
+    Directory containing .ps1 function files to be combined [-ModuleSourcePath c:\path-to\module\Public]
     .PARAMETER ModuleDestinationPath
     Final monolithic module .psm1 file name to be populated [-ModuleDestinationPath c:\path-to\module\module.psm1]
     .PARAMETER ShowDebug
@@ -33,15 +37,26 @@ function Merge-Module {
     .PARAMETER Whatif
     Parameter to run a Test no-change pass [-Whatif switch]
     .EXAMPLE
-    .\merge-Module.ps1 -ModuleName verb-AAD -ModuleSourcePaths C:\sc\verb-AAD\Public -ModuleDestinationPath C:\sc\verb-AAD\verb-AAD -showdebug -whatif ;
+    .\merge-Module.ps1 -ModuleName verb-AAD -ModuleSourcePath C:\sc\verb-AAD\Public -ModuleDestinationPath C:\sc\verb-AAD\verb-AAD -showdebug -whatif ;
+    Command line process
+    .EXAMPLE
+    $pltmergeModule=[ordered]@{
+        ModuleName="verb-AAD" ;
+        ModuleSourcePath="C:\sc\verb-AAD\Public","C:\sc\verb-AAD\Internal" ;
+        ModuleDestinationPath="C:\sc\verb-AAD\verb-AAD" ;
+        showdebug=$true ;
+        whatif=$($whatif);
+    } ;
+    Merge-Module @pltmergeModule ;
+    Splatted example (from process-NewModule.ps1)
     .LINK
     https://www.toddomation.com
     #>
     param (
         [Parameter(Mandatory = $True, HelpMessage = "Module Name (used to name the ModuleName.psm1 file)[-ModuleName verb-XXX]")]
         [string] $ModuleName,
-        [Parameter(Mandatory = $True, HelpMessage = "Array of directory paths containing .ps1 function files to be combined [-ModuleSourcePaths c:\path-to\module\Public]")]
-        [array] $ModuleSourcePaths,
+        [Parameter(Mandatory = $True, HelpMessage = "Array of directory paths containing .ps1 function files to be combined [-ModuleSourcePath c:\path-to\module\Public]")]
+        [array] $ModuleSourcePath,
         [Parameter(Mandatory = $True, HelpMessage = "Directory path in which the final .psm1 file should be constructed [-ModuleDestinationPath c:\path-to\module\module.psm1]")]
         [string] $ModuleDestinationPath,
         [Parameter(HelpMessage = "Debugging Flag [-showDebug]")]
@@ -50,12 +65,16 @@ function Merge-Module {
         [switch] $whatIf
     ) ;
 
+    $rgxSigStart='#\sSIG\s#\sBegin\ssignature\sblock' ; 
+    $rgxSigEnd='#\sSIG\s#\sEnd\ssignature\sblock' ; 
 
     if ($ModuleDestinationPath.GetType().FullName -ne 'System.IO.DirectoryInfo') {
         $ModuleDestinationPath = get-item -path $ModuleDestinationPath ;
     } ;
 
-    $ttl = ($ModuleSourcePaths | measure).count ;
+    $ModuleRootPath = split-path $ModuleDestinationPath -Parent ; 
+
+    $ttl = ($ModuleSourcePath | measure).count ;
     $iProcd = 0 ;
 
     $ExportFunctions = @() ;
@@ -72,23 +91,6 @@ function Merge-Module {
 
         # this script *appends* to the existing .psm1 file.
         # which by default includes a dynamic include block:
-        <#
-        #Get public and private function definition files.
-        $functionFolders = @('Public', 'Internal', 'Classes') ;
-        ForEach ($folder in $functionFolders) {
-            $folderPath = Join-Path -Path $PSScriptRoot -ChildPath $folder ;
-            If (Test-Path -Path $folderPath) {
-                Write-Verbose -Message "Importing from $folder" ;
-                $functions = Get-ChildItem -Path $folderPath -Filter '*.ps1'  ;
-                ForEach ($function in $functions) {
-                    Write-Verbose -Message "  Importing $($function.BaseName)" ;
-                    . $($function.FullName) ;
-                } ;
-            } ;
-        } ;
-        $publicFunctions = (Get-ChildItem -Path "$PSScriptRoot\Public" -Filter '*.ps1').BaseName ;
-        Export-ModuleMember -Function $publicFunctions ;
-        #>
         # detect and drop out the above, for the monolithic version
         $rgxPurgeblockStart = '#Get\spublic\sand\sprivate\sfunction\sdefinition\sfiles\.' ;
         $rgxPurgeBlockEnd = 'Export-ModuleMember\s-Function\s\$publicFunctions\s;';
@@ -107,48 +109,153 @@ function Merge-Module {
         if (!$bRet) {throw "FAILURE" } ;
     } ;
 
-    foreach ($ModuleSourcePath in $ModuleSourcePaths) {
+    # 12:55 PM 12/24/2019default - dirs creation - git doesn't reproduce empty dirs, create if empty
+    #$DefaultModDirs = "Public","Internal","Classes",".gitignore","Tests",".vscode","Docs","Docs\Cab","Docs\en-US","Docs\Markdown" ; 
+    # drop the .git & .vscode dirs, we don't publish those to modules dir
+    $DefaultModDirs = "Public","Internal","Classes","Tests","Docs","Docs\Cab","Docs\en-US","Docs\Markdown" ; 
+    foreach($Dir in $DefaultModDirs){
+        $tPath = join-path -path $ModuleRootPath -ChildPath $Dir ; 
+        if(!(test-path -path $tPath)){
+            $pltDir = [ordered]@{
+                path     = $tPath ;
+                ItemType = "Directory" ;
+                ErrorAction="Stop" ; 
+                whatif   = $($whatif) ;
+            } ;
+            $smsg = "Creating missing dir:new-Item w`n$(($pltDir|out-string).trim())" ;
+            if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } ; #Error|Warn
+            $error.clear() ;
+            $bRetry=$false ; 
+            TRY {
+                new-item @pltDir | out-null ;
+            } CATCH {
+                write-warning "$(get-date -format 'HH:mm:ss'): Failed processing $($_.Exception.ItemName). `nError Message: $($_.Exception.Message)`nError Details: $($_)" ;
+                $bRetry=$true ; 
+                #Continue #STOP(debug)|EXIT(close)|Continue(move on in loop cycle) ;
+            } ;
+            if($bRetry){
+                $pltDir.add('force',$true) ; 
+                $smsg = "Retry:FORCE:Creating missing dir:new-Item w`n$(($pltDir|out-string).trim())" ;
+                if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } ; #Error|Warn
+                $error.clear() ;
+                TRY {
+                    new-item @pltDir | out-null ;
+                } CATCH {
+                    write-warning "$(get-date -format 'HH:mm:ss'): Failed processing $($_.Exception.ItemName). `nError Message: $($_.Exception.Message)`nError Details: $($_)" ;
+                    $bRetry=$false ; 
+                    EXIT #STOP(debug)|EXIT(close)|Continue(move on in loop cycle) ;
+                } ;
+            } ; 
+        } ; 
+    } ;  # loop-E
+
+    foreach ($ModuleSource in $ModuleSourcePath) {
 
         $iProcd++ ;
 
-        if ($ModuleSourcePath.GetType().FullName -ne 'System.IO.DirectoryInfo') {
-            $ModuleSourcePath = get-item -path $ModuleSourcePath ;
+        if ($ModuleSource.GetType().FullName -ne 'System.IO.DirectoryInfo') {
+            # git doesn't reproduce empty dirs, create if empty
+            if(!(test-path -path $ModuleSource)){
+                 $pltDir = [ordered]@{
+                    path     = $ModuleSource ;
+                    ItemType = "Directory" ;
+                    ErrorAction="Stop" ; 
+                    whatif   = $($whatif) ;
+                } ;
+                $smsg = "Creating missing dir:new-Item w`n$(($pltDir|out-string).trim())" ;
+                if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } ; #Error|Warn
+                $error.clear() ;
+                $bRetry=$false ; 
+                TRY {
+                    new-item @pltDir | out-null ;
+                } CATCH {
+                    write-warning "$(get-date -format 'HH:mm:ss'): Failed processing $($_.Exception.ItemName). `nError Message: $($_.Exception.Message)`nError Details: $($_)" ;
+                    $bRetry=$true ; 
+                } ;
+                $error.clear() ;
+                if($bRetry){
+                    $pltDir.add('force',$true) ; 
+                    $smsg = "RETRY:FORCE:Creating missing dir:new-Item w`n$(($pltDir|out-string).trim())" ;
+                    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } ; #Error|Warn
+                    TRY {
+                        new-item @pltDir | out-null ;
+                    } CATCH {
+                        write-warning "$(get-date -format 'HH:mm:ss'): Failed processing $($_.Exception.ItemName). `nError Message: $($_.Exception.Message)`nError Details: $($_)" ;
+                        $bRetry=$false 
+                        Exit #STOP(debug)|EXIT(close)|Continue(move on in loop cycle) ;
+                    } ;
+                } ; 
+            } ; 
+            $ModuleSource = get-item -path $ModuleSource ;
         } ;
-        $sBnrS = "`n#*------v ($($iProcd)/$($ttl)):$($ModuleSourcePath) v------" ;
+        $sBnrS = "`n#*------v ($($iProcd)/$($ttl)):$($ModuleSource) v------" ;
         $smsg = "$($sBnrS)" ;
         if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } ; #Error|Warn|Debug **
         $error.clear() ;
         TRY {
-
-
-            [array]$ComponentScripts = Get-ChildItem -Path $ModuleSourcePath\*.ps1 -Recurse -ErrorAction SilentlyContinue   ;
-            [array]$ComponentModules = Get-ChildItem -Path $ModuleSourcePath\*.psm1 -Recurse -ErrorAction SilentlyContinue  ;
-
+            [array]$ComponentScripts = $null ; [array]$ComponentModules = $null ; 
+            if($ModuleSource.count){
+                $ComponentScripts = Get-ChildItem -Path $ModuleSource\*.ps1 -Recurse -ErrorAction SilentlyContinue   ;
+                $ComponentModules = Get-ChildItem -Path $ModuleSource\*.psm1 -Recurse -ErrorAction SilentlyContinue  ;
+            } ; 
             $pltAdd = @{
                 Path=$PsmName ;
                 whatif=$whatif;
             } ;
             foreach ($ScriptFile in $ComponentScripts) {
+                $smsg= "Processing:$($ScriptFile)..." ;  
+                if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } ; #Error|Warn|Debug 
                 $ParsedContent = [System.Management.Automation.Language.Parser]::ParseFile($ScriptFile, [ref]$null, [ref]$null) ;
+                # 9:49 AM 12/27/2019 hard strip sigs
+                #$ParsedContent = $ParsedContent -replace "#\sSIG\s#\sBegin\ssignature\sblock(.|\n)*(.|\n)*#\sSIG\s#\sEnd\ssignature\sblock","# SIGNATURE REMOVED #"   ; 
+                # 1:01 PM 12/27/2019 nope, above doesn't cleanly get all of it, leaves trailing curlies
+                # better to detect and throw up
+                if($ParsedContent| ?{$_ -match $rgxSigStart -OR $_ -match $rgxSigEnd} ){
+                    $smsg= "*WARNING*:SUBFILE`n$($scriptfile.fullname)`nHAS AUTHENTICODE SIGNATURE MARKERS PRESENT!`nREVIEW THE FILE AND REMOVE ANY EVIDENCE OF SIGNING!" ;  
+                    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Error } ; #Error|Warn|Debug 
+                    exit
+                } ; 
+
                 # above is literally the entire AST, unfiltered. Should be ALL parsed entities.
-                #$Functions = $ParsedContent.EndBlock.Extent.Text  ;
-                #$Functions | Add-Content @pltAdd ;
-                $ParsedContent.EndBlock.Extent.Text | Add-Content @pltAdd ;
+                #$ParsedContent.EndBlock.Extent.Text | Add-Content @pltAdd ;
+                #"`n$($ParsedContent.EndBlock.Extent.Text)" | Add-Content @pltAdd ;
+                # 7:30 AM 12/27/2019 add demarc comments - this is AST parsed, so it prob doesn't include delimiters
+                $sBnrSStart = "`n#*------v $($ScriptFile.basename) v------" ;
+                $sBnrSEnd = "$($sBnrS.replace('-v','-^').replace('v-','^-'))" ;
+                "$($sBnrSStart)`n$($ParsedContent.EndBlock.Extent.Text)`n$($sBnrSEnd)" | Add-Content @pltAdd ;
+
+                $AST = [System.Management.Automation.Language.Parser]::ParseFile($ScriptFile, [ref]$null, [ref]$Null ) ; 
+                $ASTFunctions =  $AST.FindAll( { $args[0] -is [System.Management.Automation.Language.FunctionDefinitionAst] }, $true) ;
 
                 # public & functions = public ; private & internal = private
-                if($ModuleSourcePath -match '(Public|Functions)'){
-                    $AST = [System.Management.Automation.Language.Parser]::ParseFile($ScriptFile, [ref]$null, [ref]$Null ) ; 
-                    $ASTFunctions =  $AST.FindAll( { $args[0] -is [System.Management.Automation.Language.FunctionDefinitionAst] }, $true) ;
+                if($ModuleSource -match '(Public|Functions)'){
+                    $smsg= "$($ScriptFile.name):PUB FUNC:`n$(($ASTFunctions) -join ',' |out-string)" ;
+                    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Debug } ; #Error|Warn|Debug 
                     $ExportFunctions += $ASTFunctions.name ;
-                } elseif($ModuleSourcePath -match '(Private|Internal)'){
-                    $smsg= "PRIV FUNC:`n$(($ASTFunctions) -join ',' |out-string)" ;
+                } elseif($ModuleSource -match '(Private|Internal)'){
+                    $smsg= "$($ScriptFile.name):PRIV FUNC:`n$(($ASTFunctions) -join ',' |out-string)" ;
                     if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Debug } ; #Error|Warn|Debug
+                    $PrivateFunctions += $ASTFunctions.name ;
                 } ;
             } ; # loop-E
 
             foreach ($ModFile in $ComponentModules) {
+                $smsg= "Adding:$($ModFile)..." ;  
+                if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } ; #Error|Warn|Debug 
                 $Content = Get-Content $ModFile ;
+                # 9:49 AM 12/27/2019 hard strip sigs - nope, doesn't clean, detect and warn instead
+                #$Content  = $Content  -replace "#\sSIG\s#\sBegin\ssignature\sblock(.|\n)*(.|\n)*#\sSIG\s#\sEnd\ssignature\sblock","# SIGNATURE REMOVED #"   ; 
+                if($Content| ?{$_ -match $rgxSigStart -OR $_ -match $rgxSigEnd} ){
+                    $smsg= "*WARNING*:SUBFILE`n$($ModFile.fullname)`nHAS AUTHENTICODE SIGNATURE MARKERS PRESENT!`nREVIEW THE FILE AND REMOVE ANY EVIDENCE OF SIGNING!" ;  
+                    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Error } ; #Error|Warn|Debug 
+                    exit ; 
+                } ; 
                 $Content | Add-Content @pltAdd ;
+                # by contras, this is NON-AST parsed - it's appending the entire raw file content. Shouldn't need delimiters - they'd already be in source .psm1
+                <# $sBnrSStart = "`n#*------v $($ModFile.basename) v------" ;
+                $sBnrSEnd = "$($sBnrS.replace('-v','-^').replace('v-','^-'))" ;
+                "$($sBnrSStart)`n$($Content)`n$($sBnrSEnd)" | Add-Content @pltAdd ;
+                #>
             } ;
             # append the Export-ModuleMember -Function $publicFunctions  ? 
             #"Export-ModuleMember -Function $(($ExportFunctions) -join ',')" | Add-Content @pltAdd ;
@@ -157,40 +264,15 @@ function Merge-Module {
             if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } ; #Error|Warn|Debug
 
             # this is copying the manifest (assumes public & psd1 are in same dir) - Plaster is doing that separately, not needed
-            #Copy-Item -Path "$ModuleSourcePath\$ModuleName.psd1" "$ModuleDestinationPath\$ModuleName.psd1" ;
+            #Copy-Item -Path "$ModuleSource\$ModuleName.psd1" "$ModuleDestinationPath\$ModuleName.psd1" ;
 
             $true | write-output ;
 
         } CATCH {
-            Write-Error "$(get-date -format 'HH:mm:ss'): Failed processing $($_.Exception.ItemName). `nError Message: $($_.Exception.Message)`nError Details: $($_)" ;
+            write-warning "$(get-date -format 'HH:mm:ss'): Failed processing $($_.Exception.ItemName). `nError Message: $($_.Exception.Message)`nError Details: $($_)" ;
             $false | write-output ;
             #Exit #STOP(debug)|EXIT(close)|Continue(move on in loop cycle) ;
             Continue ;
         } ;
     } ; # loop-E
 } ; #*------^ END Function Merge-Module ^------
-# SIG # Begin signature block
-# MIIELgYJKoZIhvcNAQcCoIIEHzCCBBsCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
-# gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUT2LnpDueR5CFrfw3yKgfhAS2
-# 3fCgggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
-# MCwxKjAoBgNVBAMTIVBvd2VyU2hlbGwgTG9jYWwgQ2VydGlmaWNhdGUgUm9vdDAe
-# Fw0xNDEyMjkxNzA3MzNaFw0zOTEyMzEyMzU5NTlaMBUxEzARBgNVBAMTClRvZGRT
-# ZWxmSUkwgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBALqRVt7uNweTkZZ+16QG
-# a+NnFYNRPPa8Bnm071ohGe27jNWKPVUbDfd0OY2sqCBQCEFVb5pqcIECRRnlhN5H
-# +EEJmm2x9AU0uS7IHxHeUo8fkW4vm49adkat5gAoOZOwbuNntBOAJy9LCyNs4F1I
-# KKphP3TyDwe8XqsEVwB2m9FPAgMBAAGjdjB0MBMGA1UdJQQMMAoGCCsGAQUFBwMD
-# MF0GA1UdAQRWMFSAEL95r+Rh65kgqZl+tgchMuKhLjAsMSowKAYDVQQDEyFQb3dl
-# clNoZWxsIExvY2FsIENlcnRpZmljYXRlIFJvb3SCEGwiXbeZNci7Rxiz/r43gVsw
-# CQYFKw4DAh0FAAOBgQB6ECSnXHUs7/bCr6Z556K6IDJNWsccjcV89fHA/zKMX0w0
-# 6NefCtxas/QHUA9mS87HRHLzKjFqweA3BnQ5lr5mPDlho8U90Nvtpj58G9I5SPUg
-# CspNr5jEHOL5EdJFBIv3zI2jQ8TPbFGC0Cz72+4oYzSxWpftNX41MmEsZkMaADGC
-# AWAwggFcAgEBMEAwLDEqMCgGA1UEAxMhUG93ZXJTaGVsbCBMb2NhbCBDZXJ0aWZp
-# Y2F0ZSBSb290AhBaydK0VS5IhU1Hy6E1KUTpMAkGBSsOAwIaBQCgeDAYBgorBgEE
-# AYI3AgEMMQowCKACgAChAoAAMBkGCSqGSIb3DQEJAzEMBgorBgEEAYI3AgEEMBwG
-# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBRjCQ7H
-# NxxfWGKouWHHS5CtS7vwvTANBgkqhkiG9w0BAQEFAASBgE39FfreHVXQj2XVC6YI
-# XXg1ng7CZI5W+5dZxTPf+IQfgWvmUTwNtszIv4KDtHRpJiklF6YVNYqAZ5OzBeaK
-# zbVusfgC6o15BSla8pUWPzyHZ9Bq7eijBwAaQYLSl0z1rgNtR/YgihGT1QdL7I3v
-# VFbtLtJV9yjcxO3z/92iBSaT
-# SIG # End signature block
