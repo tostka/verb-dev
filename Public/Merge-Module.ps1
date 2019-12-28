@@ -18,6 +18,7 @@ function Merge-Module {
     AddedWebsite: https://evotec.xyz/powershell-single-psm1-file-versus-multi-file-modules/
     AddedTwitter:
     REVISIONS
+    * 9:51 AM 12/28/2019 Merge-Module fixed $sBnrSStart/End typo
     * 1:23 PM 12/27/2019 pulled regex sig replace with simple start/end detect and throw error (was leaving dangling curlies in psm1)
     * 12:11 PM 12/27/2019 swapped write-error in catch blocks with write-warning - we seems to be failing to exec the bal of the catch
     * 7:46 AM 12/27/2019 Merge-Module(): added included file demarc comments to improve merged file visual parsing, accumulating $PrivateFunctions now as well, explicit echos
@@ -220,8 +221,8 @@ function Merge-Module {
                 #$ParsedContent.EndBlock.Extent.Text | Add-Content @pltAdd ;
                 #"`n$($ParsedContent.EndBlock.Extent.Text)" | Add-Content @pltAdd ;
                 # 7:30 AM 12/27/2019 add demarc comments - this is AST parsed, so it prob doesn't include delimiters
-                $sBnrSStart = "`n#*------v $($ScriptFile.basename) v------" ;
-                $sBnrSEnd = "$($sBnrS.replace('-v','-^').replace('v-','^-'))" ;
+                $sBnrSStart = "`n#*------v $($ScriptFile.name) v------" ;
+                $sBnrSEnd = "$($sBnrSStart.replace('-v','-^').replace('v-','^-'))" ;
                 "$($sBnrSStart)`n$($ParsedContent.EndBlock.Extent.Text)`n$($sBnrSEnd)" | Add-Content @pltAdd ;
 
                 $AST = [System.Management.Automation.Language.Parser]::ParseFile($ScriptFile, [ref]$null, [ref]$Null ) ; 
