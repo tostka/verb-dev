@@ -5,7 +5,7 @@
   .SYNOPSIS
   verb-dev - Development-related generic functions
   .NOTES
-  Version     : 1.1.1
+  Version     : 1.2.2
   Author      : Todd Kadrie
   Website     :	https://www.toddomation.com
   Twitter     :	@tostka
@@ -18,6 +18,10 @@
   AddedWebsite:	REFERENCEURL
   AddedTwitter:	@HANDLE / http://twitter.com/HANDLE
   REVISIONS
+  # * 7:59 AM 12/30/2019 dbgd merge-module.ps1 w/in process-NewModule.ps1, functional so far.
+  # * 12:03 PM 12/29/2019 added else wh on pswls entries
+  # * 1:54 PM 12/28/2019 added merge-module
+  # * 9:51 AM 12/28/2019 Merge-Module fixed $sBnrSStart/End typo
   * 12/26/2019 - 1.1.1
   # * 5:22 PM 12/15/2019initial vers includes Get-CommentBlocks, parseHelp, profile-FileAST, build-VSCConfig, Merge-Module  
   .DESCRIPTION

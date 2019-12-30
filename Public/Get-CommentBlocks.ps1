@@ -17,6 +17,7 @@ function Get-CommentBlocks {
     AddedWebsite:
     AddedTwitter:
     REVISIONS
+    * 8:36 AM 12/30/2019 Get-CommentBlocks:updated cbh and added .INPUTS/.OUTPUTS cbh entries, detailing the subcompontents of the hashtable returned
     * 8:28 PM 11/17/2019 INIT
     .DESCRIPTION
     Get-CommentBlocks - Write output string to specified File
@@ -26,7 +27,21 @@ function Get-CommentBlocks {
     Parameter to display Debugging messages [-ShowDebug switch]
     .PARAMETER Whatif
     Parameter to run a Test no-change pass [-Whatif switch]
+    .INPUTS
+    None
+    .OUTPUTS
+    Returns a hashtable containing the following parsed content/objects, from the Text specified:
+    * metaBlock : `<#PSScriptInfo..#`> published script metadata block (added via New|Update-ScriptFileInfo, at top of file)
+    * metaOpen : Line# of start of metaBlock
+    * metaClose : Line# of end of metaBlock
+    * cbhBlock : Comment-Based-Help block
+    * cbhOpen : Line# of start of CBH
+    * cbhClose : Line# of end of CBH
+    * interText : Block of text *between* any metaBlock metaClose line, and any CBH cbhOpen line.
+    * metaCBlockIndex : Of the collection of all block comments - `<#..#`> - the index of the one corresponding to the metaBlock
+    * CbhCBlockIndex  : Of the collection of all block comments - `<#..#`> - the index of the one corresponding to the cbhBlock
     .EXAMPLE
+    $rawSourceLines = get-content c:\path-to\script.ps*1  ;
     $oBlkComments = Get-CommentBlocks -TextLines $rawSourceLines -showdebug:$($showdebug) -whatif:$($whatif) ;
     $metaBlock = $oBlkComments.metaBlock ;
     if ($metaBlock) {
@@ -50,7 +65,7 @@ function Get-CommentBlocks {
     $AllBlkCommentCloses = $TextLines | Select-string -Pattern '\s*#>' | Select-Object -ExpandProperty LineNumber ;
     $AllBlkCommentOpens = $TextLines | Select-string -Pattern '\s*<#' | Select-Object  -ExpandProperty LineNumber ;
 
-    $MetaStart = $TextLines | Select-string -Pattern '\<\#PSScriptInfo' | Select-Object -First 1 -ExpandProperty LineNumber ;
+    #$MetaStart = $TextLines | Select-string -Pattern '\<\#PSScriptInfo' | Select-Object -First 1 -ExpandProperty LineNumber ;
 
     # cycle the comment-block combos till you find the CBH comment block
     $metaBlock = $null ; $metaBlock = @()
@@ -82,7 +97,7 @@ function Get-CommentBlocks {
             $cbhBlock = $tmpBlock ;
             if ($showDebug) {
                 if ($metaOpen -AND $metaClose) {
-                    $smsg = "Existing CBH block located and tagged" ;
+                    $smsg = "Existing CBH metaBlock located and tagged" ;
                     #if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } ; #Error|Warn|Debug
                     write-verbose -verbose:$true  "$((get-date).ToString('HH:mm:ss')):$($smsg)" ;
                 } ;
@@ -100,7 +115,17 @@ function Get-CommentBlocks {
     else {
         write-verbose -verbose:$true  "$((get-date).ToString('HH:mm:ss')):(doesn't appear to be an inter meta-CBH block)" ;
     } ;
-
+    <#
+    metaBlock : <#PSScriptInfo published script metadata block
+    metaOpen : Line# of start of metaBlock
+    metaClose : Line# of end of metaBlock
+    cbhBlock : Comment-Based-Help block
+    cbhOpen : Line# of start of CBH
+    cbhClose : Line# of end of CBH
+    interText : Block of text *between* any metaBlock metaClose, and any CBH cbhOpen.
+    metaCBlockIndex : Of the collection of all block comments - `<#..#`> , the index of the one corresponding to the metaBlock
+    CbhCBlockIndex  : Of the collection of all block comments - `<#..#`> , the index of the one corresponding to the cbhBlock
+    #>
     $objReturn = [ordered]@{
         metaBlock       = $metaBlock  ;
         metaOpen        = $metaOpen ;

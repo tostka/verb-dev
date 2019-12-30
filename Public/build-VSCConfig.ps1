@@ -17,6 +17,7 @@ function build-VSCConfig {
     AddedWebsite:
     AddedTwitter:
     REVISIONS
+    * 9:14 AM 12/30/2019 added CBH .INPUTS & .OUTPUTS, including specific material returned.
     * 5:51 PM 12/16/2019 added OneArgument param
     * 2:58 PM 12/15/2019 INIT
     .DESCRIPTION
@@ -29,6 +30,10 @@ function build-VSCConfig {
     Parameter to display Debugging messages [-ShowDebug switch]
     .PARAMETER Whatif
     Parameter to run a Test no-change pass [-Whatif switch]
+    .INPUTS
+    None
+    .OUTPUTS
+    Console dump & copy to clipboard, of model launch.json conversion of ISE Breakpoints xml file.
     .EXAMPLE
     $bRet = build-VSCConfig -CommandLine $updatedContent -showdebug:$($showdebug) -whatif:$($whatif) ;
     if (!$bRet) {Continue } ;

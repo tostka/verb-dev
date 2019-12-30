@@ -17,6 +17,7 @@ function profile-FileAST {
     AddedWebsite:
     AddedTwitter:
     REVISIONS
+    * 9:04 AM 12/30/2019 profile-FileAST: updated CBH: added .INPUTS & OUTPUTS, including hash properties returned
     * 3:56 PM 12/8/2019 INIT
     .DESCRIPTION
     profile-FileAST - Parse specified Script/Module using Language.FunctionDefinitionAst
@@ -26,6 +27,13 @@ function profile-FileAST {
     Parameter to display Debugging messages [-ShowDebug switch]
     .PARAMETER Whatif
     Parameter to run a Test no-change pass [-Whatif switch]
+    .INPUTS
+    None
+    .OUTPUTS
+    Outputs a hashtable object containing:
+    * Parameters : Details on all Parameters in the file
+    * Functions : Details on all Functions in the file
+    * VariableAssignments : Details on all Variables assigned in the file
     .EXAMPLE
     $ASTProfile = profile-FileAST -File $oSrc.fullname -showdebug:$($showdebug) -whatif:$($whatif) ;
     .LINK
@@ -42,8 +50,8 @@ function profile-FileAST {
         $File = get-childitem -path $File ;
     } ;
 
-    $sQot = [char]34 ; $sQotS = [char]39 ;
-    $NewCBH = $null ; $NewCBH = @() ;
+    #$sQot = [char]34 ; $sQotS = [char]39 ;
+    #$NewCBH = $null ; $NewCBH = @() ;
 
     $AST = [System.Management.Automation.Language.Parser]::ParseFile($File.fullname, [ref]$null, [ref]$Null ) ;
 

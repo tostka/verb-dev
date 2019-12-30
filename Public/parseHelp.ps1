@@ -17,6 +17,7 @@ function parseHelp {
     AddedWebsite:
     AddedTwitter:
     REVISIONS
+    * 9:11 AM 12/30/2019 parseHelp(): added CBH .INPUTS & .OUTPUTS, specifying returns hash of get-help parsed output, and presence of CBH in the file
     * 10:03 PM 12/2/201919 INIT
     .DESCRIPTION
     parseHelp - Parse Script and prepend new Comment-based-Help keyed to existing contents
@@ -26,6 +27,12 @@ function parseHelp {
     Parameter to display Debugging messages [-ShowDebug switch]
     .PARAMETER Whatif
     Parameter to run a Test no-change pass [-Whatif switch]
+    .INPUTS
+    None
+    .OUTPUTS
+    Outputs a hashtable with following content/objects:
+    * HelpParsed : Raw object output of a get-help -full [path] against the specified $Path
+    * hasExistingCBH : Boolean indicating if a functional CBH was detected
     .EXAMPLE
     $bRet = parseHelp -Path $oSrc.fullname -showdebug:$($showdebug) -whatif:$($whatif) ;
     if($bRet.parseHelp){
@@ -80,15 +87,16 @@ function parseHelp {
         REMOTEHELPRUNSPACE
         EXTERNALHELP
     #>
-    $rgxCBHKeywords = "\.(SYNOPSIS|DESCRIPTION|PARAMETER|EXAMPLE|INPUTS|OUTPUTS|NOTES|LINK|COMPONENT|ROLE|FUNCTIONALITY|FORWARDHELPTARGETNAME|FORWARDHELPCATEGORY|REMOTEHELPRUNSPACE|EXTERNALHELP)"
+    #$rgxCBHKeywords = "\.(SYNOPSIS|DESCRIPTION|PARAMETER|EXAMPLE|INPUTS|OUTPUTS|NOTES|LINK|COMPONENT|ROLE|FUNCTIONALITY|FORWARDHELPTARGETNAME|FORWARDHELPCATEGORY|REMOTEHELPRUNSPACE|EXTERNALHELP)"
 
     # 4) determine if target already has CBH:
+    <#
     if ($showDebug) {
         $smsg = "$(($helpparsed | select Category,Name,Synopsis, param*,alertset,details,examples |out-string).trim())" ;
         #$smsg = "CMDLET w`n$((|out-string).trim())" ;
         $smsg = "`$Path.FullName:$($Path.FullName)" ;
     } ;
-
+    #>
 
     if ( ( ($HelpParsed.Category -eq 'ExternalScript') -AND ($HelpParsed.Name -eq $Path.Name) ) ) {
         <# weird, helpparsed.synopsis is 3 lines long (has word wraps), although the first looks like the $Path.name, it still doesn't match

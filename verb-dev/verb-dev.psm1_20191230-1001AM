@@ -1,9 +1,11 @@
 # verb-dev.psm1
+
+
   <#
   .SYNOPSIS
   verb-dev - Development-related generic functions
   .NOTES
-  Version     : 1.2.3
+  Version     : 1.2.2
   Author      : Todd Kadrie
   Website     :	https://www.toddomation.com
   Twitter     :	@tostka
@@ -16,16 +18,12 @@
   AddedWebsite:	REFERENCEURL
   AddedTwitter:	@HANDLE / http://twitter.com/HANDLE
   REVISIONS
-  * 10:33 AM 12/30/2019 Merge-Module():951,952 assert sorts into alpha order (make easier to find in the psm1)
-  *  10:20 AM 12/30/2019 Merge-Module(): fixed/debugged monolithic build options, now works. Could use some code to autoupdate all .NOTES:Version fields, but that's for future. ;Added code to update against monolithic/non-dyn-incl psm1s. Parses CBH & meta blocks out & constructs a new psm1 from the content. ; dbgd merge-module.ps1 w/in process-NewModule.ps1, functional so far.
-  *  9:11 AM 12/30/2019 parseHelp(): added CBH .INPUTS & .OUTPUTS, specifying returns hash of get-help parsed output, and presence of CBH in the file
-  *  9:04 AM 12/30/2019 profile-FileAST: updated CBH: added INPUTS & OUTPUTS, including hash properties returned
-  *  8:36 AM 12/30/2019 Get-CommentBlocks:updated cbh and added .INPUTS/.OUTPUTS cbh entries, detailing the subcompontents of the hashtable returned
-  *  12:03 PM 12/29/2019 added else wh on pswls entries
-  *  1:54 PM 12/28/2019 added merge-module
-  *  9:51 AM 12/28/2019 Merge-Module fixed $sBnrSStart/End typo
+  # * 7:59 AM 12/30/2019 dbgd merge-module.ps1 w/in process-NewModule.ps1, functional so far.
+  # * 12:03 PM 12/29/2019 added else wh on pswls entries
+  # * 1:54 PM 12/28/2019 added merge-module
+  # * 9:51 AM 12/28/2019 Merge-Module fixed $sBnrSStart/End typo
   * 12/26/2019 - 1.1.1
-  * 5:22 PM 12/15/2019initial vers includes Get-CommentBlocks, parseHelp, profile-FileAST, build-VSCConfig, Merge-Module  
+  # * 5:22 PM 12/15/2019initial vers includes Get-CommentBlocks, parseHelp, profile-FileAST, build-VSCConfig, Merge-Module  
   .DESCRIPTION
   verb-dev - Development-related generic functions
   .EXAMPLE
@@ -33,6 +31,7 @@
   .LINK
   https://github.com/tostka/verb-dev
   #>
+
 
 
 #*------v build-VSCConfig.ps1 v------
@@ -54,7 +53,6 @@ function build-VSCConfig {
     AddedWebsite:
     AddedTwitter:
     REVISIONS
-    * 9:14 AM 12/30/2019 added CBH .INPUTS & .OUTPUTS, including specific material returned.
     * 5:51 PM 12/16/2019 added OneArgument param
     * 2:58 PM 12/15/2019 INIT
     .DESCRIPTION
@@ -67,10 +65,6 @@ function build-VSCConfig {
     Parameter to display Debugging messages [-ShowDebug switch]
     .PARAMETER Whatif
     Parameter to run a Test no-change pass [-Whatif switch]
-    .INPUTS
-    None
-    .OUTPUTS
-    Console dump & copy to clipboard, of model launch.json conversion of ISE Breakpoints xml file.
     .EXAMPLE
     $bRet = build-VSCConfig -CommandLine $updatedContent -showdebug:$($showdebug) -whatif:$($whatif) ;
     if (!$bRet) {Continue } ;
@@ -155,7 +149,6 @@ function Get-CommentBlocks {
     AddedWebsite:
     AddedTwitter:
     REVISIONS
-    * 8:36 AM 12/30/2019 Get-CommentBlocks:updated cbh and added .INPUTS/.OUTPUTS cbh entries, detailing the subcompontents of the hashtable returned
     * 8:28 PM 11/17/2019 INIT
     .DESCRIPTION
     Get-CommentBlocks - Write output string to specified File
@@ -165,21 +158,7 @@ function Get-CommentBlocks {
     Parameter to display Debugging messages [-ShowDebug switch]
     .PARAMETER Whatif
     Parameter to run a Test no-change pass [-Whatif switch]
-    .INPUTS 
-    None
-    .OUTPUTS
-    Returns a hashtable containing the following parsed content/objects, from the Text specified:
-    * metaBlock : `<#PSScriptInfo..#`> published script metadata block (added via New|Update-ScriptFileInfo, at top of file)
-    * metaOpen : Line# of start of metaBlock
-    * metaClose : Line# of end of metaBlock
-    * cbhBlock : Comment-Based-Help block
-    * cbhOpen : Line# of start of CBH
-    * cbhClose : Line# of end of CBH
-    * interText : Block of text *between* any metaBlock metaClose line, and any CBH cbhOpen line. 
-    * metaCBlockIndex : Of the collection of all block comments - `<#..#`> - the index of the one corresponding to the metaBlock
-    * CbhCBlockIndex  : Of the collection of all block comments - `<#..#`> - the index of the one corresponding to the cbhBlock
     .EXAMPLE
-    $rawSourceLines = get-content c:\path-to\script.ps*1  ;
     $oBlkComments = Get-CommentBlocks -TextLines $rawSourceLines -showdebug:$($showdebug) -whatif:$($whatif) ;
     $metaBlock = $oBlkComments.metaBlock ;
     if ($metaBlock) {
@@ -253,17 +232,7 @@ function Get-CommentBlocks {
     else {
         write-verbose -verbose:$true  "$((get-date).ToString('HH:mm:ss')):(doesn't appear to be an inter meta-CBH block)" ;
     } ;
-    <#
-    metaBlock : <#PSScriptInfo published script metadata block
-    metaOpen : Line# of start of metaBlock
-    metaClose : Line# of end of metaBlock
-    cbhBlock : Comment-Based-Help block
-    cbhOpen : Line# of start of CBH
-    cbhClose : Line# of end of CBH
-    interText : Block of text *between* any metaBlock metaClose, and any CBH cbhOpen. 
-    metaCBlockIndex : Of the collection of all block comments - `<#..#`> , the index of the one corresponding to the metaBlock
-    CbhCBlockIndex  : Of the collection of all block comments - `<#..#`> , the index of the one corresponding to the cbhBlock
-    #>
+
     $objReturn = [ordered]@{
         metaBlock       = $metaBlock  ;
         metaOpen        = $metaOpen ;
@@ -285,7 +254,7 @@ function Get-CommentBlocks {
 function get-VersionInfo {
     <#
     .SYNOPSIS
-    get-VersionInfo.ps1 - get-VersionInfo.ps1 - Extract comment-help .NOTES block into a hashtable, key-value split on colons, to provide portable metadata (for New/Update-ScriptFileInfo inputs).
+    get-VersionInfo.ps1 - get-VersionInfo.ps1 - Extract comment-help .NOTES block into a hashtable, key-value split on colons, to provide portable metadata (for New/Update-ScriptFileInfo inputs). 
     .NOTES
     Version     : 0.1.0
     Author      : Todd Kadrie
@@ -294,24 +263,17 @@ function get-VersionInfo {
     License     : MIT License
     Copyright   : (c) 2019 Todd Kadrie
     AddedCredit : Based on code & concept by Alek Davis
-    AddedWebsite:	https://stackoverflow.com/questions/38561009/where-is-the-standard-place-to-put-a-powershell-script-version-number
-    AddedTwitter:
+    AddedWebsite:	URLhttps://stackoverflow.com/questions/38561009/where-is-the-standard-place-to-put-a-powershell-script-version-number
+    AddedTwitter:	
     REVISIONS
-    * 9:36 AM 12/30/2019 added CBH .INPUTS & OUTPUTS, including description of the hashtable of key/value pairs returned, for existing CBH .NOTES block
-    * added explicit -path param to get-help
-    * 8:39 PM 11/21/2019 added test for returned get-help
     * 8:27 AM 11/5/2019 Todd rework: Added Path param, parsed to REVISIONS: block, & return the top rev as LastRevision key in returned object.
     * 02/07/2019 Posted version
     .DESCRIPTION
-    get-VersionInfo.ps1 - Extract comment-help .NOTES block into a hashtable, key-value split on colons, to provide portable metadata (for New/Update-ScriptFileInfo inputs).
+    get-VersionInfo.ps1 - Extract comment-help .NOTES block into a hashtable, key-value split on colons, to provide portable metadata (for New/Update-ScriptFileInfo inputs). 
     .PARAMETER  Path
     Path to target script (defaults to $PSCommandPath)
     .PARAMETER ShowDebug
     Parameter to display Debugging messages [-ShowDebug switch]
-    .INPUTS
-    None
-    .OUTPUTS
-    Returns a hashtable of key-value pairs for each of the entries in the .NOTES CBH block in a given file. 
     .EXAMPLE
     .\get-VersionInfo
     Default process from $PSCommandPath
@@ -322,46 +284,41 @@ function get-VersionInfo {
     https://stackoverflow.com/questions/38561009/where-is-the-standard-place-to-put-a-powershell-script-version-number
     #>
     PARAM(
-        [Parameter(Position = 0, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true, HelpMessage = "Path to target script (defaults to `$PSCommandPath) [-Path -Path .\path-to\script.ps1]")]
-        [ValidateScript( { Test-Path $_ })]$Path,
-        [Parameter(HelpMessage = "Debugging Flag [-showDebug]")]
+        [Parameter(Position=0,ValueFromPipeline=$true,ValueFromPipelineByPropertyName=$true,HelpMessage="Path to target script (defaults to `$PSCommandPath) [-Path -Path .\path-to\script.ps1]")]
+        [ValidateScript({Test-Path $_})]$Path,
+        [Parameter(HelpMessage="Debugging Flag [-showDebug]")]
         [switch] $showDebug,
-        [Parameter(HelpMessage = "Whatif Flag  [-whatIf]")]
-        [switch] $whatIf
+        [Parameter(HelpMessage="Whatif Flag  [-whatIf]")]
+        [switch] $whatIf=$true
     ) ;
-    $notes = $null ; $notes = @{ } ;
+    $notes = $null ; $notes = @{} ; 
     # Get the .NOTES section of the script header comment.
-    if (!$Path) {
-        $Help = Get-Help -Full -path $PSCommandPath
-    }
-    else { $Help = Get-Help -Full -path $Path } ;
-    if($Help){
-        $notesLines = ($Help.alertSet.alert.Text -split '\r?\n').Trim() ;
-        foreach ($line in $notesLines) {
-            if (!$line) { continue } ;
-            $name = $null ; $value = $null ;
-            if ($line -eq 'REVISIONS') { $bRevBlock = $true ; Continue } ;
-            if ($bRevBlock) {
-                $notes.Add("LastRevision", "$line") ;
-                break ;
-            } ;
-            if ($line.Contains(':')) {
-                $nameValue = $null ;
-                $nameValue = @() ;
-                # Split line by the first colon (:) character.
-                $nameValue = ($line -split ':', 2).Trim() ;
-                $name = $nameValue[0] ;
-                if ($name) {
-                    $value = $nameValue[1] ;
-                    if ($value) { $value = $value.Trim() } ;
-                    if (!($notes.ContainsKey($name))) { $notes.Add($name, $value) } ;
-                } ;
-            } ;
-        } ;
-        $notes | write-output ;
-    } else {
-        $false | write-output ;
-    } ;
+    if(!$Path){$Help = Get-Help -Full $PSCommandPath 
+    } else { $Help = Get-Help -Full $Path } ; 
+    $notesLines = ($Help.alertSet.alert.Text -split '\r?\n').Trim() ; 
+    #$lines = ($notesText -split '\r?\n').Trim() ; 
+    foreach ($line in $notesLines) {
+        if (!$line) {continue } ; 
+        $name  = $null ; $value = $null ; 
+        if ($line -eq 'REVISIONS') {$bRevBlock=$true ; Continue } ; 
+        if ($bRevBlock){
+            $notes.Add("LastRevision","$line") ; 
+            break ; 
+        } ; 
+        if ($line.Contains(':')) {
+            $nameValue = $null ; 
+            $nameValue = @() ; 
+            # Split line by the first colon (:) character.
+            $nameValue = ($line -split ':',2).Trim() ; 
+            $name = $nameValue[0] ; 
+            if ($name) {
+                $value = $nameValue[1] ; 
+                if ($value) {$value = $value.Trim() } ; 
+                if (!($notes.ContainsKey($name))) {$notes.Add($name, $value) } ; 
+            } ; 
+        } ; 
+    } ; 
+    $notes | write-output ;  
 }
 
 #*------^ get-VersionInfo.ps1 ^------
@@ -371,7 +328,7 @@ function Merge-Module {
 
     <#
     .SYNOPSIS
-    Merge-Module.ps1 - Merge function .ps1 files into a monolisthic module.psm1 module file, returns a hash with status:$true/$false, and PsmNameBU:The name of a backup of the original .psm1 file (for restoring on failures)
+    Merge-Module.ps1 - Merge function .ps1 files into a monolisthic module.psm1 module file
     .NOTES
     Version     : 1.0.0
     Author      : Todd Kadrie
@@ -386,7 +343,6 @@ function Merge-Module {
     AddedWebsite: https://evotec.xyz/powershell-single-psm1-file-versus-multi-file-modules/
     AddedTwitter:
     REVISIONS
-    * 8:59 AM 12/30/2019 Merge-Module(): Added code to update against monolithic/non-dyn-incl psm1s. Parses CBH & meta blocks out & constructs a new psm1 from the content.
     * 9:51 AM 12/28/2019 Merge-Module fixed $sBnrSStart/End typo
     * 1:23 PM 12/27/2019 pulled regex sig replace with simple start/end detect and throw error (was leaving dangling curlies in psm1)
     * 12:11 PM 12/27/2019 swapped write-error in catch blocks with write-warning - we seems to be failing to exec the bal of the catch
@@ -406,10 +362,6 @@ function Merge-Module {
     Parameter to display Debugging messages [-ShowDebug switch]
     .PARAMETER Whatif
     Parameter to run a Test no-change pass [-Whatif switch]
-    .INPUTS
-    None
-    .OUTPUTS
-    Outputs a hashtable object containing: Status[$true/$false], PsmNameBU [the name of the backup of the original psm1 file]
     .EXAMPLE
     .\merge-Module.ps1 -ModuleName verb-AAD -ModuleSourcePath C:\sc\verb-AAD\Public -ModuleDestinationPath C:\sc\verb-AAD\verb-AAD -showdebug -whatif ;
     Command line process
@@ -456,14 +408,12 @@ function Merge-Module {
 
     $PsmName="$ModuleDestinationPath\$ModuleName.psm1" ;
 
-    $PassStatus = $null ;
-
     # backup existing & purge the dyn-include block
     if(test-path -path $PsmName){
-        $rawSourceLines = get-content -path $PsmName  ;
+        $rawSourceLines = get-content $PsmName  ;
         $SrcLineTtl = ($rawSourceLines | Measure-Object).count ;
-        $PsmNameBU = backup-File -path $PsmName -showdebug:$($showdebug) -whatif:$($whatif) ;
-        if (!$PsmNameBU) {throw "FAILURE" } ;
+        $bRet = backup-File -path $PsmName -showdebug:$($showdebug) -whatif:$($whatif) ;
+        if (!$bRet) {throw "FAILURE" } ;
 
         # this script *appends* to the existing .psm1 file.
         # which by default includes a dynamic include block:
@@ -474,76 +424,18 @@ function Merge-Module {
         $dynIncludeClose = (ss -Path  $PsmName -Pattern $rgxPurgeBlockEnd).linenumber ;
         if(!$dynIncludeOpen){$dynIncludeClose = 0 } ;
         $updatedContent = @() ; $DropContent=@() ;
-
-        if($dynIncludeOpen -AND $dynIncludeClose){
-            # dyn psm1
-            $smsg= "(dyn-include psm1 detected - purging content...)" ;  
-            if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
-            else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
-            $updatedContent = $rawSourceLines[0..($dynIncludeOpen-2)] ;
-            $updatedContent += $rawSourceLines[($dynIncludeClose)..$Srclinettl] ;
-            $DropContent = $rawsourcelines[$dynIncludeOpen..$dynIncludeClose] ;
-            if($showdebug){
-                $smsg= "`$DropContent:`n$($DropContent|out-string)" ;
-                if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Debug }  #Error|Warn|Debug 
-                else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
-            } ;
-        } else { 
-            # monolithic psm1?
-            $smsg= "(NON-dyn psm1 detected - purging existing non-CBH content...)" ;  
-            if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
-            else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
-            # parse out the CBH and just start from that:
-            $oBlkComments = Get-CommentBlocks -TextLines $rawSourceLines -showdebug:$($showdebug) -whatif:$($whatif) ;
-            <# returned props
-            * metaBlock : `<#PSScriptInfo..#`> published script metadata block (added via New|Update-ScriptFileInfo, at top of file)
-            * metaOpen : Line# of start of metaBlock
-            * metaClose : Line# of end of metaBlock
-            * cbhBlock : Comment-Based-Help block
-            * cbhOpen : Line# of start of CBH
-            * cbhClose : Line# of end of CBH
-            * interText : Block of text *between* any metaBlock metaClose line, and any CBH cbhOpen line. 
-            * metaCBlockIndex : Of the collection of all block comments - `<#..#`> - the index of the one corresponding to the metaBlock
-            * CbhCBlockIndex  : Of the collection of all block comments - `<#..#`> - the index of the one corresponding to the cbhBlock
-            #>
-            <# so we want a stack of
-            # [psm1name]
-
-            [metaBlock]
-            [interText]
-            [cbhBlock]
-            and then add the includes to the file
-            #>
-            $updatedContent=@"
-# $($PsmName)
-
-$($oBlkComments.metaBlock)
-$($oBlkComments.interText)
-$($oBlkComments.cbhBlock)
-
-"@; 
-        } ; 
-
-        if($updatedContent){
-            $bRet = Set-FileContent -Text $updatedContent -Path $PsmName -showdebug:$($showdebug) -whatif:$($whatif) ;
-            if (!$bRet) {throw "FAILURE" } ;
-        } else { 
-            $PassStatus += ";ERROR"; 
-            $smsg= "NO PARSEABLE METADATA/CBH CONTENT IN EXISTING FILE, TO BUILD UPDATED PSM1 FROM!`n$($PsmName)" ;        
-            if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Error } #Error|Warn
-            else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
-            #$false | write-output ;
-            $ReportObj=[ordered]@{
-                Status=$false ; 
-                PsmNameBU = $PsmNameBU ; 
-                PassStatus = $PassStatus ;
-            } ; 
-            $ReportObj | write-output ;
-            Exit #STOP(debug)|EXIT(close)|Continue(move on in loop cycle) ;
-        } ; 
+        $updatedContent = $rawSourceLines[0..($dynIncludeOpen-2)] ;
+        $updatedContent += $rawSourceLines[($dynIncludeClose)..$Srclinettl] ;
+        $DropContent = $rawsourcelines[$dynIncludeOpen..$dynIncludeClose] ;
+        if($showdebug){
+            $smsg= "`$DropContent:`n$($DropContent|out-string)" ;
+            if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Debug } ; #Error|Warn|Debug
+        } ;
+        $bRet = Set-FileContent -Text $updatedContent -Path $PsmName -showdebug:$($showdebug) -whatif:$($whatif) ;
+        if (!$bRet) {throw "FAILURE" } ;
     } ;
 
-    # 12:55 PM 12/24/2019default - dirs creation - git doesn't reproduce empty dirs, create if empty (avoids errors later)
+    # 12:55 PM 12/24/2019default - dirs creation - git doesn't reproduce empty dirs, create if empty
     #$DefaultModDirs = "Public","Internal","Classes",".gitignore","Tests",".vscode","Docs","Docs\Cab","Docs\en-US","Docs\Markdown" ; 
     # drop the .git & .vscode dirs, we don't publish those to modules dir
     $DefaultModDirs = "Public","Internal","Classes","Tests","Docs","Docs\Cab","Docs\en-US","Docs\Markdown" ; 
@@ -557,37 +449,25 @@ $($oBlkComments.cbhBlock)
                 whatif   = $($whatif) ;
             } ;
             $smsg = "Creating missing dir:new-Item w`n$(($pltDir|out-string).trim())" ;
-            if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info }  #Error|Warn|Debug 
-            else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+            if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } ; #Error|Warn
             $error.clear() ;
             $bRetry=$false ; 
             TRY {
                 new-item @pltDir | out-null ;
             } CATCH {
-                $ErrorTrapped = $Error[0] ;
-                #write-warning "$(get-date -format 'HH:mm:ss'): Failed processing $($ErrorTrapped.Exception.ItemName). `nError Message: $($ErrorTrapped.Exception.Message)`nError Details: $($ErrorTrapped)" ;
-                $PassStatus += ";ERROR";        
-                $smsg= "Failed processing $($ErrorTrapped.Exception.ItemName). `nError Message: $($ErrorTrapped.Exception.Message)`nError Details: $($ErrorTrapped)" ;        
-                if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Error } #Error|Warn
-                else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } 
+                write-warning "$(get-date -format 'HH:mm:ss'): Failed processing $($_.Exception.ItemName). `nError Message: $($_.Exception.Message)`nError Details: $($_)" ;
                 $bRetry=$true ; 
                 #Continue #STOP(debug)|EXIT(close)|Continue(move on in loop cycle) ;
             } ;
             if($bRetry){
                 $pltDir.add('force',$true) ; 
                 $smsg = "Retry:FORCE:Creating missing dir:new-Item w`n$(($pltDir|out-string).trim())" ;
-                if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
-                else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } ; #Error|Warn
                 $error.clear() ;
                 TRY {
                     new-item @pltDir | out-null ;
                 } CATCH {
-                    $ErrorTrapped = $Error[0] ;
-                    #write-warning "$(get-date -format 'HH:mm:ss'): Failed processing $($ErrorTrapped.Exception.ItemName). `nError Message: $($ErrorTrapped.Exception.Message)`nError Details: $($ErrorTrapped)" ;
-                    $PassStatus += ";ERROR";        
-                    $smsg= "Failed processing $($ErrorTrapped.Exception.ItemName). `nError Message: $($ErrorTrapped.Exception.Message)`nError Details: $($ErrorTrapped)" ;        
-                    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Error }  #Error|Warn
-                    else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                    write-warning "$(get-date -format 'HH:mm:ss'): Failed processing $($_.Exception.ItemName). `nError Message: $($_.Exception.Message)`nError Details: $($_)" ;
                     $bRetry=$false ; 
                     EXIT #STOP(debug)|EXIT(close)|Continue(move on in loop cycle) ;
                 } ;
@@ -609,34 +489,24 @@ $($oBlkComments.cbhBlock)
                     whatif   = $($whatif) ;
                 } ;
                 $smsg = "Creating missing dir:new-Item w`n$(($pltDir|out-string).trim())" ;
-                if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn
-                else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
-                $bRetry=$false ; 
+                if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } ; #Error|Warn
                 $error.clear() ;
+                $bRetry=$false ; 
                 TRY {
                     new-item @pltDir | out-null ;
                 } CATCH {
-                    $ErrorTrapped = $Error[0] ;
+                    write-warning "$(get-date -format 'HH:mm:ss'): Failed processing $($_.Exception.ItemName). `nError Message: $($_.Exception.Message)`nError Details: $($_)" ;
                     $bRetry=$true ; 
-                    $PassStatus += ";ERROR"; 
-                    $smsg= "Failed processing $($ErrorTrapped.Exception.ItemName). `nError Message: $($ErrorTrapped.Exception.Message)`nError Details: $($ErrorTrapped)" ;        
-                    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Error } #Error|Warn
-                    else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
                 } ;
+                $error.clear() ;
                 if($bRetry){
                     $pltDir.add('force',$true) ; 
                     $smsg = "RETRY:FORCE:Creating missing dir:new-Item w`n$(($pltDir|out-string).trim())" ;
-                    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn
-                    else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
-                    $error.clear() ;
+                    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } ; #Error|Warn
                     TRY {
                         new-item @pltDir | out-null ;
                     } CATCH {
-                        $ErrorTrapped = $Error[0] ;
-                        $PassStatus += ";ERROR"; 
-                        $smsg= "Failed processing $($ErrorTrapped.Exception.ItemName). `nError Message: $($ErrorTrapped.Exception.Message)`nError Details: $($ErrorTrapped)" ;        
-                        if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Error } #Error|Warn
-                        else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                        write-warning "$(get-date -format 'HH:mm:ss'): Failed processing $($_.Exception.ItemName). `nError Message: $($_.Exception.Message)`nError Details: $($_)" ;
                         $bRetry=$false 
                         Exit #STOP(debug)|EXIT(close)|Continue(move on in loop cycle) ;
                     } ;
@@ -646,8 +516,7 @@ $($oBlkComments.cbhBlock)
         } ;
         $sBnrS = "`n#*------v ($($iProcd)/$($ttl)):$($ModuleSource) v------" ;
         $smsg = "$($sBnrS)" ;
-        if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info }  #Error|Warn|Debug 
-        else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+        if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } ; #Error|Warn|Debug **
         $error.clear() ;
         TRY {
             [array]$ComponentScripts = $null ; [array]$ComponentModules = $null ; 
@@ -661,8 +530,7 @@ $($oBlkComments.cbhBlock)
             } ;
             foreach ($ScriptFile in $ComponentScripts) {
                 $smsg= "Processing:$($ScriptFile)..." ;  
-                if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info }  #Error|Warn|Debug 
-                else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } ; #Error|Warn|Debug 
                 $ParsedContent = [System.Management.Automation.Language.Parser]::ParseFile($ScriptFile, [ref]$null, [ref]$null) ;
                 # 9:49 AM 12/27/2019 hard strip sigs
                 #$ParsedContent = $ParsedContent -replace "#\sSIG\s#\sBegin\ssignature\sblock(.|\n)*(.|\n)*#\sSIG\s#\sEnd\ssignature\sblock","# SIGNATURE REMOVED #"   ; 
@@ -670,8 +538,7 @@ $($oBlkComments.cbhBlock)
                 # better to detect and throw up
                 if($ParsedContent| ?{$_ -match $rgxSigStart -OR $_ -match $rgxSigEnd} ){
                     $smsg= "*WARNING*:SUBFILE`n$($scriptfile.fullname)`nHAS AUTHENTICODE SIGNATURE MARKERS PRESENT!`nREVIEW THE FILE AND REMOVE ANY EVIDENCE OF SIGNING!" ;  
-                    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Error } #Error|Warn|Debug 
-                    else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Error } ; #Error|Warn|Debug 
                     exit
                 } ; 
 
@@ -689,28 +556,24 @@ $($oBlkComments.cbhBlock)
                 # public & functions = public ; private & internal = private
                 if($ModuleSource -match '(Public|Functions)'){
                     $smsg= "$($ScriptFile.name):PUB FUNC:`n$(($ASTFunctions) -join ',' |out-string)" ;
-                    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Debug }  #Error|Warn|Debug 
-                    else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Debug } ; #Error|Warn|Debug 
                     $ExportFunctions += $ASTFunctions.name ;
                 } elseif($ModuleSource -match '(Private|Internal)'){
                     $smsg= "$($ScriptFile.name):PRIV FUNC:`n$(($ASTFunctions) -join ',' |out-string)" ;
-                    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Debug }  #Error|Warn|Debug 
-                    else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Debug } ; #Error|Warn|Debug
                     $PrivateFunctions += $ASTFunctions.name ;
                 } ;
             } ; # loop-E
 
             foreach ($ModFile in $ComponentModules) {
                 $smsg= "Adding:$($ModFile)..." ;  
-                if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info }  #Error|Warn|Debug 
-                else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } ; #Error|Warn|Debug 
                 $Content = Get-Content $ModFile ;
                 # 9:49 AM 12/27/2019 hard strip sigs - nope, doesn't clean, detect and warn instead
                 #$Content  = $Content  -replace "#\sSIG\s#\sBegin\ssignature\sblock(.|\n)*(.|\n)*#\sSIG\s#\sEnd\ssignature\sblock","# SIGNATURE REMOVED #"   ; 
                 if($Content| ?{$_ -match $rgxSigStart -OR $_ -match $rgxSigEnd} ){
                     $smsg= "*WARNING*:SUBFILE`n$($ModFile.fullname)`nHAS AUTHENTICODE SIGNATURE MARKERS PRESENT!`nREVIEW THE FILE AND REMOVE ANY EVIDENCE OF SIGNING!" ;  
-                    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Error }  #Error|Warn|Debug 
-                    else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Error } ; #Error|Warn|Debug 
                     exit ; 
                 } ; 
                 $Content | Add-Content @pltAdd ;
@@ -724,33 +587,16 @@ $($oBlkComments.cbhBlock)
             #"Export-ModuleMember -Function $(($ExportFunctions) -join ',')" | Add-Content @pltAdd ;
 
             $smsg = "$($sBnrS.replace('-v','-^').replace('v-','^-'))" ;
-            if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info }  #Error|Warn|Debug 
-            else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+            if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } ; #Error|Warn|Debug
 
             # this is copying the manifest (assumes public & psd1 are in same dir) - Plaster is doing that separately, not needed
             #Copy-Item -Path "$ModuleSource\$ModuleName.psd1" "$ModuleDestinationPath\$ModuleName.psd1" ;
 
-            #$true | write-output ;
-            $ReportObj=[ordered]@{
-                Status=$true ; 
-                PsmNameBU = $PsmNameBU ; 
-                PassStatus = $PassStatus ;
-            } ; 
-            $ReportObj | write-output ;
+            $true | write-output ;
 
         } CATCH {
-            $ErrorTrapped = $Error[0] ;
-            $PassStatus += ";ERROR"; 
-            $smsg= "Failed processing $($ErrorTrapped.Exception.ItemName). `nError Message: $($ErrorTrapped.Exception.Message)`nError Details: $($ErrorTrapped)" ;        
-            if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Error } #Error|Warn
-            else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
-            #$false | write-output ;
-            $ReportObj=[ordered]@{
-                Status=$false ; 
-                PsmNameBU = $PsmNameBU ; 
-                PassStatus = $PassStatus ;
-            } ; 
-            $ReportObj | write-output ;
+            write-warning "$(get-date -format 'HH:mm:ss'): Failed processing $($_.Exception.ItemName). `nError Message: $($_.Exception.Message)`nError Details: $($_)" ;
+            $false | write-output ;
             #Exit #STOP(debug)|EXIT(close)|Continue(move on in loop cycle) ;
             Continue ;
         } ;
@@ -778,7 +624,6 @@ function parseHelp {
     AddedWebsite:
     AddedTwitter:
     REVISIONS
-    * 9:11 AM 12/30/2019 parseHelp(): added CBH .INPUTS & .OUTPUTS, specifying returns hash of get-help parsed output, and presence of CBH in the file
     * 10:03 PM 12/2/201919 INIT
     .DESCRIPTION
     parseHelp - Parse Script and prepend new Comment-based-Help keyed to existing contents
@@ -788,12 +633,6 @@ function parseHelp {
     Parameter to display Debugging messages [-ShowDebug switch]
     .PARAMETER Whatif
     Parameter to run a Test no-change pass [-Whatif switch]
-    .INPUTS
-    None
-    .OUTPUTS
-    Outputs a hashtable with following content/objects:
-    * HelpParsed : Raw object output of a get-help -full [path] against the specified $Path
-    * hasExistingCBH : Boolean indicating if a functional CBH was detected
     .EXAMPLE
     $bRet = parseHelp -Path $oSrc.fullname -showdebug:$($showdebug) -whatif:$($whatif) ;
     if($bRet.parseHelp){
@@ -1003,7 +842,6 @@ function profile-FileAST {
     AddedWebsite:
     AddedTwitter:
     REVISIONS
-    * 9:04 AM 12/30/2019 profile-FileAST: updated CBH: added .INPUTS & OUTPUTS, including hash properties returned
     * 3:56 PM 12/8/2019 INIT
     .DESCRIPTION
     profile-FileAST - Parse specified Script/Module using Language.FunctionDefinitionAst
@@ -1013,13 +851,6 @@ function profile-FileAST {
     Parameter to display Debugging messages [-ShowDebug switch]
     .PARAMETER Whatif
     Parameter to run a Test no-change pass [-Whatif switch]
-    .INPUTS
-    None
-    .OUTPUTS
-    Outputs a hashtable object containing: 
-    * Parameters : Details on all Parameters in the file
-    * Functions : Details on all Functions in the file
-    * VariableAssignments : Details on all Variables assigned in the file
     .EXAMPLE
     $ASTProfile = profile-FileAST -File $oSrc.fullname -showdebug:$($showdebug) -whatif:$($whatif) ;
     .LINK
@@ -1060,8 +891,8 @@ function profile-FileAST {
 # SIG # Begin signature block
 # MIIELgYJKoZIhvcNAQcCoIIEHzCCBBsCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUO8tkfC0anHQoCDqcl1zal7Kz
-# E6KgggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUZQYimfqquCUtYQ71FgFHXupd
+# R7GgggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
 # MCwxKjAoBgNVBAMTIVBvd2VyU2hlbGwgTG9jYWwgQ2VydGlmaWNhdGUgUm9vdDAe
 # Fw0xNDEyMjkxNzA3MzNaFw0zOTEyMzEyMzU5NTlaMBUxEzARBgNVBAMTClRvZGRT
 # ZWxmSUkwgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBALqRVt7uNweTkZZ+16QG
@@ -1076,9 +907,9 @@ function profile-FileAST {
 # AWAwggFcAgEBMEAwLDEqMCgGA1UEAxMhUG93ZXJTaGVsbCBMb2NhbCBDZXJ0aWZp
 # Y2F0ZSBSb290AhBaydK0VS5IhU1Hy6E1KUTpMAkGBSsOAwIaBQCgeDAYBgorBgEE
 # AYI3AgEMMQowCKACgAChAoAAMBkGCSqGSIb3DQEJAzEMBgorBgEEAYI3AgEEMBwG
-# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBQE4QDD
-# N9UiAb/w97shGqdwYptJ1TANBgkqhkiG9w0BAQEFAASBgJle6Emuwk4rhz8J8amu
-# jIYtJauP45rCVsdzVctPCSyBiRkyH3J4uMvM5PemkPoVzTRs9Q6X6enwRcdSuU7F
-# QoKEuOgzZiEQ+c5QGHIjk19IfTcTP3Q74CLj811AcmcuVkMWmYrT6iILeMUNdKdj
-# xCq8BO4CD3LLoeEgEYezXub0
+# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBRaM4F7
+# eUyoh17xDeYOyWTC1UHY4jANBgkqhkiG9w0BAQEFAASBgKSWiIA23cOel5GGQc2B
+# JvFCYxhFfG3TqmsFVfl8djOxNiW/5kecXAp5jTr2i1uRgDHPSicKdxJy0aDyLgar
+# hzgVqSaNoZ2p6NGmsxZHpiHGzRHb1wA7UbvGiOA7f9sZpDaoYF6EKg9y5WXQid+v
+# uAdjgNPi1ai3+5/vtwu1/ftg
 # SIG # End signature block
