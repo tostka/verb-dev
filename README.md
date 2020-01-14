@@ -1,6 +1,6 @@
-# What is verb-dev
+# What is VERB-dev
 
-Development-related generic functions v:1.1.1
+Development PS Module-related generic functions v:1.2.3
 
 Authored by Todd Kadrie
 

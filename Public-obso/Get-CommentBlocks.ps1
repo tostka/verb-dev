@@ -1,4 +1,4 @@
-﻿#*------v Function Get-CommentBlocks v------
+#*------v Function Get-CommentBlocks v------
 function Get-CommentBlocks {
     <#
     .SYNOPSIS
@@ -27,7 +27,7 @@ function Get-CommentBlocks {
     Parameter to display Debugging messages [-ShowDebug switch]
     .PARAMETER Whatif
     Parameter to run a Test no-change pass [-Whatif switch]
-    .INPUTS 
+    .INPUTS
     None
     .OUTPUTS
     Returns a hashtable containing the following parsed content/objects, from the Text specified:
@@ -37,7 +37,7 @@ function Get-CommentBlocks {
     * cbhBlock : Comment-Based-Help block
     * cbhOpen : Line# of start of CBH
     * cbhClose : Line# of end of CBH
-    * interText : Block of text *between* any metaBlock metaClose line, and any CBH cbhOpen line. 
+    * interText : Block of text *between* any metaBlock metaClose line, and any CBH cbhOpen line.
     * metaCBlockIndex : Of the collection of all block comments - `<#..#`> - the index of the one corresponding to the metaBlock
     * CbhCBlockIndex  : Of the collection of all block comments - `<#..#`> - the index of the one corresponding to the cbhBlock
     .EXAMPLE
@@ -65,7 +65,7 @@ function Get-CommentBlocks {
     $AllBlkCommentCloses = $TextLines | Select-string -Pattern '\s*#>' | Select-Object -ExpandProperty LineNumber ;
     $AllBlkCommentOpens = $TextLines | Select-string -Pattern '\s*<#' | Select-Object  -ExpandProperty LineNumber ;
 
-    $MetaStart = $TextLines | Select-string -Pattern '\<\#PSScriptInfo' | Select-Object -First 1 -ExpandProperty LineNumber ;
+    #$MetaStart = $TextLines | Select-string -Pattern '\<\#PSScriptInfo' | Select-Object -First 1 -ExpandProperty LineNumber ;
 
     # cycle the comment-block combos till you find the CBH comment block
     $metaBlock = $null ; $metaBlock = @()
@@ -122,7 +122,7 @@ function Get-CommentBlocks {
     cbhBlock : Comment-Based-Help block
     cbhOpen : Line# of start of CBH
     cbhClose : Line# of end of CBH
-    interText : Block of text *between* any metaBlock metaClose, and any CBH cbhOpen. 
+    interText : Block of text *between* any metaBlock metaClose, and any CBH cbhOpen.
     metaCBlockIndex : Of the collection of all block comments - `<#..#`> , the index of the one corresponding to the metaBlock
     CbhCBlockIndex  : Of the collection of all block comments - `<#..#`> , the index of the one corresponding to the cbhBlock
     #>
@@ -140,3 +140,28 @@ function Get-CommentBlocks {
     $objReturn | Write-Output
 
 } ; #*------^ END Function Get-CommentBlocks ^------
+# SIG # Begin signature block
+# MIIELgYJKoZIhvcNAQcCoIIEHzCCBBsCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
+# gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUotmJZ4XfLLuYjUR5btHAn83u
+# GXigggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
+# MCwxKjAoBgNVBAMTIVBvd2VyU2hlbGwgTG9jYWwgQ2VydGlmaWNhdGUgUm9vdDAe
+# Fw0xNDEyMjkxNzA3MzNaFw0zOTEyMzEyMzU5NTlaMBUxEzARBgNVBAMTClRvZGRT
+# ZWxmSUkwgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBALqRVt7uNweTkZZ+16QG
+# a+NnFYNRPPa8Bnm071ohGe27jNWKPVUbDfd0OY2sqCBQCEFVb5pqcIECRRnlhN5H
+# +EEJmm2x9AU0uS7IHxHeUo8fkW4vm49adkat5gAoOZOwbuNntBOAJy9LCyNs4F1I
+# KKphP3TyDwe8XqsEVwB2m9FPAgMBAAGjdjB0MBMGA1UdJQQMMAoGCCsGAQUFBwMD
+# MF0GA1UdAQRWMFSAEL95r+Rh65kgqZl+tgchMuKhLjAsMSowKAYDVQQDEyFQb3dl
+# clNoZWxsIExvY2FsIENlcnRpZmljYXRlIFJvb3SCEGwiXbeZNci7Rxiz/r43gVsw
+# CQYFKw4DAh0FAAOBgQB6ECSnXHUs7/bCr6Z556K6IDJNWsccjcV89fHA/zKMX0w0
+# 6NefCtxas/QHUA9mS87HRHLzKjFqweA3BnQ5lr5mPDlho8U90Nvtpj58G9I5SPUg
+# CspNr5jEHOL5EdJFBIv3zI2jQ8TPbFGC0Cz72+4oYzSxWpftNX41MmEsZkMaADGC
+# AWAwggFcAgEBMEAwLDEqMCgGA1UEAxMhUG93ZXJTaGVsbCBMb2NhbCBDZXJ0aWZp
+# Y2F0ZSBSb290AhBaydK0VS5IhU1Hy6E1KUTpMAkGBSsOAwIaBQCgeDAYBgorBgEE
+# AYI3AgEMMQowCKACgAChAoAAMBkGCSqGSIb3DQEJAzEMBgorBgEEAYI3AgEEMBwG
+# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBSCi58I
+# 9wTK404sqFTIA2pwl3w43zANBgkqhkiG9w0BAQEFAASBgE3VQEzafK0hB/XvwUV0
+# JP2Qsv/r5CyXDvcw9+aArJSsRjYQfSSXQD5G28Sh7l1AeY681lhCz9w44Lx7oAeN
+# dOn7QX0Hf5UWEDibR6gvXEI/3tiFs9qAeOOIe4j7CPmIB/sJ8kEhAux7j2EfRKXG
+# VmBiX4Wzo9eya16gqkrYtkFo
+# SIG # End signature block

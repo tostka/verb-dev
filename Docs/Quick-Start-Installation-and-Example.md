@@ -1,4 +1,4 @@
-# Installing verb-dev
+# Installing VERB-dev
 
-    # Install verb-dev from the Powershell Gallery
-    Find-Module verb-dev | Install-Module
+    # Install VERB-dev from the Powershell Gallery
+    Find-Module VERB-dev | Install-Module

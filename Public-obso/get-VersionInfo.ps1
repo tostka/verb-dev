@@ -1,4 +1,4 @@
-﻿#*------v Function get-VersionInfo v------
+#*------v Function get-VersionInfo v------
 function get-VersionInfo {
     <#
     .SYNOPSIS
@@ -28,7 +28,7 @@ function get-VersionInfo {
     .INPUTS
     None
     .OUTPUTS
-    Returns a hashtable of key-value pairs for each of the entries in the .NOTES CBH block in a given file. 
+    Returns a hashtable of key-value pairs for each of the entries in the .NOTES CBH block in a given file.
     .EXAMPLE
     .\get-VersionInfo
     Default process from $PSCommandPath
@@ -80,3 +80,28 @@ function get-VersionInfo {
         $false | write-output ;
     } ;
 } ; #*------^ END Function get-VersionInfo ^------
+# SIG # Begin signature block
+# MIIELgYJKoZIhvcNAQcCoIIEHzCCBBsCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
+# gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUj1bd32F5uHT7jkXBEVhiLUqf
+# bD2gggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
+# MCwxKjAoBgNVBAMTIVBvd2VyU2hlbGwgTG9jYWwgQ2VydGlmaWNhdGUgUm9vdDAe
+# Fw0xNDEyMjkxNzA3MzNaFw0zOTEyMzEyMzU5NTlaMBUxEzARBgNVBAMTClRvZGRT
+# ZWxmSUkwgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBALqRVt7uNweTkZZ+16QG
+# a+NnFYNRPPa8Bnm071ohGe27jNWKPVUbDfd0OY2sqCBQCEFVb5pqcIECRRnlhN5H
+# +EEJmm2x9AU0uS7IHxHeUo8fkW4vm49adkat5gAoOZOwbuNntBOAJy9LCyNs4F1I
+# KKphP3TyDwe8XqsEVwB2m9FPAgMBAAGjdjB0MBMGA1UdJQQMMAoGCCsGAQUFBwMD
+# MF0GA1UdAQRWMFSAEL95r+Rh65kgqZl+tgchMuKhLjAsMSowKAYDVQQDEyFQb3dl
+# clNoZWxsIExvY2FsIENlcnRpZmljYXRlIFJvb3SCEGwiXbeZNci7Rxiz/r43gVsw
+# CQYFKw4DAh0FAAOBgQB6ECSnXHUs7/bCr6Z556K6IDJNWsccjcV89fHA/zKMX0w0
+# 6NefCtxas/QHUA9mS87HRHLzKjFqweA3BnQ5lr5mPDlho8U90Nvtpj58G9I5SPUg
+# CspNr5jEHOL5EdJFBIv3zI2jQ8TPbFGC0Cz72+4oYzSxWpftNX41MmEsZkMaADGC
+# AWAwggFcAgEBMEAwLDEqMCgGA1UEAxMhUG93ZXJTaGVsbCBMb2NhbCBDZXJ0aWZp
+# Y2F0ZSBSb290AhBaydK0VS5IhU1Hy6E1KUTpMAkGBSsOAwIaBQCgeDAYBgorBgEE
+# AYI3AgEMMQowCKACgAChAoAAMBkGCSqGSIb3DQEJAzEMBgorBgEEAYI3AgEEMBwG
+# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBT6+MCi
+# jjKB5UOEcm9T4gkF7W19NTANBgkqhkiG9w0BAQEFAASBgDaQuhLzLfXGPCdw7J2c
+# 4vT7WaYY+wgV7a9A3BVwX2BtOGYWjpVMoGuz82oMGZvjO0qf+rKIETOlQXNMz64K
+# hz9+Socoes8vGL3qIq2lY/gHpgAktNivcoVHaJc6lhJul2ighJbj2vGvwInAo/A8
+# iteAbsXOEwAmi2cbT15mn6L8
+# SIG # End signature block

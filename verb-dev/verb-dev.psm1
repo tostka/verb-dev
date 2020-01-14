@@ -1,38 +1,44 @@
-# verb-dev.psm1
-  <#
-  .SYNOPSIS
-  verb-dev - Development-related generic functions
-  .NOTES
-  Version     : 1.2.3
-  Author      : Todd Kadrie
-  Website     :	https://www.toddomation.com
-  Twitter     :	@tostka
-  CreatedDate : 12/26/2019
-  FileName    : verb-dev.psm1
-  License     : MIT
-  Copyright   : (c) 12/26/2019 Todd Kadrie
-  Github      : https://github.com/tostka
-  AddedCredit : REFERENCE
-  AddedWebsite:	REFERENCEURL
-  AddedTwitter:	@HANDLE / http://twitter.com/HANDLE
-  REVISIONS
-  * 10:33 AM 12/30/2019 Merge-Module():951,952 assert sorts into alpha order (make easier to find in the psm1)
-  *  10:20 AM 12/30/2019 Merge-Module(): fixed/debugged monolithic build options, now works. Could use some code to autoupdate all .NOTES:Version fields, but that's for future. ;Added code to update against monolithic/non-dyn-incl psm1s. Parses CBH & meta blocks out & constructs a new psm1 from the content. ; dbgd merge-module.ps1 w/in process-NewModule.ps1, functional so far.
-  *  9:11 AM 12/30/2019 parseHelp(): added CBH .INPUTS & .OUTPUTS, specifying returns hash of get-help parsed output, and presence of CBH in the file
-  *  9:04 AM 12/30/2019 profile-FileAST: updated CBH: added INPUTS & OUTPUTS, including hash properties returned
-  *  8:36 AM 12/30/2019 Get-CommentBlocks:updated cbh and added .INPUTS/.OUTPUTS cbh entries, detailing the subcompontents of the hashtable returned
-  *  12:03 PM 12/29/2019 added else wh on pswls entries
-  *  1:54 PM 12/28/2019 added merge-module
-  *  9:51 AM 12/28/2019 Merge-Module fixed $sBnrSStart/End typo
-  * 12/26/2019 - 1.1.1
-  * 5:22 PM 12/15/2019initial vers includes Get-CommentBlocks, parseHelp, profile-FileAST, build-VSCConfig, Merge-Module  
-  .DESCRIPTION
-  verb-dev - Development-related generic functions
-  .EXAMPLE
-  .EXAMPLE
-  .LINK
-  https://github.com/tostka/verb-dev
-  #>
+ï»¿# VERB-dev.psm1
+
+
+<#
+.SYNOPSIS
+VERB-dev - Development PS Module-related generic functions
+.NOTES
+Version     : 1.2.3
+Author      : Todd Kadrie
+Website     :	https://www.toddomation.com
+Twitter     :	@tostka
+CreatedDate : 1/14/2020
+FileName    : VERB-dev.psm1
+License     : MIT
+Copyright   : (c) 1/14/2020 Todd Kadrie
+Github      : https://github.com/tostka
+AddedCredit : REFERENCE
+AddedWebsite:	REFERENCEURL
+AddedTwitter:	@HANDLE / http://twitter.com/HANDLE
+REVISIONS
+* 1/14/2020 - 1.2.3, mod build
+# * 10:33 AM 12/30/2019 Merge-Module():951,952 assert sorts into alpha order (make easier to find in the psm1)
+# * 10:20 AM 12/30/2019 Merge-Module(): fixed/debugged monolithic build options, now works. Could use some code to autoupdate all .NOTES:Version fields, but that's for future. ;Added code to update against monolithic/non-dyn-incl psm1s. Parses CBH & meta blocks out & constructs a new psm1 from the content. ; dbgd merge-module.ps1 w/in process-NewModule.ps1, functional so far.
+# * 9:11 AM 12/30/2019 parseHelp(): added CBH .INPUTS & .OUTPUTS, specifying returns hash of get-help parsed output, and presence of CBH in the file
+# * 9:04 AM 12/30/2019 profile-FileAST: updated CBH: added INPUTS & OUTPUTS, including hash properties returned
+# * 8:36 AM 12/30/2019 Get-CommentBlocks:updated cbh and added .INPUTS/.OUTPUTS cbh entries, detailing the subcompontents of the hashtable returned
+# * 12:03 PM 12/29/2019 added else wh on pswls entries
+# * 1:54 PM 12/28/2019 added merge-module to verb-dev
+# * 9:51 AM 12/28/2019 Merge-Module fixed $sBnrSStart/End typo
+# * 5:22 PM 12/15/2019initial vers includes Get-CommentBlocks, parseHelp, profile-FileAST, build-VSCConfig, Merge-Module
+.DESCRIPTION
+VERB-dev - Development PS Module-related generic functions
+.INPUTS
+None
+.OUTPUTS
+None
+.EXAMPLE
+.EXAMPLE
+.LINK
+https://github.com/tostka/verb-dev
+#>
 
 
 #*------v build-VSCConfig.ps1 v------
@@ -235,7 +241,7 @@ function Get-CommentBlocks {
             $cbhBlock = $tmpBlock ;
             if ($showDebug) {
                 if ($metaOpen -AND $metaClose) {
-                    $smsg = "Existing CBH block located and tagged" ;
+                    $smsg = "Existing CBH metaBlock located and tagged" ;
                     #if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } ; #Error|Warn|Debug
                     write-verbose -verbose:$true  "$((get-date).ToString('HH:mm:ss')):$($smsg)" ;
                 } ;
@@ -386,6 +392,9 @@ function Merge-Module {
     AddedWebsite: https://evotec.xyz/powershell-single-psm1-file-versus-multi-file-modules/
     AddedTwitter:
     REVISIONS
+    * 7:24 AM 1/3/2020 #936: trimmed errant trailing ;- byproduct of fix-encoding pass
+    * 10:33 AM 12/30/2019 Merge-Module():951,952 assert sorts into alpha order (make easier to find in the psm1)
+    * 10:20 AM 12/30/2019 Merge-Module(): fixed/debugged monolithic build options, now works. Could use some code to autoupdate all .NOTES:Version fields, but that's for future.
     * 8:59 AM 12/30/2019 Merge-Module(): Added code to update against monolithic/non-dyn-incl psm1s. Parses CBH & meta blocks out & constructs a new psm1 from the content.
     * 9:51 AM 12/28/2019 Merge-Module fixed $sBnrSStart/End typo
     * 1:23 PM 12/27/2019 pulled regex sig replace with simple start/end detect and throw error (was leaving dangling curlies in psm1)
@@ -514,6 +523,7 @@ function Merge-Module {
             [cbhBlock]
             and then add the includes to the file
             #>
+<#
             $updatedContent=@"
 # $($PsmName)
 
@@ -522,6 +532,14 @@ $($oBlkComments.interText)
 $($oBlkComments.cbhBlock)
 
 "@; 
+#>
+            # doing a herestring assigned to $updatedContent *unwraps* everything!
+            # do them in separately
+            #"$($oBlkComments.metaBlock)`n$($oBlkComments.interText)`n$($oBlkComments.cbhBlock)" | Add-Content @pltAdd ;
+            $updatedContent += "# $(split-path -path $PsmName -leaf)`n"
+            if($oBlkComments.metaBlock){$updatedContent += $oBlkComments.metaBlock  |out-string ; } ;
+            if($oBlkComments.interText ){$updatedContent += $oBlkComments.interText  |out-string ; } ; 
+            $updatedContent += $oBlkComments.cbhBlock |out-string ; 
         } ; 
 
         if($updatedContent){
@@ -652,8 +670,8 @@ $($oBlkComments.cbhBlock)
         TRY {
             [array]$ComponentScripts = $null ; [array]$ComponentModules = $null ; 
             if($ModuleSource.count){
-                $ComponentScripts = Get-ChildItem -Path $ModuleSource\*.ps1 -Recurse -ErrorAction SilentlyContinue   ;
-                $ComponentModules = Get-ChildItem -Path $ModuleSource\*.psm1 -Recurse -ErrorAction SilentlyContinue  ;
+                $ComponentScripts = Get-ChildItem -Path $ModuleSource\*.ps1 -Recurse -ErrorAction SilentlyContinue | sort name  ;
+                $ComponentModules = Get-ChildItem -Path $ModuleSource\*.psm1 -Recurse -ErrorAction SilentlyContinue | sort name;
             } ; 
             $pltAdd = @{
                 Path=$PsmName ;
@@ -683,7 +701,7 @@ $($oBlkComments.cbhBlock)
                 $sBnrSEnd = "$($sBnrSStart.replace('-v','-^').replace('v-','^-'))" ;
                 "$($sBnrSStart)`n$($ParsedContent.EndBlock.Extent.Text)`n$($sBnrSEnd)" | Add-Content @pltAdd ;
 
-                $AST = [System.Management.Automation.Language.Parser]::ParseFile($ScriptFile, [ref]$null, [ref]$Null ) ; 
+                $AST = [System.Management.Automation.Language.Parser]::ParseFile($ScriptFile, [ref]$null, [ref]$Null ) ;
                 $ASTFunctions =  $AST.FindAll( { $args[0] -is [System.Management.Automation.Language.FunctionDefinitionAst] }, $true) ;
 
                 # public & functions = public ; private & internal = private
@@ -1060,8 +1078,8 @@ function profile-FileAST {
 # SIG # Begin signature block
 # MIIELgYJKoZIhvcNAQcCoIIEHzCCBBsCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUO8tkfC0anHQoCDqcl1zal7Kz
-# E6KgggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUJnu4z3zmOtEu05yVNJT8RJJq
+# 76CgggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
 # MCwxKjAoBgNVBAMTIVBvd2VyU2hlbGwgTG9jYWwgQ2VydGlmaWNhdGUgUm9vdDAe
 # Fw0xNDEyMjkxNzA3MzNaFw0zOTEyMzEyMzU5NTlaMBUxEzARBgNVBAMTClRvZGRT
 # ZWxmSUkwgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBALqRVt7uNweTkZZ+16QG
@@ -1076,9 +1094,9 @@ function profile-FileAST {
 # AWAwggFcAgEBMEAwLDEqMCgGA1UEAxMhUG93ZXJTaGVsbCBMb2NhbCBDZXJ0aWZp
 # Y2F0ZSBSb290AhBaydK0VS5IhU1Hy6E1KUTpMAkGBSsOAwIaBQCgeDAYBgorBgEE
 # AYI3AgEMMQowCKACgAChAoAAMBkGCSqGSIb3DQEJAzEMBgorBgEEAYI3AgEEMBwG
-# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBQE4QDD
-# N9UiAb/w97shGqdwYptJ1TANBgkqhkiG9w0BAQEFAASBgJle6Emuwk4rhz8J8amu
-# jIYtJauP45rCVsdzVctPCSyBiRkyH3J4uMvM5PemkPoVzTRs9Q6X6enwRcdSuU7F
-# QoKEuOgzZiEQ+c5QGHIjk19IfTcTP3Q74CLj811AcmcuVkMWmYrT6iILeMUNdKdj
-# xCq8BO4CD3LLoeEgEYezXub0
+# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBRvKC9M
+# 5+S+HHSVBNg9lMy9l6FdMTANBgkqhkiG9w0BAQEFAASBgKOfTfmFiEmOu2kcY/il
+# pOMzC0/fwPea+NZPg8VboPdzkpqIFxpICDTiwbVtlbAdG1f6DCJ/AmuasefKhuYv
+# O65iMyfRK6PHzVOsXBR/T9CvSZoff5FFHajFH0lJVKB0N4eZpxqxdmBGj4voDBfm
+# gU4AQolvI5ocHKllOCW9OYnn
 # SIG # End signature block

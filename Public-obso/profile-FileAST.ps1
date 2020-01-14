@@ -1,4 +1,4 @@
-﻿#*------v Function profile-FileAST() v------
+#*------v Function profile-FileAST() v------
 function profile-FileAST {
     <#
     .SYNOPSIS
@@ -30,7 +30,7 @@ function profile-FileAST {
     .INPUTS
     None
     .OUTPUTS
-    Outputs a hashtable object containing: 
+    Outputs a hashtable object containing:
     * Parameters : Details on all Parameters in the file
     * Functions : Details on all Functions in the file
     * VariableAssignments : Details on all Variables assigned in the file
@@ -50,8 +50,8 @@ function profile-FileAST {
         $File = get-childitem -path $File ;
     } ;
 
-    $sQot = [char]34 ; $sQotS = [char]39 ;
-    $NewCBH = $null ; $NewCBH = @() ;
+    #$sQot = [char]34 ; $sQotS = [char]39 ;
+    #$NewCBH = $null ; $NewCBH = @() ;
 
     $AST = [System.Management.Automation.Language.Parser]::ParseFile($File.fullname, [ref]$null, [ref]$Null ) ;
 
@@ -68,3 +68,28 @@ function profile-FileAST {
     $objReturn | Write-Output
 
 } ; #*------^ END Function profile-FileAST ^------
+# SIG # Begin signature block
+# MIIELgYJKoZIhvcNAQcCoIIEHzCCBBsCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
+# gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUaK5hXgyqVT113LEpAApNTnB5
+# UyKgggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
+# MCwxKjAoBgNVBAMTIVBvd2VyU2hlbGwgTG9jYWwgQ2VydGlmaWNhdGUgUm9vdDAe
+# Fw0xNDEyMjkxNzA3MzNaFw0zOTEyMzEyMzU5NTlaMBUxEzARBgNVBAMTClRvZGRT
+# ZWxmSUkwgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBALqRVt7uNweTkZZ+16QG
+# a+NnFYNRPPa8Bnm071ohGe27jNWKPVUbDfd0OY2sqCBQCEFVb5pqcIECRRnlhN5H
+# +EEJmm2x9AU0uS7IHxHeUo8fkW4vm49adkat5gAoOZOwbuNntBOAJy9LCyNs4F1I
+# KKphP3TyDwe8XqsEVwB2m9FPAgMBAAGjdjB0MBMGA1UdJQQMMAoGCCsGAQUFBwMD
+# MF0GA1UdAQRWMFSAEL95r+Rh65kgqZl+tgchMuKhLjAsMSowKAYDVQQDEyFQb3dl
+# clNoZWxsIExvY2FsIENlcnRpZmljYXRlIFJvb3SCEGwiXbeZNci7Rxiz/r43gVsw
+# CQYFKw4DAh0FAAOBgQB6ECSnXHUs7/bCr6Z556K6IDJNWsccjcV89fHA/zKMX0w0
+# 6NefCtxas/QHUA9mS87HRHLzKjFqweA3BnQ5lr5mPDlho8U90Nvtpj58G9I5SPUg
+# CspNr5jEHOL5EdJFBIv3zI2jQ8TPbFGC0Cz72+4oYzSxWpftNX41MmEsZkMaADGC
+# AWAwggFcAgEBMEAwLDEqMCgGA1UEAxMhUG93ZXJTaGVsbCBMb2NhbCBDZXJ0aWZp
+# Y2F0ZSBSb290AhBaydK0VS5IhU1Hy6E1KUTpMAkGBSsOAwIaBQCgeDAYBgorBgEE
+# AYI3AgEMMQowCKACgAChAoAAMBkGCSqGSIb3DQEJAzEMBgorBgEEAYI3AgEEMBwG
+# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBSYyBdB
+# XgqXI80ihuzmjjy2h4T5lDANBgkqhkiG9w0BAQEFAASBgCN3q+dI+5YZExDAIDiX
+# eQ54KfXp5K/UeDVgqxr+db+fL3c0XkOxpHMaXy/aIDWLS96yaqkSmSzvYZLDdlo+
+# R+RKDCJfvgr0nSMszjQouQUd8McqyrbazAJZYFPgJtJTW4DJI0OVvelXTHoi+L7F
+# j/nqyF3dgFBuljkdMB11pw/a
+# SIG # End signature block

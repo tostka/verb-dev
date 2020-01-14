@@ -1,4 +1,4 @@
-$ModuleName = Split-Path (Resolve-Path "$PSScriptRoot\..\" ) -Leaf
+ï»¿$ModuleName = Split-Path (Resolve-Path "$PSScriptRoot\..\" ) -Leaf
 $ModuleManifest = Resolve-Path "$PSScriptRoot\..\$ModuleName\$ModuleName.psd1"
 $here = (Split-Path -Parent $MyInvocation.MyCommand.Path).Replace('tests', '')
 $scriptsModules = Get-ChildItem $here -Include *.psd1, *.psm1, *.ps1 -Exclude *.tests.ps1 -Recurse
@@ -62,7 +62,7 @@ Describe 'General - Testing all scripts and modules against the Script Analyzer 
 			'*.psd1' { $typeTesting = 'Manifest' } 
 		}
 
-		Context "Checking $typeTesting – $($scriptModule) - conforms to Script Analyzer Rules" {
+		Context "Checking $typeTesting - $($scriptModule) - conforms to Script Analyzer Rules" {
 			<# stock code
             forEach ($scriptAnalyzerRule in $scriptAnalyzerRules) {
 				It "Script Analyzer Rule $scriptAnalyzerRule" {
@@ -77,11 +77,12 @@ Describe 'General - Testing all scripts and modules against the Script Analyzer 
 		}
 	}
 }
+
 # SIG # Begin signature block
 # MIIELgYJKoZIhvcNAQcCoIIEHzCCBBsCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUHC1Yi26g8QyK1yVAwwoEu5eZ
-# 2a6gggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUWK7pEpjzZhsu/GzaePPyrCPX
+# aBCgggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
 # MCwxKjAoBgNVBAMTIVBvd2VyU2hlbGwgTG9jYWwgQ2VydGlmaWNhdGUgUm9vdDAe
 # Fw0xNDEyMjkxNzA3MzNaFw0zOTEyMzEyMzU5NTlaMBUxEzARBgNVBAMTClRvZGRT
 # ZWxmSUkwgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBALqRVt7uNweTkZZ+16QG
@@ -96,9 +97,9 @@ Describe 'General - Testing all scripts and modules against the Script Analyzer 
 # AWAwggFcAgEBMEAwLDEqMCgGA1UEAxMhUG93ZXJTaGVsbCBMb2NhbCBDZXJ0aWZp
 # Y2F0ZSBSb290AhBaydK0VS5IhU1Hy6E1KUTpMAkGBSsOAwIaBQCgeDAYBgorBgEE
 # AYI3AgEMMQowCKACgAChAoAAMBkGCSqGSIb3DQEJAzEMBgorBgEEAYI3AgEEMBwG
-# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBQDyao0
-# 9xj2LxJWNI8akL3kf4xJ2DANBgkqhkiG9w0BAQEFAASBgChI08LG/2/iD6LB7JFh
-# QhAGtM1Ezh3/QRhw8mVV2b1QrMsODV1O9tSmoOQHkSgwYyn6Lprs9GJrDmowPrTh
-# iLn98ISaxqx6Wp7ZW17DZGAbqfM5dss6ZR6vSkXqfCwRXVWchCvHuZdD5HGDjK0s
-# VkuKCbP+UE2xLR12vsHeORWw
+# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBR4iWta
+# 7h8Zv6ZvAv3NBS3NufmDVjANBgkqhkiG9w0BAQEFAASBgDyY/DpXhSx0uJsfLGtH
+# tAbiGFdwQgoeC8pwvbBrRDojoupfFB+e55jpQGvVeT6ymGL5olWL4Gn/iOyBsqjY
+# xrrrVIaRFXzTIAoPFaN2TgraFE0xmjOr5pqnIC3Nox449XY8EEpdmEoEVu/c0Qjo
+# xkkLqoikS109jIR1fWXQ5zQI
 # SIG # End signature block
