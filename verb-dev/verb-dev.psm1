@@ -5,7 +5,7 @@
 .SYNOPSIS
 VERB-dev - Development PS Module-related generic functions
 .NOTES
-Version     : 1.2.3
+Version     : 1.2.7
 Author      : Todd Kadrie
 Website     :	https://www.toddomation.com
 Twitter     :	@tostka
@@ -18,7 +18,7 @@ AddedCredit : REFERENCE
 AddedWebsite:	REFERENCEURL
 AddedTwitter:	@HANDLE / http://twitter.com/HANDLE
 REVISIONS
-* 1/14/2020 - 1.2.3, mod build
+* 1/14/2020 - 1.2.7, final mod build (updated content file vers to match latest psd1)
 # * 10:33 AM 12/30/2019 Merge-Module():951,952 assert sorts into alpha order (make easier to find in the psm1)
 # * 10:20 AM 12/30/2019 Merge-Module(): fixed/debugged monolithic build options, now works. Could use some code to autoupdate all .NOTES:Version fields, but that's for future. ;Added code to update against monolithic/non-dyn-incl psm1s. Parses CBH & meta blocks out & constructs a new psm1 from the content. ; dbgd merge-module.ps1 w/in process-NewModule.ps1, functional so far.
 # * 9:11 AM 12/30/2019 parseHelp(): added CBH .INPUTS & .OUTPUTS, specifying returns hash of get-help parsed output, and presence of CBH in the file
@@ -1074,12 +1074,11 @@ function profile-FileAST {
 }
 
 #*------^ profile-FileAST.ps1 ^------
-
 # SIG # Begin signature block
 # MIIELgYJKoZIhvcNAQcCoIIEHzCCBBsCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUJnu4z3zmOtEu05yVNJT8RJJq
-# 76CgggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUG4/7KFJKGcqVvfU81eV125Qj
+# GHSgggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
 # MCwxKjAoBgNVBAMTIVBvd2VyU2hlbGwgTG9jYWwgQ2VydGlmaWNhdGUgUm9vdDAe
 # Fw0xNDEyMjkxNzA3MzNaFw0zOTEyMzEyMzU5NTlaMBUxEzARBgNVBAMTClRvZGRT
 # ZWxmSUkwgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBALqRVt7uNweTkZZ+16QG
@@ -1094,9 +1093,9 @@ function profile-FileAST {
 # AWAwggFcAgEBMEAwLDEqMCgGA1UEAxMhUG93ZXJTaGVsbCBMb2NhbCBDZXJ0aWZp
 # Y2F0ZSBSb290AhBaydK0VS5IhU1Hy6E1KUTpMAkGBSsOAwIaBQCgeDAYBgorBgEE
 # AYI3AgEMMQowCKACgAChAoAAMBkGCSqGSIb3DQEJAzEMBgorBgEEAYI3AgEEMBwG
-# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBRvKC9M
-# 5+S+HHSVBNg9lMy9l6FdMTANBgkqhkiG9w0BAQEFAASBgKOfTfmFiEmOu2kcY/il
-# pOMzC0/fwPea+NZPg8VboPdzkpqIFxpICDTiwbVtlbAdG1f6DCJ/AmuasefKhuYv
-# O65iMyfRK6PHzVOsXBR/T9CvSZoff5FFHajFH0lJVKB0N4eZpxqxdmBGj4voDBfm
-# gU4AQolvI5ocHKllOCW9OYnn
+# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBThUndz
+# vZzb7Udw0llzYo9eyDI4ozANBgkqhkiG9w0BAQEFAASBgC0c5ff1HHTIFfXT7yKZ
+# 0klV3/Gt1BxoZDiKrgCejs3YPSc5Y+U8t5FGvTFy8BEaQGZuFpsmvOzWl9CgHl+H
+# xCWFUf9DcORnfMj32IIIiTI/zt9RWTQBLseB1HIUlCeWC559o1CXUKM3ctyPU2Ll
+# hvRQugY8E3ZBS3B5i4vk2hyn
 # SIG # End signature block
