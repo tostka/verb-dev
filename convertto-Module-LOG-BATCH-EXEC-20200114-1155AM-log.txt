@@ -109,6 +109,8 @@ $rgxIncludeDirs='\\(Public|Internal|Classes)\\' ;
 $files = gci C:\sc\VERB-dev\* -recur |?{$_.extension -match $rgxfiles} | ?{$_.fullname -notmatch $rgxIncludeDirs} ;
 sign-file -file $files.fullname ;
 
+
+
 8) Clear any existing copy in $PSProfilePath: (use SID at work w lyncRepo!)
     remove-item -Recurse -Path C:\Users\kadrits\Documents\WindowsPowerShell\Modules\VERB-dev\*.* -whatif ;
 
