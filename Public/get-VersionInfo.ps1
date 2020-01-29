@@ -4,7 +4,7 @@ function get-VersionInfo {
     .SYNOPSIS
     get-VersionInfo.ps1 - get-VersionInfo.ps1 - Extract comment-help .NOTES block into a hashtable, key-value split on colons, to provide portable metadata (for New/Update-ScriptFileInfo inputs).
     .NOTES
-    Version     : 0.1.0
+    Version     : 0.2.0
     Author      : Todd Kadrie
     Website     :	https://stackoverflow.com/questions/38561009/where-is-the-standard-place-to-put-a-powershell-script-version-number
     CreatedDate : 02/07/2019
@@ -14,6 +14,7 @@ function get-VersionInfo {
     AddedWebsite:	https://stackoverflow.com/questions/38561009/where-is-the-standard-place-to-put-a-powershell-script-version-number
     AddedTwitter:
     REVISIONS
+    * 7:50 AM 1/29/2020 added Cmdletbinding
     * 9:36 AM 12/30/2019 added CBH .INPUTS & OUTPUTS, including description of the hashtable of key/value pairs returned, for existing CBH .NOTES block
     * added explicit -path param to get-help
     * 8:39 PM 11/21/2019 added test for returned get-help
@@ -33,11 +34,12 @@ function get-VersionInfo {
     .\get-VersionInfo
     Default process from $PSCommandPath
     .EXAMPLE
-    .\get-VersionInfo -Path .\path-to\script.ps1
+    .\get-VersionInfo -Path .\path-to\script.ps1 -verbose:$VerbosePreference
     Explicit file via -Path
     .LINK
     https://stackoverflow.com/questions/38561009/where-is-the-standard-place-to-put-a-powershell-script-version-number
     #>
+    [CmdletBinding()]
     PARAM(
         [Parameter(Position = 0, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true, HelpMessage = "Path to target script (defaults to `$PSCommandPath) [-Path -Path .\path-to\script.ps1]")]
         [ValidateScript( { Test-Path $_ })]$Path,
@@ -46,6 +48,7 @@ function get-VersionInfo {
         [Parameter(HelpMessage = "Whatif Flag  [-whatIf]")]
         [switch] $whatIf
     ) ;
+    $Verbose = ($VerbosePreference -eq "Continue") ; 
     $notes = $null ; $notes = @{ } ;
     # Get the .NOTES section of the script header comment.
     if (!$Path) {

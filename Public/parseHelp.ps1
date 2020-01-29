@@ -4,7 +4,7 @@ function parseHelp {
     .SYNOPSIS
     parseHelp - Parse Script CBH with get-help -full, return parseHelp obj & $hasExistingCBH boolean
     .NOTES
-    Version     : 1.0.0
+    Version     : 1.1.0
     Author      : Todd Kadrie
     Website     : https://www.toddomation.com
     Twitter     : @tostka / http://twitter.com/tostka
@@ -17,6 +17,7 @@ function parseHelp {
     AddedWebsite:
     AddedTwitter:
     REVISIONS
+    * 7:50 AM 1/29/2020 added Cmdletbinding
     * 9:11 AM 12/30/2019 parseHelp(): added CBH .INPUTS & .OUTPUTS, specifying returns hash of get-help parsed output, and presence of CBH in the file
     * 10:03 PM 12/2/201919 INIT
     .DESCRIPTION
@@ -34,7 +35,7 @@ function parseHelp {
     * HelpParsed : Raw object output of a get-help -full [path] against the specified $Path
     * hasExistingCBH : Boolean indicating if a functional CBH was detected
     .EXAMPLE
-    $bRet = parseHelp -Path $oSrc.fullname -showdebug:$($showdebug) -whatif:$($whatif) ;
+    $bRet = parseHelp -Path $oSrc.fullname -showdebug:$($showdebug) -verbose:$VerbosePreference -whatif:$($whatif) ;
     if($bRet.parseHelp){
         $parseHelp = $bRet.parseHelp
     } ;
@@ -43,6 +44,7 @@ function parseHelp {
     } ;
     .LINK
     #>
+    [CmdletBinding()]
     PARAM(
         [Parameter(Position = 0, Mandatory = $True, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true, HelpMessage = "Path to script[-Path path-to\script.ps1]")]
         [ValidateScript( { Test-Path $_ })]$Path,
@@ -51,7 +53,7 @@ function parseHelp {
         [Parameter(HelpMessage = "Whatif Flag  [-whatIf]")]
         [switch] $whatIf
     ) ;
-
+    $Verbose = ($VerbosePreference -eq "Continue") ; 
     if ($Path.GetType().FullName -ne 'System.IO.FileInfo') {
         $Path = get-childitem -path $Path ;
     } ;

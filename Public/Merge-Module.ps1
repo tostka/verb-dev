@@ -1,11 +1,10 @@
 ﻿#*------v Function Merge-Module v------
 function Merge-Module {
-
     <#
     .SYNOPSIS
     Merge-Module.ps1 - Merge function .ps1 files into a monolisthic module.psm1 module file, returns a hash with status:$true/$false, and PsmNameBU:The name of a backup of the original .psm1 file (for restoring on failures)
     .NOTES
-    Version     : 1.0.0
+    Version     : 1.1.0
     Author      : Todd Kadrie
     Website     : https://www.toddomation.com
     Twitter     : @tostka / http://twitter.com/tostka
@@ -18,6 +17,7 @@ function Merge-Module {
     AddedWebsite: https://evotec.xyz/powershell-single-psm1-file-versus-multi-file-modules/
     AddedTwitter:
     REVISIONS
+    * 7:50 AM 1/29/2020 added Cmdletbinding
     * 7:24 AM 1/3/2020 #936: trimmed errant trailing ;- byproduct of fix-encoding pass
     * 10:33 AM 12/30/2019 Merge-Module():951,952 assert sorts into alpha order (make easier to find in the psm1)
     * 10:20 AM 12/30/2019 Merge-Module(): fixed/debugged monolithic build options, now works. Could use some code to autoupdate all .NOTES:Version fields, but that's for future.
@@ -46,7 +46,7 @@ function Merge-Module {
     .OUTPUTS
     Outputs a hashtable object containing: Status[$true/$false], PsmNameBU [the name of the backup of the original psm1 file]
     .EXAMPLE
-    .\merge-Module.ps1 -ModuleName verb-AAD -ModuleSourcePath C:\sc\verb-AAD\Public -ModuleDestinationPath C:\sc\verb-AAD\verb-AAD -showdebug -whatif ;
+    .\merge-Module.ps1 -ModuleName verb-AAD -ModuleSourcePath C:\sc\verb-AAD\Public -ModuleDestinationPath C:\sc\verb-AAD\verb-AAD -showdebug -verbose:$VerbosePreference -whatif ;
     Command line process
     .EXAMPLE
     $pltmergeModule=[ordered]@{
@@ -54,6 +54,7 @@ function Merge-Module {
         ModuleSourcePath="C:\sc\verb-AAD\Public","C:\sc\verb-AAD\Internal" ;
         ModuleDestinationPath="C:\sc\verb-AAD\verb-AAD" ;
         showdebug=$true ;
+        verbose:$VerbosePreference ; 
         whatif=$($whatif);
     } ;
     Merge-Module @pltmergeModule ;
@@ -61,7 +62,8 @@ function Merge-Module {
     .LINK
     https://www.toddomation.com
     #>
-    param (
+    [CmdletBinding()]
+    PARAM (
         [Parameter(Mandatory = $True, HelpMessage = "Module Name (used to name the ModuleName.psm1 file)[-ModuleName verb-XXX]")]
         [string] $ModuleName,
         [Parameter(Mandatory = $True, HelpMessage = "Array of directory paths containing .ps1 function files to be combined [-ModuleSourcePath c:\path-to\module\Public]")]
@@ -73,7 +75,7 @@ function Merge-Module {
         [Parameter(HelpMessage = "Whatif Flag  [-whatIf]")]
         [switch] $whatIf
     ) ;
-
+    $Verbose = ($VerbosePreference -eq "Continue") ; 
     $rgxSigStart='#\sSIG\s#\sBegin\ssignature\sblock' ; 
     $rgxSigEnd='#\sSIG\s#\sEnd\ssignature\sblock' ; 
 

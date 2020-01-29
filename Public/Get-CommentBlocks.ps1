@@ -4,7 +4,7 @@ function Get-CommentBlocks {
     .SYNOPSIS
     Get-CommentBlocks - Write output string to specified File
     .NOTES
-    Version     : 1.0.0
+    Version     : 1.1.0
     Author      : Todd Kadrie
     Website     : https://www.toddomation.com
     Twitter     : @tostka / http://twitter.com/tostka
@@ -52,7 +52,9 @@ function Get-CommentBlocks {
     $preCBHBlock = $oBlkComments.interText ;
     .LINK
     #>
-
+    #Requires -Version 3
+    #Requires -RunasAdministrator
+    [CmdletBinding()]
     PARAM(
         [Parameter(Position = 0, Mandatory = $True, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true, HelpMessage = "RawSourceLines from the target script file (as gathered with get-content) [-TextLines TextArrayObj]")]
         [ValidateNotNullOrEmpty()]$TextLines,
@@ -61,7 +63,7 @@ function Get-CommentBlocks {
         [Parameter(HelpMessage = "Whatif Flag  [-whatIf]")]
         [switch] $whatIf
     ) ;
-
+    $Verbose = ($VerbosePreference -eq "Continue") ; 
     $AllBlkCommentCloses = $TextLines | Select-string -Pattern '\s*#>' | Select-Object -ExpandProperty LineNumber ;
     $AllBlkCommentOpens = $TextLines | Select-string -Pattern '\s*<#' | Select-Object  -ExpandProperty LineNumber ;
 

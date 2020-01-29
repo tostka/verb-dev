@@ -4,7 +4,7 @@ function build-VSCConfig {
     .SYNOPSIS
     build-VSCConfig - Process a sample ISE debugging command line, and convert it to a VSC launch.json 'configurations' entry
     .NOTES
-    Version     : 1.0.0
+    Version     : 1.1.0
     Author      : Todd Kadrie
     Website     : https://www.toddomation.com
     Twitter     : @tostka / http://twitter.com/tostka
@@ -17,6 +17,7 @@ function build-VSCConfig {
     AddedWebsite:
     AddedTwitter:
     REVISIONS
+    * 7:50 AM 1/29/2020 added Cmdletbinding
     * 9:14 AM 12/30/2019 added CBH .INPUTS & .OUTPUTS, including specific material returned.
     * 5:51 PM 12/16/2019 added OneArgument param
     * 2:58 PM 12/15/2019 INIT
@@ -35,10 +36,11 @@ function build-VSCConfig {
     .OUTPUTS
     Console dump & copy to clipboard, of model launch.json conversion of ISE Breakpoints xml file.
     .EXAMPLE
-    $bRet = build-VSCConfig -CommandLine $updatedContent -showdebug:$($showdebug) -whatif:$($whatif) ;
+    $bRet = build-VSCConfig -CommandLine $updatedContent -showdebug:$($showdebug) -verbose:$VerbosePreference -whatif:$($whatif) ;
     if (!$bRet) {Continue } ;
     .LINK
     #>
+    [CmdletBinding()]
     PARAM(
         [Parameter(Position = 0, Mandatory = $True, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true, HelpMessage = "CommandLine to be written to specified file [-CommandLine script.ps1 arguments]")]
         [ValidateNotNullOrEmpty()]$CommandLine,
@@ -49,8 +51,9 @@ function build-VSCConfig {
         [Parameter(HelpMessage = "Whatif Flag  [-whatIf]")]
         [switch] $whatIf
     ) ;
-
-    $verbosePreference = "Continue" # opts: Stop(&Error)|Inquire(&Prompt)|Continue(Display)|SilentlyContinue(Suppress);
+    
+    #$verbosePreference = "Continue" # opts: Stop(&Error)|Inquire(&Prompt)|Continue(Display)|SilentlyContinue(Suppress);    
+    $Verbose = ($VerbosePreference -eq "Continue") ; 
 
     #$CommandLine = Read-Host "Enter Command to be Parsed" ;
     $parsedCmdLine = Split-CommandLine -CommandLine $CommandLine | Where-Object { $_.length -gt 1 }  ;
