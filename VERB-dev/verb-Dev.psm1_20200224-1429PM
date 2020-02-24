@@ -1,4 +1,4 @@
-﻿# verb-Dev.psm1
+﻿# VERB-dev.psm1
 
 
 <#
@@ -42,7 +42,7 @@ function build-VSCConfig {
     .SYNOPSIS
     build-VSCConfig - Process a sample ISE debugging command line, and convert it to a VSC launch.json 'configurations' entry
     .NOTES
-    Version     : 1.1.0
+    Version     : 1.0.0
     Author      : Todd Kadrie
     Website     : https://www.toddomation.com
     Twitter     : @tostka / http://twitter.com/tostka
@@ -55,7 +55,6 @@ function build-VSCConfig {
     AddedWebsite:
     AddedTwitter:
     REVISIONS
-    * 7:50 AM 1/29/2020 added Cmdletbinding
     * 9:14 AM 12/30/2019 added CBH .INPUTS & .OUTPUTS, including specific material returned.
     * 5:51 PM 12/16/2019 added OneArgument param
     * 2:58 PM 12/15/2019 INIT
@@ -74,11 +73,10 @@ function build-VSCConfig {
     .OUTPUTS
     Console dump & copy to clipboard, of model launch.json conversion of ISE Breakpoints xml file.
     .EXAMPLE
-    $bRet = build-VSCConfig -CommandLine $updatedContent -showdebug:$($showdebug) -verbose:$VerbosePreference -whatif:$($whatif) ;
+    $bRet = build-VSCConfig -CommandLine $updatedContent -showdebug:$($showdebug) -whatif:$($whatif) ;
     if (!$bRet) {Continue } ;
     .LINK
     #>
-    [CmdletBinding()]
     PARAM(
         [Parameter(Position = 0, Mandatory = $True, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true, HelpMessage = "CommandLine to be written to specified file [-CommandLine script.ps1 arguments]")]
         [ValidateNotNullOrEmpty()]$CommandLine,
@@ -89,9 +87,8 @@ function build-VSCConfig {
         [Parameter(HelpMessage = "Whatif Flag  [-whatIf]")]
         [switch] $whatIf
     ) ;
-    
-    #$verbosePreference = "Continue" # opts: Stop(&Error)|Inquire(&Prompt)|Continue(Display)|SilentlyContinue(Suppress);    
-    $Verbose = ($VerbosePreference -eq "Continue") ; 
+
+    $verbosePreference = "Continue" # opts: Stop(&Error)|Inquire(&Prompt)|Continue(Display)|SilentlyContinue(Suppress);
 
     #$CommandLine = Read-Host "Enter Command to be Parsed" ;
     $parsedCmdLine = Split-CommandLine -CommandLine $CommandLine | Where-Object { $_.length -gt 1 }  ;
@@ -146,7 +143,7 @@ function Get-CommentBlocks {
     .SYNOPSIS
     Get-CommentBlocks - Write output string to specified File
     .NOTES
-    Version     : 1.1.0
+    Version     : 1.0.0
     Author      : Todd Kadrie
     Website     : https://www.toddomation.com
     Twitter     : @tostka / http://twitter.com/tostka
@@ -194,9 +191,7 @@ function Get-CommentBlocks {
     $preCBHBlock = $oBlkComments.interText ;
     .LINK
     #>
-    #Requires -Version 3
-    #Requires -RunasAdministrator
-    [CmdletBinding()]
+
     PARAM(
         [Parameter(Position = 0, Mandatory = $True, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true, HelpMessage = "RawSourceLines from the target script file (as gathered with get-content) [-TextLines TextArrayObj]")]
         [ValidateNotNullOrEmpty()]$TextLines,
@@ -205,7 +200,7 @@ function Get-CommentBlocks {
         [Parameter(HelpMessage = "Whatif Flag  [-whatIf]")]
         [switch] $whatIf
     ) ;
-    $Verbose = ($VerbosePreference -eq "Continue") ; 
+
     $AllBlkCommentCloses = $TextLines | Select-string -Pattern '\s*#>' | Select-Object -ExpandProperty LineNumber ;
     $AllBlkCommentOpens = $TextLines | Select-string -Pattern '\s*<#' | Select-Object  -ExpandProperty LineNumber ;
 
@@ -293,7 +288,7 @@ function get-VersionInfo {
     .SYNOPSIS
     get-VersionInfo.ps1 - get-VersionInfo.ps1 - Extract comment-help .NOTES block into a hashtable, key-value split on colons, to provide portable metadata (for New/Update-ScriptFileInfo inputs).
     .NOTES
-    Version     : 0.2.0
+    Version     : 0.1.0
     Author      : Todd Kadrie
     Website     :	https://stackoverflow.com/questions/38561009/where-is-the-standard-place-to-put-a-powershell-script-version-number
     CreatedDate : 02/07/2019
@@ -303,7 +298,6 @@ function get-VersionInfo {
     AddedWebsite:	https://stackoverflow.com/questions/38561009/where-is-the-standard-place-to-put-a-powershell-script-version-number
     AddedTwitter:
     REVISIONS
-    * 7:50 AM 1/29/2020 added Cmdletbinding
     * 9:36 AM 12/30/2019 added CBH .INPUTS & OUTPUTS, including description of the hashtable of key/value pairs returned, for existing CBH .NOTES block
     * added explicit -path param to get-help
     * 8:39 PM 11/21/2019 added test for returned get-help
@@ -323,12 +317,11 @@ function get-VersionInfo {
     .\get-VersionInfo
     Default process from $PSCommandPath
     .EXAMPLE
-    .\get-VersionInfo -Path .\path-to\script.ps1 -verbose:$VerbosePreference
+    .\get-VersionInfo -Path .\path-to\script.ps1
     Explicit file via -Path
     .LINK
     https://stackoverflow.com/questions/38561009/where-is-the-standard-place-to-put-a-powershell-script-version-number
     #>
-    [CmdletBinding()]
     PARAM(
         [Parameter(Position = 0, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true, HelpMessage = "Path to target script (defaults to `$PSCommandPath) [-Path -Path .\path-to\script.ps1]")]
         [ValidateScript( { Test-Path $_ })]$Path,
@@ -337,7 +330,6 @@ function get-VersionInfo {
         [Parameter(HelpMessage = "Whatif Flag  [-whatIf]")]
         [switch] $whatIf
     ) ;
-    $Verbose = ($VerbosePreference -eq "Continue") ; 
     $notes = $null ; $notes = @{ } ;
     # Get the .NOTES section of the script header comment.
     if (!$Path) {
@@ -374,78 +366,6 @@ function get-VersionInfo {
 }
 
 #*------^ get-VersionInfo.ps1 ^------
-
-#*------v load-Module.ps1 v------
-if(!(test-path function:\load-Module)) {
-    #*------v Function load-Module v------
-    function load-Module {
-        <#
-        .SYNOPSIS
-        load-Module - Import-Module, with Find- & Install-, when not available to load.
-        .NOTES
-        Version     : 1.0.0
-        Author      : Todd Kadrie
-        Website     : http://www.toddomation.com
-        Twitter     : @tostka / http://twitter.com/tostka
-        CreatedDate : 2019-8-28
-        FileName    : 
-        License     : MIT License
-        Copyright   : (c) 2020 Todd Kadrie
-        Github      : https://github.com/tostka
-        AddedCredit : REFERENCE
-        AddedWebsite:	URL
-        AddedTwitter:	URL
-        REVISIONS
-        * 7:29 AM 1/29/2020 added pshelp, version etc (copying into verb-dev)
-        * 8/28/2019 init
-        .DESCRIPTION
-        load-Module - Import-Module, with Find- & Install-, when not available to load.
-        .PARAMETER  Module
-        Module name to be loaded or installed [ -Module Azure]
-        .PARAMETER ShowDebug
-        Parameter to display Debugging messages [-ShowDebug switch]
-        .PARAMETER Whatif
-        Parameter to run a Test no-change pass [-Whatif switch]
-        .EXAMPLE
-        .\load-Module Azure
-        .LINK
-        https://github.com/tostka
-        #>
-        [CmdletBinding()]
-        Param(
-            [Parameter(Position = 0, Mandatory = $True, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true, HelpMessage = "Module name to be loaded or installed [ -Module Azure]")]
-            [ValidateNotNullOrEmpty()][string]$Module,
-            [Parameter(HelpMessage = "Debugging Flag [-showDebug]")]
-            [switch] $showDebug,
-            [Parameter(HelpMessage = "Whatif Flag  [-whatIf]")]
-            [switch] $whatIf
-        ) ;
-        $Verbose = ($VerbosePreference -eq "Continue") ; 
-        if!(Get-Module -Name $Module){
-            if (Get-Module -Name $Module -ListAvailable) {
-                Import-Module $Module ;
-            } else {
-                write-host -foregroundcolor RED "$((get-date).ToString('HH:mm:ss')):ERROR!:The $($Module) module is *NOT* INSTALLED!.`n Checking for available copy..." ;
-                if(find-module $Module){
-                    write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):Would you *LIKE* to install the $Module module *NOW*?" ;
-                    $bRet = Read-Host "Enter YYY to continue. Anything else will exit"
-                    if ($bRet.ToUpper() -eq "YYY") {
-                        Write-host "Installing Module:$($Module)`nInstall-Module -Name $($Module) -AllowClobber -Scope CurrentUser..."
-                        Install-Module -Name $Module -AllowClobber -Scope CurrentUser
-                    } else {
-                        write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):Install declined. Aborting script pass.`nThe required $($Module) module can be installed via the`nInstall-Module -Name $($Module) -AllowClobber -Scope CurrentUser`ncommand.`nEXITING"
-                        # exit <asserted exit error #>
-                        exit 1
-                    } # if-block end
-                } else {
-                    write-host -foregroundcolor RED "$((get-date).ToString('HH:mm:ss')):ERROR!:The $($Module) module was not found at the routine Repositories. `nPlease locate a copy and install it before attempting to use this script" ;
-                } ;
-            } ;
-        } ;
-    } #*------^ END Function load-Module ^------ ;
-}
-
-#*------^ load-Module.ps1 ^------
 
 #*------v Merge-Module.ps1 v------
 function Merge-Module {
@@ -841,7 +761,6 @@ $($oBlkComments.cbhBlock)
         } ;
     } ; # loop-E
 }
-
 #*------^ Merge-Module.ps1 ^------
 
 #*------v parseHelp.ps1 v------
@@ -850,7 +769,7 @@ function parseHelp {
     .SYNOPSIS
     parseHelp - Parse Script CBH with get-help -full, return parseHelp obj & $hasExistingCBH boolean
     .NOTES
-    Version     : 1.1.0
+    Version     : 1.0.0
     Author      : Todd Kadrie
     Website     : https://www.toddomation.com
     Twitter     : @tostka / http://twitter.com/tostka
@@ -863,7 +782,6 @@ function parseHelp {
     AddedWebsite:
     AddedTwitter:
     REVISIONS
-    * 7:50 AM 1/29/2020 added Cmdletbinding
     * 9:11 AM 12/30/2019 parseHelp(): added CBH .INPUTS & .OUTPUTS, specifying returns hash of get-help parsed output, and presence of CBH in the file
     * 10:03 PM 12/2/201919 INIT
     .DESCRIPTION
@@ -881,7 +799,7 @@ function parseHelp {
     * HelpParsed : Raw object output of a get-help -full [path] against the specified $Path
     * hasExistingCBH : Boolean indicating if a functional CBH was detected
     .EXAMPLE
-    $bRet = parseHelp -Path $oSrc.fullname -showdebug:$($showdebug) -verbose:$VerbosePreference -whatif:$($whatif) ;
+    $bRet = parseHelp -Path $oSrc.fullname -showdebug:$($showdebug) -whatif:$($whatif) ;
     if($bRet.parseHelp){
         $parseHelp = $bRet.parseHelp
     } ;
@@ -890,7 +808,6 @@ function parseHelp {
     } ;
     .LINK
     #>
-    [CmdletBinding()]
     PARAM(
         [Parameter(Position = 0, Mandatory = $True, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true, HelpMessage = "Path to script[-Path path-to\script.ps1]")]
         [ValidateScript( { Test-Path $_ })]$Path,
@@ -899,7 +816,7 @@ function parseHelp {
         [Parameter(HelpMessage = "Whatif Flag  [-whatIf]")]
         [switch] $whatIf
     ) ;
-    $Verbose = ($VerbosePreference -eq "Continue") ; 
+
     if ($Path.GetType().FullName -ne 'System.IO.FileInfo') {
         $Path = get-childitem -path $Path ;
     } ;
@@ -1077,7 +994,7 @@ function profile-FileAST {
     .SYNOPSIS
     profile-FileAST - Parse specified Script/Module using Language.FunctionDefinitionAst
     .NOTES
-    Version     : 1.1.0
+    Version     : 1.0.0
     Author      : Todd Kadrie
     Website     : https://www.toddomation.com
     Twitter     : @tostka / http://twitter.com/tostka
@@ -1090,7 +1007,6 @@ function profile-FileAST {
     AddedWebsite:
     AddedTwitter:
     REVISIONS
-    # * 7:50 AM 1/29/2020 added Cmdletbinding
     * 9:04 AM 12/30/2019 profile-FileAST: updated CBH: added .INPUTS & OUTPUTS, including hash properties returned
     * 3:56 PM 12/8/2019 INIT
     .DESCRIPTION
@@ -1109,10 +1025,9 @@ function profile-FileAST {
     * Functions : Details on all Functions in the file
     * VariableAssignments : Details on all Variables assigned in the file
     .EXAMPLE
-    $ASTProfile = profile-FileAST -File $oSrc.fullname -showdebug:$($showdebug) -verbose:$VerbosePreference -whatif:$($whatif) ;
+    $ASTProfile = profile-FileAST -File $oSrc.fullname -showdebug:$($showdebug) -whatif:$($whatif) ;
     .LINK
     #>
-    [CmdletBinding()]
     PARAM(
         [Parameter(Position = 0, Mandatory = $True, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true, HelpMessage = "Path to script[-File path-to\script.ps1]")]
         [ValidateScript( { Test-Path $_ })]$File,
@@ -1124,7 +1039,7 @@ function profile-FileAST {
     if ($File.GetType().FullName -ne 'System.IO.FileInfo') {
         $File = get-childitem -path $File ;
     } ;
-    $Verbose = ($VerbosePreference -eq "Continue") ; 
+
     $sQot = [char]34 ; $sQotS = [char]39 ;
     $NewCBH = $null ; $NewCBH = @() ;
 
@@ -1145,12 +1060,11 @@ function profile-FileAST {
 }
 
 #*------^ profile-FileAST.ps1 ^------
-
 # SIG # Begin signature block
 # MIIELgYJKoZIhvcNAQcCoIIEHzCCBBsCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUcX5gCwTUfbbmH+1S8utampi/
-# 54SgggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUG4/7KFJKGcqVvfU81eV125Qj
+# GHSgggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
 # MCwxKjAoBgNVBAMTIVBvd2VyU2hlbGwgTG9jYWwgQ2VydGlmaWNhdGUgUm9vdDAe
 # Fw0xNDEyMjkxNzA3MzNaFw0zOTEyMzEyMzU5NTlaMBUxEzARBgNVBAMTClRvZGRT
 # ZWxmSUkwgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBALqRVt7uNweTkZZ+16QG
@@ -1165,9 +1079,9 @@ function profile-FileAST {
 # AWAwggFcAgEBMEAwLDEqMCgGA1UEAxMhUG93ZXJTaGVsbCBMb2NhbCBDZXJ0aWZp
 # Y2F0ZSBSb290AhBaydK0VS5IhU1Hy6E1KUTpMAkGBSsOAwIaBQCgeDAYBgorBgEE
 # AYI3AgEMMQowCKACgAChAoAAMBkGCSqGSIb3DQEJAzEMBgorBgEEAYI3AgEEMBwG
-# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBTza4c2
-# 3GhmAdroL07E0rM8l6ii/DANBgkqhkiG9w0BAQEFAASBgDsfsJ9c4REIQnPGfDlq
-# jqfjfUYVa21nPpZ9itgUpKRbpNz7WCDfd3FnKwkkjcyaA3JcrlCTjKI5lLVPsTH6
-# G2Y7gRX5EaO6As+oc6lul9RaB+y+E6C3/0wuFeFUmJr86zUKiplSt5w+rT9cVRNU
-# ZKf3vewx9ABcF1w9GRGrS6Dm
+# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBThUndz
+# vZzb7Udw0llzYo9eyDI4ozANBgkqhkiG9w0BAQEFAASBgC0c5ff1HHTIFfXT7yKZ
+# 0klV3/Gt1BxoZDiKrgCejs3YPSc5Y+U8t5FGvTFy8BEaQGZuFpsmvOzWl9CgHl+H
+# xCWFUf9DcORnfMj32IIIiTI/zt9RWTQBLseB1HIUlCeWC559o1CXUKM3ctyPU2Ll
+# hvRQugY8E3ZBS3B5i4vk2hyn
 # SIG # End signature block
