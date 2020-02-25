@@ -5,7 +5,7 @@
 .SYNOPSIS
 VERB-dev - Development PS Module-related generic functions
 .NOTES
-Version     : 1.2.7
+Version     : 1.2.8
 Author      : Todd Kadrie
 Website     :	https://www.toddomation.com
 Twitter     :	@tostka
@@ -18,6 +18,7 @@ AddedCredit : REFERENCE
 AddedWebsite:	REFERENCEURL
 AddedTwitter:	@HANDLE / http://twitter.com/HANDLE
 REVISIONS
+* 3:00 PM 2/24/2020 1.2.8, pulled #Requires RunAsAdministrator, convertto-module runs as UID, doesn't have it
 * 1/14/2020 - 1.2.7, final mod build (updated content file vers to match latest psd1)
 # * 10:33 AM 12/30/2019 Merge-Module():951,952 assert sorts into alpha order (make easier to find in the psm1) ; fixed/debugged monolithic build options, now works. Could use some code to autoupdate all .NOTES:Version fields, but that's for future. ;Added code to update against monolithic/non-dyn-incl psm1s. Parses CBH & meta blocks out & constructs a new psm1 from the content. ; dbgd merge-module.ps1 w/in process-NewModule.ps1, functional so far. ; parseHelp(): added CBH .INPUTS & .OUTPUTS, specifying returns hash of get-help parsed output, and presence of CBH in the file ; ; profile-FileAST: updated CBH: added INPUTS & OUTPUTS, including hash properties returned ; Get-CommentBlocks:updated cbh and added .INPUTS/.OUTPUTS cbh entries, detailing the subcompontents of the hashtable returned
 # * 12:03 PM 12/29/2019 added else wh on pswls entries
@@ -195,7 +196,6 @@ function Get-CommentBlocks {
     .LINK
     #>
     #Requires -Version 3
-    #Requires -RunasAdministrator
     [CmdletBinding()]
     PARAM(
         [Parameter(Position = 0, Mandatory = $True, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true, HelpMessage = "RawSourceLines from the target script file (as gathered with get-content) [-TextLines TextArrayObj]")]
@@ -1145,12 +1145,11 @@ function profile-FileAST {
 }
 
 #*------^ profile-FileAST.ps1 ^------
-
 # SIG # Begin signature block
 # MIIELgYJKoZIhvcNAQcCoIIEHzCCBBsCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUcX5gCwTUfbbmH+1S8utampi/
-# 54SgggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQU6fty7+CapCqErxwhgpni1YGi
+# nEOgggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
 # MCwxKjAoBgNVBAMTIVBvd2VyU2hlbGwgTG9jYWwgQ2VydGlmaWNhdGUgUm9vdDAe
 # Fw0xNDEyMjkxNzA3MzNaFw0zOTEyMzEyMzU5NTlaMBUxEzARBgNVBAMTClRvZGRT
 # ZWxmSUkwgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBALqRVt7uNweTkZZ+16QG
@@ -1165,9 +1164,9 @@ function profile-FileAST {
 # AWAwggFcAgEBMEAwLDEqMCgGA1UEAxMhUG93ZXJTaGVsbCBMb2NhbCBDZXJ0aWZp
 # Y2F0ZSBSb290AhBaydK0VS5IhU1Hy6E1KUTpMAkGBSsOAwIaBQCgeDAYBgorBgEE
 # AYI3AgEMMQowCKACgAChAoAAMBkGCSqGSIb3DQEJAzEMBgorBgEEAYI3AgEEMBwG
-# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBTza4c2
-# 3GhmAdroL07E0rM8l6ii/DANBgkqhkiG9w0BAQEFAASBgDsfsJ9c4REIQnPGfDlq
-# jqfjfUYVa21nPpZ9itgUpKRbpNz7WCDfd3FnKwkkjcyaA3JcrlCTjKI5lLVPsTH6
-# G2Y7gRX5EaO6As+oc6lul9RaB+y+E6C3/0wuFeFUmJr86zUKiplSt5w+rT9cVRNU
-# ZKf3vewx9ABcF1w9GRGrS6Dm
+# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBRuUIbm
+# oo4e1TDVmxil2VJHEIv0NDANBgkqhkiG9w0BAQEFAASBgANV5HbvXyNUxgZhOxZu
+# rngr9FYucOIxrQ21nwmLEAuBeq1P6QJhIYF33ZAIU2y+vtTV5Z8pjxxOkzprdqPs
+# fr/G3yZDU8JKHonTPVFHHbSyl53tdL+P/fFwhxIlRTy6YFU93IFD0xoHYfxWbZIe
+# 8Kiy669D1GI3EASv5Vpu1ycl
 # SIG # End signature block
