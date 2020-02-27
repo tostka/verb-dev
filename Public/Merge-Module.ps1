@@ -1,6 +1,5 @@
 ﻿#*------v Merge-Module.ps1 v------
 function Merge-Module {
-
     <#
     .SYNOPSIS
     Merge-Module.ps1 - Merge function .ps1 files into a monolisthic module.psm1 module file, returns a hash with status:$true/$false, and PsmNameBU:The name of a backup of the original .psm1 file (for restoring on failures)
@@ -18,6 +17,7 @@ function Merge-Module {
     AddedWebsite: https://evotec.xyz/powershell-single-psm1-file-versus-multi-file-modules/
     AddedTwitter:
     REVISIONS
+    * 3:44 PM 2/26/2020 Merge-Module: added -LogSpec param (feed it the object returned by a Start-Log() pass). 
     * 11:27 AM Merge-Module 2/24/2020 suppress block dumps to console, unless -showdebug or -verbose in use
     * 7:24 AM 1/3/2020 #936: trimmed errant trailing ;- byproduct of fix-encoding pass
     * 10:33 AM 12/30/2019 Merge-Module():951,952 assert sorts into alpha order (make easier to find in the psm1)
@@ -69,6 +69,8 @@ function Merge-Module {
         [array] $ModuleSourcePath,
         [Parameter(Mandatory = $True, HelpMessage = "Directory path in which the final .psm1 file should be constructed [-ModuleDestinationPath c:\path-to\module\module.psm1]")]
         [string] $ModuleDestinationPath,
+        [Parameter(Mandatory = $False, HelpMessage = "Logging spec object (output from start-log())[-LogSpec `$LogSpec]")]
+        $LogSpec, 
         [Parameter(HelpMessage = "Debugging Flag [-showDebug]")]
         [switch] $showDebug,
         [Parameter(HelpMessage = "Whatif Flag  [-whatIf]")]
@@ -78,6 +80,12 @@ function Merge-Module {
 
     $rgxSigStart='#\sSIG\s#\sBegin\ssignature\sblock' ; 
     $rgxSigEnd='#\sSIG\s#\sEnd\ssignature\sblock' ; 
+
+    if($logspec){
+        $logging=$logspec.logging ;
+        $logfile=$logspec.logfile ;
+        $transcript=$logspec.transcript ;
+    } ; 
 
     if ($ModuleDestinationPath.GetType().FullName -ne 'System.IO.DirectoryInfo') {
         $ModuleDestinationPath = get-item -path $ModuleDestinationPath ;

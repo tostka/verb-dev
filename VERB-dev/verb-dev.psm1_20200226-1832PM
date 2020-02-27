@@ -1,11 +1,11 @@
-﻿# verb-dev.psm1
+﻿# verb-Dev.psm1
 
 
 <#
 .SYNOPSIS
 VERB-dev - Development PS Module-related generic functions
 .NOTES
-Version     : 1.2.9
+Version     : 1.2.8
 Author      : Todd Kadrie
 Website     :	https://www.toddomation.com
 Twitter     :	@tostka
@@ -196,7 +196,6 @@ function Get-CommentBlocks {
     .LINK
     #>
     #Requires -Version 3
-    #Requires -RunasAdministrator
     [CmdletBinding()]
     PARAM(
         [Parameter(Position = 0, Mandatory = $True, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true, HelpMessage = "RawSourceLines from the target script file (as gathered with get-content) [-TextLines TextArrayObj]")]
@@ -377,76 +376,80 @@ function get-VersionInfo {
 #*------^ get-VersionInfo.ps1 ^------
 
 #*------v load-Module.ps1 v------
-function load-Module {
-    <#
-    .SYNOPSIS
-    load-Module - Import-Module, with Find- & Install-, when not available to load.
-    .NOTES
-    Version     : 1.0.0
-    Author      : Todd Kadrie
-    Website     : http://www.toddomation.com
-    Twitter     : @tostka / http://twitter.com/tostka
-    CreatedDate : 2019-8-28
-    FileName    : 
-    License     : MIT License
-    Copyright   : (c) 2020 Todd Kadrie
-    Github      : https://github.com/tostka
-    AddedCredit : REFERENCE
-    AddedWebsite:	URL
-    AddedTwitter:	URL
-    REVISIONS
-    * 7:29 AM 1/29/2020 added pshelp, version etc (copying into verb-dev)
-    * 8/28/2019 init
-    .DESCRIPTION
-    load-Module - Import-Module, with Find- & Install-, when not available to load.
-    .PARAMETER  Module
-    Module name to be loaded or installed [ -Module Azure]
-    .PARAMETER ShowDebug
-    Parameter to display Debugging messages [-ShowDebug switch]
-    .PARAMETER Whatif
-    Parameter to run a Test no-change pass [-Whatif switch]
-    .EXAMPLE
-    .\load-Module Azure
-    .LINK
-    https://github.com/tostka
-    #>
-    [CmdletBinding()]
-    Param(
-        [Parameter(Position = 0, Mandatory = $True, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true, HelpMessage = "Module name to be loaded or installed [ -Module Azure]")]
-        [ValidateNotNullOrEmpty()][string]$Module,
-        [Parameter(HelpMessage = "Debugging Flag [-showDebug]")]
-        [switch] $showDebug,
-        [Parameter(HelpMessage = "Whatif Flag  [-whatIf]")]
-        [switch] $whatIf
-    ) ;
-    $Verbose = ($VerbosePreference -eq "Continue") ; 
-    if!(Get-Module -Name $Module){
-        if (Get-Module -Name $Module -ListAvailable) {
-            Import-Module $Module ;
-        } else {
-            write-host -foregroundcolor RED "$((get-date).ToString('HH:mm:ss')):ERROR!:The $($Module) module is *NOT* INSTALLED!.`n Checking for available copy..." ;
-            if(find-module $Module){
-                write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):Would you *LIKE* to install the $Module module *NOW*?" ;
-                $bRet = Read-Host "Enter YYY to continue. Anything else will exit"
-                if ($bRet.ToUpper() -eq "YYY") {
-                    Write-host "Installing Module:$($Module)`nInstall-Module -Name $($Module) -AllowClobber -Scope CurrentUser..."
-                    Install-Module -Name $Module -AllowClobber -Scope CurrentUser
-                } else {
-                    write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):Install declined. Aborting script pass.`nThe required $($Module) module can be installed via the`nInstall-Module -Name $($Module) -AllowClobber -Scope CurrentUser`ncommand.`nEXITING"
-                    # exit <asserted exit error #>
-                    exit 1
-                } # if-block end
+if(!(test-path function:\load-Module)) {
+    #*------v Function load-Module v------
+    function load-Module {
+        <#
+        .SYNOPSIS
+        load-Module - Import-Module, with Find- & Install-, when not available to load.
+        .NOTES
+        Version     : 1.0.0
+        Author      : Todd Kadrie
+        Website     : http://www.toddomation.com
+        Twitter     : @tostka / http://twitter.com/tostka
+        CreatedDate : 2019-8-28
+        FileName    : 
+        License     : MIT License
+        Copyright   : (c) 2020 Todd Kadrie
+        Github      : https://github.com/tostka
+        AddedCredit : REFERENCE
+        AddedWebsite:	URL
+        AddedTwitter:	URL
+        REVISIONS
+        * 7:29 AM 1/29/2020 added pshelp, version etc (copying into verb-dev)
+        * 8/28/2019 init
+        .DESCRIPTION
+        load-Module - Import-Module, with Find- & Install-, when not available to load.
+        .PARAMETER  Module
+        Module name to be loaded or installed [ -Module Azure]
+        .PARAMETER ShowDebug
+        Parameter to display Debugging messages [-ShowDebug switch]
+        .PARAMETER Whatif
+        Parameter to run a Test no-change pass [-Whatif switch]
+        .EXAMPLE
+        .\load-Module Azure
+        .LINK
+        https://github.com/tostka
+        #>
+        [CmdletBinding()]
+        Param(
+            [Parameter(Position = 0, Mandatory = $True, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true, HelpMessage = "Module name to be loaded or installed [ -Module Azure]")]
+            [ValidateNotNullOrEmpty()][string]$Module,
+            [Parameter(HelpMessage = "Debugging Flag [-showDebug]")]
+            [switch] $showDebug,
+            [Parameter(HelpMessage = "Whatif Flag  [-whatIf]")]
+            [switch] $whatIf
+        ) ;
+        $Verbose = ($VerbosePreference -eq "Continue") ; 
+        if!(Get-Module -Name $Module){
+            if (Get-Module -Name $Module -ListAvailable) {
+                Import-Module $Module ;
             } else {
-                write-host -foregroundcolor RED "$((get-date).ToString('HH:mm:ss')):ERROR!:The $($Module) module was not found at the routine Repositories. `nPlease locate a copy and install it before attempting to use this script" ;
+                write-host -foregroundcolor RED "$((get-date).ToString('HH:mm:ss')):ERROR!:The $($Module) module is *NOT* INSTALLED!.`n Checking for available copy..." ;
+                if(find-module $Module){
+                    write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):Would you *LIKE* to install the $Module module *NOW*?" ;
+                    $bRet = Read-Host "Enter YYY to continue. Anything else will exit"
+                    if ($bRet.ToUpper() -eq "YYY") {
+                        Write-host "Installing Module:$($Module)`nInstall-Module -Name $($Module) -AllowClobber -Scope CurrentUser..."
+                        Install-Module -Name $Module -AllowClobber -Scope CurrentUser
+                    } else {
+                        write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):Install declined. Aborting script pass.`nThe required $($Module) module can be installed via the`nInstall-Module -Name $($Module) -AllowClobber -Scope CurrentUser`ncommand.`nEXITING"
+                        # exit <asserted exit error #>
+                        exit 1
+                    } # if-block end
+                } else {
+                    write-host -foregroundcolor RED "$((get-date).ToString('HH:mm:ss')):ERROR!:The $($Module) module was not found at the routine Repositories. `nPlease locate a copy and install it before attempting to use this script" ;
+                } ;
             } ;
         } ;
-    } ;
+    } #*------^ END Function load-Module ^------ ;
 }
 
 #*------^ load-Module.ps1 ^------
 
 #*------v Merge-Module.ps1 v------
 function Merge-Module {
+
     <#
     .SYNOPSIS
     Merge-Module.ps1 - Merge function .ps1 files into a monolisthic module.psm1 module file, returns a hash with status:$true/$false, and PsmNameBU:The name of a backup of the original .psm1 file (for restoring on failures)
@@ -464,7 +467,6 @@ function Merge-Module {
     AddedWebsite: https://evotec.xyz/powershell-single-psm1-file-versus-multi-file-modules/
     AddedTwitter:
     REVISIONS
-    * 3:44 PM 2/26/2020 Merge-Module: added -LogSpec param (feed it the object returned by a Start-Log() pass). 
     * 11:27 AM Merge-Module 2/24/2020 suppress block dumps to console, unless -showdebug or -verbose in use
     * 7:24 AM 1/3/2020 #936: trimmed errant trailing ;- byproduct of fix-encoding pass
     * 10:33 AM 12/30/2019 Merge-Module():951,952 assert sorts into alpha order (make easier to find in the psm1)
@@ -516,8 +518,6 @@ function Merge-Module {
         [array] $ModuleSourcePath,
         [Parameter(Mandatory = $True, HelpMessage = "Directory path in which the final .psm1 file should be constructed [-ModuleDestinationPath c:\path-to\module\module.psm1]")]
         [string] $ModuleDestinationPath,
-        [Parameter(Mandatory = $False, HelpMessage = "Logging spec object (output from start-log())[-LogSpec `$LogSpec]")]
-        $LogSpec, 
         [Parameter(HelpMessage = "Debugging Flag [-showDebug]")]
         [switch] $showDebug,
         [Parameter(HelpMessage = "Whatif Flag  [-whatIf]")]
@@ -527,12 +527,6 @@ function Merge-Module {
 
     $rgxSigStart='#\sSIG\s#\sBegin\ssignature\sblock' ; 
     $rgxSigEnd='#\sSIG\s#\sEnd\ssignature\sblock' ; 
-
-    if($logspec){
-        $logging=$logspec.logging ;
-        $logfile=$logspec.logfile ;
-        $transcript=$logspec.transcript ;
-    } ; 
 
     if ($ModuleDestinationPath.GetType().FullName -ne 'System.IO.DirectoryInfo') {
         $ModuleDestinationPath = get-item -path $ModuleDestinationPath ;
@@ -1151,12 +1145,11 @@ function profile-FileAST {
 }
 
 #*------^ profile-FileAST.ps1 ^------
-
 # SIG # Begin signature block
 # MIIELgYJKoZIhvcNAQcCoIIEHzCCBBsCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQU51o4V6UQlYTmqyj6nYYpZNgi
-# 5w+gggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQU6fty7+CapCqErxwhgpni1YGi
+# nEOgggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
 # MCwxKjAoBgNVBAMTIVBvd2VyU2hlbGwgTG9jYWwgQ2VydGlmaWNhdGUgUm9vdDAe
 # Fw0xNDEyMjkxNzA3MzNaFw0zOTEyMzEyMzU5NTlaMBUxEzARBgNVBAMTClRvZGRT
 # ZWxmSUkwgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBALqRVt7uNweTkZZ+16QG
@@ -1171,9 +1164,9 @@ function profile-FileAST {
 # AWAwggFcAgEBMEAwLDEqMCgGA1UEAxMhUG93ZXJTaGVsbCBMb2NhbCBDZXJ0aWZp
 # Y2F0ZSBSb290AhBaydK0VS5IhU1Hy6E1KUTpMAkGBSsOAwIaBQCgeDAYBgorBgEE
 # AYI3AgEMMQowCKACgAChAoAAMBkGCSqGSIb3DQEJAzEMBgorBgEEAYI3AgEEMBwG
-# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBS82awX
-# ZOgUPddxqTBa+/Id8scGvDANBgkqhkiG9w0BAQEFAASBgK48eTy7RSi5ReOljKzy
-# ObqfS9nc9o6DxXIr+U3wKHAEryE6lJv4bb1tsdPWX1RJlBpT/Br4ZmZrz6xEK/tE
-# daK0LYphb20Nr4TMeQyJQo/YfEEjAxgxiIs9pOaMPQOkumu/naJyfy39BkHssKjY
-# sqdHl0cwJHtG+DPzRlF6r+Az
+# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBRuUIbm
+# oo4e1TDVmxil2VJHEIv0NDANBgkqhkiG9w0BAQEFAASBgANV5HbvXyNUxgZhOxZu
+# rngr9FYucOIxrQ21nwmLEAuBeq1P6QJhIYF33ZAIU2y+vtTV5Z8pjxxOkzprdqPs
+# fr/G3yZDU8JKHonTPVFHHbSyl53tdL+P/fFwhxIlRTy6YFU93IFD0xoHYfxWbZIe
+# 8Kiy669D1GI3EASv5Vpu1ycl
 # SIG # End signature block
