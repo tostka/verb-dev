@@ -1,4 +1,4 @@
-﻿#*------v Merge-Module.ps1 v------
+﻿#*------v Function Merge-Module.ps1 v------
 function Merge-Module {
     <#
     .SYNOPSIS
@@ -17,6 +17,7 @@ function Merge-Module {
     AddedWebsite: https://evotec.xyz/powershell-single-psm1-file-versus-multi-file-modules/
     AddedTwitter:
     REVISIONS
+    * 9:17 AM 2/27/2020 added new -NoAliasExport param, and added the missing 
     * 3:44 PM 2/26/2020 Merge-Module: added -LogSpec param (feed it the object returned by a Start-Log() pass). 
     * 11:27 AM Merge-Module 2/24/2020 suppress block dumps to console, unless -showdebug or -verbose in use
     * 7:24 AM 1/3/2020 #936: trimmed errant trailing ;- byproduct of fix-encoding pass
@@ -38,6 +39,8 @@ function Merge-Module {
     Directory containing .ps1 function files to be combined [-ModuleSourcePath c:\path-to\module\Public]
     .PARAMETER ModuleDestinationPath
     Final monolithic module .psm1 file name to be populated [-ModuleDestinationPath c:\path-to\module\module.psm1]
+    .PARAMETER NoAliasExport
+    Flag that skips auto-inclusion of 'Export-ModuleMember -Alias * ' in merged file [-NoAliasExport]
     .PARAMETER ShowDebug
     Parameter to display Debugging messages [-ShowDebug switch]
     .PARAMETER Whatif
@@ -71,6 +74,8 @@ function Merge-Module {
         [string] $ModuleDestinationPath,
         [Parameter(Mandatory = $False, HelpMessage = "Logging spec object (output from start-log())[-LogSpec `$LogSpec]")]
         $LogSpec, 
+        [Parameter(HelpMessage = "Flag that skips auto-inclusion of 'Export-ModuleMember -Alias * ' in merged file [-NoAliasExport]")]
+        [switch] $NoAliasExport,
         [Parameter(HelpMessage = "Debugging Flag [-showDebug]")]
         [switch] $showDebug,
         [Parameter(HelpMessage = "Whatif Flag  [-whatIf]")]
@@ -114,7 +119,10 @@ function Merge-Module {
         # which by default includes a dynamic include block:
         # detect and drop out the above, for the monolithic version
         $rgxPurgeblockStart = '#Get\spublic\sand\sprivate\sfunction\sdefinition\sfiles\.' ;
-        $rgxPurgeBlockEnd = 'Export-ModuleMember\s-Function\s\$publicFunctions\s;';
+        # stock dyanmic export of collected functions
+        #$rgxPurgeBlockEnd = 'Export-ModuleMember\s-Function\s\$publicFunctions\s;';
+        # updated version of dyn end, that also explicitly exports -alias *
+        $rgxPurgeBlockEnd = 'Export-ModuleMember\s-Function\s\$publicFunctions\s-Alias\s\*\s;\s'
         $dynIncludeOpen = (ss -Path  $PsmName -Pattern $rgxPurgeblockStart).linenumber ;
         $dynIncludeClose = (ss -Path  $PsmName -Pattern $rgxPurgeBlockEnd).linenumber ;
         if(!$dynIncludeOpen){$dynIncludeClose = 0 } ;
@@ -157,18 +165,13 @@ function Merge-Module {
             [metaBlock]
             [interText]
             [cbhBlock]
-            and then add the includes to the file
+            [PostCBHBlock]
+            [space]
+            [optional PostCBHBlock2]
+            [space]
+            ...and then add the includes to the file
             #>
-<#
-            $updatedContent=@"
-# $($PsmName)
 
-$($oBlkComments.metaBlock)
-$($oBlkComments.interText)
-$($oBlkComments.cbhBlock)
-
-"@; 
-#>
             # doing a herestring assigned to $updatedContent *unwraps* everything!
             # do them in separately
             #"$($oBlkComments.metaBlock)`n$($oBlkComments.interText)`n$($oBlkComments.cbhBlock)" | Add-Content @pltAdd ;
@@ -176,7 +179,28 @@ $($oBlkComments.cbhBlock)
             if($oBlkComments.metaBlock){$updatedContent += $oBlkComments.metaBlock  |out-string ; } ;
             if($oBlkComments.interText ){$updatedContent += $oBlkComments.interText  |out-string ; } ; 
             $updatedContent += $oBlkComments.cbhBlock |out-string ; 
-        } ; 
+
+            # Post CBH always add the helper/alias-export command (functions are covered in the psd1 manifest, dyn's have in the template)
+            $PostCBHBlock=@"
+
+`$script:ModuleRoot = `$PSScriptRoot ;
+`$script:ModuleVersion = (Import-PowerShellDataFile -Path (get-childitem `$script:moduleroot\*.psd1).fullname).moduleversion ;
+
+"@ ; 
+            $updatedContent += $PostCBHBlock |out-string ; 
+
+            $PostCBHBlock2=@"
+# Auto-export all Aliases
+Export-ModuleMember -Alias * ;
+
+"@ ; 
+            if(-not($NoAliasExport)){
+                $updatedContent += $PostCBHBlock2 |out-string ; 
+            } ; 
+
+            
+        } ;  # if-E dyn/monolithic source psm1
+
 
         if($updatedContent){
             $bRet = Set-FileContent -Text $updatedContent -Path $PsmName -showdebug:$($showdebug) -whatif:$($whatif) ;
@@ -197,7 +221,7 @@ $($oBlkComments.cbhBlock)
         } ; 
     } ;
 
-    # default - dirs creation - git doesn't reproduce empty dirs, create if empty (avoids errors later)
+    # DEFAULT - DIRS CREATION - git doesn't reproduce empty dirs, create if empty (avoids errors later)
     # exempt the .git & .vscode dirs, we don't publish those to modules dir
     $DefaultModDirs = "Public","Internal","Classes","Tests","Docs","Docs\Cab","Docs\en-US","Docs\Markdown" ; 
     foreach($Dir in $DefaultModDirs){
@@ -245,10 +269,9 @@ $($oBlkComments.cbhBlock)
         } ; 
     } ;  # loop-E
 
+    # $MODULESOURCEPATH - DIRS CREATION 
     foreach ($ModuleSource in $ModuleSourcePath) {
-
         $iProcd++ ;
-
         if ($ModuleSource.GetType().FullName -ne 'System.IO.DirectoryInfo') {
             # git doesn't reproduce empty dirs, create if empty
             if(!(test-path -path $ModuleSource)){
@@ -294,6 +317,8 @@ $($oBlkComments.cbhBlock)
             } ; 
             $ModuleSource = get-item -path $ModuleSource ;
         } ;
+
+        # Process components below $ModuleSource
         $sBnrS = "`n#*------v ($($iProcd)/$($ttl)):$($ModuleSource) v------" ;
         $smsg = "$($sBnrS)" ;
         if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info }  #Error|Warn|Debug 
@@ -334,17 +359,22 @@ $($oBlkComments.cbhBlock)
                 # public & functions = public ; private & internal = private - flip output to -showdebug or -verbose, only
                 if($ModuleSource -match '(Public|Functions)'){
                     $smsg= "$($ScriptFile.name):PUB FUNC:`n$(($ASTFunctions) -join ',' |out-string)" ;
-                    if ($logging -AND ($showDebug -OR $verbose)) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Debug }  #Error|Warn|Debug 
-                    else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                    if($showDebug) {
+                        if ($logging -AND ($showDebug -OR $verbose)) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Debug }  #Error|Warn|Debug 
+                        else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                    } ; 
                     $ExportFunctions += $ASTFunctions.name ;
                 } elseif($ModuleSource -match '(Private|Internal)'){
                     $smsg= "$($ScriptFile.name):PRIV FUNC:`n$(($ASTFunctions) -join ',' |out-string)" ;
-                    if ($logging -AND ($showDebug -OR $verbose)) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Debug }  #Error|Warn|Debug 
-                    else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                    if($showDebug) {
+                        if ($logging -AND ($showDebug -OR $verbose)) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Debug }  #Error|Warn|Debug 
+                        else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                    } ; 
                     $PrivateFunctions += $ASTFunctions.name ;
                 } ;
             } ; # loop-E
 
+            # Process Modules below project
             foreach ($ModFile in $ComponentModules) {
                 $smsg= "Adding:$($ModFile)..." ;  
                 if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info }  #Error|Warn|Debug 
@@ -353,8 +383,10 @@ $($oBlkComments.cbhBlock)
                 
                 if($Content| ?{$_ -match $rgxSigStart -OR $_ -match $rgxSigEnd} ){
                     $smsg= "*WARNING*:SUBFILE`n$($ModFile.fullname)`nHAS AUTHENTICODE SIGNATURE MARKERS PRESENT!`nREVIEW THE FILE AND REMOVE ANY EVIDENCE OF SIGNING!" ;  
-                    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Error }  #Error|Warn|Debug 
-                    else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                    if($showDebug) {
+                        if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Error }  #Error|Warn|Debug 
+                        else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                    } ; 
                     exit ; 
                 } ; 
                 $Content | Add-Content @pltAdd ;
@@ -364,7 +396,8 @@ $($oBlkComments.cbhBlock)
                 "$($sBnrSStart)`n$($Content)`n$($sBnrSEnd)" | Add-Content @pltAdd ;
                 #>
             } ;
-            # append the Export-ModuleMember -Function $publicFunctions  ? 
+            
+            # append the Export-ModuleMember -Function $publicFunctions  (psd1 functionstoexport is functional instead)
             #"Export-ModuleMember -Function $(($ExportFunctions) -join ',')" | Add-Content @pltAdd ;
 
             $smsg = "$($sBnrS.replace('-v','-^').replace('v-','^-'))" ;
@@ -400,4 +433,4 @@ $($oBlkComments.cbhBlock)
         } ;
     } ; # loop-E
 }
-#*------^ Merge-Module.ps1 ^------
+#*------^ END Function Merge-Module.ps1 ^------
