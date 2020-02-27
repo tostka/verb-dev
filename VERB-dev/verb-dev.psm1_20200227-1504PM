@@ -5,7 +5,7 @@
 .SYNOPSIS
 VERB-dev - Development PS Module-related generic functions
 .NOTES
-Version     : 1.3.2
+Version     : 1.3.0
 Author      : Todd Kadrie
 Website     :	https://www.toddomation.com
 Twitter     :	@tostka
@@ -150,7 +150,7 @@ function build-VSCConfig {
 
 #*------^ build-VSCConfig.ps1 ^------
 
-#*------v Get-CommentBlocks.ps1 v------
+#*------v Function Get-CommentBlocks v------
 function Get-CommentBlocks {
     <#
     .SYNOPSIS
@@ -293,9 +293,7 @@ function Get-CommentBlocks {
     } ;
     $objReturn | Write-Output
 
-}
-
-#*------^ Get-CommentBlocks.ps1 ^------
+} ; #*------^ END Function Get-CommentBlocks ^------
 
 #*------v get-VersionInfo.ps1 v------
 function get-VersionInfo {
@@ -677,7 +675,7 @@ Export-ModuleMember -Alias * ;
         } ; 
     } ;
 
-    # DEFAULT - DIRS CREATION - git doesn't reproduce empty dirs, create if empty (avoids errors later)
+    # default - dirs creation - git doesn't reproduce empty dirs, create if empty (avoids errors later)
     # exempt the .git & .vscode dirs, we don't publish those to modules dir
     $DefaultModDirs = "Public","Internal","Classes","Tests","Docs","Docs\Cab","Docs\en-US","Docs\Markdown" ; 
     foreach($Dir in $DefaultModDirs){
@@ -725,9 +723,10 @@ Export-ModuleMember -Alias * ;
         } ; 
     } ;  # loop-E
 
-    # $MODULESOURCEPATH - DIRS CREATION 
     foreach ($ModuleSource in $ModuleSourcePath) {
+
         $iProcd++ ;
+
         if ($ModuleSource.GetType().FullName -ne 'System.IO.DirectoryInfo') {
             # git doesn't reproduce empty dirs, create if empty
             if(!(test-path -path $ModuleSource)){
@@ -774,7 +773,6 @@ Export-ModuleMember -Alias * ;
             $ModuleSource = get-item -path $ModuleSource ;
         } ;
 
-        # Process components below $ModuleSource
         $sBnrS = "`n#*------v ($($iProcd)/$($ttl)):$($ModuleSource) v------" ;
         $smsg = "$($sBnrS)" ;
         if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info }  #Error|Warn|Debug 
@@ -815,22 +813,17 @@ Export-ModuleMember -Alias * ;
                 # public & functions = public ; private & internal = private - flip output to -showdebug or -verbose, only
                 if($ModuleSource -match '(Public|Functions)'){
                     $smsg= "$($ScriptFile.name):PUB FUNC:`n$(($ASTFunctions) -join ',' |out-string)" ;
-                    if($showDebug) {
-                        if ($logging -AND ($showDebug -OR $verbose)) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Debug }  #Error|Warn|Debug 
-                        else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
-                    } ; 
+                    if ($logging -AND ($showDebug -OR $verbose)) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Debug }  #Error|Warn|Debug 
+                    else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
                     $ExportFunctions += $ASTFunctions.name ;
                 } elseif($ModuleSource -match '(Private|Internal)'){
                     $smsg= "$($ScriptFile.name):PRIV FUNC:`n$(($ASTFunctions) -join ',' |out-string)" ;
-                    if($showDebug) {
-                        if ($logging -AND ($showDebug -OR $verbose)) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Debug }  #Error|Warn|Debug 
-                        else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
-                    } ; 
+                    if ($logging -AND ($showDebug -OR $verbose)) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Debug }  #Error|Warn|Debug 
+                    else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
                     $PrivateFunctions += $ASTFunctions.name ;
                 } ;
             } ; # loop-E
 
-            # Process Modules below project
             foreach ($ModFile in $ComponentModules) {
                 $smsg= "Adding:$($ModFile)..." ;  
                 if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info }  #Error|Warn|Debug 
@@ -839,10 +832,8 @@ Export-ModuleMember -Alias * ;
                 
                 if($Content| ?{$_ -match $rgxSigStart -OR $_ -match $rgxSigEnd} ){
                     $smsg= "*WARNING*:SUBFILE`n$($ModFile.fullname)`nHAS AUTHENTICODE SIGNATURE MARKERS PRESENT!`nREVIEW THE FILE AND REMOVE ANY EVIDENCE OF SIGNING!" ;  
-                    if($showDebug) {
-                        if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Error }  #Error|Warn|Debug 
-                        else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
-                    } ; 
+                    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Error }  #Error|Warn|Debug 
+                    else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
                     exit ; 
                 } ; 
                 $Content | Add-Content @pltAdd ;
@@ -852,8 +843,7 @@ Export-ModuleMember -Alias * ;
                 "$($sBnrSStart)`n$($Content)`n$($sBnrSEnd)" | Add-Content @pltAdd ;
                 #>
             } ;
-            
-            # append the Export-ModuleMember -Function $publicFunctions  (psd1 functionstoexport is functional instead)
+            # append the Export-ModuleMember -Function $publicFunctions  ? 
             #"Export-ModuleMember -Function $(($ExportFunctions) -join ',')" | Add-Content @pltAdd ;
 
             $smsg = "$($sBnrS.replace('-v','-^').replace('v-','^-'))" ;
@@ -1197,8 +1187,8 @@ function profile-FileAST {
 # SIG # Begin signature block
 # MIIELgYJKoZIhvcNAQcCoIIEHzCCBBsCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUWlWMf1URQZA+HT+3eyWTP7vd
-# 8tqgggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUBtwZt9yrMkXhEZpF2oNQXNNx
+# pSygggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
 # MCwxKjAoBgNVBAMTIVBvd2VyU2hlbGwgTG9jYWwgQ2VydGlmaWNhdGUgUm9vdDAe
 # Fw0xNDEyMjkxNzA3MzNaFw0zOTEyMzEyMzU5NTlaMBUxEzARBgNVBAMTClRvZGRT
 # ZWxmSUkwgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBALqRVt7uNweTkZZ+16QG
@@ -1213,9 +1203,9 @@ function profile-FileAST {
 # AWAwggFcAgEBMEAwLDEqMCgGA1UEAxMhUG93ZXJTaGVsbCBMb2NhbCBDZXJ0aWZp
 # Y2F0ZSBSb290AhBaydK0VS5IhU1Hy6E1KUTpMAkGBSsOAwIaBQCgeDAYBgorBgEE
 # AYI3AgEMMQowCKACgAChAoAAMBkGCSqGSIb3DQEJAzEMBgorBgEEAYI3AgEEMBwG
-# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBSEmVWR
-# vOujeJuUJu5TU5UKDheCKzANBgkqhkiG9w0BAQEFAASBgJ15KAzxb+yPpNlkxHTj
-# G4QOnAkDDpxsz99F3yLSW+MjDZLhy92Bd+McSgI60lqlMaMlQ8hJHfWzthE9pLng
-# Hkt8EJLPSfkSXWgCL7cmF7JNl1vbK6IkchmbPljWTaZXko4e9j4olQdUozObKMjb
-# mffb0CRWWpgMpXeW4yc7k+bB
+# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBSyzmqn
+# 2ot0krXJOip4CKU0Im7DSDANBgkqhkiG9w0BAQEFAASBgAQrfPkVX7eVYwzzMexy
+# OCHLWWb57/x1kghCxqYDf4tjhldpvZ1pprIc1Hh2I9cB1tHqNCg6ODmkrboWi3MC
+# XLjPkCB8s37cJwVP87ccmfT9zdH2+I3FABeGOpwOtxARCxdPf8ILeGNplgAw6vGf
+# 5E7iL35W0FAVejp+EIaS54Zb
 # SIG # End signature block

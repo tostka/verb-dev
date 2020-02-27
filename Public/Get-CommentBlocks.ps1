@@ -17,6 +17,7 @@ function Get-CommentBlocks {
     AddedWebsite:
     AddedTwitter:
     REVISIONS
+    * 10:51 AM 2/27/2020 pulled #Requires RunAsAdmin, hangs UID passes
     * 8:36 AM 12/30/2019 Get-CommentBlocks:updated cbh and added .INPUTS/.OUTPUTS cbh entries, detailing the subcompontents of the hashtable returned
     * 8:28 PM 11/17/2019 INIT
     .DESCRIPTION
@@ -53,7 +54,6 @@ function Get-CommentBlocks {
     .LINK
     #>
     #Requires -Version 3
-    #Requires -RunasAdministrator
     [CmdletBinding()]
     PARAM(
         [Parameter(Position = 0, Mandatory = $True, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true, HelpMessage = "RawSourceLines from the target script file (as gathered with get-content) [-TextLines TextArrayObj]")]
