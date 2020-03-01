@@ -52,9 +52,8 @@ function build-VSCConfig {
         [switch] $whatIf
     ) ;
     
-    #$verbosePreference = "Continue" # opts: Stop(&Error)|Inquire(&Prompt)|Continue(Display)|SilentlyContinue(Suppress);    
+    #$verbosePreference = "Continue" # opts: Stop(&Error)|Inquire(&Prompt)|Continue(Display)|SilentlyContinue(Suppress);
     $Verbose = ($VerbosePreference -eq "Continue") ; 
-
     #$CommandLine = Read-Host "Enter Command to be Parsed" ;
     $parsedCmdLine = Split-CommandLine -CommandLine $CommandLine | Where-Object { $_.length -gt 1 }  ;
     $ttl = ($parsedCmdLine | Measure-Object).count ;
