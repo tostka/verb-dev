@@ -17,6 +17,7 @@ function Merge-Module {
     AddedWebsite: https://evotec.xyz/powershell-single-psm1-file-versus-multi-file-modules/
     AddedTwitter:
     REVISIONS
+    * 9:12 AM 2/29/2020 shift export-modulemember/FooterBlock to bottom, added FUNCTIONS delimiter lines
     * 9:17 AM 2/27/2020 added new -NoAliasExport param, and added the missing 
     * 3:44 PM 2/26/2020 Merge-Module: added -LogSpec param (feed it the object returned by a Start-Log() pass). 
     * 11:27 AM Merge-Module 2/24/2020 suppress block dumps to console, unless -showdebug or -verbose in use
@@ -186,18 +187,10 @@ function Merge-Module {
 `$script:ModuleRoot = `$PSScriptRoot ;
 `$script:ModuleVersion = (Import-PowerShellDataFile -Path (get-childitem `$script:moduleroot\*.psd1).fullname).moduleversion ;
 
+#*======v FUNCTIONS v======
+
 "@ ; 
             $updatedContent += $PostCBHBlock |out-string ; 
-
-            $PostCBHBlock2=@"
-# Auto-export all Aliases
-Export-ModuleMember -Alias * ;
-
-"@ ; 
-            if(-not($NoAliasExport)){
-                $updatedContent += $PostCBHBlock2 |out-string ; 
-            } ; 
-
             
         } ;  # if-E dyn/monolithic source psm1
 
@@ -432,5 +425,34 @@ Export-ModuleMember -Alias * ;
             Continue ;
         } ;
     } ; # loop-E
-}
+
+    # tack in footerblock to the merged psm1 (primarily export-modulemember -alias * ; can also be any function-trailing content you want in the psm1)
+    $FooterBlock=@"
+
+#*======^ END FUNCTIONS ^======
+
+# Auto-export all Aliases
+Export-ModuleMember -Alias * ;
+
+"@ ; 
+
+    if(-not($NoAliasExport)){
+        $smsg= "Adding:FooterBlock..." ;  
+        if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info }  #Error|Warn|Debug 
+        else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+        #$updatedContent += $FooterBlock |out-string ; 
+        $pltAdd = @{
+            Path=$PsmName ;
+            whatif=$whatif;
+        } ;
+        $FooterBlock | Add-Content @pltAdd ;
+    } else {
+        $smsg= "NoAliasExport specified:Skipping FooterBlock add" ;  
+        if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info }  #Error|Warn|Debug 
+        else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+        "#*======^ END FUNCTIONS ^======" | Add-Content @pltAdd ;
+    } ; 
+
+
+} 
 #*------^ END Function Merge-Module.ps1 ^------
