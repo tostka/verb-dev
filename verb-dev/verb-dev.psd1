@@ -12,7 +12,7 @@
 RootModule = 'VERB-dev.psm1'
 
 # Version number of this module.
-ModuleVersion = '1.3.2'
+ModuleVersion = '1.4.10'
 
 # Supported PSEditions
 # CompatiblePSEditions = @()
@@ -69,7 +69,7 @@ Description = 'Development PS Module-related generic functions'
 # NestedModules = @()
 
 # Functions to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no functions to export.
-FunctionsToExport = @('build-VSCConfig','Get-CommentBlocks','get-VersionInfo','Merge-Module','parseHelp','profile-FileAST')
+FunctionsToExport = @('build-VSCConfig','Get-CommentBlocks','get-FunctionBlock','get-FunctionBlocks','get-ScriptProfileAST','get-VersionInfo','load-Module','Merge-Module','New-GitHubGist','parseHelp')
 
 # Cmdlets to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no cmdlets to export.
 CmdletsToExport = '*'
@@ -126,8 +126,8 @@ PrivateData = @{
 # SIG # Begin signature block
 # MIIELgYJKoZIhvcNAQcCoIIEHzCCBBsCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUE0E4/1AL+WRtOVxKttboJyES
-# QlCgggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUxPMEPHk7t9oOLVX1ErU0XLLe
+# +6qgggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
 # MCwxKjAoBgNVBAMTIVBvd2VyU2hlbGwgTG9jYWwgQ2VydGlmaWNhdGUgUm9vdDAe
 # Fw0xNDEyMjkxNzA3MzNaFw0zOTEyMzEyMzU5NTlaMBUxEzARBgNVBAMTClRvZGRT
 # ZWxmSUkwgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBALqRVt7uNweTkZZ+16QG
@@ -142,9 +142,9 @@ PrivateData = @{
 # AWAwggFcAgEBMEAwLDEqMCgGA1UEAxMhUG93ZXJTaGVsbCBMb2NhbCBDZXJ0aWZp
 # Y2F0ZSBSb290AhBaydK0VS5IhU1Hy6E1KUTpMAkGBSsOAwIaBQCgeDAYBgorBgEE
 # AYI3AgEMMQowCKACgAChAoAAMBkGCSqGSIb3DQEJAzEMBgorBgEEAYI3AgEEMBwG
-# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBSKMVls
-# YfeBSqc7MALkWBIHzB+YXjANBgkqhkiG9w0BAQEFAASBgEwr+/Jl+k9TU2bGUmw1
-# t97n9NS4ALhHNXV6b0yI0ooW/GWJRS1nBz7pjZdPvMMXKyBHYBfZAfJ0em7Hl+o+
-# dbg+I0xKoNOnl/OECUri63Piv7TPO4CNA+nNWxyojtYj2pOW7jwTzfcaEMpwZRS8
-# KenV+aPQ0JHhXDjZG8anlNXI
+# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBRl4Izd
+# yyShQ2EWG7jljhqdlefzGzANBgkqhkiG9w0BAQEFAASBgCTkhpGyu2wE9zRPsvWA
+# IfuP4yva4IgrjBi6qZxe4iiYzUSk0wvKo7vSb2DhhcXNiTIfsLBkBAdOZJR/QKoB
+# ooXihv3RBd7hFSH6hqxyNlTa4NU7yQb9zTDiRTiUOC2F4dTG9liCfu0jsN+saj0L
+# SAVJEX7ECNo4C3RLPygUCmDS
 # SIG # End signature block

@@ -17,6 +17,7 @@ function Merge-Module {
     AddedWebsite: https://evotec.xyz/powershell-single-psm1-file-versus-multi-file-modules/
     AddedTwitter:
     REVISIONS
+    * 1:58 PM 3/2/2020 as Set-ModuleFunction isn't properly setting *all* exported, go back to collecting and updating the psm1 & psd1 *both* via regx
     * 9:12 AM 2/29/2020 shift export-modulemember/FooterBlock to bottom, added FUNCTIONS delimiter lines
     * 9:17 AM 2/27/2020 added new -NoAliasExport param, and added the missing 
     * 3:44 PM 2/26/2020 Merge-Module: added -LogSpec param (feed it the object returned by a Start-Log() pass). 
@@ -106,6 +107,7 @@ function Merge-Module {
     $PrivateFunctions = @() ;
 
     $PsmName="$ModuleDestinationPath\$ModuleName.psm1" ;
+    $PsdName="$ModuleDestinationPath\$ModuleName.psd1" ;
 
     $PassStatus = $null ;
 
@@ -384,30 +386,10 @@ function Merge-Module {
                 } ; 
                 $Content | Add-Content @pltAdd ;
                 # by contrast, this is NON-AST parsed - it's appending the entire raw file content. Shouldn't need delimiters - they'd already be in source .psm1
-                <# $sBnrSStart = "`n#*------v $($ModFile.basename) v------" ;
-                $sBnrSEnd = "$($sBnrS.replace('-v','-^').replace('v-','^-'))" ;
-                "$($sBnrSStart)`n$($Content)`n$($sBnrSEnd)" | Add-Content @pltAdd ;
-                #>
             } ;
+
+
             
-            # append the Export-ModuleMember -Function $publicFunctions  (psd1 functionstoexport is functional instead)
-            #"Export-ModuleMember -Function $(($ExportFunctions) -join ',')" | Add-Content @pltAdd ;
-
-            $smsg = "$($sBnrS.replace('-v','-^').replace('v-','^-'))" ;
-            if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info }  #Error|Warn|Debug 
-            else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
-
-            # this is copying the manifest (assumes public & psd1 are in same dir) - Plaster is doing that separately, not needed
-            #Copy-Item -Path "$ModuleSource\$ModuleName.psd1" "$ModuleDestinationPath\$ModuleName.psd1" ;
-
-            #$true | write-output ;
-            $ReportObj=[ordered]@{
-                Status=$true ; 
-                PsmNameBU = $PsmNameBU ; 
-                PassStatus = $PassStatus ;
-            } ; 
-            $ReportObj | write-output ;
-
         } CATCH {
             $ErrorTrapped = $Error[0] ;
             $PassStatus += ";ERROR"; 
@@ -424,15 +406,25 @@ function Merge-Module {
             #Exit #STOP(debug)|EXIT(close)|Continue(move on in loop cycle) ;
             Continue ;
         } ;
+
     } ; # loop-E
 
+    # append the Export-ModuleMember -Function $publicFunctions  (psd1 functionstoexport is functional instead),
+    $smsg= "(Updating Psm1 Export-ModuleMember -Function to reflect Public modules)" ;  
+    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info }  #Error|Warn|Debug 
+    else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+    #"Export-ModuleMember -Function $(($ExportFunctions) -join ',')" | Add-Content @pltAdd ;
+    # Collect & set explicitly in the psm1, the psd1 Set-ModuleFunctoin buildhelper isn't doing the full set, only above. 
+    # stick the Alias * in there too, force it as the psd1 spec's simply override the explicits in the psm1
+    
+    #"`nExport-ModuleMember -Function $(($ExportFunctions) -join ',') -Alias *" | Add-Content @pltAdd ;
+    
     # tack in footerblock to the merged psm1 (primarily export-modulemember -alias * ; can also be any function-trailing content you want in the psm1)
     $FooterBlock=@"
 
 #*======^ END FUNCTIONS ^======
 
-# Auto-export all Aliases
-Export-ModuleMember -Alias * ;
+Export-ModuleMember -Function $(($ExportFunctions) -join ',') -Alias *
 
 "@ ; 
 
@@ -452,6 +444,43 @@ Export-ModuleMember -Alias * ;
         else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
         "#*======^ END FUNCTIONS ^======" | Add-Content @pltAdd ;
     } ; 
+
+    # update the manifest too: # should be forced array: FunctionsToExport = @('build-VSCConfig','Get-CommentBlocks','get-VersionInfo','Merge-Module','parseHelp')
+    $smsg = "Updating the Psd1 FunctionsToExport to match" ; 
+    if($verbose){ if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
+    else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; } ; 
+    if(test-path -path $PsdName){
+        #Set-ModuleFunction -path $PsdName -whatif:$($whatif) ; 
+        # BuildHelpers cmdlet above isn't fully populating with all funcs in public: FunctionsToExport = @('build-VSCConfig','Get-CommentBlocks','get-VersionInfo','Merge-Module','parseHelp')
+        # switch back to manual local updates
+        $rgxFuncs2Export = 'FunctionsToExport((\s)*)=((\s)*).*'
+        #'FunctionsToExport((\s)*)=((\s)*)((@\()*).*((\))*)'
+        $psd1Profile = gci $PsdName | ss -Pattern $rgxFuncs2Export ; 
+        $tf = $PsdName; 
+        $enc=$null ; $enc=get-FileEncoding -path $tf ;
+        if($enc -eq 'ASCII') { 
+            $enc = 'UTF8' ; 
+            $smsg = "(ASCI encoding detected, converting to UTF8)" ; 
+            if($verbose){ if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
+            else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; } ; 
+        } ; # force damaged/ascii to UTF8
+        $pltSetCon=[ordered]@{ Path=$tf ; whatif=$($whatif) ;  } ;
+        if($enc){$pltSetCon.add('encoding',$enc) } ;
+        (Get-Content $tf) | Foreach-Object {
+            $_ -replace $rgxFuncs2Export , ("FunctionsToExport = " + "@('" + $($ExportFunctions -join "','") + "')") 
+        } | Set-Content @pltSetCon ; 
+    } else { 
+        $smsg = "UNABLE TO test-path -path $($PsdName)`nFunctionsToExport CAN'T BE UPDATED!" ; 
+        if($verbose){ if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
+        else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; } ; 
+    } ; 
+
+    $ReportObj=[ordered]@{
+        Status=$true ; 
+        PsmNameBU = $PsmNameBU ; 
+        PassStatus = $PassStatus ;
+    } ; 
+    $ReportObj | write-output ;
 
 
 } 

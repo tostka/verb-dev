@@ -5,7 +5,7 @@
 .SYNOPSIS
 VERB-dev - Development PS Module-related generic functions
 .NOTES
-Version     : 1.4.10
+Version     : 1.4.1
 Author      : Todd Kadrie
 Website     :	https://www.toddomation.com
 Twitter     :	@tostka
@@ -745,7 +745,6 @@ function Merge-Module {
     AddedWebsite: https://evotec.xyz/powershell-single-psm1-file-versus-multi-file-modules/
     AddedTwitter:
     REVISIONS
-    * 1:58 PM 3/2/2020 as Set-ModuleFunction isn't properly setting *all* exported, go back to collecting and updating the psm1 & psd1 *both* via regx
     * 9:12 AM 2/29/2020 shift export-modulemember/FooterBlock to bottom, added FUNCTIONS delimiter lines
     * 9:17 AM 2/27/2020 added new -NoAliasExport param, and added the missing 
     * 3:44 PM 2/26/2020 Merge-Module: added -LogSpec param (feed it the object returned by a Start-Log() pass). 
@@ -1114,10 +1113,66 @@ function Merge-Module {
                 } ; 
                 $Content | Add-Content @pltAdd ;
                 # by contrast, this is NON-AST parsed - it's appending the entire raw file content. Shouldn't need delimiters - they'd already be in source .psm1
+                <# $sBnrSStart = "`n#*------v $($ModFile.basename) v------" ;
+                $sBnrSEnd = "$($sBnrS.replace('-v','-^').replace('v-','^-'))" ;
+                "$($sBnrSStart)`n$($Content)`n$($sBnrSEnd)" | Add-Content @pltAdd ;
+                #>
             } ;
-
-
             
+            # append the Export-ModuleMember -Function $publicFunctions  (psd1 functionstoexport is functional instead),
+            #"Export-ModuleMember -Function $(($ExportFunctions) -join ',')" | Add-Content @pltAdd ;
+            # Collect & set explicitly in the psm1, the psd1 Set-ModuleFunctoin buildhelper isn't doing the full set, only above. 
+            #"Export-ModuleMember -Function $(($ExportFunctions) -join ',')" | Add-Content @pltAdd ;
+            # stick the Alias * in there too, force it as the psd1 spec's simply override the explicits in the psm1
+            "Export-ModuleMember -Function $(($ExportFunctions) -join ',') -Alias *" | Add-Content @pltAdd ;
+            $smsg = "$($sBnrS.replace('-v','-^').replace('v-','^-'))" ;
+            if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info }  #Error|Warn|Debug 
+            else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+
+            # update the manifest too: # should be forced array: FunctionsToExport = @('build-VSCConfig','Get-CommentBlocks','get-VersionInfo','Merge-Module','parseHelp')
+            $smsg = "Updating the psd1 FunctionsToExport (via buildhelpers)" ; 
+            if($verbose){ if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
+            else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; } ; 
+            #Set-ModuleFunction -path $ModDirPath -whatif:$($whatif) ; 
+            # threw:Could not find module 'C:\sc\verb-Desktop'
+            # try the $env:BHPSModuleManifest fullpath to the .psd1 instead
+            if(test-path -path $PsdName){
+                #Set-ModuleFunction -path $PsdName -whatif:$($whatif) ; 
+                # It isn't fully populating with all funcs in public: FunctionsToExport = @('build-VSCConfig','Get-CommentBlocks','get-VersionInfo','Merge-Module','parseHelp')
+                $rgxFuncs2Export = 'FunctionsToExport((\s)*)=((\s)*)((@\()*).*((\))*)'
+                $psd1Profile = gci $PsdName | ss -Pattern $rgxFuncs2Export ; 
+                $tf = $PsdName; 
+                $enc=$null ; $enc=get-FileEncoding -path $tf ;
+                if($enc -eq 'ASCII') { 
+                    $enc = 'UTF8' ; 
+                    $smsg = "(ASCI encoding detected, converting to UTF8)" ; 
+                    if($verbose){ if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
+                    else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; } ; 
+                } ; # force damaged/ascii to UTF8
+                $pltSetCon=[ordered]@{ Path=$tf ; whatif=$($whatif) ;  } ;
+                if($enc){$pltSetCon.add('encoding',$enc) } ;
+                (Get-Content $tf) | Foreach-Object {
+                    $_ -replace $psd1Profile.matches[0].value.tostring(), ("FunctionsToExport = " + "@('" + $($ExportFunctions -join "','") + "')") 
+                } | Set-Content @pltSetCon ; 
+            } else { 
+                $smsg = "UNABLE TO test-path -path $($PsdName)`nFunctionsToExport CAN'T BE UPDATED!" ; 
+                if($verbose){ if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
+                else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; } ; 
+            } ; 
+
+            # this is copying the manifest (assumes public & psd1 are in same dir) - Plaster is doing that separately, not needed
+            #Copy-Item -Path "$ModuleSource\$ModuleName.psd1" "$ModuleDestinationPath\$ModuleName.psd1" ;
+
+
+
+            #$true | write-output ;
+            $ReportObj=[ordered]@{
+                Status=$true ; 
+                PsmNameBU = $PsmNameBU ; 
+                PassStatus = $PassStatus ;
+            } ; 
+            $ReportObj | write-output ;
+
         } CATCH {
             $ErrorTrapped = $Error[0] ;
             $PassStatus += ";ERROR"; 
@@ -1134,25 +1189,15 @@ function Merge-Module {
             #Exit #STOP(debug)|EXIT(close)|Continue(move on in loop cycle) ;
             Continue ;
         } ;
-
     } ; # loop-E
 
-    # append the Export-ModuleMember -Function $publicFunctions  (psd1 functionstoexport is functional instead),
-    $smsg= "(Updating Psm1 Export-ModuleMember -Function to reflect Public modules)" ;  
-    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info }  #Error|Warn|Debug 
-    else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
-    #"Export-ModuleMember -Function $(($ExportFunctions) -join ',')" | Add-Content @pltAdd ;
-    # Collect & set explicitly in the psm1, the psd1 Set-ModuleFunctoin buildhelper isn't doing the full set, only above. 
-    # stick the Alias * in there too, force it as the psd1 spec's simply override the explicits in the psm1
-    
-    #"`nExport-ModuleMember -Function $(($ExportFunctions) -join ',') -Alias *" | Add-Content @pltAdd ;
-    
     # tack in footerblock to the merged psm1 (primarily export-modulemember -alias * ; can also be any function-trailing content you want in the psm1)
     $FooterBlock=@"
 
 #*======^ END FUNCTIONS ^======
 
-Export-ModuleMember -Function $(($ExportFunctions) -join ',') -Alias *
+# Auto-export all Aliases
+Export-ModuleMember -Alias * ;
 
 "@ ; 
 
@@ -1172,43 +1217,6 @@ Export-ModuleMember -Function $(($ExportFunctions) -join ',') -Alias *
         else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
         "#*======^ END FUNCTIONS ^======" | Add-Content @pltAdd ;
     } ; 
-
-    # update the manifest too: # should be forced array: FunctionsToExport = @('build-VSCConfig','Get-CommentBlocks','get-VersionInfo','Merge-Module','parseHelp')
-    $smsg = "Updating the Psd1 FunctionsToExport to match" ; 
-    if($verbose){ if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
-    else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; } ; 
-    if(test-path -path $PsdName){
-        #Set-ModuleFunction -path $PsdName -whatif:$($whatif) ; 
-        # BuildHelpers cmdlet above isn't fully populating with all funcs in public: FunctionsToExport = @('build-VSCConfig','Get-CommentBlocks','get-VersionInfo','Merge-Module','parseHelp')
-        # switch back to manual local updates
-        $rgxFuncs2Export = 'FunctionsToExport((\s)*)=((\s)*).*'
-        #'FunctionsToExport((\s)*)=((\s)*)((@\()*).*((\))*)'
-        $psd1Profile = gci $PsdName | ss -Pattern $rgxFuncs2Export ; 
-        $tf = $PsdName; 
-        $enc=$null ; $enc=get-FileEncoding -path $tf ;
-        if($enc -eq 'ASCII') { 
-            $enc = 'UTF8' ; 
-            $smsg = "(ASCI encoding detected, converting to UTF8)" ; 
-            if($verbose){ if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
-            else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; } ; 
-        } ; # force damaged/ascii to UTF8
-        $pltSetCon=[ordered]@{ Path=$tf ; whatif=$($whatif) ;  } ;
-        if($enc){$pltSetCon.add('encoding',$enc) } ;
-        (Get-Content $tf) | Foreach-Object {
-            $_ -replace $rgxFuncs2Export , ("FunctionsToExport = " + "@('" + $($ExportFunctions -join "','") + "')") 
-        } | Set-Content @pltSetCon ; 
-    } else { 
-        $smsg = "UNABLE TO test-path -path $($PsdName)`nFunctionsToExport CAN'T BE UPDATED!" ; 
-        if($verbose){ if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
-        else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; } ; 
-    } ; 
-
-    $ReportObj=[ordered]@{
-        Status=$true ; 
-        PsmNameBU = $PsmNameBU ; 
-        PassStatus = $PassStatus ;
-    } ; 
-    $ReportObj | write-output ;
 
 
 }
@@ -1565,34 +1573,4 @@ function parseHelp {
 }
 
 #*------^ parseHelp.ps1 ^------
-
-#*======^ END FUNCTIONS ^======
-
 Export-ModuleMember -Function build-VSCConfig,Get-CommentBlocks,get-FunctionBlock,get-FunctionBlocks,get-ScriptProfileAST,get-VersionInfo,load-Module,Merge-Module,New-GitHubGist,parseHelp -Alias *
-
-
-# SIG # Begin signature block
-# MIIELgYJKoZIhvcNAQcCoIIEHzCCBBsCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
-# gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUVXFcg3nFA3Vo/xvV1xXssuyd
-# jDugggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
-# MCwxKjAoBgNVBAMTIVBvd2VyU2hlbGwgTG9jYWwgQ2VydGlmaWNhdGUgUm9vdDAe
-# Fw0xNDEyMjkxNzA3MzNaFw0zOTEyMzEyMzU5NTlaMBUxEzARBgNVBAMTClRvZGRT
-# ZWxmSUkwgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBALqRVt7uNweTkZZ+16QG
-# a+NnFYNRPPa8Bnm071ohGe27jNWKPVUbDfd0OY2sqCBQCEFVb5pqcIECRRnlhN5H
-# +EEJmm2x9AU0uS7IHxHeUo8fkW4vm49adkat5gAoOZOwbuNntBOAJy9LCyNs4F1I
-# KKphP3TyDwe8XqsEVwB2m9FPAgMBAAGjdjB0MBMGA1UdJQQMMAoGCCsGAQUFBwMD
-# MF0GA1UdAQRWMFSAEL95r+Rh65kgqZl+tgchMuKhLjAsMSowKAYDVQQDEyFQb3dl
-# clNoZWxsIExvY2FsIENlcnRpZmljYXRlIFJvb3SCEGwiXbeZNci7Rxiz/r43gVsw
-# CQYFKw4DAh0FAAOBgQB6ECSnXHUs7/bCr6Z556K6IDJNWsccjcV89fHA/zKMX0w0
-# 6NefCtxas/QHUA9mS87HRHLzKjFqweA3BnQ5lr5mPDlho8U90Nvtpj58G9I5SPUg
-# CspNr5jEHOL5EdJFBIv3zI2jQ8TPbFGC0Cz72+4oYzSxWpftNX41MmEsZkMaADGC
-# AWAwggFcAgEBMEAwLDEqMCgGA1UEAxMhUG93ZXJTaGVsbCBMb2NhbCBDZXJ0aWZp
-# Y2F0ZSBSb290AhBaydK0VS5IhU1Hy6E1KUTpMAkGBSsOAwIaBQCgeDAYBgorBgEE
-# AYI3AgEMMQowCKACgAChAoAAMBkGCSqGSIb3DQEJAzEMBgorBgEEAYI3AgEEMBwG
-# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBRvLmIH
-# 0xbVT0yZlclppadjLWguhTANBgkqhkiG9w0BAQEFAASBgKiOKf7JUH1l7RTe5c3U
-# HbGLMr2kvWVtHieiUZCLfGAuteea3Q32gEIK/gvvxCqkXoAufku2sFeQyxxLvh1n
-# BVO3GEfXorzBNmEVvr9PbUQD7NC60OiI8YMNYdbjFN+bsfcvBu5Xt+TeIeFzH88d
-# h4cI+5JAXKvdKp55lemI46PM
-# SIG # End signature block

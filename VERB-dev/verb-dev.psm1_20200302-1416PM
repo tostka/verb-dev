@@ -5,7 +5,7 @@
 .SYNOPSIS
 VERB-dev - Development PS Module-related generic functions
 .NOTES
-Version     : 1.3.0
+Version     : 1.4.1
 Author      : Todd Kadrie
 Website     :	https://www.toddomation.com
 Twitter     :	@tostka
@@ -40,9 +40,7 @@ https://github.com/tostka/verb-dev
 $script:ModuleRoot = $PSScriptRoot ;
 $script:ModuleVersion = (Import-PowerShellDataFile -Path (get-childitem $script:moduleroot\*.psd1).fullname).moduleversion ;
 
-
-# Auto-export all Aliases
-Export-ModuleMember -Alias * ;
+#*======v FUNCTIONS v======
 
 
 
@@ -100,9 +98,8 @@ function build-VSCConfig {
         [switch] $whatIf
     ) ;
     
-    #$verbosePreference = "Continue" # opts: Stop(&Error)|Inquire(&Prompt)|Continue(Display)|SilentlyContinue(Suppress);    
+    #$verbosePreference = "Continue" # opts: Stop(&Error)|Inquire(&Prompt)|Continue(Display)|SilentlyContinue(Suppress);
     $Verbose = ($VerbosePreference -eq "Continue") ; 
-
     #$CommandLine = Read-Host "Enter Command to be Parsed" ;
     $parsedCmdLine = Split-CommandLine -CommandLine $CommandLine | Where-Object { $_.length -gt 1 }  ;
     $ttl = ($parsedCmdLine | Measure-Object).count ;
@@ -150,7 +147,7 @@ function build-VSCConfig {
 
 #*------^ build-VSCConfig.ps1 ^------
 
-#*------v Function Get-CommentBlocks v------
+#*------v Get-CommentBlocks.ps1 v------
 function Get-CommentBlocks {
     <#
     .SYNOPSIS
@@ -169,7 +166,6 @@ function Get-CommentBlocks {
     AddedWebsite:
     AddedTwitter:
     REVISIONS
-    * 10:51 AM 2/27/2020 pulled #Requires RunAsAdmin, hangs UID passes
     * 8:36 AM 12/30/2019 Get-CommentBlocks:updated cbh and added .INPUTS/.OUTPUTS cbh entries, detailing the subcompontents of the hashtable returned
     * 8:28 PM 11/17/2019 INIT
     .DESCRIPTION
@@ -206,6 +202,7 @@ function Get-CommentBlocks {
     .LINK
     #>
     #Requires -Version 3
+    ##Requires -RunasAdministrator
     [CmdletBinding()]
     PARAM(
         [Parameter(Position = 0, Mandatory = $True, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true, HelpMessage = "RawSourceLines from the target script file (as gathered with get-content) [-TextLines TextArrayObj]")]
@@ -293,7 +290,284 @@ function Get-CommentBlocks {
     } ;
     $objReturn | Write-Output
 
-} ; #*------^ END Function Get-CommentBlocks ^------
+}
+
+#*------^ Get-CommentBlocks.ps1 ^------
+
+#*------v get-FunctionBlock.ps1 v------
+function get-FunctionBlock {
+    <#
+    .SYNOPSIS
+    get-FunctionBlock - Retrieve the specified $functionname function block from the specified $Parsefile.
+    .NOTES
+    Author: Todd Kadrie
+    Based on Code by: Philip Giuliani (broken example), functional AST code & example by Bartek Bielawski
+    Website:	http://tinstoys.blogspot.com
+    Twitter:	http://twitter.com/tostka
+    REVISIONS   :
+    # 10:07 AM 9/27/2019 ren'd GetFuncBlock -> get-FunctionBlock & tighted up, added named param expl
+    3:19 PM 8/31/2016 - initial version, functional
+    .DESCRIPTION
+    .PARAMETER  ParseFile
+    Script to be parsed [path-to\script.ps1]
+    .PARAMETER  functionName
+    Function name to be found and displayed from ParseFile
+    .INPUTS
+    None. Does not accepted piped input.
+    .OUTPUTS
+    None. Returns matched Function block to pipeline.
+    .EXAMPLE
+    get-FunctionBlock C:\usr\work\exch\scripts\Set-Empl-Offboard-20160601-1217PM.ps1 Add-EMSRemote ;
+    Pull/display the Add-EMSRemote function from the specified .ps1, using positional params
+    .EXAMPLE
+    get-FunctionBlock -Parse C:\usr\work\exch\scripts\Set-Empl-Offboard-20160601-1217PM.ps1 -Func Add-EMSRemote ;
+    Pull/display the Add-EMSRemote function from the specified .ps1, using named params
+    .LINK
+    https://stackoverflow.com/questions/22335439/get-the-last-line-of-a-specific-function-in-a-ps1-file (returns 440 to the pipeline)
+    https://blogs.technet.microsoft.com/heyscriptingguy/2012/09/26/learn-how-it-pros-can-use-the-powershell-ast/
+    #>
+
+    #Requires -Version 3
+    Param(
+        [Parameter(Position=0,MandaABCy=$True,ValueFromPipeline=$true,ValueFromPipelineByPropertyName=$true,HelpMessage="Script to be parsed [path-to\script.ps1]")][ValidateNotNullOrEmpty()]
+        $ParseFile
+        ,[Parameter(Position=1,MandaABCy=$True,HelpMessage="Function name to be found and displayed from ParseFile")]
+        $functionName
+    )  ;
+
+
+    # 2:07 PM 8/31/2016 alt code:
+    $AST = [System.Management.Automation.Language.Parser]::ParseFile($ParseFile,[ref]$null,[ref]$Null ) ;
+    $funcsInFile = $AST.FindAll({$args[0] -is [System.Management.Automation.Language.FunctionDefinitionAst]}, $true) ;
+    # this variant pulls commands v functions
+    #$AST.FindAll({$args[0] -is [System.Management.Automation.Language.CommandAst]}, $true)
+
+    $matchfunc = $null ;
+    foreach($func in $funcsInFile) {
+        if($func.Name -eq $functionName) {
+            $matchfunc = $func ;
+            break ;
+        } ;
+    } ;
+    if($matchfunc -eq $null){ return 0 } ;
+    $matchfuncBody = $matchfunc.Body ;
+
+    # dumping the last line# for the targeted funct to pipeline
+    #return $matchfuncBody.Extent.EndLineNumber ;
+
+    # 2:20 PM 8/31/2016 return the function with bracketing
+
+    $sPre="$("=" * 50)`n#*------v Function $($matchfunc.name) from Script:$($ParseFile) v------" ;
+    $sPost="#*------^ END Function $($matchfunc.name) from Script:$($ParseFile) ^------ ;`n$("=" * 50)" ;
+
+    # here string seems to make it crap out, just append together
+    $sOut = $null ;
+    $sOut += "$($sPre)`nFunction $($matchfunc.name) " ;
+    $sOut += "$($matchfunc.Body) $($sPost)" ;
+
+    write-verbose -verbose:$true "Script:$($ParseFile): Matched Function:$($functionName) " ;
+    $sOut | write-output ;
+
+}
+
+#*------^ get-FunctionBlock.ps1 ^------
+
+#*------v get-FunctionBlocks.ps1 v------
+function get-FunctionBlocks {
+    <#
+    .SYNOPSIS
+    get-FunctionBlocks - All functions from the specified $Parsefile, output them directly to pipeline (capture on far end & parse/display)
+    .NOTES
+    Author: Todd Kadrie
+    Based on Code by: Philip Giuliani (broken example), functional AST code & example by Bartek Bielawski
+    Website:	http://tinstoys.blogspot.com
+    Twitter:	http://twitter.com/tostka
+    REVISIONS   :
+    # 10:21 AM 9/27/2019 just pull the functions in a file and pipeline them, nothing more.
+    .DESCRIPTION
+    .PARAMETER  ParseFile
+    Script to be parsed [path-to\script.ps1]
+    .INPUTS
+    Accepts piped input.
+    .OUTPUTS
+    None. Returns matched Function block to pipeline.
+    get-FunctionBlocks -Parse C:\usr\work\exch\scripts\Set-Empl-Offboard-20160601-1217PM.ps1 ;
+    Pull/display the Add-EMSRemote function from the specified .ps1, using named params
+    .EXAMPLE
+    $funcs = get-FunctionBlocks C:\usr\work\exch\scripts\Set-Empl-Offboard-20160601-1217PM.ps1 ;
+    $funcs |?{$_.name -eq 'get-lastwake'} | format-list name,body
+    Pull ALL functions, and post-filter return for specific function, and dump the name & body to console.
+    .EXAMPLE
+    $funcs = get-FunctionBlocks C:\usr\work\exch\scripts\Set-Empl-Offboard-20160601-1217PM.ps1 ;
+    ($funcs |?{$_.name -eq 'get-lastwake'}).Extent.text
+    Pull ALL functions, and post-filter return for specific function, and dump the extent.text (body) to console.
+    .EXAMPLE
+    $funcs = get-FunctionBlocks C:\usr\work\exch\scripts\Set-Empl-Offboard-20160601-1217PM.ps1 ;
+    foreach($func in $funcs){
+      $sPre="$("=" * 50)`n#*------v Function $($func.name) from Script:$($ParseFile) v------" ;
+      $sPost="#*------^ END Function $($func.name) from Script:$($ParseFile) ^------ ;`n$("=" * 50)" ;
+      $sOut = $null ;
+      $sOut += "$($sPre)`nFunction $($func.name) " ;
+      $sOut += "$($func.Body) $($sPost)" ;
+      write-host $sOut
+    } ;
+    Output a formatted block of Name & Bodies (approx the get-FunctionBlock())
+    .LINK
+    https://stackoverflow.com/questions/22335439/get-the-last-line-of-a-specific-function-in-a-ps1-file (returns 440 to the pipeline)
+    https://blogs.technet.microsoft.com/heyscriptingguy/2012/09/26/learn-how-it-pros-can-use-the-powershell-ast/
+    #>
+
+    #Requires -Version 3
+    Param(
+        [Parameter(Position = 0, MandaABCy = $True, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true, HelpMessage = "Script to be parsed [path-to\script.ps1]")][ValidateNotNullOrEmpty()]
+        $ParseFile
+    )  ;
+
+    # 2:07 PM 8/31/2016 alt code:
+    $AST = [System.Management.Automation.Language.Parser]::ParseFile($ParseFile, [ref]$null, [ref]$Null ) ;
+    $funcsInFile = $AST.FindAll( { $args[0] -is [System.Management.Automation.Language.FunctionDefinitionAst] }, $true) ;
+    # this variant pulls commands v functions
+    #$AST.FindAll({$args[0] -is [System.Management.Automation.Language.CommandAst]}, $true)
+
+    foreach ($func in $funcsInFile) {
+        $func | write-output ;
+    } ;
+}
+
+#*------^ get-FunctionBlocks.ps1 ^------
+
+#*------v get-ScriptProfileAST.ps1 v------
+function get-ScriptProfileAST {
+    <#
+    .SYNOPSIS
+    get-ScriptProfileAST - Parse specified Script/Module using Language.FunctionDefinitionAst
+    .NOTES
+    Version     : 1.1.0
+    Author      : Todd Kadrie
+    Website     : https://www.toddomation.com
+    Twitter     : @tostka / http://twitter.com/tostka
+    CreatedDate : 3:56 PM 12/8/2019
+    FileName    :
+    License     : MIT License
+    Copyright   : (c) 2019 Todd Kadrie
+    Github      : https://github.com/tostka
+    AddedCredit :
+    AddedWebsite:
+    AddedTwitter:
+    REVISIONS
+    # 5:25 PM 2/29/2020 ren profile-FileASt -> get-ScriptProfileAST (aliased orig name)
+    # * 7:50 AM 1/29/2020 added Cmdletbinding
+    * 9:04 AM 12/30/2019 profile-FileAST: updated CBH: added .INPUTS & OUTPUTS, including hash properties returned
+    * 3:56 PM 12/8/2019 INIT
+    .DESCRIPTION
+    profile-FileAST - Parse specified Script/Module using Language.FunctionDefinitionAst
+    .PARAMETER  File
+    Path to script/module file
+    .PARAMETER Functions
+    Flag to return Functions-only [-Functions]
+    .PARAMETER Parameter
+    Flag to return Parameter-only [-Functions]
+    .PARAMETER Variables
+    Flag to return Variables-only [-Variables]
+    .PARAMETER Aliases
+    Flag to return Aliases-only [-Aliases]
+    .PARAMETER GenericCommands
+    Flag to return GenericCommands-only [-GenericCommands]
+    .PARAMETER All
+    Flag to return All [-All]
+    .PARAMETER ShowDebug
+    Parameter to display Debugging messages [-ShowDebug switch]
+    .PARAMETER Whatif
+    Parameter to run a Test no-change pass [-Whatif switch]
+    .INPUTS
+    None
+    .OUTPUTS
+    Outputs a hashtable object containing:
+    * Parameters : Details on all Parameters in the file
+    * Functions : Details on all Functions in the file
+    * VariableAssignments : Details on all Variables assigned in the file
+    .EXAMPLE
+    $ASTProfile = profile-FileAST -File c:\pathto\script.ps1 -showdebug:$($showdebug) -verbose:$VerbosePreference -whatif:$($whatif) ;
+    Return the raw $ASTProfile object to the piepline (default behavior)
+    .EXAMPLE
+    $FunctionNames = (get-scriptprofileast -File c:\usr\work\exch\scripts\verb-dev.ps1 -Functions).functions.name ;
+    Return the Functions within the specified script, and select the name properties of the functions object returned.
+    .EXAMPLE
+    $AliasAssignments = (get-scriptprofileast -File c:\usr\work\exch\scripts\verb-dev.ps1 -Aliases).Aliases.extent.text;
+    Return the set/new-Alias commands from the specified script, selecting the full syntax of the command
+    .EXAMPLE
+    $WhatifLines = ((get-scriptprofileast -File c:\usr\work\exch\scripts\verb-dev.ps1 -GenericCommands).GenericCommands | ?{$_.extent -like '*whatif*' } | select -expand extent).text
+    Return any GenericCommands from the specified script, that have whatif within the line
+    .EXAMPLE
+    $bRet = ((get-scriptprofileast -File c:\usr\work\exch\scripts\verb-dev.ps1 -All) ;
+    $bRet.functions.name ;
+    $bret.variables.extent.text
+    $bret.aliases.extent.text
+
+    Return ALL variant objects - Functions, Parameters, Variables, aliases, GenericCommands - from the specified script, and output the function names, variable names, and alias assignement commands
+    .LINK
+    #>
+    [CmdletBinding()]
+    PARAM(
+        [Parameter(Position = 0, Mandatory = $True, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true, HelpMessage = "Path to script[-File path-to\script.ps1]")]
+        [ValidateScript( { Test-Path $_ })]$File,
+        [Parameter(HelpMessage = "Flag to return Functions-only [-Functions]")]
+        [switch] $Functions,
+        [Parameter(HelpMessage = "Flag to return Parameters-only [-Functions]")]
+        [switch] $Parameters,
+        [Parameter(HelpMessage = "Flag to return Variables-only [-Variables]")]
+        [switch] $Variables,
+        [Parameter(HelpMessage = "Flag to return Aliases-only [-Aliases]")]
+        [switch] $Aliases,
+        [Parameter(HelpMessage = "Flag to return GenericCommands-only [-GenericCommands]")]
+        [switch] $GenericCommands,
+        [Parameter(HelpMessage = "Flag to return All [-All]")]
+        [switch] $All,
+        [Parameter(HelpMessage = "Debugging Flag [-showDebug]")]
+        [switch] $showDebug,
+        [Parameter(HelpMessage = "Whatif Flag  [-whatIf]")]
+        [switch] $whatIf
+    ) ;
+    BEGIN {
+        $Verbose = ($VerbosePreference -eq "Continue") ;
+        if ($File.GetType().FullName -ne 'System.IO.FileInfo') {
+            $File = get-childitem -path $File ;
+        } ;
+    } ;
+    PROCESS {
+        $AST = [System.Management.Automation.Language.Parser]::ParseFile($File.fullname, [ref]$null, [ref]$Null ) ;
+
+        $objReturn = [ordered]@{ } ;
+
+        if ($Functions -OR $All) {
+            $ASTFunctions = $AST.FindAll( { $args[0] -is [System.Management.Automation.Language.FunctionDefinitionAst] }, $true) ;
+            $objReturn.add('Functions', $ASTFunctions) ;
+        } ;
+        if ($Parameters -OR $All) {
+            $ASTParameters = $ast.ParamBlock.Parameters.Name.variablepath.userpath ;
+            $objReturn.add('Parameters', $ASTParameters) ;
+        } ;
+        if ($Variables -OR $All) {
+            $AstVariableAssignments = $ast.FindAll( { $args[0] -is [System.Management.Automation.Language.VariableExpressionAst] }, $true) ;
+            $objReturn.add('Variables', $AstVariableAssignments) ;
+        } ;
+        if ($($Aliases -OR $GenericCommands) -OR $All) {
+            $ASTGenericCommands = $ast.FindAll( { $args[0] -is [System.Management.Automation.Language.CommandAst] }, $true) ;
+            if ($Aliases -OR $All) {
+                $ASTAliasAssigns = ($ASTGenericCommands | ? { $_.extent.text -match '(set|new)-alias' }) ;
+                $objReturn.add('Aliases', $ASTAliasAssigns) ;
+            } ;
+            if ($GenericCommands -OR $All) {
+                $objReturn.add('GenericCommands', $ASTGenericCommands) ;
+            } ;
+        } ;
+        $objReturn | Write-Output ;
+    } ;
+    END { } ;
+} ; #*------^ END Function get-ScriptProfileAST ^------
+if (!(get-alias -name "profile-FileAST" -ea 0 )) { Set-Alias -Name 'profile-FileAST' -Value 'get-ScriptProfileAST' ; }
+
+#*------^ get-ScriptProfileAST.ps1 ^------
 
 #*------v get-VersionInfo.ps1 v------
 function get-VersionInfo {
@@ -471,6 +745,8 @@ function Merge-Module {
     AddedWebsite: https://evotec.xyz/powershell-single-psm1-file-versus-multi-file-modules/
     AddedTwitter:
     REVISIONS
+    * 1:58 PM 3/2/2020 as Set-ModuleFunction isn't properly setting *all* exported, go back to collecting and updating the psm1 & psd1 *both* via regx
+    * 9:12 AM 2/29/2020 shift export-modulemember/FooterBlock to bottom, added FUNCTIONS delimiter lines
     * 9:17 AM 2/27/2020 added new -NoAliasExport param, and added the missing 
     * 3:44 PM 2/26/2020 Merge-Module: added -LogSpec param (feed it the object returned by a Start-Log() pass). 
     * 11:27 AM Merge-Module 2/24/2020 suppress block dumps to console, unless -showdebug or -verbose in use
@@ -559,6 +835,7 @@ function Merge-Module {
     $PrivateFunctions = @() ;
 
     $PsmName="$ModuleDestinationPath\$ModuleName.psm1" ;
+    $PsdName="$ModuleDestinationPath\$ModuleName.psd1" ;
 
     $PassStatus = $null ;
 
@@ -640,18 +917,10 @@ function Merge-Module {
 `$script:ModuleRoot = `$PSScriptRoot ;
 `$script:ModuleVersion = (Import-PowerShellDataFile -Path (get-childitem `$script:moduleroot\*.psd1).fullname).moduleversion ;
 
+#*======v FUNCTIONS v======
+
 "@ ; 
             $updatedContent += $PostCBHBlock |out-string ; 
-
-            $PostCBHBlock2=@"
-# Auto-export all Aliases
-Export-ModuleMember -Alias * ;
-
-"@ ; 
-            if(-not($NoAliasExport)){
-                $updatedContent += $PostCBHBlock2 |out-string ; 
-            } ; 
-
             
         } ;  # if-E dyn/monolithic source psm1
 
@@ -675,7 +944,7 @@ Export-ModuleMember -Alias * ;
         } ; 
     } ;
 
-    # default - dirs creation - git doesn't reproduce empty dirs, create if empty (avoids errors later)
+    # DEFAULT - DIRS CREATION - git doesn't reproduce empty dirs, create if empty (avoids errors later)
     # exempt the .git & .vscode dirs, we don't publish those to modules dir
     $DefaultModDirs = "Public","Internal","Classes","Tests","Docs","Docs\Cab","Docs\en-US","Docs\Markdown" ; 
     foreach($Dir in $DefaultModDirs){
@@ -723,10 +992,9 @@ Export-ModuleMember -Alias * ;
         } ; 
     } ;  # loop-E
 
+    # $MODULESOURCEPATH - DIRS CREATION 
     foreach ($ModuleSource in $ModuleSourcePath) {
-
         $iProcd++ ;
-
         if ($ModuleSource.GetType().FullName -ne 'System.IO.DirectoryInfo') {
             # git doesn't reproduce empty dirs, create if empty
             if(!(test-path -path $ModuleSource)){
@@ -773,6 +1041,7 @@ Export-ModuleMember -Alias * ;
             $ModuleSource = get-item -path $ModuleSource ;
         } ;
 
+        # Process components below $ModuleSource
         $sBnrS = "`n#*------v ($($iProcd)/$($ttl)):$($ModuleSource) v------" ;
         $smsg = "$($sBnrS)" ;
         if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info }  #Error|Warn|Debug 
@@ -813,17 +1082,22 @@ Export-ModuleMember -Alias * ;
                 # public & functions = public ; private & internal = private - flip output to -showdebug or -verbose, only
                 if($ModuleSource -match '(Public|Functions)'){
                     $smsg= "$($ScriptFile.name):PUB FUNC:`n$(($ASTFunctions) -join ',' |out-string)" ;
-                    if ($logging -AND ($showDebug -OR $verbose)) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Debug }  #Error|Warn|Debug 
-                    else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                    if($showDebug) {
+                        if ($logging -AND ($showDebug -OR $verbose)) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Debug }  #Error|Warn|Debug 
+                        else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                    } ; 
                     $ExportFunctions += $ASTFunctions.name ;
                 } elseif($ModuleSource -match '(Private|Internal)'){
                     $smsg= "$($ScriptFile.name):PRIV FUNC:`n$(($ASTFunctions) -join ',' |out-string)" ;
-                    if ($logging -AND ($showDebug -OR $verbose)) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Debug }  #Error|Warn|Debug 
-                    else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                    if($showDebug) {
+                        if ($logging -AND ($showDebug -OR $verbose)) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Debug }  #Error|Warn|Debug 
+                        else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                    } ; 
                     $PrivateFunctions += $ASTFunctions.name ;
                 } ;
             } ; # loop-E
 
+            # Process Modules below project
             foreach ($ModFile in $ComponentModules) {
                 $smsg= "Adding:$($ModFile)..." ;  
                 if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info }  #Error|Warn|Debug 
@@ -832,8 +1106,10 @@ Export-ModuleMember -Alias * ;
                 
                 if($Content| ?{$_ -match $rgxSigStart -OR $_ -match $rgxSigEnd} ){
                     $smsg= "*WARNING*:SUBFILE`n$($ModFile.fullname)`nHAS AUTHENTICODE SIGNATURE MARKERS PRESENT!`nREVIEW THE FILE AND REMOVE ANY EVIDENCE OF SIGNING!" ;  
-                    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Error }  #Error|Warn|Debug 
-                    else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                    if($showDebug) {
+                        if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Error }  #Error|Warn|Debug 
+                        else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                    } ; 
                     exit ; 
                 } ; 
                 $Content | Add-Content @pltAdd ;
@@ -843,15 +1119,55 @@ Export-ModuleMember -Alias * ;
                 "$($sBnrSStart)`n$($Content)`n$($sBnrSEnd)" | Add-Content @pltAdd ;
                 #>
             } ;
-            # append the Export-ModuleMember -Function $publicFunctions  ? 
+            
+            # append the Export-ModuleMember -Function $publicFunctions  (psd1 functionstoexport is functional instead),
             #"Export-ModuleMember -Function $(($ExportFunctions) -join ',')" | Add-Content @pltAdd ;
-
-            $smsg = "$($sBnrS.replace('-v','-^').replace('v-','^-'))" ;
+            # Collect & set explicitly in the psm1, the psd1 Set-ModuleFunctoin buildhelper isn't doing the full set, only above. 
+            #"Export-ModuleMember -Function $(($ExportFunctions) -join ',')" | Add-Content @pltAdd ;
+            # stick the Alias * in there too, force it as the psd1 spec's simply override the explicits in the psm1
+            "Export-ModuleMember -Function $(($ExportFunctions) -join ',') -Alias *" | Add-Content @pltAdd ;
+            
+            <#$smsg = "$($sBnrS.replace('-v','-^').replace('v-','^-'))" ;
             if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info }  #Error|Warn|Debug 
             else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+            #>
+
+            # update the manifest too: # should be forced array: FunctionsToExport = @('build-VSCConfig','Get-CommentBlocks','get-VersionInfo','Merge-Module','parseHelp')
+            $smsg = "Updating the psd1 FunctionsToExport (via buildhelpers)" ; 
+            if($verbose){ if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
+            else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; } ; 
+            #Set-ModuleFunction -path $ModDirPath -whatif:$($whatif) ; 
+            # threw:Could not find module 'C:\sc\verb-Desktop'
+            # try the $env:BHPSModuleManifest fullpath to the .psd1 instead
+            if(test-path -path $PsdName){
+                #Set-ModuleFunction -path $PsdName -whatif:$($whatif) ; 
+                # It isn't fully populating with all funcs in public: FunctionsToExport = @('build-VSCConfig','Get-CommentBlocks','get-VersionInfo','Merge-Module','parseHelp')
+                $rgxFuncs2Export = 'FunctionsToExport((\s)*)=((\s)*)(\*|((@\()*).*((\))*))' # add the * default config
+                #'FunctionsToExport((\s)*)=((\s)*)((@\()*).*((\))*)'
+                $psd1Profile = gci $PsdName | ss -Pattern $rgxFuncs2Export ; 
+                $tf = $PsdName; 
+                $enc=$null ; $enc=get-FileEncoding -path $tf ;
+                if($enc -eq 'ASCII') { 
+                    $enc = 'UTF8' ; 
+                    $smsg = "(ASCI encoding detected, converting to UTF8)" ; 
+                    if($verbose){ if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
+                    else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; } ; 
+                } ; # force damaged/ascii to UTF8
+                $pltSetCon=[ordered]@{ Path=$tf ; whatif=$($whatif) ;  } ;
+                if($enc){$pltSetCon.add('encoding',$enc) } ;
+                (Get-Content $tf) | Foreach-Object {
+                    $_ -replace $psd1Profile.matches[0].value.tostring(), ("FunctionsToExport = " + "@('" + $($ExportFunctions -join "','") + "')") 
+                } | Set-Content @pltSetCon ; 
+            } else { 
+                $smsg = "UNABLE TO test-path -path $($PsdName)`nFunctionsToExport CAN'T BE UPDATED!" ; 
+                if($verbose){ if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
+                else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; } ; 
+            } ; 
 
             # this is copying the manifest (assumes public & psd1 are in same dir) - Plaster is doing that separately, not needed
             #Copy-Item -Path "$ModuleSource\$ModuleName.psd1" "$ModuleDestinationPath\$ModuleName.psd1" ;
+
+
 
             #$true | write-output ;
             $ReportObj=[ordered]@{
@@ -878,9 +1194,162 @@ Export-ModuleMember -Alias * ;
             Continue ;
         } ;
     } ; # loop-E
+
+    # tack in footerblock to the merged psm1 (primarily export-modulemember -alias * ; can also be any function-trailing content you want in the psm1)
+    $FooterBlock=@"
+
+#*======^ END FUNCTIONS ^======
+
+# Auto-export all Aliases
+Export-ModuleMember -Alias * ;
+
+"@ ; 
+
+    if(-not($NoAliasExport)){
+        $smsg= "Adding:FooterBlock..." ;  
+        if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info }  #Error|Warn|Debug 
+        else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+        #$updatedContent += $FooterBlock |out-string ; 
+        $pltAdd = @{
+            Path=$PsmName ;
+            whatif=$whatif;
+        } ;
+        $FooterBlock | Add-Content @pltAdd ;
+    } else {
+        $smsg= "NoAliasExport specified:Skipping FooterBlock add" ;  
+        if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info }  #Error|Warn|Debug 
+        else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+        "#*======^ END FUNCTIONS ^======" | Add-Content @pltAdd ;
+    } ; 
+
+
 }
 
 #*------^ Merge-Module.ps1 ^------
+
+#*------v New-GitHubGist.ps1 v------
+Function New-GitHubGist {
+    <#
+    .SYNOPSIS
+    New-GitHubGist.ps1 - Create GitHub Gist from passed param or file contents
+    .NOTES
+    Author: Jeffery Hicks
+    Website:	https://jdhitsolutions.com/blog/powershell/5410/creating-a-github-gist-with-powershell/
+    Twitter:	@tostka, http://twitter.com/tostka
+    Additional Credits: REFERENCE
+    Website:	URL
+    Twitter:	URL
+    REVISIONS   :
+    * 1/26/17 - posted version
+    .DESCRIPTION
+    .PARAMETER Name
+    What is the name for your gist?
+    PARAMETER Path
+    Path to file of content to be converted
+    PARAMETER Content,
+    Content to be converted
+    PARAMETER Description,
+    Description for new Gist
+    PARAMETER UserToken
+    Github Access Token
+    PARAMETER Private
+    Switch parameter that specifies creation of a Private Gist
+    PARAMETER Passthru
+    Passes the new Gist through into pipeline, as a new object
+    .EXAMPLE
+    New-GitHubGist -Name "BoxPrompt.ps1" -Description "a fancy PowerShell prompt function" -Path S:\boxprompt.ps1
+    .LINK
+    https://jdhitsolutions.com/blog/powershell/5410/creating-a-github-gist-with-powershell/
+    #>
+
+    [cmdletbinding(SupportsShouldProcess, DefaultParameterSetName = "Content")]
+    Param(
+        [Parameter(Position = 0, Mandatory, HelpMessage = "What is the name for your gist?", ValueFromPipelineByPropertyName)]
+        [ValidateNotNullorEmpty()]
+        [string]$Name,
+        [Parameter(ParameterSetName = "path", Mandatory, ValueFromPipelineByPropertyName)]
+        [ValidateNotNullorEmpty()]
+        [Alias("pspath")]
+        [string]$Path,
+        [Parameter(ParameterSetName = "Content", Mandatory)]
+        [ValidateNotNullorEmpty()]
+        [string[]]$Content,
+        [string]$Description,
+        [Alias("token")]
+        [ValidateNotNullorEmpty()]
+        [string]$UserToken = $gitToken,
+        [switch]$Private,
+        [switch]$Passthru
+    )
+
+    Begin {
+        Write-Verbose "[BEGIN  ] Starting: $($MyInvocation.Mycommand)"
+
+        #create the header
+        $head = @{
+            Authorization = 'Basic ' + $UserToken
+        }
+        #define API uri
+        $base = "https://api.github.com"
+
+    } #begin
+
+    Process {
+        #display PSBoundparameters formatted nicely for Verbose output
+        [string]$pb = ($PSBoundParameters | Format-Table -AutoSize | Out-String).TrimEnd()
+        Write-Verbose "[PROCESS] PSBoundparameters: `n$($pb.split("`n").Foreach({"$("`t"*2)$_"}) | Out-String) `n"
+
+        #json section names must be lowercase
+        #format content as a string
+
+        switch ($pscmdlet.ParameterSetName) {
+            "path" {
+                $gistContent = Get-Content -Path $Path | Out-String
+            }
+            "content" {
+                $gistContent = $Content | Out-String
+            }
+        } #close Switch
+
+        $data = @{
+            files       = @{$Name = @{content = $gistContent } }
+            description = $Description
+            public      = (-Not ($Private -as [boolean]))
+        } | Convertto-Json
+
+        Write-Verbose ($data | out-string)
+        Write-Verbose "[PROCESS] Posting to $base/gists"
+
+        If ($pscmdlet.ShouldProcess("$name [$description]")) {
+
+            #parameters to splat to Invoke-Restmethod
+            $invokeParams = @{
+                Method      = 'Post'
+                Uri         = "$base/gists"
+                Headers     = $head
+                Body        = $data
+                ContentType = 'application/json'
+            }
+
+            $r = Invoke-Restmethod @invokeParams
+
+            if ($Passthru) {
+                Write-Verbose "[PROCESS] Writing a result to the pipeline"
+                $r | Select @{Name = "Url"; Expression = { $_.html_url } },
+                Description, Public,
+                @{Name = "Created"; Expression = { $_.created_at -as [datetime] } }
+            }
+        } #should process
+
+    } #process
+
+    End {
+        Write-Verbose "[END    ] Ending: $($MyInvocation.Mycommand)"
+    } #end
+
+}
+
+#*------^ New-GitHubGist.ps1 ^------
 
 #*------v parseHelp.ps1 v------
 function parseHelp {
@@ -1109,103 +1578,4 @@ function parseHelp {
 
 #*------^ parseHelp.ps1 ^------
 
-#*------v profile-FileAST.ps1 v------
-function profile-FileAST {
-    <#
-    .SYNOPSIS
-    profile-FileAST - Parse specified Script/Module using Language.FunctionDefinitionAst
-    .NOTES
-    Version     : 1.1.0
-    Author      : Todd Kadrie
-    Website     : https://www.toddomation.com
-    Twitter     : @tostka / http://twitter.com/tostka
-    CreatedDate : 3:56 PM 12/8/2019
-    FileName    :
-    License     : MIT License
-    Copyright   : (c) 2019 Todd Kadrie
-    Github      : https://github.com/tostka
-    AddedCredit :
-    AddedWebsite:
-    AddedTwitter:
-    REVISIONS
-    # * 7:50 AM 1/29/2020 added Cmdletbinding
-    * 9:04 AM 12/30/2019 profile-FileAST: updated CBH: added .INPUTS & OUTPUTS, including hash properties returned
-    * 3:56 PM 12/8/2019 INIT
-    .DESCRIPTION
-    profile-FileAST - Parse specified Script/Module using Language.FunctionDefinitionAst
-    .PARAMETER  File
-    Path to script/module file
-    .PARAMETER ShowDebug
-    Parameter to display Debugging messages [-ShowDebug switch]
-    .PARAMETER Whatif
-    Parameter to run a Test no-change pass [-Whatif switch]
-    .INPUTS
-    None
-    .OUTPUTS
-    Outputs a hashtable object containing: 
-    * Parameters : Details on all Parameters in the file
-    * Functions : Details on all Functions in the file
-    * VariableAssignments : Details on all Variables assigned in the file
-    .EXAMPLE
-    $ASTProfile = profile-FileAST -File $oSrc.fullname -showdebug:$($showdebug) -verbose:$VerbosePreference -whatif:$($whatif) ;
-    .LINK
-    #>
-    [CmdletBinding()]
-    PARAM(
-        [Parameter(Position = 0, Mandatory = $True, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true, HelpMessage = "Path to script[-File path-to\script.ps1]")]
-        [ValidateScript( { Test-Path $_ })]$File,
-        [Parameter(HelpMessage = "Debugging Flag [-showDebug]")]
-        [switch] $showDebug,
-        [Parameter(HelpMessage = "Whatif Flag  [-whatIf]")]
-        [switch] $whatIf
-    ) ;
-    if ($File.GetType().FullName -ne 'System.IO.FileInfo') {
-        $File = get-childitem -path $File ;
-    } ;
-    $Verbose = ($VerbosePreference -eq "Continue") ; 
-    $sQot = [char]34 ; $sQotS = [char]39 ;
-    $NewCBH = $null ; $NewCBH = @() ;
-
-    $AST = [System.Management.Automation.Language.Parser]::ParseFile($File.fullname, [ref]$null, [ref]$Null ) ;
-
-    # parameters declared in the AST PARAM() Block
-    $ASTParameters = $ast.ParamBlock.Parameters.Name.variablepath.userpath ;
-    $ASTFunctions =  $AST.FindAll( { $args[0] -is [System.Management.Automation.Language.FunctionDefinitionAst] }, $true) ;
-    $AstVariableAssignments = $ast.FindAll({$args[0] -is [System.Management.Automation.Language.VariableExpressionAst]},$true) ;
-
-    $objReturn = [ordered]@{
-        Parameters       = $ASTParameters  ;
-        Functions        = $ASTFunctions ;
-        VariableAssignments       = $AstVariableAssignments ;
-    } ;
-    $objReturn | Write-Output
-
-}
-
-#*------^ profile-FileAST.ps1 ^------
-
-# SIG # Begin signature block
-# MIIELgYJKoZIhvcNAQcCoIIEHzCCBBsCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
-# gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUBtwZt9yrMkXhEZpF2oNQXNNx
-# pSygggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
-# MCwxKjAoBgNVBAMTIVBvd2VyU2hlbGwgTG9jYWwgQ2VydGlmaWNhdGUgUm9vdDAe
-# Fw0xNDEyMjkxNzA3MzNaFw0zOTEyMzEyMzU5NTlaMBUxEzARBgNVBAMTClRvZGRT
-# ZWxmSUkwgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBALqRVt7uNweTkZZ+16QG
-# a+NnFYNRPPa8Bnm071ohGe27jNWKPVUbDfd0OY2sqCBQCEFVb5pqcIECRRnlhN5H
-# +EEJmm2x9AU0uS7IHxHeUo8fkW4vm49adkat5gAoOZOwbuNntBOAJy9LCyNs4F1I
-# KKphP3TyDwe8XqsEVwB2m9FPAgMBAAGjdjB0MBMGA1UdJQQMMAoGCCsGAQUFBwMD
-# MF0GA1UdAQRWMFSAEL95r+Rh65kgqZl+tgchMuKhLjAsMSowKAYDVQQDEyFQb3dl
-# clNoZWxsIExvY2FsIENlcnRpZmljYXRlIFJvb3SCEGwiXbeZNci7Rxiz/r43gVsw
-# CQYFKw4DAh0FAAOBgQB6ECSnXHUs7/bCr6Z556K6IDJNWsccjcV89fHA/zKMX0w0
-# 6NefCtxas/QHUA9mS87HRHLzKjFqweA3BnQ5lr5mPDlho8U90Nvtpj58G9I5SPUg
-# CspNr5jEHOL5EdJFBIv3zI2jQ8TPbFGC0Cz72+4oYzSxWpftNX41MmEsZkMaADGC
-# AWAwggFcAgEBMEAwLDEqMCgGA1UEAxMhUG93ZXJTaGVsbCBMb2NhbCBDZXJ0aWZp
-# Y2F0ZSBSb290AhBaydK0VS5IhU1Hy6E1KUTpMAkGBSsOAwIaBQCgeDAYBgorBgEE
-# AYI3AgEMMQowCKACgAChAoAAMBkGCSqGSIb3DQEJAzEMBgorBgEEAYI3AgEEMBwG
-# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBSyzmqn
-# 2ot0krXJOip4CKU0Im7DSDANBgkqhkiG9w0BAQEFAASBgAQrfPkVX7eVYwzzMexy
-# OCHLWWb57/x1kghCxqYDf4tjhldpvZ1pprIc1Hh2I9cB1tHqNCg6ODmkrboWi3MC
-# XLjPkCB8s37cJwVP87ccmfT9zdH2+I3FABeGOpwOtxARCxdPf8ILeGNplgAw6vGf
-# 5E7iL35W0FAVejp+EIaS54Zb
-# SIG # End signature block
+Export-ModuleMember -Function build-VSCConfig,Get-CommentBlocks,get-FunctionBlock,get-FunctionBlocks,get-ScriptProfileAST,get-VersionInfo,load-Module,Merge-Module,New-GitHubGist,parseHelp -Alias *

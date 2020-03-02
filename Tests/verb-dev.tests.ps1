@@ -1,7 +1,50 @@
-﻿$ModuleName = Split-Path (Resolve-Path "$PSScriptRoot\..\" ) -Leaf
+﻿#VERB-dev.Tests.ps1
+<#
+.SYNOPSIS
+VERB-dev.Tests.ps1 - Pester Tests 
+.NOTES
+Version     : 1.0.0
+Author      : Todd Kadrie
+Website     :	http://www.toddomation.com
+Twitter     :	@tostka / http://twitter.com/tostka
+CreatedDate : 2020-
+FileName    : 
+License     : MIT License
+Copyright   : (c) 2020 Todd Kadrie
+Github      : https://github.com/tostka
+Tags        : Powershell
+AddedCredit : REFERENCE
+AddedWebsite:	URL
+AddedTwitter:	URL
+REVISIONS
+.DESCRIPTION
+VERB-dev.Tests.ps1 - Pester Tests 
+-Whatif switch]
+.EXAMPLE
+cd c:\sc\verb-dev\ ; 
+.\Tests\VERB-dev.tests.ps1 ; 
+Change to the Module source root dir, and execute the script (Script discovery assumes the pwd is the module root)
+.LINK
+#>
+
+# patch in ISE support
+if ($psISE){
+    $ScriptDir = Split-Path -Path $psISE.CurrentFile.FullPath ;
+    $ScriptBaseName = split-path -leaf $psise.currentfile.fullpath ;
+    $ScriptNameNoExt = [system.io.path]::GetFilenameWithoutExtension($psise.currentfile.fullpath) ;
+    $PSScriptRoot = $ScriptDir ;
+    if($PSScriptRoot -ne $ScriptDir){ write-warning "UNABLE TO UPDATE BLANK `$PSScriptRoot TO CURRENT `$ScriptDir!"} ;
+    $PSCommandPath = $psise.currentfile.fullpath ;
+    if($PSCommandPath -ne $psise.currentfile.fullpath){ write-warning "UNABLE TO UPDATE BLANK `$PSCommandPath TO CURRENT `$psise.currentfile.fullpath!"} ;
+}
+
+$ModuleName = Split-Path (Resolve-Path "$PSScriptRoot\..\" ) -Leaf
 $ModuleManifest = Resolve-Path "$PSScriptRoot\..\$ModuleName\$ModuleName.psd1"
 $here = (Split-Path -Parent $MyInvocation.MyCommand.Path).Replace('tests', '')
 $scriptsModules = Get-ChildItem $here -Include *.psd1, *.psm1, *.ps1 -Exclude *.tests.ps1 -Recurse
+if($scriptsModules.count -eq 0){
+    $scriptsModules = Get-ChildItem (split-path $here) -Include *.psd1, *.psm1, *.ps1 -Exclude *.tests.ps1 -Recurse
+} ; 
 
 
 Get-Module $ModuleName | Remove-Module
@@ -34,7 +77,14 @@ Describe 'Module Information' -Tags 'Command'{
     Context 'Exported Functions' {
         It 'Proper Number of Functions Exported' {
             $ExportedCount = Get-Command -Module $ModuleName | Measure-Object | Select-Object -ExpandProperty Count
-            $FileCount = Get-ChildItem -Path "$PSScriptRoot\..\$ModuleName\Public" -Filter *.ps1 -Recurse | Measure-Object | Select-Object -ExpandProperty Count
+            if(!$PSScriptRoot.length -eq 0){
+                $FileCount = Get-ChildItem -Path "$ScriptDir\..\$ModuleName\Public" -Filter *.ps1 -Recurse | Measure-Object | Select-Object -ExpandProperty Count
+                if($FileCount -eq 0){
+                    $FileCount = Get-ChildItem -Path "$ScriptDir\..\..\$ModuleName\Public" -Filter *.ps1 -Recurse | Measure-Object | Select-Object -ExpandProperty Count
+                } ; 
+            } else { 
+                $FileCount = Get-ChildItem -Path "$PSScriptRoot\..\$ModuleName\Public" -Filter *.ps1 -Recurse | Measure-Object | Select-Object -ExpandProperty Count
+            } ; 
 
             $ExportedCount | Should be $FileCount
         }
@@ -81,8 +131,8 @@ Describe 'General - Testing all scripts and modules against the Script Analyzer 
 # SIG # Begin signature block
 # MIIELgYJKoZIhvcNAQcCoIIEHzCCBBsCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUjdCR2jy6NxO8BIhScHNNqVSv
-# SvCgggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUm9qPwBDIKVXjVcMaACieQEcW
+# NfCgggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
 # MCwxKjAoBgNVBAMTIVBvd2VyU2hlbGwgTG9jYWwgQ2VydGlmaWNhdGUgUm9vdDAe
 # Fw0xNDEyMjkxNzA3MzNaFw0zOTEyMzEyMzU5NTlaMBUxEzARBgNVBAMTClRvZGRT
 # ZWxmSUkwgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBALqRVt7uNweTkZZ+16QG
@@ -97,9 +147,9 @@ Describe 'General - Testing all scripts and modules against the Script Analyzer 
 # AWAwggFcAgEBMEAwLDEqMCgGA1UEAxMhUG93ZXJTaGVsbCBMb2NhbCBDZXJ0aWZp
 # Y2F0ZSBSb290AhBaydK0VS5IhU1Hy6E1KUTpMAkGBSsOAwIaBQCgeDAYBgorBgEE
 # AYI3AgEMMQowCKACgAChAoAAMBkGCSqGSIb3DQEJAzEMBgorBgEEAYI3AgEEMBwG
-# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBQuFo9O
-# SAju3QUgW2Wm/gv4DSdAMTANBgkqhkiG9w0BAQEFAASBgF+ER20zBv0ppl6i/ZNY
-# xTkpkk6sD63Xo5CgG37aKu7tNOtIVI9c4DAgR538Zk6WV/Mr5CFEfvaXMF322uWX
-# w+1jWZ0JMj31JawwenJPG9PB+l410B7epPmS4AWy0qOguwev4i5jDLBvWBd4Vkq1
-# 8zvvim4Idho4xDnVHE6NzjYW
+# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBRLGS+w
+# mB3zYT5u5sg7eHNDJ4WpFzANBgkqhkiG9w0BAQEFAASBgBmlclZDM9pSpHdwwDl6
+# VVNwuJdq57GVxvzC1r1sC0HlxiqSyirKo3ApGGQ9JoDhVtgmkMGVE9J3+CC606II
+# NCsu5QYtdXm/3d1lmS1nweKe8Hd58XZ+pfeoWbo0guJDx1LsSQ5G7pb3DekdSJNb
+# 9o2JjIZSZz2wUuLCjrPe/fAg
 # SIG # End signature block
