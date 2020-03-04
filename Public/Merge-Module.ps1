@@ -17,6 +17,8 @@ function Merge-Module {
     AddedWebsite: https://evotec.xyz/powershell-single-psm1-file-versus-multi-file-modules/
     AddedTwitter:
     REVISIONS
+    * 12:42 PM 3/3/2020 fixed missing trailing sbnr (Internal)
+    * 10:36 AM 3/3/2020 added pre-check & echo when unable to locate the psd1 FunctionsToExport value
     * 1:58 PM 3/2/2020 as Set-ModuleFunction isn't properly setting *all* exported, go back to collecting and updating the psm1 & psd1 *both* via regx
     * 9:12 AM 2/29/2020 shift export-modulemember/FooterBlock to bottom, added FUNCTIONS delimiter lines
     * 9:17 AM 2/27/2020 added new -NoAliasExport param, and added the missing 
@@ -407,6 +409,11 @@ function Merge-Module {
             Continue ;
         } ;
 
+        $smsg = "$($sBnrS.replace('-v','-^').replace('v-','^-'))" ;
+        if($verbose){ if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
+        else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; } ; 
+
+
     } ; # loop-E
 
     # append the Export-ModuleMember -Function $publicFunctions  (psd1 functionstoexport is functional instead),
@@ -449,19 +456,15 @@ Export-ModuleMember -Function $(($ExportFunctions) -join ',') -Alias *
     $smsg = "Updating the Psd1 FunctionsToExport to match" ; 
     if($verbose){ if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
     else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; } ; 
-    if(test-path -path $PsdName){
-        #Set-ModuleFunction -path $PsdName -whatif:$($whatif) ; 
-        # BuildHelpers cmdlet above isn't fully populating with all funcs in public: FunctionsToExport = @('build-VSCConfig','Get-CommentBlocks','get-VersionInfo','Merge-Module','parseHelp')
-        # switch back to manual local updates
-        $rgxFuncs2Export = 'FunctionsToExport((\s)*)=((\s)*).*'
-        #'FunctionsToExport((\s)*)=((\s)*)((@\()*).*((\))*)'
-        $psd1Profile = gci $PsdName | ss -Pattern $rgxFuncs2Export ; 
-        $tf = $PsdName; 
+    $rgxFuncs2Export = 'FunctionsToExport((\s)*)=((\s)*).*' ; 
+    $tf = $PsdName ; 
+    # switch back to manual local updates
+    if($psd1ExpMatch = gci $tf | ss -Pattern $rgxFuncs2Export ){
         $enc=$null ; $enc=get-FileEncoding -path $tf ;
         if($enc -eq 'ASCII') { 
             $enc = 'UTF8' ; 
             $smsg = "(ASCI encoding detected, converting to UTF8)" ; 
-            if($verbose){ if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
+            if($verbose){ if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } 
             else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; } ; 
         } ; # force damaged/ascii to UTF8
         $pltSetCon=[ordered]@{ Path=$tf ; whatif=$($whatif) ;  } ;
@@ -470,8 +473,8 @@ Export-ModuleMember -Function $(($ExportFunctions) -join ',') -Alias *
             $_ -replace $rgxFuncs2Export , ("FunctionsToExport = " + "@('" + $($ExportFunctions -join "','") + "')") 
         } | Set-Content @pltSetCon ; 
     } else { 
-        $smsg = "UNABLE TO test-path -path $($PsdName)`nFunctionsToExport CAN'T BE UPDATED!" ; 
-        if($verbose){ if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
+        $smsg = "UNABLE TO Regex out $($rgxFuncs2Export) from $($tf)`nFunctionsToExport CAN'T BE UPDATED!" ; 
+        if($verbose){ if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN } #Error|Warn|Debug 
         else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; } ; 
     } ; 
 

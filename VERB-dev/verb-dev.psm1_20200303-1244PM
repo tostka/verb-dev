@@ -5,7 +5,7 @@
 .SYNOPSIS
 VERB-dev - Development PS Module-related generic functions
 .NOTES
-Version     : 1.4.12
+Version     : 1.4.11
 Author      : Todd Kadrie
 Website     :	https://www.toddomation.com
 Twitter     :	@tostka
@@ -745,7 +745,6 @@ function Merge-Module {
     AddedWebsite: https://evotec.xyz/powershell-single-psm1-file-versus-multi-file-modules/
     AddedTwitter:
     REVISIONS
-    * 12:42 PM 3/3/2020 fixed missing trailing sbnr (Internal)
     * 10:36 AM 3/3/2020 added pre-check & echo when unable to locate the psd1 FunctionsToExport value
     * 1:58 PM 3/2/2020 as Set-ModuleFunction isn't properly setting *all* exported, go back to collecting and updating the psm1 & psd1 *both* via regx
     * 9:12 AM 2/29/2020 shift export-modulemember/FooterBlock to bottom, added FUNCTIONS delimiter lines
@@ -1136,11 +1135,6 @@ function Merge-Module {
             #Exit #STOP(debug)|EXIT(close)|Continue(move on in loop cycle) ;
             Continue ;
         } ;
-
-        $smsg = "$($sBnrS.replace('-v','-^').replace('v-','^-'))" ;
-        if($verbose){ if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
-        else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; } ; 
-
 
     } ; # loop-E
 
@@ -1577,8 +1571,8 @@ Export-ModuleMember -Function build-VSCConfig,Get-CommentBlocks,get-FunctionBloc
 # SIG # Begin signature block
 # MIIELgYJKoZIhvcNAQcCoIIEHzCCBBsCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUyNr9FRvWcsGt9v0kXFRD4MjN
-# HAygggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQU5bpUJFeP0xbDEIJSZOvxQYCd
+# R/SgggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
 # MCwxKjAoBgNVBAMTIVBvd2VyU2hlbGwgTG9jYWwgQ2VydGlmaWNhdGUgUm9vdDAe
 # Fw0xNDEyMjkxNzA3MzNaFw0zOTEyMzEyMzU5NTlaMBUxEzARBgNVBAMTClRvZGRT
 # ZWxmSUkwgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBALqRVt7uNweTkZZ+16QG
@@ -1593,9 +1587,9 @@ Export-ModuleMember -Function build-VSCConfig,Get-CommentBlocks,get-FunctionBloc
 # AWAwggFcAgEBMEAwLDEqMCgGA1UEAxMhUG93ZXJTaGVsbCBMb2NhbCBDZXJ0aWZp
 # Y2F0ZSBSb290AhBaydK0VS5IhU1Hy6E1KUTpMAkGBSsOAwIaBQCgeDAYBgorBgEE
 # AYI3AgEMMQowCKACgAChAoAAMBkGCSqGSIb3DQEJAzEMBgorBgEEAYI3AgEEMBwG
-# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBQLzafE
-# e7LIC6HY5eskbIEnofzbETANBgkqhkiG9w0BAQEFAASBgJi0prv3V05ynaY4dz2l
-# AeayHcxjmtI4Zz32BmP3TJzzD5CnXEwsmAVT1u/LLxxBiI9f7LT32dVTe7oSZk1K
-# v0zj/C6OTdfWsnj0ALOWFMy7GOb9bHw5o2g/RnDf6YlIpZSD2BjoI6WIMYbc3078
-# pSTlWdbiB9xg/LmMCQ97MRqt
+# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBTpjz/a
+# KIsPfIOFg/DEt+laSrFoujANBgkqhkiG9w0BAQEFAASBgBGRMwyifNjWcGTDpo9j
+# DUOlUzil9QLgx065tXLaHawEi5RiaMVvsyk5vEaz/V2YUt6+bmw6o4o25fPw6pL3
+# u3HpWyVhk8ZYedB/+b1Jn9QtivrdZsIn9ISM7QggeDYKTTkwoO39zv8TX7CfFOZS
+# ZqOpJnGqeV2FCha1buiXA7IJ
 # SIG # End signature block
