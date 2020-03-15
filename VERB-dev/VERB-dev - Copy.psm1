@@ -18,7 +18,6 @@ AddedCredit : REFERENCE
 AddedWebsite:	REFERENCEURL
 AddedTwitter:	@HANDLE / http://twitter.com/HANDLE
 REVISIONS
-* 3:27 PM 3/15/2020 load-Module: added $PsmNameTmp, $PsdNameTmp and shifted updating to a _TMP file of each, which at end, if error free, overwrites the current functional copy (correcting prior issue with corruption of existing copy, when there were processing errors). 
 * 3:00 PM 2/24/2020 1.2.8, pulled #Requires RunAsAdministrator, convertto-module runs as UID, doesn't have it
 * 1/14/2020 - 1.2.7, final mod build (updated content file vers to match latest psd1)
 # * 10:33 AM 12/30/2019 Merge-Module():951,952 assert sorts into alpha order (make easier to find in the psm1) ; fixed/debugged monolithic build options, now works. Could use some code to autoupdate all .NOTES:Version fields, but that's for future. ;Added code to update against monolithic/non-dyn-incl psm1s. Parses CBH & meta blocks out & constructs a new psm1 from the content. ; dbgd merge-module.ps1 w/in process-NewModule.ps1, functional so far. ; parseHelp(): added CBH .INPUTS & .OUTPUTS, specifying returns hash of get-help parsed output, and presence of CBH in the file ; ; profile-FileAST: updated CBH: added INPUTS & OUTPUTS, including hash properties returned ; Get-CommentBlocks:updated cbh and added .INPUTS/.OUTPUTS cbh entries, detailing the subcompontents of the hashtable returned
@@ -746,8 +745,6 @@ function Merge-Module {
     AddedWebsite: https://evotec.xyz/powershell-single-psm1-file-versus-multi-file-modules/
     AddedTwitter:
     REVISIONS
-    * 3:27 PM 3/15/2020 load-Module: added $PsmNameTmp, $PsdNameTmp and shifted updating to a _TMP file of each, which at end, if error free, overwrites the current functional copy (correcting prior issue with corruption of existing copy, when there were processing errors). 
-    * failing to load verb-io content, added a forceload if get-fileencoding isn't present, added new PassStatus tests and passed back in output, also now does the build in a .psm1_TMP file, to avoid damaging last functional copy
     * 12:42 PM 3/3/2020 fixed missing trailing sbnr (Internal)
     * 10:36 AM 3/3/2020 added pre-check & echo when unable to locate the psd1 FunctionsToExport value
     * 1:58 PM 3/2/2020 as Set-ModuleFunction isn't properly setting *all* exported, go back to collecting and updating the psm1 & psd1 *both* via regx
@@ -821,15 +818,6 @@ function Merge-Module {
     $rgxSigStart='#\sSIG\s#\sBegin\ssignature\sblock' ; 
     $rgxSigEnd='#\sSIG\s#\sEnd\ssignature\sblock' ; 
 
-    $PassStatus = $null ;
-    $PassStatus = @() ;
-
-    $tModCmdlet = "Get-FileEncoding" ; 
-    if(!(test-path function:$tModCmdlet)){
-         write-warning -verbose:$true  "UNABLE TO VALIDATE PRESENCE OF $tModCmdlet";
-         $tModFile = "verb-IO.ps1" ; $sLoad = (join-path -path $LocalInclDir -childpath $tModFile) ; if (Test-Path $sLoad) {     Write-Verbose -verbose ((Get-Date).ToString("HH:mm:ss") + "LOADING:" + $sLoad) ; . $sLoad ; if ($showdebug) { Write-Verbose -verbose "Post $sLoad" }; } else {     $sLoad = (join-path -path $backInclDir -childpath $tModFile) ; if (Test-Path $sLoad) {         Write-Verbose -verbose ((Get-Date).ToString("HH:mm:ss") + "LOADING:" + $sLoad) ; . $sLoad ; if ($showdebug) { Write-Verbose -verbose "Post $sLoad" };     }     else { Write-Warning ((Get-Date).ToString("HH:mm:ss") + ":MISSING:" + $sLoad + " EXITING...") ; exit; } ; } ;
-    } ; 
-
     if($logspec){
         $logging=$logspec.logging ;
         $logfile=$logspec.logfile ;
@@ -850,9 +838,8 @@ function Merge-Module {
 
     $PsmName="$ModuleDestinationPath\$ModuleName.psm1" ;
     $PsdName="$ModuleDestinationPath\$ModuleName.psd1" ;
-    $PsmNameTmp="$ModuleDestinationPath\$ModuleName.psm1_TMP" ;
-    $PsdNameTmp="$ModuleDestinationPath\$ModuleName.psd1_TMP" ;
 
+    $PassStatus = $null ;
 
     # backup existing & purge the dyn-include block
     if(test-path -path $PsmName){
@@ -941,12 +928,10 @@ function Merge-Module {
 
 
         if($updatedContent){
-            $bRet = Set-FileContent -Text $updatedContent -Path $PsmNameTmp -showdebug:$($showdebug) -whatif:$($whatif) ;
-            if (!$bRet) {throw "FAILURE" } else {
-                $PassStatus += ";UPDATED:Set-FileContent "; 
-            }  ;
+            $bRet = Set-FileContent -Text $updatedContent -Path $PsmName -showdebug:$($showdebug) -whatif:$($whatif) ;
+            if (!$bRet) {throw "FAILURE" } ;
         } else { 
-            $PassStatus += ";ERROR:Set-FileContent"; 
+            $PassStatus += ";ERROR"; 
             $smsg= "NO PARSEABLE METADATA/CBH CONTENT IN EXISTING FILE, TO BUILD UPDATED PSM1 FROM!`n$($PsmName)" ;        
             if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Error } #Error|Warn
             else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
@@ -980,10 +965,9 @@ function Merge-Module {
             $bRetry=$false ; 
             TRY {
                 new-item @pltDir | out-null ;
-                $PassStatus += ";new-item:UPDATED"; 
             } CATCH {
                 $ErrorTrapped = $Error[0] ;
-                $PassStatus += ";new-item:ERROR";        
+                $PassStatus += ";ERROR";        
                 $smsg= "Failed processing $($ErrorTrapped.Exception.ItemName). `nError Message: $($ErrorTrapped.Exception.Message)`nError Details: $($ErrorTrapped)" ;        
                 if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Error } #Error|Warn
                 else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } 
@@ -997,10 +981,9 @@ function Merge-Module {
                 $error.clear() ;
                 TRY {
                     new-item @pltDir | out-null ;
-                    $PassStatus += ";new-item:UPDATED"; 
                 } CATCH {
                     $ErrorTrapped = $Error[0] ;
-                    $PassStatus += ";new-item:ERROR";        
+                    $PassStatus += ";ERROR";        
                     $smsg= "Failed processing $($ErrorTrapped.Exception.ItemName). `nError Message: $($ErrorTrapped.Exception.Message)`nError Details: $($ErrorTrapped)" ;        
                     if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Error }  #Error|Warn
                     else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
@@ -1030,11 +1013,10 @@ function Merge-Module {
                 $error.clear() ;
                 TRY {
                     new-item @pltDir | out-null ;
-                    $PassStatus += ";new-item:UPDATED"; 
                 } CATCH {
                     $ErrorTrapped = $Error[0] ;
                     $bRetry=$true ; 
-                    $PassStatus += ";new-item:ERROR"; 
+                    $PassStatus += ";ERROR"; 
                     $smsg= "Failed processing $($ErrorTrapped.Exception.ItemName). `nError Message: $($ErrorTrapped.Exception.Message)`nError Details: $($ErrorTrapped)" ;        
                     if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Error } #Error|Warn
                     else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
@@ -1047,10 +1029,9 @@ function Merge-Module {
                     $error.clear() ;
                     TRY {
                         new-item @pltDir | out-null ;
-                        $PassStatus += ";new-item:UPDATED"; 
                     } CATCH {
                         $ErrorTrapped = $Error[0] ;
-                        $PassStatus += ";new-item:ERROR"; 
+                        $PassStatus += ";ERROR"; 
                         $smsg= "Failed processing $($ErrorTrapped.Exception.ItemName). `nError Message: $($ErrorTrapped.Exception.Message)`nError Details: $($ErrorTrapped)" ;        
                         if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Error } #Error|Warn
                         else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
@@ -1075,7 +1056,7 @@ function Merge-Module {
                 $ComponentModules = Get-ChildItem -Path $ModuleSource\*.psm1 -Recurse -ErrorAction SilentlyContinue | sort name;
             } ; 
             $pltAdd = @{
-                Path=$PsmNameTmp ;
+                Path=$PsmName ;
                 whatif=$whatif;
             } ;
             foreach ($ScriptFile in $ComponentScripts) {
@@ -1134,7 +1115,6 @@ function Merge-Module {
                     exit ; 
                 } ; 
                 $Content | Add-Content @pltAdd ;
-                $PassStatus += ";Add-Content:UPDATED"; 
                 # by contrast, this is NON-AST parsed - it's appending the entire raw file content. Shouldn't need delimiters - they'd already be in source .psm1
             } ;
 
@@ -1142,7 +1122,7 @@ function Merge-Module {
             
         } CATCH {
             $ErrorTrapped = $Error[0] ;
-            $PassStatus += ";ComponentLoop:ERROR"; 
+            $PassStatus += ";ERROR"; 
             $smsg= "Failed processing $($ErrorTrapped.Exception.ItemName). `nError Message: $($ErrorTrapped.Exception.Message)`nError Details: $($ErrorTrapped)" ;        
             if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Error } #Error|Warn
             else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
@@ -1189,17 +1169,15 @@ Export-ModuleMember -Function $(($ExportFunctions) -join ',') -Alias *
         else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
         #$updatedContent += $FooterBlock |out-string ; 
         $pltAdd = @{
-            Path=$PsmNameTmp ;
+            Path=$PsmName ;
             whatif=$whatif;
         } ;
         $FooterBlock | Add-Content @pltAdd ;
-        $PassStatus += ";Add-Content:UPDATED"; 
     } else {
         $smsg= "NoAliasExport specified:Skipping FooterBlock add" ;  
         if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info }  #Error|Warn|Debug 
         else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
         "#*======^ END FUNCTIONS ^======" | Add-Content @pltAdd ;
-        $PassStatus += ";Add-Content:UPDATED"; 
     } ; 
 
     # update the manifest too: # should be forced array: FunctionsToExport = @('build-VSCConfig','Get-CommentBlocks','get-VersionInfo','Merge-Module','parseHelp')
@@ -1217,89 +1195,25 @@ Export-ModuleMember -Function $(($ExportFunctions) -join ',') -Alias *
             if($verbose){ if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } 
             else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; } ; 
         } ; # force damaged/ascii to UTF8
-        $pltSetCon=[ordered]@{ Path=$PsdNameTmp ; whatif=$($whatif) ;  } ;
+        $pltSetCon=[ordered]@{ Path=$tf ; whatif=$($whatif) ;  } ;
         if($enc){$pltSetCon.add('encoding',$enc) } ;
         (Get-Content $tf) | Foreach-Object {
             $_ -replace $rgxFuncs2Export , ("FunctionsToExport = " + "@('" + $($ExportFunctions -join "','") + "')") 
         } | Set-Content @pltSetCon ; 
-        $PassStatus += ";Set-Content:UPDATED"; 
     } else { 
         $smsg = "UNABLE TO Regex out $($rgxFuncs2Export) from $($tf)`nFunctionsToExport CAN'T BE UPDATED!" ; 
         if($verbose){ if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN } #Error|Warn|Debug 
         else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; } ; 
     } ; 
 
-    #if($PassStatus.tolower().contains('error')){ # not properly matching, switch to ss regex, the appends are line per append, multiline seems to break contains.
-    if($PassStatus.tolower() | select-string '.*error.*'){
-        $smsg = "ERRORS LOGGED, ABORTING UPDATE OF ORIGINAL .PSM1!:`n$($pltCpy.Destination)" ; 
-        if($verbose){ if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level ERROR} #Error|Warn|Debug 
-        else{ write-WARNING "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; } ; 
-    } elseif(!$whatif) { 
-        if(test-path $PsmNameTmp){
-            $pltCpy = @{
-                Path=$PsmNameTmp ;
-                Destination=$PsmName ; 
-                whatif=$whatif;
-                ErrorAction="STOP" ; 
-            } ;
-            $smsg = "Processing error free: Overwriting temp .psm1 with temp copy`ncopy-item w`n$(($pltCpy|out-string).trim())" ; 
-            if($verbose){ if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
-            else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; } ;     
-            $error.clear() ;
-            TRY {
-                copy-Item @pltCpy ;
-                $PassStatus += ";copy-Item:UPDATED"; 
-            } CATCH {
-                Write-Warning "$(get-date -format 'HH:mm:ss'): Failed processing $($_.Exception.ItemName). `nError Message: $($_.Exception.Message)`nError Details: $($_)" ;
-                $PassStatus += ";copy-Item:ERROR"; 
-                Exit #STOP(debug)|EXIT(close)|Continue(move on in loop cycle) ; 
-            } ; 
-        } else {
-            $smsg = "UNABLE TO LOCATE temp .psm1!:`n$($pltCpy.path)" ; 
-            if($verbose){ if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level ERROR} #Error|Warn|Debug 
-            else{ write-WARNING "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; } ; 
-            $PassStatus += ";test-path $PsmNameTmp:ERROR"; 
-        } ;  
-        # $PsdNameTmp/$PsdName
-        if(test-path $PsdNameTmp){
-            $pltCpy = @{
-                Path=$PsdNameTmp ;
-                Destination=$PsdName ; 
-                whatif=$whatif;
-                ErrorAction="STOP" ; 
-            } ;
-            $smsg = "Processing error free: Overwriting temp .psd1 with temp copy`ncopy-item w`n$(($pltCpy|out-string).trim())" ; 
-            if($verbose){ if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
-            else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; } ;     
-            $error.clear() ;
-            TRY {
-                copy-Item @pltCpy ;
-                $PassStatus += ";copy-Item:UPDATE"; 
-            } CATCH {
-                Write-Warning "$(get-date -format 'HH:mm:ss'): Failed processing $($_.Exception.ItemName). `nError Message: $($_.Exception.Message)`nError Details: $($_)" ;
-                $PassStatus += ";copy-Item:ERROR"; 
-                Exit #STOP(debug)|EXIT(close)|Continue(move on in loop cycle) ; 
-            } ; 
-        } else {
-            $smsg = "UNABLE TO LOCATE temp .psm1!:`n$($pltCpy.path)" ; 
-            if($verbose){ if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level ERROR} #Error|Warn|Debug 
-            else{ write-WARNING "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; } ; 
-            $PassStatus += ";test-path $PsdNameTmp:ERROR"; 
-        } ;  
-    } else {
-        $smsg = "(whatif:skipping updates)" ; 
-        if($verbose){ if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level ERROR} #Error|Warn|Debug 
-        else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; } ; 
-    }; 
     $ReportObj=[ordered]@{
         Status=$true ; 
         PsmNameBU = $PsmNameBU ; 
         PassStatus = $PassStatus ;
     } ; 
-    if($PassStatus.tolower() | select-string '.*error.*'){
-        $ReportObj.Status=$false ; 
-    } ; 
     $ReportObj | write-output ;
+
+
 }
 
 #*------^ Merge-Module.ps1 ^------
