@@ -5,7 +5,7 @@
 .SYNOPSIS
 VERB-dev - Development PS Module-related generic functions
 .NOTES
-Version     : 1.4.16
+Version     : 1.4.13
 Author      : Todd Kadrie
 Website     :	https://www.toddomation.com
 Twitter     :	@tostka
@@ -330,9 +330,9 @@ function get-FunctionBlock {
 
     #Requires -Version 3
     Param(
-        [Parameter(Position=0,MandaTory=$True,ValueFromPipeline=$true,ValueFromPipelineByPropertyName=$true,HelpMessage="Script to be parsed [path-to\script.ps1]")][ValidateNotNullOrEmpty()]
+        [Parameter(Position=0,Mandatory=$True,ValueFromPipeline=$true,ValueFromPipelineByPropertyName=$true,HelpMessage="Script to be parsed [path-to\script.ps1]")][ValidateNotNullOrEmpty()]
         $ParseFile
-        ,[Parameter(Position=1,MandaTory=$True,HelpMessage="Function name to be found and displayed from ParseFile")]
+        ,[Parameter(Position=1,Mandatory=$True,HelpMessage="Function name to be found and displayed from ParseFile")]
         $functionName
     )  ;
 
@@ -384,7 +384,6 @@ function get-FunctionBlocks {
     Website:	http://tinstoys.blogspot.com
     Twitter:	http://twitter.com/tostka
     REVISIONS   :
-    # 5:55 PM 3/15/2020 fix corrupt ABC typo
     # 10:21 AM 9/27/2019 just pull the functions in a file and pipeline them, nothing more.
     .DESCRIPTION
     .PARAMETER  ParseFile
@@ -1664,8 +1663,8 @@ Export-ModuleMember -Function build-VSCConfig,Get-CommentBlocks,get-FunctionBloc
 # SIG # Begin signature block
 # MIIELgYJKoZIhvcNAQcCoIIEHzCCBBsCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUxz4V6ZPYRoB9cjGj/wG76I9M
-# Gz2gggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUB47vUF1ALId5Aytl0lHrsUox
+# lV6gggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
 # MCwxKjAoBgNVBAMTIVBvd2VyU2hlbGwgTG9jYWwgQ2VydGlmaWNhdGUgUm9vdDAe
 # Fw0xNDEyMjkxNzA3MzNaFw0zOTEyMzEyMzU5NTlaMBUxEzARBgNVBAMTClRvZGRT
 # ZWxmSUkwgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBALqRVt7uNweTkZZ+16QG
@@ -1680,9 +1679,9 @@ Export-ModuleMember -Function build-VSCConfig,Get-CommentBlocks,get-FunctionBloc
 # AWAwggFcAgEBMEAwLDEqMCgGA1UEAxMhUG93ZXJTaGVsbCBMb2NhbCBDZXJ0aWZp
 # Y2F0ZSBSb290AhBaydK0VS5IhU1Hy6E1KUTpMAkGBSsOAwIaBQCgeDAYBgorBgEE
 # AYI3AgEMMQowCKACgAChAoAAMBkGCSqGSIb3DQEJAzEMBgorBgEEAYI3AgEEMBwG
-# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBSjgA0v
-# B07TCb2t2nzhAfRznVsgejANBgkqhkiG9w0BAQEFAASBgHksoCURZX7gDFHhdQKm
-# +wq61ue36kC/gxXpUD9QTxSGIdJSk842JzQ6SY8oYvANKIFPWX5eJH7wsRMk6NMa
-# rUHV51KQbpaqVV6QT8AE02z70f0RYPvIcDS5HDsLThyz6QQYXBtC0+uhlVN8h68S
-# zzTWLWb9NGRui3BVpSowNrMb
+# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBTX3obc
+# DBllwT9y6FWdvHuSRlPPqzANBgkqhkiG9w0BAQEFAASBgHPVgEwCPRMf5kYDO/LN
+# Q12NgLUUVn9CtCGpl5McLhpxj1Et8AMT88RYmir4pnOVLJszygX9YMuYaDNtjKU8
+# mDMcjMQ1lvHiqssmKYjnkbPiJcKoNGUvbgvaBzPrwzTCuj7nnRUUTb9J8V/rWG9t
+# jqg+uVSi3Cumsd454w3azXW0
 # SIG # End signature block

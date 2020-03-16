@@ -33,9 +33,9 @@ function get-FunctionBlock {
 
     #Requires -Version 3
     Param(
-        [Parameter(Position=0,MandaABCy=$True,ValueFromPipeline=$true,ValueFromPipelineByPropertyName=$true,HelpMessage="Script to be parsed [path-to\script.ps1]")][ValidateNotNullOrEmpty()]
+        [Parameter(Position=0,MandaTory=$True,ValueFromPipeline=$true,ValueFromPipelineByPropertyName=$true,HelpMessage="Script to be parsed [path-to\script.ps1]")][ValidateNotNullOrEmpty()]
         $ParseFile
-        ,[Parameter(Position=1,MandaABCy=$True,HelpMessage="Function name to be found and displayed from ParseFile")]
+        ,[Parameter(Position=1,MandaTory=$True,HelpMessage="Function name to be found and displayed from ParseFile")]
         $functionName
     )  ;
 

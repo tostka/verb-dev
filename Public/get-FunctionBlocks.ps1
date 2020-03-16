@@ -9,6 +9,7 @@ function get-FunctionBlocks {
     Website:	http://tinstoys.blogspot.com
     Twitter:	http://twitter.com/tostka
     REVISIONS   :
+    # 5:55 PM 3/15/2020 fix corrupt ABC typo
     # 10:21 AM 9/27/2019 just pull the functions in a file and pipeline them, nothing more.
     .DESCRIPTION
     .PARAMETER  ParseFile
@@ -45,7 +46,7 @@ function get-FunctionBlocks {
 
     #Requires -Version 3
     Param(
-        [Parameter(Position = 0, MandaABCy = $True, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true, HelpMessage = "Script to be parsed [path-to\script.ps1]")][ValidateNotNullOrEmpty()]
+        [Parameter(Position = 0, Mandatory = $True, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true, HelpMessage = "Script to be parsed [path-to\script.ps1]")][ValidateNotNullOrEmpty()]
         $ParseFile
     )  ;
 
