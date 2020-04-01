@@ -5,7 +5,7 @@
 .SYNOPSIS
 VERB-dev - Development PS Module-related generic functions
 .NOTES
-Version     : 1.4.16
+Version     : 1.4.17
 Author      : Todd Kadrie
 Website     :	https://www.toddomation.com
 Twitter     :	@tostka
@@ -147,6 +147,98 @@ function build-VSCConfig {
 }
 
 #*------^ build-VSCConfig.ps1 ^------
+
+#*------v check-PsLocalRepoRegistration.ps1 v------
+function check-PsLocalRepoRegistration {
+    <#
+    .SYNOPSIS
+    check-PsLocalRepoRegistration - Check for PSRepository for $localPSRepo, register if missing
+    .NOTES
+    Version     : 1.0.0
+    Author: Todd Kadrie
+    Website:	http://toddomation.com
+    Twitter:	http://twitter.com/tostka
+    CreatedDate : 2020-03-29
+    FileName    : check-PsLocalRepoRegistration
+    License     : MIT License
+    Copyright   : (c) 2020 Todd Kadrie
+    Github      : https://github.com/tostka
+    Tags        : Powershell,Git,Repository
+    REVISIONS
+    * 7:00 PM 3/29/2020 init
+    .DESCRIPTION
+    check-PsLocalRepoRegistration - Check for PSRepository for $localPSRepo, register if missing
+    .PARAMETER  User
+    User security principal (defaults to current user)[-User `$SecPrinobj]
+    .PARAMETER ShowDebug
+    Parameter to display Debugging messages [-ShowDebug switch]
+    .PARAMETER Whatif
+    Parameter to run a Test no-change pass [-Whatif switch]
+    .EXAMPLE
+    $bRet = check-PsLocalRepoRegistration -Repository $localPSRepo 
+    Check registration on the repo defined by variable $localPSRepo
+    .LINK
+    #>
+    [CmdletBinding()]
+    PARAM(
+        [Parameter(Mandatory=$True,ValueFromPipeline=$true,ValueFromPipelineByPropertyName=$true,HelpMessage="Local Repository [-Repository repoName]")]
+        $Repository = $localPSRepo,
+        [Parameter(HelpMessage="Debugging Flag [-showDebug]")]
+        [switch] $showDebug,
+        [Parameter(HelpMessage="Whatif Flag  [-whatIf]")]
+        [switch] $whatIf=$true
+    ) ; 
+    $verbose = ($VerbosePreference -eq 'Continue') ; 
+    # on cold installs there *is* no repo, precheck
+    if($Repository){
+        if(!(Get-PSRepository -Name $Repository -ea 0)){
+            $repo = @{
+                Name = 'lyncRepo' ;
+                SourceLocation = $null;
+                PublishLocation = $null;
+                InstallationPolicy = 'Trusted' ;
+            } ;
+            if($Repository = 'lyncRepo'){
+                $RepoPath = "\\lynmsv10\lync_fs\scripts\sc" ;
+                $repo.Name = 'lyncRepo' ; 
+                $repo.SourceLocation = $RepoPath ; 
+                $repo.PublishLocation = $RepoPath ;
+            } elseif($Repository = "tinRepo") {
+                #Name = 'tinRepo', Location = '\\SYNNAS\archs\archs\sc'; IsTrusted = 'True'; IsRegistered = 'True'.
+                $RepoPath = '\\SYNNAS\archs\archs\sc' ;
+                $repo.Name = 'tinRepo' ; 
+                $repo.SourceLocation = $RepoPath ; 
+                $repo.PublishLocation = $RepoPath ;
+            } else { 
+                $smsg = "UNRECOGNIZED `$Repository" ; 
+                if($verbose){ if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level warning } #Error|Warn|Debug 
+                else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; } ; 
+            }; 
+            $smsg = "MISSING REPO REGISTRATION!`nRegister-PSRepository w`n$(($repo|out-string).trim())" ; 
+            if($verbose){ if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
+            else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; } ; 
+            if(!$whatif){
+                $bReturn = Register-PSRepository @repo ;
+                $bReturn | write-output ;             
+            } else { 
+                $smsg = "(whatif detected: skipping execution - Register-PSRepository lacks -whatif support)" ; 
+                if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
+                else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; 
+            }
+        } else {
+            $smsg = "($Repository repository is already registered in this profile)" ; 
+            if($verbose){ if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
+            else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; } ; 
+            $true | write-output ;              
+        } ;  
+    } else {
+        $smsg = "MISSING REPO REGISTRATION!`nNO RECOGNIZED `$Repository DEFINED!" ; 
+        if($verbose){ if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level warning } #Error|Warn|Debug 
+        else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; } ; 
+    }; 
+}
+
+#*------^ check-PsLocalRepoRegistration.ps1 ^------
 
 #*------v Get-CommentBlocks.ps1 v------
 function Get-CommentBlocks {
@@ -1658,14 +1750,14 @@ function parseHelp {
 
 #*======^ END FUNCTIONS ^======
 
-Export-ModuleMember -Function build-VSCConfig,Get-CommentBlocks,get-FunctionBlock,get-FunctionBlocks,get-ScriptProfileAST,get-VersionInfo,load-Module,Merge-Module,New-GitHubGist,parseHelp -Alias *
+Export-ModuleMember -Function build-VSCConfig,check-PsLocalRepoRegistration,Get-CommentBlocks,get-FunctionBlock,get-FunctionBlocks,get-ScriptProfileAST,get-VersionInfo,load-Module,Merge-Module,New-GitHubGist,parseHelp -Alias *
 
 
 # SIG # Begin signature block
 # MIIELgYJKoZIhvcNAQcCoIIEHzCCBBsCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUxz4V6ZPYRoB9cjGj/wG76I9M
-# Gz2gggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUSNhoUw8A4hUS9pRiTsvrSCYs
+# 2LWgggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
 # MCwxKjAoBgNVBAMTIVBvd2VyU2hlbGwgTG9jYWwgQ2VydGlmaWNhdGUgUm9vdDAe
 # Fw0xNDEyMjkxNzA3MzNaFw0zOTEyMzEyMzU5NTlaMBUxEzARBgNVBAMTClRvZGRT
 # ZWxmSUkwgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBALqRVt7uNweTkZZ+16QG
@@ -1680,9 +1772,9 @@ Export-ModuleMember -Function build-VSCConfig,Get-CommentBlocks,get-FunctionBloc
 # AWAwggFcAgEBMEAwLDEqMCgGA1UEAxMhUG93ZXJTaGVsbCBMb2NhbCBDZXJ0aWZp
 # Y2F0ZSBSb290AhBaydK0VS5IhU1Hy6E1KUTpMAkGBSsOAwIaBQCgeDAYBgorBgEE
 # AYI3AgEMMQowCKACgAChAoAAMBkGCSqGSIb3DQEJAzEMBgorBgEEAYI3AgEEMBwG
-# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBSjgA0v
-# B07TCb2t2nzhAfRznVsgejANBgkqhkiG9w0BAQEFAASBgHksoCURZX7gDFHhdQKm
-# +wq61ue36kC/gxXpUD9QTxSGIdJSk842JzQ6SY8oYvANKIFPWX5eJH7wsRMk6NMa
-# rUHV51KQbpaqVV6QT8AE02z70f0RYPvIcDS5HDsLThyz6QQYXBtC0+uhlVN8h68S
-# zzTWLWb9NGRui3BVpSowNrMb
+# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBRsSX0j
+# 6tMfIQywQE7if6+HptMfiTANBgkqhkiG9w0BAQEFAASBgGWuSXt+khWfJZ5ZmKoz
+# JHHPRX3SyvtyFPEr+9bzJMqonPd/bHqftlIsXdMiaoyTP2FCoKweYWnWCtwiV2Sk
+# KcqnWauxpjRSvucQHTrgFdGh1iGKFWPIxQwi79ajZ5D0eip1PhClKXExK9y0K6iR
+# yEci56Xue0pZyPLyk7sulemV
 # SIG # End signature block
