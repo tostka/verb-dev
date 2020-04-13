@@ -1,8 +1,8 @@
-﻿#*------v Function Get-CommentBlocks v------
+﻿#*------v Get-CommentBlocks.ps1 v------
 function Get-CommentBlocks {
     <#
     .SYNOPSIS
-    Get-CommentBlocks - Write output string to specified File
+    Get-CommentBlocks - Parse specified Path (or inbound Textcontent) for Comment-BasedHelp, and surrounding structures.
     .NOTES
     Version     : 1.1.0
     Author      : Todd Kadrie
@@ -17,12 +17,15 @@ function Get-CommentBlocks {
     AddedWebsite:
     AddedTwitter:
     REVISIONS
+    * 5:19 PM 4/11/2020 added Path variable, and ParameterSet/exlus support
     * 8:36 AM 12/30/2019 Get-CommentBlocks:updated cbh and added .INPUTS/.OUTPUTS cbh entries, detailing the subcompontents of the hashtable returned
     * 8:28 PM 11/17/2019 INIT
     .DESCRIPTION
-    Get-CommentBlocks - Write output string to specified File
-    .PARAMETER  Text
-    RawSourceLines from the target script file (as gathered with get-content
+    Get-CommentBlocks - Parse specified Path (or inbound Textcontent) for Comment-BasedHelp, and surrounding structures. Returns following parsed content: metaBlock (`<#PSScriptInfo..#`>), metaOpen (Line# of start of metaBlock), metaClose (Line# of end of metaBlock), cbhBlock (Comment-Based-Help block), cbhOpen (Line# of start of CBH), cbhClose (Line# of end of CBH), interText (Block of text *between* any metaBlock metaClose line, and any CBH cbhOpen line), metaCBlockIndex ( Of the collection of all block comments - `<#..#`> - the index of the one corresponding to the metaBlock), CbhCBlockIndex  (Of the collection of all block comments - `<#..#`> - the index of the one corresponding to the cbhBlock)
+    .PARAMETER  TextLines 
+    Raw source lines from the target script file (as gathered with get-content) [-TextLines TextArrayObj]
+    .PARAMETER Path
+    Path to a powershell ps1/psm1 file to be parsed for CBH [-Path c:\path-to\script.ps1]
     .PARAMETER ShowDebug
     Parameter to display Debugging messages [-ShowDebug switch]
     .PARAMETER Whatif
@@ -54,16 +57,24 @@ function Get-CommentBlocks {
     #>
     #Requires -Version 3
     ##Requires -RunasAdministrator
+    
     [CmdletBinding()]
     PARAM(
-        [Parameter(Position = 0, Mandatory = $True, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true, HelpMessage = "RawSourceLines from the target script file (as gathered with get-content) [-TextLines TextArrayObj]")]
+        [Parameter(ParameterSetName='Text',Position = 0, Mandatory = $True, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true, HelpMessage = "Raw source lines from the target script file (as gathered with get-content) [-TextLines TextArrayObj]")]
         [ValidateNotNullOrEmpty()]$TextLines,
+        [Parameter(ParameterSetName='File',Position = 0, Mandatory = $True, HelpMessage = "Path to a powershell ps1/psm1 file to be parsed for CBH [-Path c:\path-to\script.ps1]")]
+        [ValidateScript({Test-Path $_})]$Path,
         [Parameter(HelpMessage = "Debugging Flag [-showDebug]")]
         [switch] $showDebug,
         [Parameter(HelpMessage = "Whatif Flag  [-whatIf]")]
         [switch] $whatIf
     ) ;
     $Verbose = ($VerbosePreference -eq "Continue") ; 
+    
+    if($Path){
+        $TextLines = get-content -path $path  ;
+    } ; 
+    
     $AllBlkCommentCloses = $TextLines | Select-string -Pattern '\s*#>' | Select-Object -ExpandProperty LineNumber ;
     $AllBlkCommentOpens = $TextLines | Select-string -Pattern '\s*<#' | Select-Object  -ExpandProperty LineNumber ;
 
@@ -115,7 +126,7 @@ function Get-CommentBlocks {
         $InterText = $TextLines[($metaClose + 1)..($cbhOpen - 1 )] ;
     }
     else {
-        write-verbose -verbose:$true  "$((get-date).ToString('HH:mm:ss')):(doesn't appear to be an inter meta-CBH block)" ;
+        write-verbose -verbose:$true  L"$((get-date).ToString('HH:mm:ss')):(doesn't appear to be an inter meta-CBH block)" ;
     } ;
     <#
     metaBlock : <#PSScriptInfo published script metadata block
@@ -141,4 +152,5 @@ function Get-CommentBlocks {
     } ;
     $objReturn | Write-Output
 
-} ; #*------^ END Function Get-CommentBlocks ^------
+} ; 
+#*------^ Get-CommentBlocks.ps1 ^------
