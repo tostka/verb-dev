@@ -5,7 +5,7 @@
 .SYNOPSIS
 VERB-dev - Development PS Module-related generic functions
 .NOTES
-Version     : 1.4.18
+Version     : 1.4.20
 Author      : Todd Kadrie
 Website     :	https://www.toddomation.com
 Twitter     :	@tostka
@@ -259,12 +259,16 @@ function Get-CommentBlocks {
     AddedWebsite:
     AddedTwitter:
     REVISIONS
+    * 3:49 PM 4/14/2020 minor change
+    * 5:19 PM 4/11/2020 added Path variable, and ParameterSet/exlus support
     * 8:36 AM 12/30/2019 Get-CommentBlocks:updated cbh and added .INPUTS/.OUTPUTS cbh entries, detailing the subcompontents of the hashtable returned
     * 8:28 PM 11/17/2019 INIT
     .DESCRIPTION
-    Get-CommentBlocks - Write output string to specified File
-    .PARAMETER  Text
-    RawSourceLines from the target script file (as gathered with get-content
+    Get-CommentBlocks - Parse specified Path (or inbound Textcontent) for Comment-BasedHelp, and surrounding structures. Returns following parsed content: metaBlock (`<#PSScriptInfo..#`>), metaOpen (Line# of start of metaBlock), metaClose (Line# of end of metaBlock), cbhBlock (Comment-Based-Help block), cbhOpen (Line# of start of CBH), cbhClose (Line# of end of CBH), interText (Block of text *between* any metaBlock metaClose line, and any CBH cbhOpen line), metaCBlockIndex ( Of the collection of all block comments - `<#..#`> - the index of the one corresponding to the metaBlock), CbhCBlockIndex  (Of the collection of all block comments - `<#..#`> - the index of the one corresponding to the cbhBlock)
+    .PARAMETER  TextLines 
+    Raw source lines from the target script file (as gathered with get-content) [-TextLines TextArrayObj]
+    .PARAMETER Path
+    Path to a powershell ps1/psm1 file to be parsed for CBH [-Path c:\path-to\script.ps1]
     .PARAMETER ShowDebug
     Parameter to display Debugging messages [-ShowDebug switch]
     .PARAMETER Whatif
@@ -296,23 +300,31 @@ function Get-CommentBlocks {
     #>
     #Requires -Version 3
     ##Requires -RunasAdministrator
+    
     [CmdletBinding()]
     PARAM(
-        [Parameter(Position = 0, Mandatory = $True, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true, HelpMessage = "RawSourceLines from the target script file (as gathered with get-content) [-TextLines TextArrayObj]")]
+        [Parameter(ParameterSetName='Text',Position = 0, Mandatory = $True, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true, HelpMessage = "Raw source lines from the target script file (as gathered with get-content) [-TextLines TextArrayObj]")]
         [ValidateNotNullOrEmpty()]$TextLines,
+        [Parameter(ParameterSetName='File',Position = 0, Mandatory = $True, HelpMessage = "Path to a powershell ps1/psm1 file to be parsed for CBH [-Path c:\path-to\script.ps1]")]
+        [ValidateScript({Test-Path $_})]$Path,
         [Parameter(HelpMessage = "Debugging Flag [-showDebug]")]
         [switch] $showDebug,
         [Parameter(HelpMessage = "Whatif Flag  [-whatIf]")]
         [switch] $whatIf
     ) ;
     $Verbose = ($VerbosePreference -eq "Continue") ; 
+    
+    if($Path){
+        $TextLines = get-content -path $path  ;
+    } ; 
+    
     $AllBlkCommentCloses = $TextLines | Select-string -Pattern '\s*#>' | Select-Object -ExpandProperty LineNumber ;
     $AllBlkCommentOpens = $TextLines | Select-string -Pattern '\s*<#' | Select-Object  -ExpandProperty LineNumber ;
 
     $MetaStart = $TextLines | Select-string -Pattern '\<\#PSScriptInfo' | Select-Object -First 1 -ExpandProperty LineNumber ;
 
     # cycle the comment-block combos till you find the CBH comment block
-    $metaBlock = $null ; $metaBlock = @()
+    $metaBlock = $null ; $metaBlock = @() ; 
     $cbhBlock = $null ; $cbhBlock = @() ;
 
     $rgxCBHKeywords = "\.(SYNOPSIS|DESCRIPTION|PARAMETER|EXAMPLE|INPUTS|OUTPUTS|NOTES|LINK|COMPONENT|ROLE|FUNCTIONALITY|FORWARDHELPTARGETNAME|FORWARDHELPCATEGORY|REMOTEHELPRUNSPACE|EXTERNALHELP)"
@@ -357,7 +369,7 @@ function Get-CommentBlocks {
         $InterText = $TextLines[($metaClose + 1)..($cbhOpen - 1 )] ;
     }
     else {
-        write-verbose -verbose:$true  "$((get-date).ToString('HH:mm:ss')):(doesn't appear to be an inter meta-CBH block)" ;
+        write-verbose -verbose:$true  L"$((get-date).ToString('HH:mm:ss')):(doesn't appear to be an inter meta-CBH block)" ;
     } ;
     <#
     metaBlock : <#PSScriptInfo published script metadata block
@@ -679,6 +691,7 @@ function get-VersionInfo {
     AddedWebsite:	https://stackoverflow.com/questions/38561009/where-is-the-standard-place-to-put-a-powershell-script-version-number
     AddedTwitter:
     REVISIONS
+    * 3:47 PM 4/14/2020 substantially shifted role to parseHelp(), which is less brittle and less likely to fail the critical get-help call that underlies the parsing. 
     * 7:50 AM 1/29/2020 added Cmdletbinding
     * 9:36 AM 12/30/2019 added CBH .INPUTS & OUTPUTS, including description of the hashtable of key/value pairs returned, for existing CBH .NOTES block
     * added explicit -path param to get-help
@@ -716,6 +729,7 @@ function get-VersionInfo {
     $Verbose = ($VerbosePreference -eq "Continue") ; 
     $notes = $null ; $notes = @{ } ;
     # Get the .NOTES section of the script header comment.
+    # key difference from parseHelp is the get-help in that one, doesn't spec -path param, AT ALL, just the value: $HelpParsed = Get-Help -Full $Path.fullname, and it *works* on the same file that won't with below
     if (!$Path) {
         $Help = Get-Help -Full -path $PSCommandPath
     }
@@ -1414,6 +1428,7 @@ function new-CBH {
     Github      : https://github.com/tostka
     Tags        : Powershell,Development,Scripts
     REVISIONS
+    * 11:38 AM 4/14/2020 flipped filename from fullname to name
     * 4:42 PM 4/9/2020 ren NewCBH-> new-CBH shift into verb-Dev.psm1
     * 9:12 PM 11/25/2019 new-CBH: added dummy parameter name fields - drop them and you get no CBH function
     * 6:47 PM 11/24/2019 new-CBH: got revision of through a full pass of adding a new CBH addition to a non-compliant file.
@@ -1474,7 +1489,7 @@ Author      : Todd Kadrie
 Website     : https://www.toddomation.com
 Twitter     : @tostka / http://twitter.com/tostka
 CreatedDate : $(get-date -format yyyy-MM-dd)
-FileName    : $($Path.fullname)
+FileName    : $($Path.name)
 License     : MIT License
 Copyright   : (c)  $(get-date -format yyyy) Todd Kadrie. All rights reserved.
 Github      : https://github.com/tostka
@@ -1706,11 +1721,13 @@ function parseHelp {
     AddedWebsite:
     AddedTwitter:
     REVISIONS
+    * 3:45 PM 4/14/2020 added pretest of $path extension, get-help only works with .ps1/.psm1 script files (misnamed temp files fail to parse)
     * 7:50 AM 1/29/2020 added Cmdletbinding
     * 9:11 AM 12/30/2019 parseHelp(): added CBH .INPUTS & .OUTPUTS, specifying returns hash of get-help parsed output, and presence of CBH in the file
     * 10:03 PM 12/2/201919 INIT
     .DESCRIPTION
     parseHelp - Parse Script and prepend new Comment-based-Help keyed to existing contents
+    Note, if using temp files, you *can't* pull get-help on anything but script/module files, with the proper extension
     .PARAMETER  Path
     Path to script
     .PARAMETER ShowDebug
@@ -1733,6 +1750,7 @@ function parseHelp {
     } ;
     .LINK
     #>
+    # [ValidateScript({Test-Path $_})], [ValidateScript({Test-Path $_})]
     [CmdletBinding()]
     PARAM(
         [Parameter(Position = 0, Mandatory = $True, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true, HelpMessage = "Path to script[-Path path-to\script.ps1]")]
@@ -1748,6 +1766,12 @@ function parseHelp {
     } ;
     # Collect existing HelpParsed
     $error.clear() ;
+    if($Path.Extension -notmatch '\.PS((M)*)1'){
+        $smsg = "Specified -Path is *INVALID* for processing with Get-Help`nMust specify a file with valid .PS1/.PSM1 extensions.`nEXITING" ; 
+        if($verbose){ if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
+        else{ write-error -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; } ; 
+        Exit ; 
+    } ; 
     TRY {
         $HelpParsed = Get-Help -Full $Path.fullname
     }
@@ -1759,6 +1783,8 @@ function parseHelp {
     $objReturn = [ordered]@{
         HelpParsed     = $HelpParsed  ;
         hasExistingCBH = $false ;
+        NotesHash = $null ; 
+        RevisionsText = $null ; 
     } ;
 
     <# CBH keywords to use to detect CBH blocks
@@ -1782,9 +1808,9 @@ function parseHelp {
 
     # 4) determine if target already has CBH:
     if ($showDebug) {
-        $smsg = "$(($helpparsed | select Category,Name,Synopsis, param*,alertset,details,examples |out-string).trim())" ;
-        #$smsg = "CMDLET w`n$((|out-string).trim())" ;
-        $smsg = "`$Path.FullName:$($Path.FullName)" ;
+        $smsg = "`$Path.FullName:$($Path.FullName):`n$(($helpparsed | select Category,Name,Synopsis, param*,alertset,details,examples |out-string).trim())" ;
+        if($verbose){ if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
+        else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; } ; 
     } ;
 
 
@@ -1908,7 +1934,50 @@ function parseHelp {
     #>
 
 
-    }  ;
+    } elseif ($HelpParsed.Name -eq 'default') {
+        # failed to properly parse CBH
+        $objReturn.helpparsed = $null ; 
+        $objReturn.hasExistingCBH = $false ;
+        $objReturn.NotesHash = $null ; 
+    } ;  
+
+    # 12:24 PM 4/13/2020 splice in the get-VersionInfo notes processing code
+    $notes = $null ; $notes = @{ } ;
+    $notesLines = $null ; $notesLineCount = $null ;
+    $revText = $null ; $CurrLine = 0 ; 
+    $rgxNoteMeta = '^((\s)*)\w{3,}((\s*)*)\:((\s*)*)*.*' ; 
+    if ( ($notesLines = $HelpParsed.alertSet.alert.Text -split '\r?\n').Trim() ) {
+        $notesLineCount = ($notesLines | measure).count ;
+        foreach ($line in $notesLines) {
+            $CurrLine++ ; 
+            if (!$line) { continue } ;
+            if($line -match $rgxNoteMeta ){
+                $name = $null ; $value = $null ;
+                if ($line -match '(?i:REVISIONS((\s*)*)((\:)*))') { 
+                    # at this point, from here down should be rev data
+                    $revText = $notesLines[$($CurrLine)..$($notesLineCount)] ;  
+                    $notes.Add("LastRevision", $notesLines[$currLine]) ;
+                    #Continue ;
+                    break ; 
+                } ;
+                if ($line.Contains(':')) {
+                    $nameValue = $null ;
+                    $nameValue = @() ;
+                    # Split line by the first colon (:) character.
+                    $nameValue = ($line -split ':', 2).Trim() ;
+                    $name = $nameValue[0] ;
+                    if ($name) {
+                        $value = $nameValue[1] ;
+                        if ($value) { $value = $value.Trim() } ;
+                        if (!($notes.ContainsKey($name))) { $notes.Add($name, $value) } ;
+                    } ;
+                } ;
+            } ; 
+        } ;
+        $objReturn.NotesHash = $notes ;
+        $objReturn.RevisionsText = $revText ; 
+    } ; 
+
     $objReturn | Write-Output ;
 }
 
@@ -1922,8 +1991,8 @@ Export-ModuleMember -Function build-VSCConfig,check-PsLocalRepoRegistration,Get-
 # SIG # Begin signature block
 # MIIELgYJKoZIhvcNAQcCoIIEHzCCBBsCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUTyOPGNuaS9C6QgENKQeELN8W
-# fFOgggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQU16uH9s9NWafzsAHCG3/XvxGq
+# eCagggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
 # MCwxKjAoBgNVBAMTIVBvd2VyU2hlbGwgTG9jYWwgQ2VydGlmaWNhdGUgUm9vdDAe
 # Fw0xNDEyMjkxNzA3MzNaFw0zOTEyMzEyMzU5NTlaMBUxEzARBgNVBAMTClRvZGRT
 # ZWxmSUkwgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBALqRVt7uNweTkZZ+16QG
@@ -1938,9 +2007,9 @@ Export-ModuleMember -Function build-VSCConfig,check-PsLocalRepoRegistration,Get-
 # AWAwggFcAgEBMEAwLDEqMCgGA1UEAxMhUG93ZXJTaGVsbCBMb2NhbCBDZXJ0aWZp
 # Y2F0ZSBSb290AhBaydK0VS5IhU1Hy6E1KUTpMAkGBSsOAwIaBQCgeDAYBgorBgEE
 # AYI3AgEMMQowCKACgAChAoAAMBkGCSqGSIb3DQEJAzEMBgorBgEEAYI3AgEEMBwG
-# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBRyeQra
-# DtObXfYbhxGVce0FAKLrqDANBgkqhkiG9w0BAQEFAASBgFM57FyiG3StyK4DVy0Q
-# zr+VM4gbjj6hSxen+LVNjJEZnDhQ3X5jAsr5OuEcVThPb3ojaO1qWnFSAvwOEkB5
-# r6SRIJVKhA0uN683CpsGMEDJ3rP3EStZXrExsgV25mFmZsyHxZ9OSdsXmww49e0Y
-# nzrRYxnel3ebp2A6a8SGgUI/
+# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBTEK6Pa
+# JjVJRvUz7GeK3bbJI1nnFzANBgkqhkiG9w0BAQEFAASBgIMoIkPMUMY5gBX8q09B
+# HIXE+HfT1315OQfp1GPc4Rd/dWoX6iH1TmofKC/4+IdnBHKyalujnkSS1zThGXgB
+# 4GbRA3O+mRJsZxNWySXP+V0ZVmHO5XbfGo6QQCAjjOIxAJ7I806dZ01rGTrH+0hV
+# ibc6VYOYwRtaWzqHSxUWE0I3
 # SIG # End signature block
