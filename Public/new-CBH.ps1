@@ -1,4 +1,4 @@
-#*------v Function new-CBH() v------
+#*------v new-CBH.ps1 v------
 function new-CBH {
     <#
     .SYNOPSIS
@@ -15,6 +15,7 @@ function new-CBH {
     Github      : https://github.com/tostka
     Tags        : Powershell,Development,Scripts
     REVISIONS
+    * 11:38 AM 4/14/2020 flipped filename from fullname to name
     * 4:42 PM 4/9/2020 ren NewCBH-> new-CBH shift into verb-Dev.psm1
     * 9:12 PM 11/25/2019 new-CBH: added dummy parameter name fields - drop them and you get no CBH function
     * 6:47 PM 11/24/2019 new-CBH: got revision of through a full pass of adding a new CBH addition to a non-compliant file.
@@ -75,7 +76,7 @@ Author      : Todd Kadrie
 Website     : https://www.toddomation.com
 Twitter     : @tostka / http://twitter.com/tostka
 CreatedDate : $(get-date -format yyyy-MM-dd)
-FileName    : $($Path.fullname)
+FileName    : $($Path.name)
 License     : MIT License
 Copyright   : (c)  $(get-date -format yyyy) Todd Kadrie. All rights reserved.
 Github      : https://github.com/tostka
@@ -160,4 +161,6 @@ Parameter to run a Test no-change pass [-Whatif switch]
     } ;
     $NewCBH | write-output ;
 
-} ; #*------^ END Function new-CBH ^------
+}
+
+#*------^ new-CBH.ps1 ^------
