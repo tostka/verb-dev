@@ -14,6 +14,7 @@ function get-VersionInfo {
     AddedWebsite:	https://stackoverflow.com/questions/38561009/where-is-the-standard-place-to-put-a-powershell-script-version-number
     AddedTwitter:
     REVISIONS
+    * 3:47 PM 4/14/2020 substantially shifted role to parseHelp(), which is less brittle and less likely to fail the critical get-help call that underlies the parsing. 
     * 7:50 AM 1/29/2020 added Cmdletbinding
     * 9:36 AM 12/30/2019 added CBH .INPUTS & OUTPUTS, including description of the hashtable of key/value pairs returned, for existing CBH .NOTES block
     * added explicit -path param to get-help
@@ -51,6 +52,7 @@ function get-VersionInfo {
     $Verbose = ($VerbosePreference -eq "Continue") ; 
     $notes = $null ; $notes = @{ } ;
     # Get the .NOTES section of the script header comment.
+    # key difference from parseHelp is the get-help in that one, doesn't spec -path param, AT ALL, just the value: $HelpParsed = Get-Help -Full $Path.fullname, and it *works* on the same file that won't with below
     if (!$Path) {
         $Help = Get-Help -Full -path $PSCommandPath
     }
