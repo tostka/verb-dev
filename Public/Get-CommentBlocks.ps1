@@ -17,6 +17,7 @@ function Get-CommentBlocks {
     AddedWebsite:
     AddedTwitter:
     REVISIONS
+    * 3:49 PM 4/14/2020 minor change
     * 5:19 PM 4/11/2020 added Path variable, and ParameterSet/exlus support
     * 8:36 AM 12/30/2019 Get-CommentBlocks:updated cbh and added .INPUTS/.OUTPUTS cbh entries, detailing the subcompontents of the hashtable returned
     * 8:28 PM 11/17/2019 INIT
@@ -81,7 +82,7 @@ function Get-CommentBlocks {
     $MetaStart = $TextLines | Select-string -Pattern '\<\#PSScriptInfo' | Select-Object -First 1 -ExpandProperty LineNumber ;
 
     # cycle the comment-block combos till you find the CBH comment block
-    $metaBlock = $null ; $metaBlock = @()
+    $metaBlock = $null ; $metaBlock = @() ; 
     $cbhBlock = $null ; $cbhBlock = @() ;
 
     $rgxCBHKeywords = "\.(SYNOPSIS|DESCRIPTION|PARAMETER|EXAMPLE|INPUTS|OUTPUTS|NOTES|LINK|COMPONENT|ROLE|FUNCTIONALITY|FORWARDHELPTARGETNAME|FORWARDHELPCATEGORY|REMOTEHELPRUNSPACE|EXTERNALHELP)"
