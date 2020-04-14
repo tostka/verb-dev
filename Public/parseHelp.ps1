@@ -1,4 +1,4 @@
-﻿#*------v Function parseHelp() v------
+﻿#*------v parseHelp.ps1 v------
 function parseHelp {
     <#
     .SYNOPSIS
@@ -17,11 +17,13 @@ function parseHelp {
     AddedWebsite:
     AddedTwitter:
     REVISIONS
+    * 3:45 PM 4/14/2020 added pretest of $path extension, get-help only works with .ps1/.psm1 script files (misnamed temp files fail to parse)
     * 7:50 AM 1/29/2020 added Cmdletbinding
     * 9:11 AM 12/30/2019 parseHelp(): added CBH .INPUTS & .OUTPUTS, specifying returns hash of get-help parsed output, and presence of CBH in the file
     * 10:03 PM 12/2/201919 INIT
     .DESCRIPTION
     parseHelp - Parse Script and prepend new Comment-based-Help keyed to existing contents
+    Note, if using temp files, you *can't* pull get-help on anything but script/module files, with the proper extension
     .PARAMETER  Path
     Path to script
     .PARAMETER ShowDebug
@@ -44,6 +46,7 @@ function parseHelp {
     } ;
     .LINK
     #>
+    # [ValidateScript({Test-Path $_})], [ValidateScript({Test-Path $_})]
     [CmdletBinding()]
     PARAM(
         [Parameter(Position = 0, Mandatory = $True, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true, HelpMessage = "Path to script[-Path path-to\script.ps1]")]
@@ -59,6 +62,12 @@ function parseHelp {
     } ;
     # Collect existing HelpParsed
     $error.clear() ;
+    if($Path.Extension -notmatch '\.PS((M)*)1'){
+        $smsg = "Specified -Path is *INVALID* for processing with Get-Help`nMust specify a file with valid .PS1/.PSM1 extensions.`nEXITING" ; 
+        if($verbose){ if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
+        else{ write-error -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; } ; 
+        Exit ; 
+    } ; 
     TRY {
         $HelpParsed = Get-Help -Full $Path.fullname
     }
@@ -70,6 +79,8 @@ function parseHelp {
     $objReturn = [ordered]@{
         HelpParsed     = $HelpParsed  ;
         hasExistingCBH = $false ;
+        NotesHash = $null ; 
+        RevisionsText = $null ; 
     } ;
 
     <# CBH keywords to use to detect CBH blocks
@@ -93,9 +104,9 @@ function parseHelp {
 
     # 4) determine if target already has CBH:
     if ($showDebug) {
-        $smsg = "$(($helpparsed | select Category,Name,Synopsis, param*,alertset,details,examples |out-string).trim())" ;
-        #$smsg = "CMDLET w`n$((|out-string).trim())" ;
-        $smsg = "`$Path.FullName:$($Path.FullName)" ;
+        $smsg = "`$Path.FullName:$($Path.FullName):`n$(($helpparsed | select Category,Name,Synopsis, param*,alertset,details,examples |out-string).trim())" ;
+        if($verbose){ if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
+        else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; } ; 
     } ;
 
 
@@ -219,6 +230,51 @@ function parseHelp {
     #>
 
 
-    }  ;
+    } elseif ($HelpParsed.Name -eq 'default') {
+        # failed to properly parse CBH
+        $objReturn.helpparsed = $null ; 
+        $objReturn.hasExistingCBH = $false ;
+        $objReturn.NotesHash = $null ; 
+    } ;  
+
+    # 12:24 PM 4/13/2020 splice in the get-VersionInfo notes processing code
+    $notes = $null ; $notes = @{ } ;
+    $notesLines = $null ; $notesLineCount = $null ;
+    $revText = $null ; $CurrLine = 0 ; 
+    $rgxNoteMeta = '^((\s)*)\w{3,}((\s*)*)\:((\s*)*)*.*' ; 
+    if ( ($notesLines = $HelpParsed.alertSet.alert.Text -split '\r?\n').Trim() ) {
+        $notesLineCount = ($notesLines | measure).count ;
+        foreach ($line in $notesLines) {
+            $CurrLine++ ; 
+            if (!$line) { continue } ;
+            if($line -match $rgxNoteMeta ){
+                $name = $null ; $value = $null ;
+                if ($line -match '(?i:REVISIONS((\s*)*)((\:)*))') { 
+                    # at this point, from here down should be rev data
+                    $revText = $notesLines[$($CurrLine)..$($notesLineCount)] ;  
+                    $notes.Add("LastRevision", $notesLines[$currLine]) ;
+                    #Continue ;
+                    break ; 
+                } ;
+                if ($line.Contains(':')) {
+                    $nameValue = $null ;
+                    $nameValue = @() ;
+                    # Split line by the first colon (:) character.
+                    $nameValue = ($line -split ':', 2).Trim() ;
+                    $name = $nameValue[0] ;
+                    if ($name) {
+                        $value = $nameValue[1] ;
+                        if ($value) { $value = $value.Trim() } ;
+                        if (!($notes.ContainsKey($name))) { $notes.Add($name, $value) } ;
+                    } ;
+                } ;
+            } ; 
+        } ;
+        $objReturn.NotesHash = $notes ;
+        $objReturn.RevisionsText = $revText ; 
+    } ; 
+
     $objReturn | Write-Output ;
-} ; # #*------^ END Function parseHelp() ^------
+}
+
+#*------^ parseHelp.ps1 ^------
