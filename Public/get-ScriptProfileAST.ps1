@@ -17,6 +17,7 @@ function get-ScriptProfileAST {
     AddedWebsite:
     AddedTwitter:
     REVISIONS
+    # 1:01 PM 5/27/2020 moved alias: profile-FileAST win func
     # 5:25 PM 2/29/2020 ren profile-FileASt -> get-ScriptProfileAST (aliased orig name)
     # * 7:50 AM 1/29/2020 added Cmdletbinding
     * 9:04 AM 12/30/2019 profile-FileAST: updated CBH: added .INPUTS & OUTPUTS, including hash properties returned
@@ -70,6 +71,7 @@ function get-ScriptProfileAST {
     .LINK
     #>
     [CmdletBinding()]
+    [Alias('profile-FileAST')]
     PARAM(
         [Parameter(Position = 0, Mandatory = $True, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true, HelpMessage = "Path to script[-File path-to\script.ps1]")]
         [ValidateScript( { Test-Path $_ })]$File,
