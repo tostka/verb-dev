@@ -5,7 +5,7 @@
 .SYNOPSIS
 VERB-dev - Development PS Module-related generic functions
 .NOTES
-Version     : 1.4.25
+Version     : 1.4.24
 Author      : Todd Kadrie
 Website     :	https://www.toddomation.com
 Twitter     :	@tostka
@@ -786,7 +786,6 @@ function Merge-Module {
     AddedWebsite: https://evotec.xyz/powershell-single-psm1-file-versus-multi-file-modules/
     AddedTwitter:
     REVISIONS
-    * 11:42 AM 6/30/2020 fixed Public\_CommonCode.ps1, -ea 0 when not present
     * 1:13 PM 6/29/2020 add support for .Public\_CommonCode.ps1 - module-spanning code that should follow the Function block in the .psm1
     * 3:27 PM 3/15/2020 load-Module: added $PsmNameTmp, $PsdNameTmp and shifted updating to a _TMP file of each, which at end, if error free, overwrites the current functional copy (correcting prior issue with corruption of existing copy, when there were processing errors). 
     * failing to load verb-io content, added a forceload if get-fileencoding isn't present, added new PassStatus tests and passed back in output, also now does the build in a .psm1_TMP file, to avoid damaging last functional copy
@@ -810,7 +809,6 @@ function Merge-Module {
     2:54 PM 12/11/2019 rewrote, added backup of psm1, parsing out the stock dyn-include code from the orig psm1, leverages fault-tolerant set-fileContent(), switched sourcepaths to array type, and looped, detecting public/internal by path and prepping for the export list.
     * 2018/11/06 Przemyslaw Klys posted version
     .DESCRIPTION
-    Merge-Module.ps1 - Merge function .ps1 files into a monolisthic module.psm1 module file, returns a hash with status:$true/$false, and PsmNameBU:The name of a backup of the original .psm1 file (for restoring on failures)
     .PARAMETER  ModuleName
     Module Name (used to name the ModuleName.psm1 file)[-ModuleName verb-XXX]
     .PARAMETER  ModuleSourcePath
@@ -1206,30 +1204,6 @@ function Merge-Module {
 
     } ; # loop-E
 
-    # add support for Public\_CommonCode.ps1 (module-spanning code that trails the functions blo9ck in the .psm1)
-    if($PublicPath = $ModuleSourcePath |?{$_ -match 'Public'}){
-        if($ModFile = Get-ChildItem -Path $PublicPath\_CommonCode.ps1 -ea 0 ){
-            $smsg= "Adding:$($ModFile)..." ;  
-            if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info }  #Error|Warn|Debug 
-            else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
-            "#*======v _CommonCode v======" | Add-Content @pltAdd ;
-            $Content = Get-Content $ModFile ;
-            if($Content| ?{$_ -match $rgxSigStart -OR $_ -match $rgxSigEnd} ){
-                $smsg= "*WARNING*:SUBFILE`n$($ModFile.fullname)`nHAS AUTHENTICODE SIGNATURE MARKERS PRESENT!`nREVIEW THE FILE AND REMOVE ANY EVIDENCE OF SIGNING!" ;  
-                if($showDebug) {
-                    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Error }  #Error|Warn|Debug 
-                    else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
-                } ; 
-                exit ; 
-            } ; 
-            $Content | Add-Content @pltAdd ;
-            "#*======^ END _CommonCode ^======" | Add-Content @pltAdd ;
-            $PassStatus += ";Add-Content:UPDATED"; 
-        } else {
-            write-verbose "(no Public\_CommonCode.ps1)" ;
-        } ; 
-    } ; 
-
     # append the Export-ModuleMember -Function $publicFunctions  (psd1 functionstoexport is functional instead),
     $smsg= "(Updating Psm1 Export-ModuleMember -Function to reflect Public modules)" ;  
     if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info }  #Error|Warn|Debug 
@@ -1268,7 +1242,30 @@ Export-ModuleMember -Function $(($ExportFunctions) -join ',') -Alias *
         $PassStatus += ";Add-Content:UPDATED"; 
     } ; 
 
-    
+    # add support for Public\_CommonCode.ps1 (module-spanning code that trails the functions blo9ck in the .psm1)
+    if($PublicPath = $ModuleSourcePath |?{$_ -match 'Public'}){
+        if($ModFile = Get-ChildItem -Path $PublicPath\_CommonCode.ps1 -ea 0 ){
+            $smsg= "Adding:$($ModFile)..." ;  
+            if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info }  #Error|Warn|Debug 
+            else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+            "#*======v _CommonCode v======" | Add-Content @pltAdd ;
+            $Content = Get-Content $ModFile ;
+            if($Content| ?{$_ -match $rgxSigStart -OR $_ -match $rgxSigEnd} ){
+                $smsg= "*WARNING*:SUBFILE`n$($ModFile.fullname)`nHAS AUTHENTICODE SIGNATURE MARKERS PRESENT!`nREVIEW THE FILE AND REMOVE ANY EVIDENCE OF SIGNING!" ;  
+                if($showDebug) {
+                    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Error }  #Error|Warn|Debug 
+                    else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                } ; 
+                exit ; 
+            } ; 
+            $Content | Add-Content @pltAdd ;
+            "#*======^ END _CommonCode ^======" | Add-Content @pltAdd ;
+            $PassStatus += ";Add-Content:UPDATED"; 
+        } else {
+            write-verbose "(no Public\_CommonCode.ps1)" ;
+        } ; 
+    } ; 
+
     # update the manifest too: # should be forced array: FunctionsToExport = @('build-VSCConfig','Get-CommentBlocks','get-VersionInfo','Merge-Module','parseHelp')
     $smsg = "Updating the Psd1 FunctionsToExport to match" ; 
     if($verbose){ if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
@@ -1951,8 +1948,8 @@ Export-ModuleMember -Function build-VSCConfig,check-PsLocalRepoRegistration,Get-
 # SIG # Begin signature block
 # MIIELgYJKoZIhvcNAQcCoIIEHzCCBBsCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQU3tyB3Lx8uz7FShRjtpsMgKCH
-# Q4ygggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUNqZCvEhCPEuQ5+IDXsTBBhIT
+# zoygggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
 # MCwxKjAoBgNVBAMTIVBvd2VyU2hlbGwgTG9jYWwgQ2VydGlmaWNhdGUgUm9vdDAe
 # Fw0xNDEyMjkxNzA3MzNaFw0zOTEyMzEyMzU5NTlaMBUxEzARBgNVBAMTClRvZGRT
 # ZWxmSUkwgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBALqRVt7uNweTkZZ+16QG
@@ -1967,9 +1964,9 @@ Export-ModuleMember -Function build-VSCConfig,check-PsLocalRepoRegistration,Get-
 # AWAwggFcAgEBMEAwLDEqMCgGA1UEAxMhUG93ZXJTaGVsbCBMb2NhbCBDZXJ0aWZp
 # Y2F0ZSBSb290AhBaydK0VS5IhU1Hy6E1KUTpMAkGBSsOAwIaBQCgeDAYBgorBgEE
 # AYI3AgEMMQowCKACgAChAoAAMBkGCSqGSIb3DQEJAzEMBgorBgEEAYI3AgEEMBwG
-# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBTvjmD0
-# ltRv2diyyHS9AT1CsApGEDANBgkqhkiG9w0BAQEFAASBgF7mCsxAV/K3r4eI39Y7
-# UnkHM4r2egAc+mapABz8p055WhsZYVwraas1rG7Q9vnrw/EMOmIRHx3ZEL2371Ml
-# kV1W1Zjir7F7kaH9emMvRk+Ks3TyNUT/mPD23ynajn1eHYqeCm+gH01tBJpUVlz1
-# 73s4RhS/mWV6/zhuiuUwTw+o
+# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBQQJ3Cz
+# hykLOWrKMZMCDoLkk9ud3TANBgkqhkiG9w0BAQEFAASBgHw1BV8fx1pZmJIwBfja
+# RIkIRLggR2YCIXXAjNBtVL8uixR2kAaoxWE4TDem97HzEfF1KtWAHdL3Yt7sMP8f
+# Umq7X+fCzN9hNeBi0vpg0Dh03Nft59WUzS1YlpR7JgSxTkDxJeOCJwnU644KYLi7
+# B1tFfu6qQxsBPs6101vVxwty
 # SIG # End signature block
