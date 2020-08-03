@@ -1,4 +1,4 @@
-# verb-dev.psm1
+﻿# verb-dev.psm1
 
 
 <#
@@ -256,7 +256,7 @@ function convert-CommandLine2VSCDebugJson {
     Copyright   : (c) 2019 Todd Kadrie
     Github      : https://github.com/tostka
     REVISIONS
-    * 9:28 AM 8/3/2020 ren'd build-vscconfir -> convert-CommandLine2VSCDebugJson, and added alias:convert-cmdline2json, porting into verb-dev module ; refactored name & script tag resolution, and accomdates leading dot-source(.), invocation (&), and local dir (.\) 1-2 chars of cmdline ; coerced right side of args assignement into [array](required in launch.json spec)
+    * 9:28 AM 8/3/2020 ren'd build-vscconfir -> convert-CommandLine2VSCDebugJson, and added alias:convert-cmdline2json, porting into verb-dev module ; refactored name & script tag resolution, and accomdates leading dot-source(.), invocation (&), and local dir (.\) 1-2 chars of cmdline
     * 5:51 PM 12/16/2019 added OneArgument param
     * 2:58 PM 12/15/2019 INIT
     .DESCRIPTION
@@ -323,7 +323,7 @@ function convert-CommandLine2VSCDebugJson {
 
     - Configure Environment Variable support in launch.json:
 
-    1. Use the "configurations": [? "env":  ]section:<br>
+    1. Use the "configurations": [� "env":  ]section:<br>
     It's in "vari-name":"vari-value" format
 
     ```json
@@ -442,11 +442,11 @@ function convert-CommandLine2VSCDebugJson {
     |${workspaceRootFolderName}|the name of the folder opened in Visual Studio Code without any solidus (/)|
     |${file}|the current opened file|
     |${relativeFile}|the current opened file relative to workspaceRoot|
-    |${fileBasename}|the current opened file?s basename|
-    |${fileBasenameNoExtension}|the current opened file?s basename with no file extension|
-    |${fileDirname}|the current opened file?s dirname|
-    |${fileExtname}|the current opened file?s extension|
-    |${cwd}|the task runner?s current working directory on startup|
+    |${fileBasename}|the current opened file�s basename|
+    |${fileBasenameNoExtension}|the current opened file�s basename with no file extension|
+    |${fileDirname}|the current opened file�s dirname|
+    |${fileExtname}|the current opened file�s extension|
+    |${cwd}|the task runner�s current working directory on startup|
     |${env.USERPROFILE}|To reference env varis ; `env` must be all lowercase, and can't be `env[colon]`, must be `env[period]` *(vsc syntax, not powershell)*|
     #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
     .PARAMETER  CommandLine
@@ -495,7 +495,7 @@ function convert-CommandLine2VSCDebugJson {
         # parse out the name & script values from the first couple of elements
         if($parsedCmdLine[0].length -eq 1 -AND ($parsedCmdLine[0] -match '(&|.)') ){
             # invocation/dot-source char, skip it
-            #$1stIsPunc = $true ; 
+            $1stIsPunc = $true ; 
             $jsonRequest.name = "PS $(split-path $parsedCmdLine[1] -leaf)" ;
             $jsonRequest.script  = (resolve-path -path $parsedCmdLine[1]).path ;
             $lastConsumeditem = 1 ; 
@@ -515,13 +515,12 @@ function convert-CommandLine2VSCDebugJson {
         $lastConsumeditem++ ; 
         if ($ttl -gt 1) {
             if ($OneArgument) {
-                write-verbose -verbose:$true "(-OneArgument specified: Generating single-argument output)" ; 
-                # isn't coming out an array, so coerce it on the data assignement - that works
-                $jsonRequest.args = [array]($parsedCmdLine[$lastConsumeditem..$($ttl)] -join " ") ;
+                write-verbose -verbose:$true "(-OneArgument specified: Generating single-argument output)" ; ;
+                $jsonRequest.args = $parsedCmdLine[$lastConsumeditem..$($ttl)] -join " " ;
             }
             else {
                 # args are from after 'lastConsumeditem' through last elem
-                $jsonRequest.args = [array]($parsedCmdLine[$lastConsumeditem..$($ttl)]) ; 
+                $jsonRequest.args = $parsedCmdLine[$lastConsumeditem..$($ttl)]
             } ;
         } else { 
             write-verbose -verbose:$true "Only a single parsed item in CommandLine:`n$($CommandLine)" ; ;
@@ -2361,3 +2360,29 @@ function Split-CommandLine {
 
 Export-ModuleMember -Function build-VSCConfig,check-PsLocalRepoRegistration,convert-CommandLine2VSCDebugJson,Get-CommentBlocks,get-FunctionBlock,get-FunctionBlocks,get-ScriptProfileAST,get-VersionInfo,Merge-Module,new-CBH,New-GitHubGist,parseHelp,Split-CommandLine -Alias *
 
+
+# SIG # Begin signature block
+# MIIELgYJKoZIhvcNAQcCoIIEHzCCBBsCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
+# gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUyhy6m7c/gdlCFDzSYJ84ItTu
+# 0EGgggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
+# MCwxKjAoBgNVBAMTIVBvd2VyU2hlbGwgTG9jYWwgQ2VydGlmaWNhdGUgUm9vdDAe
+# Fw0xNDEyMjkxNzA3MzNaFw0zOTEyMzEyMzU5NTlaMBUxEzARBgNVBAMTClRvZGRT
+# ZWxmSUkwgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBALqRVt7uNweTkZZ+16QG
+# a+NnFYNRPPa8Bnm071ohGe27jNWKPVUbDfd0OY2sqCBQCEFVb5pqcIECRRnlhN5H
+# +EEJmm2x9AU0uS7IHxHeUo8fkW4vm49adkat5gAoOZOwbuNntBOAJy9LCyNs4F1I
+# KKphP3TyDwe8XqsEVwB2m9FPAgMBAAGjdjB0MBMGA1UdJQQMMAoGCCsGAQUFBwMD
+# MF0GA1UdAQRWMFSAEL95r+Rh65kgqZl+tgchMuKhLjAsMSowKAYDVQQDEyFQb3dl
+# clNoZWxsIExvY2FsIENlcnRpZmljYXRlIFJvb3SCEGwiXbeZNci7Rxiz/r43gVsw
+# CQYFKw4DAh0FAAOBgQB6ECSnXHUs7/bCr6Z556K6IDJNWsccjcV89fHA/zKMX0w0
+# 6NefCtxas/QHUA9mS87HRHLzKjFqweA3BnQ5lr5mPDlho8U90Nvtpj58G9I5SPUg
+# CspNr5jEHOL5EdJFBIv3zI2jQ8TPbFGC0Cz72+4oYzSxWpftNX41MmEsZkMaADGC
+# AWAwggFcAgEBMEAwLDEqMCgGA1UEAxMhUG93ZXJTaGVsbCBMb2NhbCBDZXJ0aWZp
+# Y2F0ZSBSb290AhBaydK0VS5IhU1Hy6E1KUTpMAkGBSsOAwIaBQCgeDAYBgorBgEE
+# AYI3AgEMMQowCKACgAChAoAAMBkGCSqGSIb3DQEJAzEMBgorBgEEAYI3AgEEMBwG
+# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBRrgrhY
+# Pt8y8+desVkh2eFDDwnLSzANBgkqhkiG9w0BAQEFAASBgKxSx9xjDaVAc8znNOZG
+# suhUnUqbBpvRx+poYNtmiNbGrk5+s5dJa8pVPyPtXWkqXZQkcFljt98jJnWWP4Zp
+# 5+dj00NdugRxMCEuF4YNj0lJkLRFhGyRN+10Eq+Kh49Hf6mUnsfpadDs+D1/DGOb
+# ZRCtmiSQXNX/etyrUJVls4YH
+# SIG # End signature block
