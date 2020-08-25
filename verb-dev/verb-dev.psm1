@@ -5,7 +5,7 @@
 .SYNOPSIS
 VERB-dev - Development PS Module-related generic functions
 .NOTES
-Version     : 1.4.27
+Version     : 1.4.29
 Author      : Todd Kadrie
 Website     :	https://www.toddomation.com
 Twitter     :	@tostka
@@ -547,6 +547,91 @@ function convert-CommandLine2VSCDebugJson {
 
 #*------^ convert-CommandLine2VSCDebugJson.ps1 ^------
 
+#*------v export-ISEBreakPoints.ps1 v------
+function export-ISEBreakPoints {
+    <#
+    .SYNOPSIS
+    export-ISEBreakPoints - Export all 'Line' ise breakpoints to XML file 
+    .NOTES
+    Version     : 1.0.0
+    Author      : Todd Kadrie
+    Website     : http://www.toddomation.com
+    Twitter     : @tostka / http://twitter.com/tostka
+    CreatedDate : 2020-08-25
+    FileName    : export-ISEBreakPoints
+    License     : MIT License
+    Copyright   : (c) 2020 Todd Kadrie
+    Github      : https://github.com/tostka
+    Tags        : Powershell,ISE,development,debugging
+    REVISIONS
+    * 12:56 PM 8/25/2020 fixed typo in 1.0.0 ; init, added to verb-dev module
+    .DESCRIPTION
+    export-ISEBreakPoints - Export all 'Line' ise breakpoints to XML file
+    By default, attempts to save to the same directory as the script, but if the directory specified doesn't exist, it redirects the save to the c:\scripts dir.
+    .EXAMPLE
+    export-ISEBreakPoints
+    Export all 'line'-type breakpoints on the current open ISE tab, to a matching xml file
+    .EXAMPLE
+    export-ISEBreakPoints -Script c:\path-to\script.ps1
+    Export all 'line'-type breakpoints from the specified script, to a matching xml file
+    .LINK
+    Github      : https://github.com/tostka
+    #>
+    [CmdletBinding()]
+    [Alias('eIseBp')]
+    PARAM(
+        [Parameter(HelpMessage="Default Path for export (when `$Script directory is unavailable)[-PathDefault c:\path-to\]")]
+        [ValidateScript({Test-Path $_ -PathType 'Container'})]
+        [string]$PathDefault = 'c:\scripts',
+        [Parameter(HelpMessage="(debugging):Path to target Script file (defaults to Current ISE Tab fullpath)[-Script c:\path-to\file.ext]")]
+        #[ValidateScript({Test-Path $_})]
+        [string]$Script
+    ) ;
+    BEGIN {} ;
+    PROCESS {
+        if ($psise){
+            
+            if($Script){
+                if( ($tScript = (gci $Script).FullName) -AND ($psise.powershelltabs.files.fullpath -contains $tScript)){
+                    write-host "-Script specified diverting target to:`n$($Script)" ; 
+                    $tScript = $Script ; 
+                    $xFname=$tScript.replace(".ps1","-ps1.xml").replace(".psm1","-psm1.xml").replace(".","-BP.") ;
+                } else { 
+                    throw "-Script specified is not a valid path!`n$($Script)`n(or is not currently open in ISE)" ; 
+                } ; 
+            } elseif($psise.CurrentFile.FullPath){
+                $tScript = $psise.CurrentFile.FullPath ;
+                # default to same loc, variant name of script in currenttab of ise
+                #$xFname=$psise.CurrentFile.FullPath.replace(".ps1","-ps1.xml").replace(".psm1","-psm1.xml").replace(".","-BP.") ;
+                $xFname=$tScript.replace(".ps1","-ps1.xml").replace(".psm1","-psm1.xml").replace(".","-BP.") ;
+                $AllUsrsScripts = "$($env:ProgramFiles)\WindowsPowerShell\Scripts" ; 
+                if( ( (split-path $xFname) -eq $AllUsrsScripts) -OR (-not(test-path (split-path $xFname))) ){
+                    # if in the AllUsers profile, or the ISE script dir is invalid
+                    if($tdir = get-item "$([Environment]::GetFolderPath('MyDocuments'))\WindowsPowershell\Scripts"){
+                        # if the CUser has a profile Scripts dir, use it                
+                    } elseif($tdir = get-item $PathDefault){
+                        # else if functional use the $pathdefault
+                    } else {
+                        throw "Unable to resolve a suitable destination for the current script`n$($tScript)" ; 
+                        break ; 
+                    } ; 
+                    $smsg = "broken path, defaulting to: $($tdir.fullname)" ; 
+                    #$xFname=(join-path -path "c:\scripts\" -childpath (split-path $psise.CurrentFile.FullPath -leaf)).replace(".ps1","-ps1.xml").replace(".psm1","-psm1.xml").replace(".","-BP.") ;
+                    $xFname = $xFname.replace( (split-path $xFname), $tdir.fullname) ;
+                } ;
+            } else { throw "ISE has no current file open. Open a file before using this script" } ; 
+        
+        write-host "Creating BP file:$($xFname)" ;
+        #$xBPs= get-psbreakpoint |?{$_.Script -eq $($psise.currentfile.fullpath) -AND ($_.line)} ;
+        $xBPs= get-psbreakpoint |?{ ($_.Script -eq $tScript) -AND ($_.line)} ;
+        $xBPs | Export-Clixml -Path $xFname ;
+        write-host "$(($xBPs|measure).count) Breakpoints exported to $xFname`n$(($xBPs|sort line|ft -a Line,Script|out-string).trim())" ;
+        } else {  write-warning "This script only functions within PS ISE, with a script file open for editing" };
+    } # PROC-E
+}
+
+#*------^ export-ISEBreakPoints.ps1 ^------
+
 #*------v Get-CommentBlocks.ps1 v------
 function Get-CommentBlocks {
     <#
@@ -1073,6 +1158,113 @@ function get-VersionInfo {
 }
 
 #*------^ get-VersionInfo.ps1 ^------
+
+#*------v import-ISEBreakPoints.ps1 v------
+function import-ISEBreakPoints {
+    <#
+    .SYNOPSIS
+    import-ISEBreakPoints - Import the 'Line' ise breakpoints previously cached to an XML file
+    .NOTES
+    Version     : 1.0.0.
+    Author      : Todd Kadrie
+    Website     : http://www.toddomation.com
+    Twitter     : @tostka / http://twitter.com/tostka
+    CreatedDate : 2020-08-25
+    FileName    : import-ISEBreakPoints
+    License     : MIT License
+    Copyright   : (c) 2020 Todd Kadrie
+    Github      : https://github.com/tostka
+    Tags        : Powershell,ISE,development,debugging
+    REVISIONS
+    * 10:49 AM 8/25/2020 init, added to verb-dev module
+    .DESCRIPTION
+    import-ISEBreakPoints - Import the 'Line' ise breakpoints previously cached to an XML file
+    By default, attempts to save to the same directory as the script, but if the directory specified doesn't exist, it redirects the save to the c:\scripts dir.
+    .PARAMETER PathDefault
+    Default Path for export (when `$Script directory is unavailable)[-PathDefault c:\path-to\]
+    .EXAMPLE
+    import-ISEBreakPoints
+    Import all 'line'-type breakpoints into the current open ISE tab, from matching xml file
+    .EXAMPLE
+    Import-ISEBreakPoints -Script c:\path-to\script.ps1
+    Import all 'line'-type breakpoints into the specified script, from matching xml file
+    .LINK
+    Github      : https://github.com/tostka
+    #>
+    [CmdletBinding()]
+    [Alias('iIseBp')]
+
+    #[ValidateScript({Test-Path $_})]
+    PARAM(
+        [Parameter(HelpMessage="Default Path for Import (when `$Script directory is unavailable)[-PathDefault c:\path-to\]")]
+        [ValidateScript({Test-Path $_ -PathType 'Container'})]
+        [string]$PathDefault = 'c:\scripts',
+        [Parameter(HelpMessage="(debugging):Path to target Script file (defaults to Current ISE Tab fullpath)[-Script c:\path-to\file.ext]")]
+        [string]$Script
+    ) ;
+    BEGIN {} ;
+    PROCESS {
+        # for debugging, -Script permits targeting another script *not* being currently debugged
+        if ($psise){
+            if($Script){
+                if( ($tScript = (gci $Script).fullname) -AND ($psise.powershelltabs.files.fullpath -contains $tScript)){
+                    write-host "-Script specified diverting target to:`n$($Script)" ;
+                    $iFname = "$($Script.replace('.ps1','-ps1.xml').replace('.psm1','-psm1.xml').replace('.','-BP.'))" ;
+                } else {
+                    throw "-Script specified is not a valid path!`n$($Script)`n(or is not currently open in ISE)" ;
+                } ;
+            } elseif($psise.CurrentFile.FullPath){
+                $tScript = $psise.CurrentFile.FullPath
+                # array of paths to be preferred (in order)
+                # - script's current path (with either -[ext]-BP or -BP suffix)
+                #
+                $tfiles = "$($tScript.replace('.ps1','-ps1.xml').replace('.psm1','-psm1.xml').replace('.','-BP.'))",
+                    # ^current path name variant 1
+                    "$($tScript.replace('ps1','xml').replace('.','-BP.'))",
+                    # ^current path name variant 2
+                    "$((join-path -path "$([Environment]::GetFolderPath('MyDocuments'))\WindowsPowershell\Scripts" -childpath (split-path $tScript -leaf)).replace('.ps1','-ps1.xml').replace('.psm1','-psm1.xml').replace('.','-BP.'))" ,
+                    # ^CU scripts dir
+                    "$((join-path -path $PathDefault -childpath (split-path $tScript -leaf)).replace('.ps1','-ps1.xml').replace('.psm1','-psm1.xml').replace('.','-BP.'))" ;
+                    # ^ PathDefault dir
+                foreach($tf in $tfiles){if($iFname = gci $tf -ea 0 | select -exp fullname ){break } } ;
+            } else { throw "ISE has no current file open. Open a file before using this script" } ;
+
+            if($iFname){
+                write-host "*Importing BP file:$($iFname) and setting specified BP's for open file $($tScript)" ;
+                # clear all existing bps
+                if($eBP=Get-PSBreakpoint |?{$_.line -AND $_.Script -eq $tScript}){$eBP | remove-PsBreakpoint } ;
+
+
+                # set bps in found .xml file
+                $iBPs = Import-Clixml -path $iFname ;
+
+                <# fundemental issue importing cross-machines, the xml stores the full path to the script at runtime
+                    $iBP.script
+                C:\Users\kadriTSS\Documents\WindowsPowerShell\Scripts\maintain-AzTenantGuests.ps1
+                    $tscript
+                C:\usr\work\o365\scripts\maintain-AzTenantGuests.ps1
+                #>
+                
+                # so if they mismatch, we need to patch over the script used in the set-psbreakpoint command
+                if(  ( (split-path $iBP.script) -ne (split-path $tscript) ) -AND ($psise.powershelltabs.files.fullpath -contains $tScript) ) {
+                    write-verbose "Target script is pathed to different location than .XML exported`n(patching BPs to accomodate)" ; 
+                    $setPs1 = $tScript ; 
+                } else {
+                    # use script on 1st bp in xml
+                    $setPs1 = $iBPs[0].Script ; 
+                }; 
+
+                #$iBPs | %{set-PSBreakpoint -script $_.script -line $_.line } | out-null ;
+                foreach($iBP in $iBPs){
+                    $null = set-PSBreakpoint -script $setPs1 -line $iBP.line ;
+                } ; 
+                write-host "$(($iBP|measure).count) Breakpoints imported and set as per $($iFname)`n$(($iBPs|sort line|ft -a Line,Script|out-string).trim())" ;
+             } else { "Missing .xml BP file for open file $($tScript)" } ;
+        } else {  write-warning 'This script only functions within PS ISE, with a script file open for editing' };
+    } # PROC-E
+}
+
+#*------^ import-ISEBreakPoints.ps1 ^------
 
 #*------v Merge-Module.ps1 v------
 function Merge-Module {
@@ -2250,6 +2442,62 @@ function parseHelp {
 
 #*------^ parseHelp.ps1 ^------
 
+#*------v shift-ISEBreakPoints.ps1 v------
+function shift-ISEBreakPoints {
+    <#
+    .SYNOPSIS
+    shift-ISEBreakPoints - Offset current ISE tab's existing breakpoints by lines specified
+    .NOTES
+    Version     : 1.0.0.
+    Author      : Todd Kadrie
+    Website     : http://www.toddomation.com
+    Twitter     : @tostka / http://twitter.com/tostka
+    CreatedDate : 2020-08-25
+    FileName    : shift-ISEBreakPoints
+    License     : MIT License
+    Copyright   : (c) 2020 Todd Kadrie
+    Github      : https://github.com/tostka
+    Tags        : Powershell,ISE,development,debugging
+    REVISIONS
+    * 10:49 AM 8/25/2020 init, added to verb-dev module
+    .DESCRIPTION
+    shift-ISEBreakPoints - Offset current ISE tab's existing breakpoints by lines specified
+    .PARAMETER PathDefault
+    Default Path for export (when `$Script directory is unavailable)[-PathDefault c:\path-to\]
+    .EXAMPLE
+    shift-ISEBreakPoints -lines -4
+    Shift all existing PSBreakpoints UP 4 lines
+    .EXAMPLE
+    shift-ISEBreakPoints -lines 5
+    Shift all existing PSBreakpoints DOWN 5 lines
+    .LINK
+    Github      : https://github.com/tostka
+    #>
+    [CmdletBinding()]
+    [Alias('sIseBp')]
+    PARAM(
+        [Parameter(Position=0,Mandatory=$True,HelpMessage="Enter lines +/- to shift breakpoints on current script[-lines -3]")]
+        [int]$lines
+    ) ;
+    BEGIN {} ;
+    PROCESS {
+        if ($psise -AND $psise.CurrentFile.FullPath){
+            
+            $eBPs = get-psbreakpoint -Script $psise.CurrentFile.fullpath ; 
+            # older, mandetory param prompts instead
+            #$lines=Read-Host "Enter lines +/- to shift breakpoints on current script:($($psise.CurrentFile.displayname))" ;
+            foreach($eBP in $eBPs){
+              remove-psbreakpoint -id $eBP.id ; 
+              set-PSBreakpoint -script $eBP.script -line ($eBP.line + $lines) ; 
+            } ; 
+            
+        } else {  write-warning 'This script only functions within PS ISE, with a script file open for editing' };
+
+     } # PROC-E
+}
+
+#*------^ shift-ISEBreakPoints.ps1 ^------
+
 #*------v split-CommandLine.ps1 v------
 function Split-CommandLine {
     <#
@@ -2359,14 +2607,14 @@ function Split-CommandLine {
 
 #*======^ END FUNCTIONS ^======
 
-Export-ModuleMember -Function build-VSCConfig,check-PsLocalRepoRegistration,convert-CommandLine2VSCDebugJson,Get-CommentBlocks,get-FunctionBlock,get-FunctionBlocks,get-ScriptProfileAST,get-VersionInfo,Merge-Module,new-CBH,New-GitHubGist,parseHelp,Split-CommandLine -Alias *
+Export-ModuleMember -Function build-VSCConfig,check-PsLocalRepoRegistration,convert-CommandLine2VSCDebugJson,export-ISEBreakPoints,Get-CommentBlocks,get-FunctionBlock,get-FunctionBlocks,get-ScriptProfileAST,get-VersionInfo,import-ISEBreakPoints,Merge-Module,new-CBH,New-GitHubGist,parseHelp,shift-ISEBreakPoints,Split-CommandLine -Alias *
 
 
 # SIG # Begin signature block
 # MIIELgYJKoZIhvcNAQcCoIIEHzCCBBsCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUMFyQ3euyqIiU830awMgGwrwz
-# 9NagggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUOVRiByFL8pEZocLEznH06J/Z
+# x9SgggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
 # MCwxKjAoBgNVBAMTIVBvd2VyU2hlbGwgTG9jYWwgQ2VydGlmaWNhdGUgUm9vdDAe
 # Fw0xNDEyMjkxNzA3MzNaFw0zOTEyMzEyMzU5NTlaMBUxEzARBgNVBAMTClRvZGRT
 # ZWxmSUkwgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBALqRVt7uNweTkZZ+16QG
@@ -2381,9 +2629,9 @@ Export-ModuleMember -Function build-VSCConfig,check-PsLocalRepoRegistration,conv
 # AWAwggFcAgEBMEAwLDEqMCgGA1UEAxMhUG93ZXJTaGVsbCBMb2NhbCBDZXJ0aWZp
 # Y2F0ZSBSb290AhBaydK0VS5IhU1Hy6E1KUTpMAkGBSsOAwIaBQCgeDAYBgorBgEE
 # AYI3AgEMMQowCKACgAChAoAAMBkGCSqGSIb3DQEJAzEMBgorBgEEAYI3AgEEMBwG
-# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBSvJ2po
-# Ew1SFfy/ooDVfFet+jNupzANBgkqhkiG9w0BAQEFAASBgIsYI8U9tbOn6IglfbRu
-# LEXgnNr+F+Xgt002V9ygIQCl8ZWklNrtwyjQEyU26R+kw/5oDtATEI8yXKO/SwYL
-# 3T22ajbEnwYhIBex2Swems1M45Tcf0CqyF9sJ31Vk3IsD8E9U1mzSpfGga2Ffhj1
-# B7d3c2n1j/Otax8br9tnizT1
+# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBTqN6VA
+# w7vAriQVEva4sMnf0QA8ADANBgkqhkiG9w0BAQEFAASBgJwiMlPSmUHlbrEjJa4T
+# dUH4NI0kYga/Yn+PA4k1o94glRMCbh62sOZ9iDeU1rBUUGYD1B7JtzuMBIt9NTbM
+# ygnVSVACs9wxveIFBGD6Nvd6YOr+UrgZovJaAeZPv3ZPdebxo1K4DufnQ+LUrD3Z
+# quwvU/Zb8Y2LYEShD+BEr8v6
 # SIG # End signature block

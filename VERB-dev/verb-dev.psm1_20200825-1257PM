@@ -1,4 +1,4 @@
-# verb-dev.psm1
+﻿# verb-dev.psm1
 
 
 <#
@@ -553,7 +553,7 @@ function export-ISEBreakPoints {
     .SYNOPSIS
     export-ISEBreakPoints - Export all 'Line' ise breakpoints to XML file 
     .NOTES
-    Version     : 1.0.0
+    Version     : 1.0.0.
     Author      : Todd Kadrie
     Website     : http://www.toddomation.com
     Twitter     : @tostka / http://twitter.com/tostka
@@ -564,7 +564,7 @@ function export-ISEBreakPoints {
     Github      : https://github.com/tostka
     Tags        : Powershell,ISE,development,debugging
     REVISIONS
-    * 12:56 PM 8/25/2020 fixed typo in 1.0.0 ; init, added to verb-dev module
+    * 10:49 AM 8/25/2020 init, added to verb-dev module
     .DESCRIPTION
     export-ISEBreakPoints - Export all 'Line' ise breakpoints to XML file
     By default, attempts to save to the same directory as the script, but if the directory specified doesn't exist, it redirects the save to the c:\scripts dir.
@@ -604,8 +604,7 @@ function export-ISEBreakPoints {
                 # default to same loc, variant name of script in currenttab of ise
                 #$xFname=$psise.CurrentFile.FullPath.replace(".ps1","-ps1.xml").replace(".psm1","-psm1.xml").replace(".","-BP.") ;
                 $xFname=$tScript.replace(".ps1","-ps1.xml").replace(".psm1","-psm1.xml").replace(".","-BP.") ;
-                $AllUsrsScripts = "$($env:ProgramFiles)\WindowsPowerShell\Scripts" ; 
-                if( ( (split-path $xFname) -eq $AllUsrsScripts) -OR (-not(test-path (split-path $xFname))) ){
+                if( (split-path $xFname -eq "$($env:ProgramFiles)\WindowsPowerShell\Scripts") -OR -not(test-path (split-path $xFname)) ){
                     # if in the AllUsers profile, or the ISE script dir is invalid
                     if($tdir = get-item "$([Environment]::GetFolderPath('MyDocuments'))\WindowsPowershell\Scripts"){
                         # if the CUser has a profile Scripts dir, use it                
@@ -2609,3 +2608,29 @@ function Split-CommandLine {
 
 Export-ModuleMember -Function build-VSCConfig,check-PsLocalRepoRegistration,convert-CommandLine2VSCDebugJson,export-ISEBreakPoints,Get-CommentBlocks,get-FunctionBlock,get-FunctionBlocks,get-ScriptProfileAST,get-VersionInfo,import-ISEBreakPoints,Merge-Module,new-CBH,New-GitHubGist,parseHelp,shift-ISEBreakPoints,Split-CommandLine -Alias *
 
+
+# SIG # Begin signature block
+# MIIELgYJKoZIhvcNAQcCoIIEHzCCBBsCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
+# gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQU54SpjgaTX77PXeM89qIeDm24
+# IL2gggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
+# MCwxKjAoBgNVBAMTIVBvd2VyU2hlbGwgTG9jYWwgQ2VydGlmaWNhdGUgUm9vdDAe
+# Fw0xNDEyMjkxNzA3MzNaFw0zOTEyMzEyMzU5NTlaMBUxEzARBgNVBAMTClRvZGRT
+# ZWxmSUkwgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBALqRVt7uNweTkZZ+16QG
+# a+NnFYNRPPa8Bnm071ohGe27jNWKPVUbDfd0OY2sqCBQCEFVb5pqcIECRRnlhN5H
+# +EEJmm2x9AU0uS7IHxHeUo8fkW4vm49adkat5gAoOZOwbuNntBOAJy9LCyNs4F1I
+# KKphP3TyDwe8XqsEVwB2m9FPAgMBAAGjdjB0MBMGA1UdJQQMMAoGCCsGAQUFBwMD
+# MF0GA1UdAQRWMFSAEL95r+Rh65kgqZl+tgchMuKhLjAsMSowKAYDVQQDEyFQb3dl
+# clNoZWxsIExvY2FsIENlcnRpZmljYXRlIFJvb3SCEGwiXbeZNci7Rxiz/r43gVsw
+# CQYFKw4DAh0FAAOBgQB6ECSnXHUs7/bCr6Z556K6IDJNWsccjcV89fHA/zKMX0w0
+# 6NefCtxas/QHUA9mS87HRHLzKjFqweA3BnQ5lr5mPDlho8U90Nvtpj58G9I5SPUg
+# CspNr5jEHOL5EdJFBIv3zI2jQ8TPbFGC0Cz72+4oYzSxWpftNX41MmEsZkMaADGC
+# AWAwggFcAgEBMEAwLDEqMCgGA1UEAxMhUG93ZXJTaGVsbCBMb2NhbCBDZXJ0aWZp
+# Y2F0ZSBSb290AhBaydK0VS5IhU1Hy6E1KUTpMAkGBSsOAwIaBQCgeDAYBgorBgEE
+# AYI3AgEMMQowCKACgAChAoAAMBkGCSqGSIb3DQEJAzEMBgorBgEEAYI3AgEEMBwG
+# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBSiVjbh
+# aQJAXvspZqQwWHuWLI67xDANBgkqhkiG9w0BAQEFAASBgDX5ibeptw0MVWtcVCpD
+# r1ckwcPNWej+/GdYsRPnGJgn8FMCJy3b8kdBGfAjwa2ctgZ/t2KUVzrlFhRAaEYI
+# GoVyJ/BKty1TGroLO4D17lwuY/YFvduEkgAzyR5H+ksy1Vkr2ho85xEMPUHpRRXS
+# n+Zfaip6xCNWhtkm10zNhLqy
+# SIG # End signature block
