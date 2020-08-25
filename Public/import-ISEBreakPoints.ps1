@@ -1,4 +1,4 @@
-#*------v Function import-ISEBreakPoints v------
+#*------v import-ISEBreakPoints.ps1 v------
 function import-ISEBreakPoints {
     <#
     .SYNOPSIS
@@ -15,7 +15,7 @@ function import-ISEBreakPoints {
     Github      : https://github.com/tostka
     Tags        : Powershell,ISE,development,debugging
     REVISIONS
-    * 10:49 AM 8/25/2020 init, added to verb-dev module
+    * 1:45 PM 8/25/2020 fix bug in import code ; init, added to verb-dev module
     .DESCRIPTION
     import-ISEBreakPoints - Import the 'Line' ise breakpoints previously cached to an XML file
     By default, attempts to save to the same directory as the script, but if the directory specified doesn't exist, it redirects the save to the c:\scripts dir.
@@ -85,7 +85,7 @@ function import-ISEBreakPoints {
                 #>
                 
                 # so if they mismatch, we need to patch over the script used in the set-psbreakpoint command
-                if(  ( (split-path $iBP.script) -ne (split-path $tscript) ) -AND ($psise.powershelltabs.files.fullpath -contains $tScript) ) {
+                if(  ( (split-path $iBP[0].script) -ne (split-path $tscript) ) -AND ($psise.powershelltabs.files.fullpath -contains $tScript) ) {
                     write-verbose "Target script is pathed to different location than .XML exported`n(patching BPs to accomodate)" ; 
                     $setPs1 = $tScript ; 
                 } else {
@@ -101,6 +101,6 @@ function import-ISEBreakPoints {
              } else { "Missing .xml BP file for open file $($tScript)" } ;
         } else {  write-warning 'This script only functions within PS ISE, with a script file open for editing' };
     } # PROC-E
-} ; #*------^ END Function import-ISEBreakPoints ^------
+}
 
-#import-ISEBreakPoints -Script C:\usr\work\o365\scripts\maintain-AzTenantGuests.ps1 -verbose ;
+#*------^ import-ISEBreakPoints.ps1 ^------

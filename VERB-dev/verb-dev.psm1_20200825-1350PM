@@ -1,4 +1,4 @@
-# verb-dev.psm1
+﻿# verb-dev.psm1
 
 
 <#
@@ -1176,7 +1176,7 @@ function import-ISEBreakPoints {
     Github      : https://github.com/tostka
     Tags        : Powershell,ISE,development,debugging
     REVISIONS
-    * 1:45 PM 8/25/2020 fix bug in import code ; init, added to verb-dev module
+    * 10:49 AM 8/25/2020 init, added to verb-dev module
     .DESCRIPTION
     import-ISEBreakPoints - Import the 'Line' ise breakpoints previously cached to an XML file
     By default, attempts to save to the same directory as the script, but if the directory specified doesn't exist, it redirects the save to the c:\scripts dir.
@@ -1246,7 +1246,7 @@ function import-ISEBreakPoints {
                 #>
                 
                 # so if they mismatch, we need to patch over the script used in the set-psbreakpoint command
-                if(  ( (split-path $iBP[0].script) -ne (split-path $tscript) ) -AND ($psise.powershelltabs.files.fullpath -contains $tScript) ) {
+                if(  ( (split-path $iBP.script) -ne (split-path $tscript) ) -AND ($psise.powershelltabs.files.fullpath -contains $tScript) ) {
                     write-verbose "Target script is pathed to different location than .XML exported`n(patching BPs to accomodate)" ; 
                     $setPs1 = $tScript ; 
                 } else {
@@ -2609,3 +2609,29 @@ function Split-CommandLine {
 
 Export-ModuleMember -Function build-VSCConfig,check-PsLocalRepoRegistration,convert-CommandLine2VSCDebugJson,export-ISEBreakPoints,Get-CommentBlocks,get-FunctionBlock,get-FunctionBlocks,get-ScriptProfileAST,get-VersionInfo,import-ISEBreakPoints,Merge-Module,new-CBH,New-GitHubGist,parseHelp,shift-ISEBreakPoints,Split-CommandLine -Alias *
 
+
+# SIG # Begin signature block
+# MIIELgYJKoZIhvcNAQcCoIIEHzCCBBsCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
+# gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUOVRiByFL8pEZocLEznH06J/Z
+# x9SgggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
+# MCwxKjAoBgNVBAMTIVBvd2VyU2hlbGwgTG9jYWwgQ2VydGlmaWNhdGUgUm9vdDAe
+# Fw0xNDEyMjkxNzA3MzNaFw0zOTEyMzEyMzU5NTlaMBUxEzARBgNVBAMTClRvZGRT
+# ZWxmSUkwgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBALqRVt7uNweTkZZ+16QG
+# a+NnFYNRPPa8Bnm071ohGe27jNWKPVUbDfd0OY2sqCBQCEFVb5pqcIECRRnlhN5H
+# +EEJmm2x9AU0uS7IHxHeUo8fkW4vm49adkat5gAoOZOwbuNntBOAJy9LCyNs4F1I
+# KKphP3TyDwe8XqsEVwB2m9FPAgMBAAGjdjB0MBMGA1UdJQQMMAoGCCsGAQUFBwMD
+# MF0GA1UdAQRWMFSAEL95r+Rh65kgqZl+tgchMuKhLjAsMSowKAYDVQQDEyFQb3dl
+# clNoZWxsIExvY2FsIENlcnRpZmljYXRlIFJvb3SCEGwiXbeZNci7Rxiz/r43gVsw
+# CQYFKw4DAh0FAAOBgQB6ECSnXHUs7/bCr6Z556K6IDJNWsccjcV89fHA/zKMX0w0
+# 6NefCtxas/QHUA9mS87HRHLzKjFqweA3BnQ5lr5mPDlho8U90Nvtpj58G9I5SPUg
+# CspNr5jEHOL5EdJFBIv3zI2jQ8TPbFGC0Cz72+4oYzSxWpftNX41MmEsZkMaADGC
+# AWAwggFcAgEBMEAwLDEqMCgGA1UEAxMhUG93ZXJTaGVsbCBMb2NhbCBDZXJ0aWZp
+# Y2F0ZSBSb290AhBaydK0VS5IhU1Hy6E1KUTpMAkGBSsOAwIaBQCgeDAYBgorBgEE
+# AYI3AgEMMQowCKACgAChAoAAMBkGCSqGSIb3DQEJAzEMBgorBgEEAYI3AgEEMBwG
+# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBTqN6VA
+# w7vAriQVEva4sMnf0QA8ADANBgkqhkiG9w0BAQEFAASBgJwiMlPSmUHlbrEjJa4T
+# dUH4NI0kYga/Yn+PA4k1o94glRMCbh62sOZ9iDeU1rBUUGYD1B7JtzuMBIt9NTbM
+# ygnVSVACs9wxveIFBGD6Nvd6YOr+UrgZovJaAeZPv3ZPdebxo1K4DufnQ+LUrD3Z
+# quwvU/Zb8Y2LYEShD+BEr8v6
+# SIG # End signature block

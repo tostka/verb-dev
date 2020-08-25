@@ -5,7 +5,7 @@
 .SYNOPSIS
 VERB-dev - Development PS Module-related generic functions
 .NOTES
-Version     : 1.4.29
+Version     : 1.4.30
 Author      : Todd Kadrie
 Website     :	https://www.toddomation.com
 Twitter     :	@tostka
@@ -1176,7 +1176,7 @@ function import-ISEBreakPoints {
     Github      : https://github.com/tostka
     Tags        : Powershell,ISE,development,debugging
     REVISIONS
-    * 10:49 AM 8/25/2020 init, added to verb-dev module
+    * 1:45 PM 8/25/2020 fix bug in import code ; init, added to verb-dev module
     .DESCRIPTION
     import-ISEBreakPoints - Import the 'Line' ise breakpoints previously cached to an XML file
     By default, attempts to save to the same directory as the script, but if the directory specified doesn't exist, it redirects the save to the c:\scripts dir.
@@ -1246,7 +1246,7 @@ function import-ISEBreakPoints {
                 #>
                 
                 # so if they mismatch, we need to patch over the script used in the set-psbreakpoint command
-                if(  ( (split-path $iBP.script) -ne (split-path $tscript) ) -AND ($psise.powershelltabs.files.fullpath -contains $tScript) ) {
+                if(  ( (split-path $iBP[0].script) -ne (split-path $tscript) ) -AND ($psise.powershelltabs.files.fullpath -contains $tScript) ) {
                     write-verbose "Target script is pathed to different location than .XML exported`n(patching BPs to accomodate)" ; 
                     $setPs1 = $tScript ; 
                 } else {
@@ -2613,8 +2613,8 @@ Export-ModuleMember -Function build-VSCConfig,check-PsLocalRepoRegistration,conv
 # SIG # Begin signature block
 # MIIELgYJKoZIhvcNAQcCoIIEHzCCBBsCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUOVRiByFL8pEZocLEznH06J/Z
-# x9SgggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUiMyCmSI2xfQHFjFbyhr+1mnO
+# OtegggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
 # MCwxKjAoBgNVBAMTIVBvd2VyU2hlbGwgTG9jYWwgQ2VydGlmaWNhdGUgUm9vdDAe
 # Fw0xNDEyMjkxNzA3MzNaFw0zOTEyMzEyMzU5NTlaMBUxEzARBgNVBAMTClRvZGRT
 # ZWxmSUkwgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBALqRVt7uNweTkZZ+16QG
@@ -2629,9 +2629,9 @@ Export-ModuleMember -Function build-VSCConfig,check-PsLocalRepoRegistration,conv
 # AWAwggFcAgEBMEAwLDEqMCgGA1UEAxMhUG93ZXJTaGVsbCBMb2NhbCBDZXJ0aWZp
 # Y2F0ZSBSb290AhBaydK0VS5IhU1Hy6E1KUTpMAkGBSsOAwIaBQCgeDAYBgorBgEE
 # AYI3AgEMMQowCKACgAChAoAAMBkGCSqGSIb3DQEJAzEMBgorBgEEAYI3AgEEMBwG
-# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBTqN6VA
-# w7vAriQVEva4sMnf0QA8ADANBgkqhkiG9w0BAQEFAASBgJwiMlPSmUHlbrEjJa4T
-# dUH4NI0kYga/Yn+PA4k1o94glRMCbh62sOZ9iDeU1rBUUGYD1B7JtzuMBIt9NTbM
-# ygnVSVACs9wxveIFBGD6Nvd6YOr+UrgZovJaAeZPv3ZPdebxo1K4DufnQ+LUrD3Z
-# quwvU/Zb8Y2LYEShD+BEr8v6
+# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBTSNN9d
+# 3eXF521uoVkl1VEnBW6OUTANBgkqhkiG9w0BAQEFAASBgJMckbVX3HOzE71oWGjt
+# tL2HtNf4hOESHvlS7GLRy+kXtsTqULoVwwj7Be6s7vchfcDmBYVBYXQqf6vmfwP6
+# wJ+4IstiFVgdTKAJVuJpc5vlmb6/s7TALfRqT0isrSFNi71vbuS42g7IWaMUVrMa
+# obnbcSn+2/uwq6Pz/wNrwTOM
 # SIG # End signature block
