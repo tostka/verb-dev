@@ -15,6 +15,7 @@ function import-ISEBreakPoints {
     Github      : https://github.com/tostka
     Tags        : Powershell,ISE,development,debugging
     REVISIONS
+    * 8:43 AM 8/26/2020 fixed typo $ibp[0]->$ibps[0]
     * 1:45 PM 8/25/2020 fix bug in import code ; init, added to verb-dev module
     .DESCRIPTION
     import-ISEBreakPoints - Import the 'Line' ise breakpoints previously cached to an XML file
@@ -69,23 +70,21 @@ function import-ISEBreakPoints {
             } else { throw "ISE has no current file open. Open a file before using this script" } ;
 
             if($iFname){
-                write-host "*Importing BP file:$($iFname) and setting specified BP's for open file $($tScript)" ;
+                write-host "*Importing BP file:$($iFname) and setting specified BP's for open file`n$($tScript)" ;
                 # clear all existing bps
                 if($eBP=Get-PSBreakpoint |?{$_.line -AND $_.Script -eq $tScript}){$eBP | remove-PsBreakpoint } ;
-
 
                 # set bps in found .xml file
                 $iBPs = Import-Clixml -path $iFname ;
 
                 <# fundemental issue importing cross-machines, the xml stores the full path to the script at runtime
                     $iBP.script
-                C:\Users\kadriTSS\Documents\WindowsPowerShell\Scripts\maintain-AzTenantGuests.ps1
+                C:\Users\UID\Documents\WindowsPowerShell\Scripts\maintain-AzTenantGuests.ps1
                     $tscript
                 C:\usr\work\o365\scripts\maintain-AzTenantGuests.ps1
                 #>
-                
                 # so if they mismatch, we need to patch over the script used in the set-psbreakpoint command
-                if(  ( (split-path $iBP[0].script) -ne (split-path $tscript) ) -AND ($psise.powershelltabs.files.fullpath -contains $tScript) ) {
+                if(  ( (split-path $iBPs[0].script) -ne (split-path $tscript) ) -AND ($psise.powershelltabs.files.fullpath -contains $tScript) ) {
                     write-verbose "Target script is pathed to different location than .XML exported`n(patching BPs to accomodate)" ; 
                     $setPs1 = $tScript ; 
                 } else {
