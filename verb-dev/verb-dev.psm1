@@ -5,7 +5,7 @@
 .SYNOPSIS
 VERB-dev - Development PS Module-related generic functions
 .NOTES
-Version     : 1.4.33
+Version     : 1.4.34
 Author      : Todd Kadrie
 Website     :	https://www.toddomation.com
 Twitter     :	@tostka
@@ -1264,6 +1264,69 @@ function import-ISEBreakPoints {
 }
 
 #*------^ import-ISEBreakPoints.ps1 ^------
+
+#*------v import-ISEConsoleColors.ps1 v------
+Function import-ISEConsoleColors {
+    <#
+    .SYNOPSIS
+    import-ISEConsoleColors - Import stored $psise.options from a "`$(split-path $profile)\IseColors-XXX.csv" file
+    .NOTES
+    Version     : 1.0.0
+    Author      : Todd Kadrie
+    Website     :	http://www.toddomation.com
+    Twitter     :	@tostka / http://twitter.com/tostka
+    CreatedDate : 2021-03-17
+    License     : MIT License
+    Copyright   : (c) 2020 Todd Kadrie
+    Copyright   : 
+    Github      : https://github.com/tostka
+    Tags        : Powershell,ExchangeOnline,Exchange,RemotePowershell,Connection,MFA
+    REVISIONS   :
+    * 7:29 AM 3/17/2021 init
+    .DESCRIPTION
+    import-ISEConsoleColors - Import stored $psise.options from a "`$(split-path $profile)\IseColors-XXX.csv" file
+    .INPUTS
+    None. Does not accepted piped input.
+    .OUTPUTS
+    None. Returns no objects or output.
+    .EXAMPLE
+    import-ISEConsoleColors;
+    .LINK
+    https://github.com/tostka/verb-IO
+    #>
+    
+    [CmdletBinding()]
+    Param() 
+    $verbose = ($VerbosePreference -eq "Continue") ; 
+        switch($host.name){
+            "Windows PowerShell ISE Host" {
+                ##$psISE.Options.RestoreDefaultTokenColors()
+                <#$sFileTag=Read-Host "Enter 'Name' for saved color scheme" ;
+                $ofile = "$(split-path $profile)\IseColors-$($sFileTag).csv" ; 
+                write-host -fore green "Saving current Colors & Fonts to file: $($ofile)" ; 
+                $psise.options | Select ConsolePane*,Font* | Export-CSV "$($ofile)" ;
+                #>
+                #$ifile = "$(split-path $profile)\IseColorsDefault.csv" ; 
+                get-childitem  "$(split-path $profile)\IseColors*.csv" | out-gridview -Title "Pick IseColors-XXX.csv file of Font/Color settings to be imported into ISE:" -passthru | foreach-object {
+                    $ifile = $_.fullname ; 
+                    if(test-path $ifile){
+                        (import-csv $ifile ).psobject.properties | foreach { $psise.options.$($_.name) = $_.Value} ; 
+                    } else { 
+                        throw "Missing $($ifile), skipping import-ISEConsoleColors.ps1`nCan be created via:`n`$psise.options | Select ConsolePane*,Font* | Export-CSV '`$(split-path $profile)\IseColorsDefault.csv'"
+                    } ;
+                } ;
+            } 
+            "ConsoleHost" {
+                #[console]::ResetColor()  # reset console colorscheme to default
+                throw "This command is intended to import ISE settings (`$psie.options object). PS `$host is not supported" ; 
+            }
+            default {
+                write-warning "Unrecognized `$Host.name:$($Host.name), skipping $($MyInvocation.MyCommand.Name)" ; 
+            } ; 
+        } ; 
+    }
+
+#*------^ import-ISEConsoleColors.ps1 ^------
 
 #*------v Merge-Module.ps1 v------
 function Merge-Module {
@@ -3075,6 +3138,119 @@ function parseHelp {
 
 #*------^ parseHelp.ps1 ^------
 
+#*------v restore-ISEConsoleColors.ps1 v------
+Function restore-ISEConsoleColors {
+    <#
+    .SYNOPSIS
+    restore-ISEConsoleColors - Restore default $psise.options from "`$(split-path $profile)\IseColorsDefault.csv" file
+    .NOTES
+    Version     : 1.0.0
+    Author      : Todd Kadrie
+    Website     :	http://www.toddomation.com
+    Twitter     :	@tostka / http://twitter.com/tostka
+    CreatedDate : 2021-03-17
+    License     : MIT License
+    Copyright   : (c) 2020 Todd Kadrie
+    Copyright   : 
+    Github      : https://github.com/tostka
+    Tags        : Powershell,ExchangeOnline,Exchange,RemotePowershell,Connection,MFA
+    REVISIONS   :
+    * 7:29 AM 3/17/2021 init
+    .DESCRIPTION
+    restore-ISEConsoleColors - Restore default $psise.options from "`$(split-path $profile)\IseColorsDefault.csv" file
+    .INPUTS
+    None. Does not accepted piped input.
+    .OUTPUTS
+    None. Returns no objects or output.
+    .EXAMPLE
+    restore-ISEConsoleColors;
+    .LINK
+    https://github.com/tostka/verb-IO
+    #>
+    
+    [CmdletBinding()]
+    Param() 
+    $verbose = ($VerbosePreference -eq "Continue") ; 
+        switch($host.name){
+            "Windows PowerShell ISE Host" {
+                ##$psISE.Options.RestoreDefaultTokenColors()
+                <#$sFileTag=Read-Host "Enter 'Name' for saved color scheme" ;
+                $ofile = "$(split-path $profile)\IseColors-$($sFileTag).csv" ; 
+                write-host -fore green "Saving current Colors & Fonts to file: $($ofile)" ; 
+                $psise.options | Select ConsolePane*,Font* | Export-CSV "$($ofile)" ;
+                #>
+                $ifile = "$(split-path $profile)\IseColorsDefault.csv" ; 
+                if(test-path $ifile){
+                    (import-csv $ifile ).psobject.properties | foreach { $psise.options.$($_.name) = $_.Value} ; 
+                } else { 
+                    throw "Missing $($ifile), skipping restore-ISEConsoleColors.ps1`nCan be created via:`n`$psise.options | Select ConsolePane*,Font* | Export-CSV '`$(split-path $profile)\IseColorsDefault.csv'"
+                } ;
+            } 
+            "ConsoleHost" {
+                #[console]::ResetColor()  # reset console colorscheme to default
+                throw "This command is intended to backup ISE (`$psie.options object). PS `$host is not supported" ; 
+            }
+            default {
+                write-warning "Unrecognized `$Host.name:$($Host.name), skipping $($MyInvocation.MyCommand.Name)" ; 
+            } ; 
+        } ; 
+    }
+
+#*------^ restore-ISEConsoleColors.ps1 ^------
+
+#*------v save-ISEConsoleColors.ps1 v------
+Function save-ISEConsoleColors {
+    <#
+    .SYNOPSIS
+    save-ISEConsoleColors - Save $psise.options | Select ConsolePane*,Font* to prompted csv file
+    .NOTES
+    Version     : 1.0.0
+    Author      : Todd Kadrie
+    Website     :	http://www.toddomation.com
+    Twitter     :	@tostka / http://twitter.com/tostka
+    CreatedDate : 2021-03-17
+    License     : MIT License
+    Copyright   : (c) 2020 Todd Kadrie
+    Copyright   : 
+    Github      : https://github.com/tostka
+    Tags        : Powershell,ExchangeOnline,Exchange,RemotePowershell,Connection,MFA
+    REVISIONS   :
+    * 1:25 PM 3/5/2021 init ; added support for both ISE & powershell console
+    .DESCRIPTION
+    save-ISEConsoleColors - Save $psise.options | Select ConsolePane*,Font* to prompted csv file
+    .INPUTS
+    None. Does not accepted piped input.
+    .OUTPUTS
+    None. Returns no objects or output.
+    .EXAMPLE
+    save-ISEConsoleColors;
+    .LINK
+    https://github.com/tostka/verb-IO
+    #>
+    [CmdletBinding()]
+    #[Alias('dxo')]
+    Param() 
+    $verbose = ($VerbosePreference -eq "Continue") ; 
+        switch($host.name){
+            "Windows PowerShell ISE Host" {
+                ##$psISE.Options.RestoreDefaultTokenColors()
+                $sFileTag=Read-Host "Enter 'Name' for saved color scheme" ;
+                $ofile = "$(split-path $profile)\IseColors-$($sFileTag).csv" ; 
+                write-host -fore green "Saving current Colors & Fonts to file: $($ofile)" ; 
+                $psise.options | Select ConsolePane*,Font* | Export-CSV "$($ofile)" ;
+            } 
+            "ConsoleHost" {
+                #[console]::ResetColor()  # reset console colorscheme to default
+                throw "This command is intended to backup ISE (`$psie.options object). PS `$host is not supported" ; 
+            }
+            default {
+                write-warning "Unrecognized `$Host.name:$($Host.name), skipping save-ISEConsoleColors" ; 
+            } ; 
+        } ; 
+    }
+
+#*------^ save-ISEConsoleColors.ps1 ^------
+
 #*------v shift-ISEBreakPoints.ps1 v------
 function shift-ISEBreakPoints {
     <#
@@ -3240,14 +3416,14 @@ function Split-CommandLine {
 
 #*======^ END FUNCTIONS ^======
 
-Export-ModuleMember -Function build-VSCConfig,check-PsLocalRepoRegistration,convert-CommandLine2VSCDebugJson,export-ISEBreakPoints,Get-CommentBlocks,get-FunctionBlock,get-FunctionBlocks,get-ScriptProfileAST,get-VersionInfo,import-ISEBreakPoints,Merge-Module,Merge-ModulePs1,new-CBH,New-GitHubGist,parseHelp,shift-ISEBreakPoints,Split-CommandLine -Alias *
+Export-ModuleMember -Function build-VSCConfig,check-PsLocalRepoRegistration,convert-CommandLine2VSCDebugJson,export-ISEBreakPoints,Get-CommentBlocks,get-FunctionBlock,get-FunctionBlocks,get-ScriptProfileAST,get-VersionInfo,import-ISEBreakPoints,import-ISEConsoleColors,Merge-Module,Merge-ModulePs1,new-CBH,New-GitHubGist,parseHelp,restore-ISEConsoleColors,save-ISEConsoleColors,shift-ISEBreakPoints,Split-CommandLine -Alias *
 
 
 # SIG # Begin signature block
 # MIIELgYJKoZIhvcNAQcCoIIEHzCCBBsCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUUDNnxvf02A1/hdvfsjxQfQAS
-# QJ2gggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQU6q4LTMLpz8neKJTGkdZOmupP
+# NI6gggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
 # MCwxKjAoBgNVBAMTIVBvd2VyU2hlbGwgTG9jYWwgQ2VydGlmaWNhdGUgUm9vdDAe
 # Fw0xNDEyMjkxNzA3MzNaFw0zOTEyMzEyMzU5NTlaMBUxEzARBgNVBAMTClRvZGRT
 # ZWxmSUkwgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBALqRVt7uNweTkZZ+16QG
@@ -3262,9 +3438,9 @@ Export-ModuleMember -Function build-VSCConfig,check-PsLocalRepoRegistration,conv
 # AWAwggFcAgEBMEAwLDEqMCgGA1UEAxMhUG93ZXJTaGVsbCBMb2NhbCBDZXJ0aWZp
 # Y2F0ZSBSb290AhBaydK0VS5IhU1Hy6E1KUTpMAkGBSsOAwIaBQCgeDAYBgorBgEE
 # AYI3AgEMMQowCKACgAChAoAAMBkGCSqGSIb3DQEJAzEMBgorBgEEAYI3AgEEMBwG
-# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBTdoOOn
-# uacb0RrHAVqKabxSORFgqjANBgkqhkiG9w0BAQEFAASBgINHOZikao0NMmQqrnKb
-# 6NiiQp7riidXENaDt+tEZLYD+Cw4jsaYZK2f756TEvSMaCHKvxcH+vjPKddq8aw6
-# b9fRx4GcFnmb8VJvK1qLS5OXoinkF4TRnJlztWdUevSX/R88Uduiat4yCBipvzk9
-# 4+UK0v6xBoII195o25P2l8If
+# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBSS+MkT
+# PFpAUKPWfqgFxI9c0dKTrjANBgkqhkiG9w0BAQEFAASBgD5ex3dsYlahvEJfK0jW
+# OhXF8yxefcX0y44NbRHhsY07iHB0R5Htdxfk7nqZ1FC8663MSLGj8UKnBFJ0FLx8
+# EAUkBHTmgrX7zfqyLJn9wshiPL5/xzpdM+T27xOAWrxF5ChzbYSMHOo8SbrcquBD
+# xJheiQxBcvemzho8dHAJU1pk
 # SIG # End signature block
