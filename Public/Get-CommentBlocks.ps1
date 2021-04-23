@@ -23,7 +23,7 @@ function Get-CommentBlocks {
     * 8:28 PM 11/17/2019 INIT
     .DESCRIPTION
     Get-CommentBlocks - Parse specified Path (or inbound Textcontent) for Comment-BasedHelp, and surrounding structures. Returns following parsed content: metaBlock (`<#PSScriptInfo..#`>), metaOpen (Line# of start of metaBlock), metaClose (Line# of end of metaBlock), cbhBlock (Comment-Based-Help block), cbhOpen (Line# of start of CBH), cbhClose (Line# of end of CBH), interText (Block of text *between* any metaBlock metaClose line, and any CBH cbhOpen line), metaCBlockIndex ( Of the collection of all block comments - `<#..#`> - the index of the one corresponding to the metaBlock), CbhCBlockIndex  (Of the collection of all block comments - `<#..#`> - the index of the one corresponding to the cbhBlock)
-    .PARAMETER  TextLines 
+    .PARAMETER  TextLines
     Raw source lines from the target script file (as gathered with get-content) [-TextLines TextArrayObj]
     .PARAMETER Path
     Path to a powershell ps1/psm1 file to be parsed for CBH [-Path c:\path-to\script.ps1]
@@ -31,7 +31,7 @@ function Get-CommentBlocks {
     Parameter to display Debugging messages [-ShowDebug switch]
     .PARAMETER Whatif
     Parameter to run a Test no-change pass [-Whatif switch]
-    .INPUTS 
+    .INPUTS
     None
     .OUTPUTS
     Returns a hashtable containing the following parsed content/objects, from the Text specified:
@@ -41,7 +41,7 @@ function Get-CommentBlocks {
     * cbhBlock : Comment-Based-Help block
     * cbhOpen : Line# of start of CBH
     * cbhClose : Line# of end of CBH
-    * interText : Block of text *between* any metaBlock metaClose line, and any CBH cbhOpen line. 
+    * interText : Block of text *between* any metaBlock metaClose line, and any CBH cbhOpen line.
     * metaCBlockIndex : Of the collection of all block comments - `<#..#`> - the index of the one corresponding to the metaBlock
     * CbhCBlockIndex  : Of the collection of all block comments - `<#..#`> - the index of the one corresponding to the cbhBlock
     .EXAMPLE
@@ -58,7 +58,7 @@ function Get-CommentBlocks {
     #>
     #Requires -Version 3
     ##Requires -RunasAdministrator
-    
+
     [CmdletBinding()]
     PARAM(
         [Parameter(ParameterSetName='Text',Position = 0, Mandatory = $True, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true, HelpMessage = "Raw source lines from the target script file (as gathered with get-content) [-TextLines TextArrayObj]")]
@@ -70,19 +70,19 @@ function Get-CommentBlocks {
         [Parameter(HelpMessage = "Whatif Flag  [-whatIf]")]
         [switch] $whatIf
     ) ;
-    $Verbose = ($VerbosePreference -eq "Continue") ; 
-    
+    $Verbose = ($VerbosePreference -eq "Continue") ;
+
     if($Path){
         $TextLines = get-content -path $path  ;
-    } ; 
-    
+    } ;
+
     $AllBlkCommentCloses = $TextLines | Select-string -Pattern '\s*#>' | Select-Object -ExpandProperty LineNumber ;
     $AllBlkCommentOpens = $TextLines | Select-string -Pattern '\s*<#' | Select-Object  -ExpandProperty LineNumber ;
 
     $MetaStart = $TextLines | Select-string -Pattern '\<\#PSScriptInfo' | Select-Object -First 1 -ExpandProperty LineNumber ;
 
     # cycle the comment-block combos till you find the CBH comment block
-    $metaBlock = $null ; $metaBlock = @() ; 
+    $metaBlock = $null ; $metaBlock = @() ;
     $cbhBlock = $null ; $cbhBlock = @() ;
 
     $rgxCBHKeywords = "\.(SYNOPSIS|DESCRIPTION|PARAMETER|EXAMPLE|INPUTS|OUTPUTS|NOTES|LINK|COMPONENT|ROLE|FUNCTIONALITY|FORWARDHELPTARGETNAME|FORWARDHELPCATEGORY|REMOTEHELPRUNSPACE|EXTERNALHELP)"
@@ -136,7 +136,7 @@ function Get-CommentBlocks {
     cbhBlock : Comment-Based-Help block
     cbhOpen : Line# of start of CBH
     cbhClose : Line# of end of CBH
-    interText : Block of text *between* any metaBlock metaClose, and any CBH cbhOpen. 
+    interText : Block of text *between* any metaBlock metaClose, and any CBH cbhOpen.
     metaCBlockIndex : Of the collection of all block comments - `<#..#`> , the index of the one corresponding to the metaBlock
     CbhCBlockIndex  : Of the collection of all block comments - `<#..#`> , the index of the one corresponding to the cbhBlock
     #>
@@ -153,5 +153,6 @@ function Get-CommentBlocks {
     } ;
     $objReturn | Write-Output
 
-} ; 
+}
+
 #*------^ Get-CommentBlocks.ps1 ^------
