@@ -5,7 +5,7 @@
 .SYNOPSIS
 VERB-dev - Development PS Module-related generic functions
 .NOTES
-Version     : 1.4.38
+Version     : 1.4.39
 Author      : Todd Kadrie
 Website     :	https://www.toddomation.com
 Twitter     :	@tostka
@@ -1345,8 +1345,10 @@ function Merge-Module {
     Github      : https://github.com/tostka
     AddedCredit : Przemyslaw Klys
     AddedWebsite: https://evotec.xyz/powershell-single-psm1-file-versus-multi-file-modules/
+    Tags        : Powershell,Module,Development
     AddedTwitter:
     REVISIONS
+    * 11:25 AM 9/21/2021 added code to remove obsolete gens of .nupkgs & build log files (calls to new verb-io:remove-UnneededFileVariants()); CBH:added Tags; fixed missing CmdletBinding (which breaks functional verbose); added brcketing Banr (easier to tell where breaks occur)
     * 12:15 PM 4/21/2021 expanded select-string aliases
     * 11:42 AM 6/30/2020 fixed Public\_CommonCode.ps1, -ea 0 when not present
     * 1:13 PM 6/29/2020 add support for .Public\_CommonCode.ps1 - module-spanning code that should follow the Function block in the .psm1
@@ -1405,7 +1407,8 @@ function Merge-Module {
     .LINK
     https://www.toddomation.com
     #>
-    param (
+    [CmdletBinding()]
+    PARAM (
         [Parameter(Mandatory = $True, HelpMessage = "Module Name (used to name the ModuleName.psm1 file)[-ModuleName verb-XXX]")]
         [string] $ModuleName,
         [Parameter(Mandatory = $True, HelpMessage = "Array of directory paths containing .ps1 function files to be combined [-ModuleSourcePath c:\path-to\module\Public]")]
@@ -1421,7 +1424,16 @@ function Merge-Module {
         [Parameter(HelpMessage = "Whatif Flag  [-whatIf]")]
         [switch] $whatIf
     ) ;
+    # function self-name (equiv to script's: $MyInvocation.MyCommand.Path) ;
+    ${CmdletName} = $PSCmdlet.MyInvocation.MyCommand.Name ;
+    # Get parameters this function was invoked with
+    #$PSParameters = New-Object -TypeName PSObject -Property $PSBoundParameters ;
     $verbose = ($VerbosePreference -eq "Continue") ;
+    
+    $sBnr="#*======v $(${CmdletName}): v======" ; 
+    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
+    else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+    
 
     $rgxSigStart='#\sSIG\s#\sBegin\ssignature\sblock' ;
     $rgxSigEnd='#\sSIG\s#\sEnd\ssignature\sblock' ;
@@ -1465,6 +1477,22 @@ function Merge-Module {
         $SrcLineTtl = ($rawSourceLines | Measure-Object).count ;
         $PsmNameBU = backup-File -path $PsmName -showdebug:$($showdebug) -whatif:$($whatif) ;
         if (!$PsmNameBU) {throw "FAILURE" } ;
+
+        # the above produces 'C:\sc\verb-Auth\verb-Auth\verb-auth.psm1_20210609-1544PM' files from the prior .psm1
+        # make it purge all but the last 2 backups above, dated prior to today.
+        #$PsmName = 'C:\sc\verb-Auth\verb-Auth\verb-Auth.psm1'
+        $pltRGens =[ordered]@{
+            Path = (split-path $PsmName) ;
+            Include =(split-path $PsmName -leaf).replace('.psm1','.psm1_*') ;
+            Pattern = '\.ps(m|d)1_\d{8}-\d{3,4}(A|P)M$' ;
+            FilterOn = 'CreationTime' ;
+            Keep = 2 ;
+            KeepToday = $true ;
+            verbose=$true ;
+            whatif=$($whatif) ;
+        } ; 
+        write-host -foregroundcolor green "DEADWOOD REMOVAL:remove-UnneededFileVariants w`n$(($pltRGens|out-string).trim())" ; 
+        remove-UnneededFileVariants @pltRGens ;
 
         # this script *appends* to the existing .psm1 file.
         # which by default includes a dynamic include block:
@@ -1768,7 +1796,7 @@ function Merge-Module {
 
     } ; # loop-E
 
-    # add support for Public\_CommonCode.ps1 (module-spanning code that trails the functions blo9ck in the .psm1)
+    # add support for Public\_CommonCode.ps1 (module-spanning code that trails the functions block in the .psm1)
     if($PublicPath = $ModuleSourcePath |Where-Object{$_ -match 'Public'}){
         if($ModFile = Get-ChildItem -Path $PublicPath\_CommonCode.ps1 -ea 0 ){
             $smsg= "Adding:$($ModFile)..." ;
@@ -1929,6 +1957,10 @@ Export-ModuleMember -Function $(($ExportFunctions) -join ',') -Alias *
         $ReportObj.Status=$false ;
     } ;
     $ReportObj | write-output ;
+    
+    $smsg = $sBnr.replace('=v','=^').replace('v=','^=') ;
+    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
+    else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
 }
 
 #*------^ Merge-Module.ps1 ^------
@@ -3424,8 +3456,8 @@ Export-ModuleMember -Function build-VSCConfig,check-PsLocalRepoRegistration,conv
 # SIG # Begin signature block
 # MIIELgYJKoZIhvcNAQcCoIIEHzCCBBsCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUoX1CfC6iJvpeFJzt4gCA+WNS
-# sOqgggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUGEJiPKAJ1pXFUhZuaZFnFRhE
+# kWWgggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
 # MCwxKjAoBgNVBAMTIVBvd2VyU2hlbGwgTG9jYWwgQ2VydGlmaWNhdGUgUm9vdDAe
 # Fw0xNDEyMjkxNzA3MzNaFw0zOTEyMzEyMzU5NTlaMBUxEzARBgNVBAMTClRvZGRT
 # ZWxmSUkwgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBALqRVt7uNweTkZZ+16QG
@@ -3440,9 +3472,9 @@ Export-ModuleMember -Function build-VSCConfig,check-PsLocalRepoRegistration,conv
 # AWAwggFcAgEBMEAwLDEqMCgGA1UEAxMhUG93ZXJTaGVsbCBMb2NhbCBDZXJ0aWZp
 # Y2F0ZSBSb290AhBaydK0VS5IhU1Hy6E1KUTpMAkGBSsOAwIaBQCgeDAYBgorBgEE
 # AYI3AgEMMQowCKACgAChAoAAMBkGCSqGSIb3DQEJAzEMBgorBgEEAYI3AgEEMBwG
-# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBRcLG9N
-# gS6Qaiq1hme6qCj/o6xLSDANBgkqhkiG9w0BAQEFAASBgC0m/WHBBu7BC3RKmRIM
-# ZtlU0wNgxWNN7eVVa0RtXFFBQbu2njesTHt0lbL9MpSUr6gZjOHsCAkftGGiRcFf
-# 2fFIk1uob2q8Yce9IgQIzbpXmi2NHVd0KslnpBLvSDcmdeh4QuAcs1myBGk1sAvi
-# /uvyppHnmLZS4YvH7i2bRUJc
+# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBTKJaS9
+# /b0nmqaryi+ZGcQXUP24/zANBgkqhkiG9w0BAQEFAASBgHsWr6V3rOKhw/KDJwH7
+# JqsZJE9VNfSh6hmalK0zh5f0dDPzbKsBPA4X6kdPXX6uK/81axLbHqO9JLAz/HU2
+# 6rcxLMoqYr8g1Hty5rd6suxH7IT3eIeunrdhX09GOccYaAUFbr3Tj8zrfxHKARRj
+# P/FnSY/4iGgeg3x8IALFgRwm
 # SIG # End signature block
