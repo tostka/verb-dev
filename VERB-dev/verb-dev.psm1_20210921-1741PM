@@ -1,4 +1,4 @@
-# verb-dev.psm1
+﻿# verb-dev.psm1
 
 
 <#
@@ -4589,3 +4589,29 @@ function Split-CommandLine {
 
 Export-ModuleMember -Function build-VSCConfig,check-PsLocalRepoRegistration,convert-CommandLine2VSCDebugJson,export-ISEBreakPoints,Get-CommentBlocks,get-FunctionBlock,get-FunctionBlocks,get-ScriptProfileAST,get-VersionInfo,import-ISEBreakPoints,import-ISEConsoleColors,Merge-Module,Merge-ModulePs1,new-CBH,New-GitHubGist,parseHelp,process-NewModule,restore-ISEConsoleColors,save-ISEConsoleColors,shift-ISEBreakPoints,Split-CommandLine -Alias *
 
+
+# SIG # Begin signature block
+# MIIELgYJKoZIhvcNAQcCoIIEHzCCBBsCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
+# gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUJ6jrg2JrhKn60s4P+Oe17IZY
+# 0bigggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
+# MCwxKjAoBgNVBAMTIVBvd2VyU2hlbGwgTG9jYWwgQ2VydGlmaWNhdGUgUm9vdDAe
+# Fw0xNDEyMjkxNzA3MzNaFw0zOTEyMzEyMzU5NTlaMBUxEzARBgNVBAMTClRvZGRT
+# ZWxmSUkwgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBALqRVt7uNweTkZZ+16QG
+# a+NnFYNRPPa8Bnm071ohGe27jNWKPVUbDfd0OY2sqCBQCEFVb5pqcIECRRnlhN5H
+# +EEJmm2x9AU0uS7IHxHeUo8fkW4vm49adkat5gAoOZOwbuNntBOAJy9LCyNs4F1I
+# KKphP3TyDwe8XqsEVwB2m9FPAgMBAAGjdjB0MBMGA1UdJQQMMAoGCCsGAQUFBwMD
+# MF0GA1UdAQRWMFSAEL95r+Rh65kgqZl+tgchMuKhLjAsMSowKAYDVQQDEyFQb3dl
+# clNoZWxsIExvY2FsIENlcnRpZmljYXRlIFJvb3SCEGwiXbeZNci7Rxiz/r43gVsw
+# CQYFKw4DAh0FAAOBgQB6ECSnXHUs7/bCr6Z556K6IDJNWsccjcV89fHA/zKMX0w0
+# 6NefCtxas/QHUA9mS87HRHLzKjFqweA3BnQ5lr5mPDlho8U90Nvtpj58G9I5SPUg
+# CspNr5jEHOL5EdJFBIv3zI2jQ8TPbFGC0Cz72+4oYzSxWpftNX41MmEsZkMaADGC
+# AWAwggFcAgEBMEAwLDEqMCgGA1UEAxMhUG93ZXJTaGVsbCBMb2NhbCBDZXJ0aWZp
+# Y2F0ZSBSb290AhBaydK0VS5IhU1Hy6E1KUTpMAkGBSsOAwIaBQCgeDAYBgorBgEE
+# AYI3AgEMMQowCKACgAChAoAAMBkGCSqGSIb3DQEJAzEMBgorBgEEAYI3AgEEMBwG
+# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBQaONZl
+# NEt28DdLhYZrH8PX1H+Z0jANBgkqhkiG9w0BAQEFAASBgHNrn3EWvy6eBQQTImGR
+# DMR8Q6O64ACnSGV88LimWtyfCkBts9Vk/n+FXgsBegQACYSI6QnDJZNgtSBtKYig
+# MHVZCy3oxCNAE+gE66S4plJrsrzHVDwIWKVHsyUG3oOvCAqzXUzP0Xqa2NXJ52T6
+# gL6PvralOxv0+Cr3einYOkn8
+# SIG # End signature block
