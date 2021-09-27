@@ -15,8 +15,8 @@ function process-NewModule {
     Github      : https://github.com/tostka/verb-dev
     Tags        : Powershell,Module,Build,Development
     REVISIONS
-    * 2:14 PM 9/21/2021 functionalized & added to verb-dev ; updated $FinalReport to leverage varis, simpler to port install cmds between mods; added #requires (left in loadmod support against dependancy breaks); cleaned up rems
-    * 11:25 AM 9/21/2021 added code to remove obsolete gens of .nupkgs & build log files (calls to new verb-io:remove-UnneededFileVariants()); 
+    * 2:40 PM 9/27/2021 spliced in updated start-log pre-proc code
+    * 2:14 PM 9/21/2021 functionalized & added to verb-dev ; updated $FinalReport to leverage varis, simpler to port install cmds between mods; added #requires (left in loadmod support against dependancy breaks); cleaned up rems; added code to remove obsolete gens of .nupkgs & build log files (calls to new verb-io:remove-UnneededFileVariants()); 
     * 12:40 PM 6/2/2021 example used verb-trans, swapped in verb-logging
     * 12:07 PM 4/21/2021 expanded ss aliases
     * 10:17 AM 3/16/2021 added -ea 0 to the install BP output, suppress remove-module error when not already loaded
@@ -116,6 +116,10 @@ function process-NewModule {
         [Parameter(HelpMessage="Whatif Flag  [-whatIf]")]
         [switch] $whatIf
     ) ;
+    # function self-name (equiv to script's: $MyInvocation.MyCommand.Path) ;
+    ${CmdletName} = $PSCmdlet.MyInvocation.MyCommand.Name ;
+    # Get parameters this function was invoked with
+    #$PSParameters = New-Object -TypeName PSObject -Property $PSBoundParameters ;
     $verbose = ($VerbosePreference -eq "Continue") ; 
 
     if ($psISE){
@@ -303,13 +307,70 @@ function process-NewModule {
 
     if ( !(check-ReqMods $reqMods) ) { write-error "$((get-date).ToString("yyyyMMdd HH:mm:ss")):Missing function. EXITING." ; throw "FAILURE" ; }  ;
 
+    # 2:32 PM 9/27/2021 updated start-log code
+    if(!(get-variable LogPathDrives -ea 0)){$LogPathDrives = 'd','c' };
+    foreach($budrv in $LogPathDrives){if(test-path -path "$($budrv):\scripts" -ea 0 ){break} } ;
+    if(!(get-variable rgxPSAllUsersScope -ea 0)){
+        $rgxPSAllUsersScope="^$([regex]::escape([environment]::getfolderpath('ProgramFiles')))\\((Windows)*)PowerShell\\(Scripts|Modules)\\.*\.(ps(((d|m))*)1|dll)$" ;
+    } ;
+    if(!(get-variable rgxPSCurrUserScope -ea 0)){
+        $rgxPSCurrUserScope="^$([regex]::escape([Environment]::GetFolderPath('MyDocuments')))\\((Windows)*)PowerShell\\(Scripts|Modules)\\.*\.(ps((d|m)*)1|dll)$" ;
+    } ;
+    $pltSL=[ordered]@{Path=$null ;NoTimeStamp=$false ;Tag=$null ;showdebug=$($showdebug) ; Verbose=$($VerbosePreference -eq 'Continue') ; whatif=$($whatif) ;} ;
+    $pltSL.Tag = $ModuleName ; 
+    if($script:PSCommandPath){
+        if(($script:PSCommandPath -match $rgxPSAllUsersScope) -OR ($script:PSCommandPath -match $rgxPSCurrUserScope)){
+            $bDivertLog = $true ; 
+            switch -regex ($script:PSCommandPath){
+                $rgxPSAllUsersScope{$smsg = "AllUsers"} 
+                $rgxPSCurrUserScope{$smsg = "CurrentUser"}
+            } ;
+            $smsg += " context script/module, divert logging into [$budrv]:\scripts" 
+            write-verbose $smsg  ;
+            if($bDivertLog){
+                if((split-path $script:PSCommandPath -leaf) -ne $cmdletname){
+                    # function in a module/script installed to allusers|cu - defer name to Cmdlet/Function name
+                    $pltSL.Path = (join-path -Path "$($budrv):\scripts" -ChildPath "$($cmdletname).ps1") ;
+                } else {
+                    # installed allusers|CU script, use the hosting script name
+                    $pltSL.Path = (join-path -Path "$($budrv):\scripts" -ChildPath (split-path $script:PSCommandPath -leaf)) ;
+                }
+            } ;
+        } else {
+            $pltSL.Path = $script:PSCommandPath ;
+        } ;
+    } else {
+        if(($MyInvocation.MyCommand.Definition -match $rgxPSAllUsersScope) -OR ($MyInvocation.MyCommand.Definition -match $rgxPSCurrUserScope) ){
+             $pltSL.Path = (join-path -Path "$($budrv):\scripts" -ChildPath (split-path $script:PSCommandPath -leaf)) ;
+        } else {
+            $pltSL.Path = $MyInvocation.MyCommand.Definition ;
+        } ;
+    } ;
+    write-verbose "start-Log w`n$(($pltSL|out-string).trim())" ; 
+    $logspec = start-Log @pltSL ;
+    $error.clear() ;
+    TRY {
+        if($logspec){
+            $logging=$logspec.logging ;
+            $logfile=$logspec.logfile ;
+            $transcript=$logspec.transcript ;
+            $stopResults = try {Stop-transcript -ErrorAction stop} catch {} ;
+            start-Transcript -path $transcript ;
+        } else {throw "Unable to configure logging!" } ;
+    } CATCH {
+        $ErrTrapd=$Error[0] ;
+        $smsg = "Failed processing $($ErrTrapd.Exception.ItemName). `nError Message: $($ErrTrapd.Exception.Message)`nError Details: $($ErrTrapd)" ;
+        if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug
+        else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+    } ;
+    <# prior code
     $logspec = start-Log -Path ($MyInvocation.MyCommand.Definition) -Tag $ModuleName -showdebug:$($showdebug) -whatif:$($whatif) ;
     if($logspec){
         $logging=$logspec.logging ;
         $logfile=$logspec.logfile ;
         $transcript=$logspec.transcript ;
     } else {throw "Unable to configure logging!" } ;
-
+    #>
     $sBnr="#*======v $($ScriptBaseName):$($ModuleName) v======" ; 
     $smsg= "$($sBnr)" ;  
     if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
@@ -1133,5 +1194,3 @@ $($logfile)
     #*======^ END SUB MAIN ^======
 } ; 
 #*------^ END Function process-NewModule ^------
-
-
