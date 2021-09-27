@@ -5,7 +5,7 @@
 .SYNOPSIS
 VERB-dev - Development PS Module-related generic functions
 .NOTES
-Version     : 1.4.40
+Version     : 1.4.45
 Author      : Todd Kadrie
 Website     :	https://www.toddomation.com
 Twitter     :	@tostka
@@ -3189,6 +3189,7 @@ function process-NewModule {
     Github      : https://github.com/tostka/verb-dev
     Tags        : Powershell,Module,Build,Development
     REVISIONS
+    * 2:40 PM 9/27/2021 spliced in updated start-log pre-proc code ; fixed $Repo escape in update herestring block
     * 2:14 PM 9/21/2021 functionalized & added to verb-dev ; updated $FinalReport to leverage varis, simpler to port install cmds between mods; added #requires (left in loadmod support against dependancy breaks); cleaned up rems
     * 11:25 AM 9/21/2021 added code to remove obsolete gens of .nupkgs & build log files (calls to new verb-io:remove-UnneededFileVariants()); 
     * 12:40 PM 6/2/2021 example used verb-trans, swapped in verb-logging
@@ -3266,9 +3267,9 @@ function process-NewModule {
     .LINK
     #>
 
-    #Requires -Version 5
+    ##Requires -Version 3 # rem'd already in module
     ##Requires -Module verb-dev # added to verb-dev (recursive if present)
-    #Requires -Modules BuildHelpers,verb-dev, verb-IO, verb-logging, verb-Mods, verb-Text
+    #Requires -Modules BuildHelpers,verb-IO, verb-logging, verb-Mods, verb-Text
     [CmdletBinding()]
     PARAM(
         [Parameter(Position=0,Mandatory=$True,ValueFromPipeline=$true,ValueFromPipelineByPropertyName=$true,HelpMessage="ModuleName[-ModuleName verb-AAD]")]
@@ -3290,6 +3291,10 @@ function process-NewModule {
         [Parameter(HelpMessage="Whatif Flag  [-whatIf]")]
         [switch] $whatIf
     ) ;
+    # function self-name (equiv to script's: $MyInvocation.MyCommand.Path) ;
+    ${CmdletName} = $PSCmdlet.MyInvocation.MyCommand.Name ;
+    # Get parameters this function was invoked with
+    #$PSParameters = New-Object -TypeName PSObject -Property $PSBoundParameters ;
     $verbose = ($VerbosePreference -eq "Continue") ; 
 
     if ($psISE){
@@ -3477,13 +3482,70 @@ function process-NewModule {
 
     if ( !(check-ReqMods $reqMods) ) { write-error "$((get-date).ToString("yyyyMMdd HH:mm:ss")):Missing function. EXITING." ; throw "FAILURE" ; }  ;
 
+    # 2:32 PM 9/27/2021 updated start-log code
+    if(!(get-variable LogPathDrives -ea 0)){$LogPathDrives = 'd','c' };
+    foreach($budrv in $LogPathDrives){if(test-path -path "$($budrv):\scripts" -ea 0 ){break} } ;
+    if(!(get-variable rgxPSAllUsersScope -ea 0)){
+        $rgxPSAllUsersScope="^$([regex]::escape([environment]::getfolderpath('ProgramFiles')))\\((Windows)*)PowerShell\\(Scripts|Modules)\\.*\.(ps(((d|m))*)1|dll)$" ;
+    } ;
+    if(!(get-variable rgxPSCurrUserScope -ea 0)){
+        $rgxPSCurrUserScope="^$([regex]::escape([Environment]::GetFolderPath('MyDocuments')))\\((Windows)*)PowerShell\\(Scripts|Modules)\\.*\.(ps((d|m)*)1|dll)$" ;
+    } ;
+    $pltSL=[ordered]@{Path=$null ;NoTimeStamp=$false ;Tag=$null ;showdebug=$($showdebug) ; Verbose=$($VerbosePreference -eq 'Continue') ; whatif=$($whatif) ;} ;
+    $pltSL.Tag = $ModuleName ; 
+    if($script:PSCommandPath){
+        if(($script:PSCommandPath -match $rgxPSAllUsersScope) -OR ($script:PSCommandPath -match $rgxPSCurrUserScope)){
+            $bDivertLog = $true ; 
+            switch -regex ($script:PSCommandPath){
+                $rgxPSAllUsersScope{$smsg = "AllUsers"} 
+                $rgxPSCurrUserScope{$smsg = "CurrentUser"}
+            } ;
+            $smsg += " context script/module, divert logging into [$budrv]:\scripts" 
+            write-verbose $smsg  ;
+            if($bDivertLog){
+                if((split-path $script:PSCommandPath -leaf) -ne $cmdletname){
+                    # function in a module/script installed to allusers|cu - defer name to Cmdlet/Function name
+                    $pltSL.Path = (join-path -Path "$($budrv):\scripts" -ChildPath "$($cmdletname).ps1") ;
+                } else {
+                    # installed allusers|CU script, use the hosting script name
+                    $pltSL.Path = (join-path -Path "$($budrv):\scripts" -ChildPath (split-path $script:PSCommandPath -leaf)) ;
+                }
+            } ;
+        } else {
+            $pltSL.Path = $script:PSCommandPath ;
+        } ;
+    } else {
+        if(($MyInvocation.MyCommand.Definition -match $rgxPSAllUsersScope) -OR ($MyInvocation.MyCommand.Definition -match $rgxPSCurrUserScope) ){
+             $pltSL.Path = (join-path -Path "$($budrv):\scripts" -ChildPath (split-path $script:PSCommandPath -leaf)) ;
+        } else {
+            $pltSL.Path = $MyInvocation.MyCommand.Definition ;
+        } ;
+    } ;
+    write-verbose "start-Log w`n$(($pltSL|out-string).trim())" ; 
+    $logspec = start-Log @pltSL ;
+    $error.clear() ;
+    TRY {
+        if($logspec){
+            $logging=$logspec.logging ;
+            $logfile=$logspec.logfile ;
+            $transcript=$logspec.transcript ;
+            $stopResults = try {Stop-transcript -ErrorAction stop} catch {} ;
+            start-Transcript -path $transcript ;
+        } else {throw "Unable to configure logging!" } ;
+    } CATCH {
+        $ErrTrapd=$Error[0] ;
+        $smsg = "Failed processing $($ErrTrapd.Exception.ItemName). `nError Message: $($ErrTrapd.Exception.Message)`nError Details: $($ErrTrapd)" ;
+        if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug
+        else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+    } ;
+    <# prior code
     $logspec = start-Log -Path ($MyInvocation.MyCommand.Definition) -Tag $ModuleName -showdebug:$($showdebug) -whatif:$($whatif) ;
     if($logspec){
         $logging=$logspec.logging ;
         $logfile=$logspec.logfile ;
         $transcript=$logspec.transcript ;
     } else {throw "Unable to configure logging!" } ;
-
+    #>
     $sBnr="#*======v $($ScriptBaseName):$($ModuleName) v======" ; 
     $smsg= "$($sBnr)" ;  
     if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
@@ -4224,7 +4286,7 @@ Processing completed: $($ModuleName) :: $($ModDirPath)
 TRY {
 Remove-Module -Name `$tmod -ea 0 ;
 Uninstall-Module -Name `$tmod -AllVersion -whatif:`$(`$whatif) ;
-install-Module -name `$tmod -Repository `$(`$Repository) -MinimumVersion `$tVer -scope `$tScop -AllowClobber -whatif:`$(`$whatif) ;
+install-Module -name `$tmod -Repository `$($Repository) -MinimumVersion `$tVer -scope `$tScop -AllowClobber -whatif:`$(`$whatif) ;
 import-Module -name `$tmod -force -verbose ;
 } CATCH {
 Write-Warning "Failed processing `$(`$_.Exception.ItemName). `nError Message: `$(`$_.Exception.Message)`nError Details: `$(`$_)" ; Break ;
@@ -4235,7 +4297,7 @@ Write-Warning "Failed processing `$(`$_.Exception.ItemName). `nError Message: `$
 TRY {
 Remove-Module -Name `$tmod -ea 0 ;
 Uninstall-Module -Name `$tmod -AllVersion -whatif:`$(`$whatif) ;
-install-Module -name `$tmod -Repository `$(`$Repository) -MinimumVersion `$tVer -scope `$tScop -AllowClobber -whatif:`$(`$whatif) ;
+install-Module -name `$tmod -Repository `$($Repository) -MinimumVersion `$tVer -scope `$tScop -AllowClobber -whatif:`$(`$whatif) ;
 import-Module -name `$tmod -force -verbose ;
 } CATCH {
 Write-Warning "Failed processing `$(`$_.Exception.ItemName). `nError Message: `$(`$_.Exception.Message)`nError Details: `$(`$_)" ; Break ;
@@ -4593,8 +4655,8 @@ Export-ModuleMember -Function build-VSCConfig,check-PsLocalRepoRegistration,conv
 # SIG # Begin signature block
 # MIIELgYJKoZIhvcNAQcCoIIEHzCCBBsCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUCYXRF8StqBGcIA9LPDkw6BDs
-# rZOgggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUSr636OTBXlUr8XElwHWNIaRg
+# cbugggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
 # MCwxKjAoBgNVBAMTIVBvd2VyU2hlbGwgTG9jYWwgQ2VydGlmaWNhdGUgUm9vdDAe
 # Fw0xNDEyMjkxNzA3MzNaFw0zOTEyMzEyMzU5NTlaMBUxEzARBgNVBAMTClRvZGRT
 # ZWxmSUkwgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBALqRVt7uNweTkZZ+16QG
@@ -4609,9 +4671,9 @@ Export-ModuleMember -Function build-VSCConfig,check-PsLocalRepoRegistration,conv
 # AWAwggFcAgEBMEAwLDEqMCgGA1UEAxMhUG93ZXJTaGVsbCBMb2NhbCBDZXJ0aWZp
 # Y2F0ZSBSb290AhBaydK0VS5IhU1Hy6E1KUTpMAkGBSsOAwIaBQCgeDAYBgorBgEE
 # AYI3AgEMMQowCKACgAChAoAAMBkGCSqGSIb3DQEJAzEMBgorBgEEAYI3AgEEMBwG
-# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBTCkxQ1
-# 2TTLVABurZrxQ64yY4s2XzANBgkqhkiG9w0BAQEFAASBgEaTnCHe6liOwlPVZsgA
-# LnELFD7JRV9ZWRIMqb6tmkAz223AIqAyblWxVXHoB2WSdABW2eC8CpUgpn80Wcpp
-# GWcPsQ40fDIpREJBwUp2ZimY6bpNT+DzRcaRVF1TNCUzuz//WvM75BR8NBvR7Ycg
-# CvHeraL/E+35Q+XlwhnxjXy2
+# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBTV812m
+# XFecwTSHxOYpHKFqQOcinjANBgkqhkiG9w0BAQEFAASBgIyzgNnAvF99rYtJ7Mww
+# f/UNWk1qWcnJsVWI3FVjccokz8lrSX6Z9pqoUqD4dyA432N255Cs5bGJfDYtttZ9
+# vOuPZc4rCK1DeYN5Lvn4n+3Z0uoeH1PSeODOQOu39mkfNHyTn+xySW+dK2t63t6B
+# 8uT6zCHFKMbbxkC2u0mTmZ/n
 # SIG # End signature block
