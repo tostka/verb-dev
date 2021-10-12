@@ -20,6 +20,7 @@ function Initialize-ModuleFingerprint {
     AddedWebsite: https://powershellexplained.com/2017-10-14-Powershell-module-semantic-version/
     AddedTwitter: 
     REVISIONS
+    * 7:41 PM 10/11/2021 cleaned up rem'd requires
     * 9:08 PM 10/9/2021 init version
     .DESCRIPTION
     Initialize-ModuleFingerprint.ps1 - Profile a specified module and summarize commands into a semantic-version 'fingerprint'.
@@ -31,7 +32,6 @@ function Initialize-ModuleFingerprint {
     None. Does not accepted piped input.(.NET types, can add description)
     .OUTPUTS
     None. Returns no objects or output (.NET types)
-    System.Boolean
     .EXAMPLE
     PS> Initialize-ModuleFingerprint -path 'C:\sc\Get-MediaInfo' -whatif -verbose ;
     Fingerprint the specified module path, with whatif and verbose specified
@@ -40,13 +40,7 @@ function Initialize-ModuleFingerprint {
     .LINK
     https://powershellexplained.com/2017-10-14-Powershell-module-semantic-version/
     #>
-    ##Requires -Version 2.0
     #Requires -Version 3
-    ##requires -PSEdition Desktop
-    ##requires -PSEdition Core
-    ##Requires -PSSnapin Microsoft.Exchange.Management.PowerShell.E2010
-    ##Requires -Modules ActiveDirectory, AzureAD, MSOnline, ExchangeOnlineManagement, verb-AAD, verb-ADMS, verb-Auth, verb-Ex2010, verb-EXO, verb-IO, verb-logging, verb-Network, verb-Text
-    ##Requires -Modules ActiveDirectory, AzureAD, MSOnline, ExchangeOnlineManagement, MicrosoftTeams, SkypeOnlineConnector, Lync,  verb-AAD, verb-ADMS, verb-Auth, verb-Azure, VERB-CCMS, verb-Desktop, verb-dev, verb-Ex2010, verb-EXO, verb-IO, verb-logging, verb-Mods, verb-Network, verb-L13, verb-SOL, verb-Teams, verb-Text, verb-logging
     #Requires -RunasAdministrator
     # VALIDATORS: [ValidateNotNull()][ValidateNotNullOrEmpty()][ValidateLength(24,25)][ValidateLength(5)][ValidatePattern("(lyn|bcc|spb|adl)ms6(4|5)(0|1).(china|global)\.ad\.toro\.com")][ValidateSet("USEA","GBMK","AUSYD")][ValidateScript({Test-Path $_ -PathType 'Container'})][ValidateScript({Test-Path $_})][ValidateRange(21,65)][ValidateCount(1,3)]
     [CmdletBinding()]
@@ -68,8 +62,6 @@ function Initialize-ModuleFingerprint {
         # Get parameters this function was invoked with
         #$PSParameters = New-Object -TypeName PSObject -Property $PSBoundParameters ;
         $Verbose = ($VerbosePreference -eq 'Continue') ; 
-    
-    
     } ;  # BEGIN-E
     PROCESS {
         $error.clear() ;
