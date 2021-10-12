@@ -5,7 +5,7 @@
 .SYNOPSIS
 VERB-dev - Development PS Module-related generic functions
 .NOTES
-Version     : 1.4.44
+Version     : 1.4.48
 Author      : Todd Kadrie
 Website     :	https://www.toddomation.com
 Twitter     :	@tostka
@@ -3189,8 +3189,10 @@ function process-NewModule {
     Github      : https://github.com/tostka/verb-dev
     Tags        : Powershell,Module,Build,Development
     REVISIONS
-    * 2:40 PM 9/27/2021 spliced in updated start-log pre-proc code
-    * 2:14 PM 9/21/2021 functionalized & added to verb-dev ; updated $FinalReport to leverage varis, simpler to port install cmds between mods; added #requires (left in loadmod support against dependancy breaks); cleaned up rems; added code to remove obsolete gens of .nupkgs & build log files (calls to new verb-io:remove-UnneededFileVariants()); 
+    * 3:43 PM 10/7/2021 revised .nupkg caching code to use the returned (find-module).version string to find the repo .nupkg file, for caching (works around behavior where 4-digit semvars, with 4th digit(rev) 0, get only a 3-digit version string in the .nupkg file name)
+    * 3:43 PM 9/27/2021 spliced in updated start-log pre-proc code ; fixed $Repo escape in update herestring block
+    * 2:14 PM 9/21/2021 functionalized & added to verb-dev ; updated $FinalReport to leverage varis, simpler to port install cmds between mods; added #requires (left in loadmod support against dependancy breaks); cleaned up rems
+    * 11:25 AM 9/21/2021 added code to remove obsolete gens of .nupkgs & build log files (calls to new verb-io:remove-UnneededFileVariants()); 
     * 12:40 PM 6/2/2021 example used verb-trans, swapped in verb-logging
     * 12:07 PM 4/21/2021 expanded ss aliases
     * 10:17 AM 3/16/2021 added -ea 0 to the install BP output, suppress remove-module error when not already loaded
@@ -4169,7 +4171,11 @@ And then re-run process-NewModule.
                 } ;
 
                 # finally, lets grab the .nukpg that was created on the repo, and cached it in the sc dir (for direct copying to stock other repos, home etc)
-                if($tNewPkg = gci "$($tRepo.ScriptPublishLocation)\$($ModuleName).$($psd1Vers).nupkg" -ea 0){
+                #if($tNewPkg = gci "$($tRepo.ScriptPublishLocation)\$($ModuleName).$($psd1Vers).nupkg" -ea 0){
+                # revise: use $tMod.version instead of $psd1Vers
+                # when publishing 4-digit n.n.n.n semvers, if revision (4th digit) is 0, the .nupkg gets only a 3-digit semvar string in the filename. 
+                # The returned $tMod.version reflects the string actually used in the .nupkg, and is what you use to find the .nupkg for caching, from the repo.
+                if($tNewPkg = gci "$($tRepo.ScriptPublishLocation)\$($ModuleName).$($tMod.version).nupkg" -ea 0){
                     $smsg= "Proper updated .nupkg file found:$($tNewPkg.name), copying to local Pkg directory." ;  
                     if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
                     else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
@@ -4281,22 +4287,22 @@ Processing completed: $($ModuleName) :: $($ModDirPath)
         import-Module -name $($ModuleName) -force -verbose ;
 
 #-=-Stacked list: Unwrap to create a 1-liner for the above: CURRENTUSER =-=-=-=-=-=-=
-`$whatif=`$true ; `$tMod = '$($ModuleName)' ; `$tVer = '$($psd1Vers)' ;  `$tScop = 'CurrentUser' ;
+`$whatif=`$false ; `$tMod = '$($ModuleName)' ; `$tVer = '$($psd1Vers)' ;  `$tScop = 'CurrentUser' ;
 TRY {
 Remove-Module -Name `$tmod -ea 0 ;
 Uninstall-Module -Name `$tmod -AllVersion -whatif:`$(`$whatif) ;
-install-Module -name `$tmod -Repository `$(`$Repository) -MinimumVersion `$tVer -scope `$tScop -AllowClobber -whatif:`$(`$whatif) ;
+install-Module -name `$tmod -Repository '$($Repository)' -MinimumVersion `$tVer -scope `$tScop -AllowClobber -whatif:`$(`$whatif) ;
 import-Module -name `$tmod -force -verbose ;
 } CATCH {
 Write-Warning "Failed processing `$(`$_.Exception.ItemName). `nError Message: `$(`$_.Exception.Message)`nError Details: `$(`$_)" ; Break ;
 } ;
 #-=-=-=-=-=-=-=-=
 #-=-Stacked list: Unwrap to create a 1-liner for the above: ALLUSERS =-=-=-=-=-=-=
-`$whatif=`$true ; `$tMod = '$($ModuleName)' ; `$tVer = '$($psd1Vers)' ;  `$tScop = 'AllUsers' ;
+`$whatif=`$false ; `$tMod = '$($ModuleName)' ; `$tVer = '$($psd1Vers)' ;  `$tScop = 'AllUsers' ;
 TRY {
 Remove-Module -Name `$tmod -ea 0 ;
 Uninstall-Module -Name `$tmod -AllVersion -whatif:`$(`$whatif) ;
-install-Module -name `$tmod -Repository `$(`$Repository) -MinimumVersion `$tVer -scope `$tScop -AllowClobber -whatif:`$(`$whatif) ;
+install-Module -name `$tmod -Repository '$($Repository)' -MinimumVersion `$tVer -scope `$tScop -AllowClobber -whatif:`$(`$whatif) ;
 import-Module -name `$tmod -force -verbose ;
 } CATCH {
 Write-Warning "Failed processing `$(`$_.Exception.ItemName). `nError Message: `$(`$_.Exception.Message)`nError Details: `$(`$_)" ; Break ;
@@ -4654,8 +4660,8 @@ Export-ModuleMember -Function build-VSCConfig,check-PsLocalRepoRegistration,conv
 # SIG # Begin signature block
 # MIIELgYJKoZIhvcNAQcCoIIEHzCCBBsCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUPGOWrus5JASn5RV+iDvIXOZ5
-# xdSgggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUgz052PO3WodkwosZJAOYkDKv
+# CRmgggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
 # MCwxKjAoBgNVBAMTIVBvd2VyU2hlbGwgTG9jYWwgQ2VydGlmaWNhdGUgUm9vdDAe
 # Fw0xNDEyMjkxNzA3MzNaFw0zOTEyMzEyMzU5NTlaMBUxEzARBgNVBAMTClRvZGRT
 # ZWxmSUkwgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBALqRVt7uNweTkZZ+16QG
@@ -4670,9 +4676,9 @@ Export-ModuleMember -Function build-VSCConfig,check-PsLocalRepoRegistration,conv
 # AWAwggFcAgEBMEAwLDEqMCgGA1UEAxMhUG93ZXJTaGVsbCBMb2NhbCBDZXJ0aWZp
 # Y2F0ZSBSb290AhBaydK0VS5IhU1Hy6E1KUTpMAkGBSsOAwIaBQCgeDAYBgorBgEE
 # AYI3AgEMMQowCKACgAChAoAAMBkGCSqGSIb3DQEJAzEMBgorBgEEAYI3AgEEMBwG
-# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBS7KajK
-# D7nX7nbH3r64xjtX3SafRTANBgkqhkiG9w0BAQEFAASBgKqiC7wie3X3da5HxmRB
-# 9ojaw4otokQyCeL1u9GXFLWjmV5HAaXZpxj7JflaVXv8rt5OWz0XFj1TSgixkLnW
-# VXHIZJWnnktmC9f/ZtBAKR1FW0nHKmqMmrqPb73zVn0W2hTXrOChFulqyblH6Clt
-# OgIcqq8pTn6vF9CoUvN5Npns
+# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBQr3HMt
+# BZ3yXCmufaKo9ZKetzDGLTANBgkqhkiG9w0BAQEFAASBgF2zK17tvi+cQ13VQxBn
+# kVtmvZtX86WrY6gTpM0utcbNCFnNKnON0hD4htTifglo4vsxqcY4NI4l/WmoOg+N
+# gtRScdDtmtp3fBiUL3bKVDIcPA0gnYDBYnWF2jTmCCgIcXukOlcTTDnvQjtA4lcr
+# zOmKF4DOKLm0i/WG/gJMLLlz
 # SIG # End signature block

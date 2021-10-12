@@ -1,4 +1,4 @@
-﻿#*------v Function process-NewModule v------
+﻿#*------v process-NewModule.ps1 v------
 function process-NewModule {
     <#
     .SYNOPSIS
@@ -15,6 +15,7 @@ function process-NewModule {
     Github      : https://github.com/tostka/verb-dev
     Tags        : Powershell,Module,Build,Development
     REVISIONS
+    * 1:17 PM 10/12/2021 revised post publish code, find-module was returning an array (bombming nupkg gci), so sort on version and take highest single.
     * 3:43 PM 10/7/2021 revised .nupkg caching code to use the returned (find-module).version string to find the repo .nupkg file, for caching (works around behavior where 4-digit semvars, with 4th digit(rev) 0, get only a 3-digit version string in the .nupkg file name)
     * 3:43 PM 9/27/2021 spliced in updated start-log pre-proc code ; fixed $Repo escape in update herestring block
     * 2:14 PM 9/21/2021 functionalized & added to verb-dev ; updated $FinalReport to leverage varis, simpler to port install cmds between mods; added #requires (left in loadmod support against dependancy breaks); cleaned up rems
@@ -932,7 +933,13 @@ And then re-run process-NewModule.
             $1F=$false ;Do {if($1F){Sleep -s 5} ;  write-host "." -NoNewLine ; $1F=$true ; } Until ($tMod = find-module -name $($ModuleName) -Repository $Repository -EA 0) ;
 
             if($tMod){
-            
+                # issue with $tMod is it can come back with multiple versions. Sort Version take last
+                if($tMod -is [system.array]){
+                    $smsg = "find-module returned Array, taking highest Version..." ; 
+                    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
+                    else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                    $tMod = ($tMod | sort version)[-1] ; 
+                } ; 
                 TRY {
                     $tfiles = Get-ChildItem -Recurse -Path "$($env:userprofile)\Documents\WindowsPowerShell\Modules\$($ModuleName)\*.*" |Where-Object{ ! $_.PSIsContainer } ; 
                     #$tfiles | remove-item @pltRemoveItem ; 
@@ -1001,6 +1008,10 @@ And then re-run process-NewModule.
                 # revise: use $tMod.version instead of $psd1Vers
                 # when publishing 4-digit n.n.n.n semvers, if revision (4th digit) is 0, the .nupkg gets only a 3-digit semvar string in the filename. 
                 # The returned $tMod.version reflects the string actually used in the .nupkg, and is what you use to find the .nupkg for caching, from the repo.
+                $smsg = "Retrieving matching Repo .nupkg file:`ngci $($tRepo.ScriptPublishLocation)\$($ModuleName).$($tMod.version).nupkgl.." ; 
+                if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
+                else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+
                 if($tNewPkg = gci "$($tRepo.ScriptPublishLocation)\$($ModuleName).$($tMod.version).nupkg" -ea 0){
                     $smsg= "Proper updated .nupkg file found:$($tNewPkg.name), copying to local Pkg directory." ;  
                     if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
@@ -1198,5 +1209,6 @@ $($logfile)
     else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
 
     #*======^ END SUB MAIN ^======
-} ; 
-#*------^ END Function process-NewModule ^------
+}
+
+#*------^ process-NewModule.ps1 ^------
