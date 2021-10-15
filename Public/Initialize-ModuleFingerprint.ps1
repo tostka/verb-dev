@@ -18,6 +18,7 @@ function Initialize-ModuleFingerprint {
     AddedWebsite: https://powershellexplained.com/2017-10-14-Powershell-module-semantic-version/
     AddedTwitter: 
     REVISIONS
+    * 6:11 PM 10/15/2021 rem'd # raa, replaced psd1/psm1-location code with Get-PSModuleFile(), which is a variant of BuildHelpers get-psModuleManifest. 
     * 12:36 PM 10/13/2021 added else block to catch mods with inconsistent names between root dir, and .psm1 file, (or even .psm1 location); upgraded catchblock to curr std; added splats and verbose echos for debugging outlier processing errors
     * 7:41 PM 10/11/2021 cleaned up rem'd requires
     * 9:08 PM 10/9/2021 init version
@@ -48,7 +49,7 @@ function Initialize-ModuleFingerprint {
     https://powershellexplained.com/2017-10-14-Powershell-module-semantic-version/
     #>
     #Requires -Version 3
-    #Requires -RunasAdministrator
+    ##Requires -RunasAdministrator
     # VALIDATORS: [ValidateNotNull()][ValidateNotNullOrEmpty()][ValidateLength(24,25)][ValidateLength(5)][ValidatePattern("(lyn|bcc|spb|adl)ms6(4|5)(0|1).(china|global)\.ad\.toro\.com")][ValidateSet("USEA","GBMK","AUSYD")][ValidateScript({Test-Path $_ -PathType 'Container'})][ValidateScript({Test-Path $_})][ValidateRange(21,65)][ValidateCount(1,3)]
     [CmdletBinding()]
     ###[Alias('Alias','Alias2')]
@@ -80,36 +81,101 @@ function Initialize-ModuleFingerprint {
             } ; 
 
             $pltXMO=@{Name=$null ; force=$true ; ErrorAction='STOP'} ;
-            $modname = split-path $path -leaf ;
-            $moddir = gi -Path $path;
-
+            
             $pltGCI=[ordered]@{path=$moddir.FullName ;recurse=$true ; ErrorAction='STOP'} ;
             write-verbose "gci w`n$(($pltGCI|out-string).trim())" ; 
             $moddirfiles = gci @pltGCI ;
-            # Accomodate modules in non-standard name schemes: Statistics.psm1 root folder isn't named 'Statistics', it's named: 'PowerShell-Statistics', 
-            # failthrough & recheck for *any* .psm1 in the $moddirfiles and (ensure it's not an array)
-            if($psm1 = $moddirfiles|?{$_.name -eq "$modname.psm1"} ){
-                write-verbose "located `$psm1:$($psm1)" ; 
-            } elseif($psm1 = $moddirfiles|?{$_.name -like "*.psm1"} ){
-                write-verbose "fail-thru located `$psm1:$($psm1)" ; 
-            } ; 
-            if($psm1){
-                if($psm1 -is [system.array]){
-                    throw "`$psm1 resolved to multiple .psm1 files in the module tree!" ; 
+            
+            $Path = (Resolve-Path $Path).Path ; 
+            $moddirfiles = gci -path $path -recur 
+            #-=-=-=-=-=-=-=-=
+            if(-not (gcm Get-PSModuleFile -ea 0)){
+                function Get-PSModuleFile {
+                    [CmdletBinding()]
+                    PARAM(
+                        [Parameter(Mandatory=$True,ValueFromPipeline=$true,ValueFromPipelineByPropertyName=$true,HelpMessage="Path to project root. Defaults to the current working path [-path 'C:\sc\PowerShell-Statistics\']")]
+                        [ValidateScript({Test-Path $_ -PathType 'Container'})]
+                        [string]$Path = $PWD.Path,
+                        [Parameter(HelpMessage="Specify Module file type: Module .psm1 file or Manifest .psd1 file (psd1|psm1 - defaults psd1)[-Extension .psm1]")]
+                        [ValidateSet('.psd1','.psm1','both')]
+                        [string] $Extension='.psd1'
+                    ) ;
+
+                    # function self-name (equiv to script's: $MyInvocation.MyCommand.Path) ;
+                    ${CmdletName} = $PSCmdlet.MyInvocation.MyCommand.Name ;
+                    $sBnr="#*======v RUNNING :$($CmdletName):$($Extension):$($Path) v======" ; 
+                    $smsg = "$($sBnr)" ;
+                    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
+                    else{ write-verbose "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+
+                    if($Extension -eq 'Both'){
+                        [array]$Exts = '.psd1','.psm1'
+                        write-verbose "(-extension Both specified: Running both:$($Exts -join ','))" ; 
+                    } else {
+                        $Exts = $Extension ; 
+                    } ; 
+                    $Path = ( Resolve-Path $Path ).Path ; 
+                    $CurrentFolder = Split-Path $Path -Leaf ;
+                    $ExpectedPath = Join-Path -Path $Path -ChildPath $CurrentFolder ;
+        
+                    foreach($ext in $Exts){
+                        $ExpectedFile = Join-Path -Path $ExpectedPath -ChildPath "$CurrentFolder$($ext)" ;
+                        if(Test-Path $ExpectedFile){$ExpectedFile  } 
+                        else {
+                            # Look for properly organized modules (name\name.ps(d|m)1)
+                            $ProjectPaths = Get-ChildItem $Path -Directory |
+                                ForEach-Object {
+                                    $ThisFolder = $_ ;
+                                    write-verbose "checking:$($ThisFolder)" ; 
+                                    $ExpectedFile = Join-Path -path $ThisFolder.FullName -child "$($ThisFolder.Name)$($ext)" ;
+                                    If( Test-Path $ExpectedFile) {$ExpectedFile  } ;
+                                } ;
+                            if( @($ProjectPaths).Count -gt 1 ){
+                                Write-Warning "Found more than one project path via subfolders with psd1 files" ;
+                                $ProjectPaths  ;
+                            } elseif( @($ProjectPaths).Count -eq 1 )  {$ProjectPaths  } 
+                            elseif( Test-Path "$ExpectedPath$($ext)" ) {
+                                write-verbose "`$ExpectedPath:$($ExpectedPath)" ; 
+                                #PSD1 in root of project - ick, but happens.
+                                "$ExpectedPath$($ext)"  ;
+                            } elseif( Get-Item "$Path\S*rc*\*$($ext)" -OutVariable SourceFiles)  {
+                                # PSD1 in Source or Src folder
+                                If ( $SourceFiles.Count -gt 1 ) {
+                                    Write-Warning "Found more than one project $($ext) file in the Source folder" ;
+                                } ;
+                                $SourceFiles.FullName ;
+                            } else {
+                                Write-Warning "Could not find a PowerShell module $($ext) file from $($Path)" ;
+                            } ;
+                        } ;
+                    } ; 
+                    $smsg = "$($sBnr.replace('=v','=^').replace('v=','^='))" ;
+                    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
+                    else{ write-verbose "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                }
+                ##-=-=-=-=-=-=-=-=
+            }
+
+            $psd1M = Get-PSModuleFile -path $Path -ext .psd1 -verbose:$($VerbosePreference -eq 'Continue');
+            $psm1 = Get-PSModuleFile -path $Path -ext .psm1 -verbose:$($VerbosePreference -eq 'Continue' ); 
+
+            if($psd1M){
+                if($psd1M -is [system.array]){
+                    throw "`$psd1M resolved to multiple .psm1 files in the module tree!" ; 
                 } ; 
                 # regardless of root dir name, the .psm1 name *is* the name of the module, use it for ipmo/rmo's
-                $psm1Basename = ((split-path $psm1.fullname -leaf).replace('.psm1','')) ; 
-                if($modname -ne $psm1Basename){
+                $psd1MBasename = ((split-path $psd1M.fullname -leaf).replace('.psm1','')) ; 
+                if($modname -ne $psd1MBasename){
                     $smsg = "Module has non-standard root-dir name`n$($moddir.fullname)"
-                    $smsg += "`ncorrecting `$modname variable to use *actual* .psm1 basename:$($psm1Basename)" ; 
+                    $smsg += "`ncorrecting `$modname variable to use *actual* .psm1 basename:$($psd1MBasename)" ; 
                     write-warning $smsg ; 
-                    $modname = $psm1Basename ; 
+                    $modname = $psd1MBasename ; 
                 } ; 
-                $pltXMO.Name = $psm1.fullname # load via full path to .psm1
+                $pltXMO.Name = $psd1M.fullname # load via full path to .psm1
                 write-verbose "import-module w`n$(($pltXMO|out-string).trim())" ; 
                 import-module @pltXMO ;
                 $commandList = Get-Command -Module $modname ;
-                $pltXMO.Name = $psm1Basename ; # have to rmo using *basename*
+                $pltXMO.Name = $psd1MBasename ; # have to rmo using *basename*
                 write-verbose "remove-module w`n$(($pltXMO|out-string).trim())" ; 
                 remove-module @pltXMO ;
 
