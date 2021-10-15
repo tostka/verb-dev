@@ -1,5 +1,3 @@
-#*------^ split-CommandLine.ps1 ^------
-
 #*------v Step-ModuleVersionCalculated.ps1 v------
 function Step-ModuleVersionCalculated {
     <#
@@ -23,6 +21,7 @@ function Step-ModuleVersionCalculated {
     AddedWebsite: www.thesurlyadmin.com
     AddedTwitter: @thesurlyadm1n
     REVISIONS
+    * 6:11 PM 10/15/2021 rem'd # raa, replaced psd1/psm1-location code with Get-PSModuleFile(), which is a variant of BuildHelpers get-psModuleManifest. 
     * 2:51 PM 10/13/2021 subbed pswls's for wv's ; added else block to catch mods with inconsistent names between root dir, and .psm1 file, (or even .psm1 location); added path to sBnr
     * 3:55 PM 10/10/2021 added output of final psd1 info on applychange ; recoded to use buildhelper; added -applyChange to exec step-moduleversion, and -NoBuildInfo to bypass reliance on BuildHelpers mod (where acting up for a module). 
     * 9:08 PM 10/9/2021 init version
@@ -47,6 +46,9 @@ function Step-ModuleVersionCalculated {
             - Major reflets breaking changes - removed commands and parameters that previously existed
             - Minor reflects enhancements - new commands and parameters that did not previously exist
             - Patch lesser modifications that neither add functions/commands or parameters, nor remove same. 
+            
+            Semantic versioning (aka SemVer), supports an optional pre-release tag and optional build meta tag (1.2.0-a.1)
+            [Semantic Versioning 2.0.0 | Semantic Versioning - semver.org/](https://semver.org/)
 
     ## Optional Method is via 'Percentage'
 
@@ -64,8 +66,6 @@ function Step-ModuleVersionCalculated {
     Path to root directory of the Module[-path 'C:\sc\PowerShell-Statistics\']
     .PARAMETER applyChange
     switch to apply the Version Update (execute step-moduleversion cmd)[-applyChange]
-    .PARAMETER NoBuildInfo
-    Skip BuildInfo use (workaround for hangs in that module)[-NoBuildInfo]
     .PARAMETER Whatif
     Parameter to run a Test no-change pass [-Whatif switch]
     .INPUTS
@@ -97,7 +97,7 @@ function Step-ModuleVersionCalculated {
     #>
     #Requires -Version 3
     #Requires -Modules BuildHelpers,verb-IO, verb-logging, verb-Mods, verb-Text
-    #Requires -RunasAdministrator    
+    ##Requires -RunasAdministrator    
     [CmdletBinding()]
     PARAM(
         [Parameter(Mandatory=$True,ValueFromPipeline=$true,ValueFromPipelineByPropertyName=$true,HelpMessage="Path to root directory of the Module[-path 'C:\sc\PowerShell-Statistics\']")]
@@ -106,8 +106,6 @@ function Step-ModuleVersionCalculated {
         [Parameter(Mandatory=$False,ValueFromPipeline=$true,ValueFromPipelineByPropertyName=$true,HelpMessage="Version level calculation basis (Fingerprint[default]|Percentage)[-Method Percentage]")]
         [ValidateSet("Fingerprint","Percentage")]
         [string]$Method='Fingerprint',
-        [Parameter(HelpMessage="Skip BuildInfo use (workaround for hangs in that module)[-NoBuildInfo]")]
-        [switch] $NoBuildInfo,
         [Parameter(HelpMessage="Switch to force-increment ModuleVersion by minimum step (Patch), regardless of calculated changes[-MinVersionIncrement]")]
         [switch] $MinVersionIncrement,
         [Parameter(HelpMessage="switch to apply the Version Update (execute step-moduleversion cmd)[-applyChange]")]
@@ -136,8 +134,7 @@ function Step-ModuleVersionCalculated {
             if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
             else{ write-host -foregroundcolor yellow "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
         } ; 
-
-        $pltXMO=@{Name=$null ; force=$true ; ErrorAction='STOP'} ;
+        
 
     } ;  # BEGIN-E
     PROCESS {
@@ -147,111 +144,102 @@ function Step-ModuleVersionCalculated {
             if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
             else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
 
-            $ModuleName = split-path $path -leaf ;
-            $moddir = (gi -Path $path).FullName;
-            #$moddirfiles = gci -path $moddir -recur ;
-            $pltGCI=[ordered]@{path=$moddir.FullName ;recurse=$true ; ErrorAction='STOP'} ;
-            $smsg = "gci w`n$(($pltGCI|out-string).trim())" ; 
-            if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
-            else{ write-verbose "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; 
+            $Path = $moddir = (Resolve-Path $Path).Path ; 
+            $moddirfiles = gci -path $path -recur 
+            #-=-=-=-=-=-=-=-=
+            if(-not (gcm Get-PSModuleFile -ea 0)){
+                function Get-PSModuleFile {
+                    [CmdletBinding()]
+                    PARAM(
+                        [Parameter(Mandatory=$True,ValueFromPipeline=$true,ValueFromPipelineByPropertyName=$true,HelpMessage="Path to project root. Defaults to the current working path [-path 'C:\sc\PowerShell-Statistics\']")]
+                        [ValidateScript({Test-Path $_ -PathType 'Container'})]
+                        [string]$Path = $PWD.Path,
+                        [Parameter(HelpMessage="Specify Module file type: Module .psm1 file or Manifest .psd1 file (psd1|psm1 - defaults psd1)[-Extension .psm1]")]
+                        [ValidateSet('.psd1','.psm1','both')]
+                        [string] $Extension='.psd1'
+                    ) ;
 
-            $moddirfiles = gci @pltGCI ;
-
-            # prelocate .psm1 (BH doesn't locate the .psm1)
-            if($psm1 = $moddirfiles|?{$_.name -eq "$ModuleName.psm1"} ){
-                $smsg = "located `$psm1:$($psm1)" ; 
-                if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
-                else{ write-verbose "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; 
-            } elseif($psm1 = $moddirfiles|?{$_.name -like "*.psm1"} ){
-                $smsg = "fail-thru located `$psm1:$($psm1)" ; 
-                if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
-                else{ write-verbose "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; 
-            } else {
-                $smsg = "failed to locate a .psm1 module file!" ; 
-                if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level warn } #Error|Warn|Debug 
-                else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
-                throw $smsg ;
-            } ; 
-            if($psm1 -is [system.array]){
-                $smsg = "`$psm1 resolved to multiple .psm1 files in the module tree!" ; 
-                if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level warn } #Error|Warn|Debug 
-                else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
-                throw $smsg ;
-            } else {
-                $psm1Basename = ((split-path $psm1.fullname -leaf).replace('.psm1','')) ; 
-                if($ModuleName -ne $psm1Basename){
-                    $smsg = "Module has non-standard root-dir name`n$($moddir.fullname)"
-                    $smsg += "`ncorrecting `$ModuleName variable to use *actual* .psm1 basename:$($psm1Basename)" ; 
-                    write-warning $smsg ; 
-                    $ModuleName = $psm1Basename ; 
-                } ; 
-            } ;  
-            
-            if($NoBuildInfo){
-                if($moddirfiles.name -contains "$ModuleName.psd1"){
-                    $psd1 = $moddirfiles|?{$_.name -eq "$ModuleName.psd1"} ; 
-                } else { 
-                    throw "Unable to locate Manifest .psd1 file!" ; 
-                } ; 
-                if($psd1 = $moddirfiles|?{$_.name -eq "$ModuleName.psd1"} ){
-                    $smsg = "located `$psd1:$($psd1)" ; 
+                    # function self-name (equiv to script's: $MyInvocation.MyCommand.Path) ;
+                    ${CmdletName} = $PSCmdlet.MyInvocation.MyCommand.Name ;
+                    $sBnr="#*======v RUNNING :$($CmdletName):$($Extension):$($Path) v======" ; 
+                    $smsg = "$($sBnr)" ;
                     if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
-                    else{ write-verbose "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; 
-                } elseif($psd1 = $moddirfiles|?{$_.name -like "*.psd1"} ){
-                    $smsg = "fail-thru located `$psd1:$($psd1)" ; 
-                    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
-                    else{ write-verbose "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; 
-                } else {
-                    $smsg = "failed to locate a .psd1 manifest file!" ; 
-                    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level warn } #Error|Warn|Debug 
-                    else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
-                    throw $smsg ;
-                } ; 
-                if($psd1 -is [system.array]){
-                    $smsg = "`$psd1 resolved to multiple .psd1 files in the module tree!" ; 
-                    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level warn } #Error|Warn|Debug 
-                    else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
-                    throw $smsg ;
-                } ; 
+                    else{ write-verbose "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
 
-            } else { 
-                # stock buildhelper e-varis
-                $smsg = "(executing:Set-BuildEnvironment -Path $($moddir) -Force `n(use -NoBuildInfo if hangs))" ; 
-                if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
-                else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
-                Set-BuildEnvironment -Path $moddir -Force ;
-                # never outputs anything but the $env:BHPS* variables, on *success* (test their status)
-                $smsg = "Processing $($ModuleName):`n$((get-item Env:BH*|out-string).trim())`n" ;
-                if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
-                else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
-                if(test-path $env:BHPSModuleManifest){
-                    $psd1 = gci $env:BHPSModuleManifest ; 
-                } else {
-                    $smsg = "Unable to locate psd1:$($env:BHPSModuleManifest)" 
-                    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level warn } #Error|Warn|Debug 
-                    else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
-                } ;
-            } ; 
-            $pltXPsd1=[ordered]@{path=$psd1.FullName ; ErrorAction='STOP'} ; 
-            $smsg = "Import-PowerShellDataFile w`n$(($pltXPsd1|out-string).trim())" ;                         
+                    if($Extension -eq 'Both'){
+                        [array]$Exts = '.psd1','.psm1'
+                        write-verbose "(-extension Both specified: Running both:$($Exts -join ','))" ; 
+                    } else {
+                        $Exts = $Extension ; 
+                    } ; 
+                    $Path = ( Resolve-Path $Path ).Path ; 
+                    $CurrentFolder = Split-Path $Path -Leaf ;
+                    $ExpectedPath = Join-Path -Path $Path -ChildPath $CurrentFolder ;
+        
+                    foreach($ext in $Exts){
+                        $ExpectedFile = Join-Path -Path $ExpectedPath -ChildPath "$CurrentFolder$($ext)" ;
+                        if(Test-Path $ExpectedFile){$ExpectedFile  } 
+                        else {
+                            # Look for properly organized modules (name\name.ps(d|m)1)
+                            $ProjectPaths = Get-ChildItem $Path -Directory |
+                                ForEach-Object {
+                                    $ThisFolder = $_ ;
+                                    write-verbose "checking:$($ThisFolder)" ; 
+                                    $ExpectedFile = Join-Path -path $ThisFolder.FullName -child "$($ThisFolder.Name)$($ext)" ;
+                                    If( Test-Path $ExpectedFile) {$ExpectedFile  } ;
+                                } ;
+                            if( @($ProjectPaths).Count -gt 1 ){
+                                Write-Warning "Found more than one project path via subfolders with psd1 files" ;
+                                $ProjectPaths  ;
+                            } elseif( @($ProjectPaths).Count -eq 1 )  {$ProjectPaths  } 
+                            elseif( Test-Path "$ExpectedPath$($ext)" ) {
+                                write-verbose "`$ExpectedPath:$($ExpectedPath)" ; 
+                                #PSD1 in root of project - ick, but happens.
+                                "$ExpectedPath$($ext)"  ;
+                            } elseif( Get-Item "$Path\S*rc*\*$($ext)" -OutVariable SourceFiles)  {
+                                # PSD1 in Source or Src folder
+                                If ( $SourceFiles.Count -gt 1 ) {
+                                    Write-Warning "Found more than one project $($ext) file in the Source folder" ;
+                                } ;
+                                $SourceFiles.FullName ;
+                            } else {
+                                Write-Warning "Could not find a PowerShell module $($ext) file from $($Path)" ;
+                            } ;
+                        } ;
+                    } ; 
+                    $smsg = "$($sBnr.replace('=v','=^').replace('v=','^='))" ;
+                    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
+                    else{ write-verbose "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                }
+                ##-=-=-=-=-=-=-=-=
+            }
+
+            $psd1M = Get-PSModuleFile -path $Path -ext .psd1 -verbose:$($VerbosePreference -eq 'Continue');
+            $psm1 = Get-PSModuleFile -path $Path -ext .psm1 -verbose:$($VerbosePreference -eq 'Continue' ); 
+
+            $pltXMO=@{Name=$null ; force=$true ; ErrorAction='STOP'} ;
+            $pltXpsd1M=[ordered]@{path=$psd1M ; ErrorAction='STOP'} ; 
+
+            $smsg = "Import-PowerShellDataFile w`n$(($pltXpsd1M|out-string).trim())" ;                         
             if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
             else{ write-verbose "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; 
-            $PsdInfoPre = Import-PowerShellDataFile @pltXPsd1 ;
-            $smsg = "test-ModuleManifest w`n$(($pltXPsd1|out-string).trim())" ;                         
+            $PsdInfoPre = Import-PowerShellDataFile @pltXpsd1M ;
+            $smsg = "test-ModuleManifest w`n$(($pltXpsd1M|out-string).trim())" ;                         
             if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
             else{ write-verbose "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; 
-            $TestReport = test-modulemanifest @pltXPsd1 ;
+            $TestReport = test-modulemanifest @pltXpsd1M ;
             if($? ){ 
                 $smsg= "(Test-ModuleManifest:PASSED)" ;
                 if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info }  #Error|Warn|Debug 
                 else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                $ModuleName = $TestReport.Name ; 
             } 
             
             switch ($Method) {
 
                 'Fingerprint' {
 
-                    $smsg = "Module:PSD1:calculating *FINGERPRINT* change Version Step" ; 
+                    $smsg = "Module:psd1M:calculating *FINGERPRINT* change Version Step" ; 
                     if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
                     else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
 
@@ -259,14 +247,14 @@ function Step-ModuleVersionCalculated {
                         $oldfingerprint = Get-Content  ($moddirfiles|?{$_.name -eq "fingerprint"}).FullName ; 
                 
                         if($psm1){
-                            $pltXMO.Name = $psm1.fullname # load via full path to .psm1
+                            $pltXMO.Name = $psm1 # load via full path to .psm1
                             $smsg = "import-module w`n$(($pltXMO|out-string).trim())" ; 
                             if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
                             else{ write-verbose "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; 
                             import-module @pltXMO ;
 
                             $commandList = Get-Command -Module $ModuleName
-                            $pltXMO.Name = $psm1Basename ; # have to rmo using *basename*
+                            $pltXMO.Name = $ModuleName; # have to rmo using *basename*
                             $smsg = "remove-module w`n$(($pltXMO|out-string).trim())" ; 
                             if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
                             else{ write-verbose "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; 
@@ -288,6 +276,8 @@ function Step-ModuleVersionCalculated {
                                 };  
                             } ;   
 
+                            # step-ModuleVersion supports -By: "Major", "Minor", "Build","Patch"
+                            # SemVers uses 3-digits, a prerelease tag and a build meta tag (only 3 are used in pkg builds etc)
                             $bumpVersionType = 'Patch' ; 
                             if($MinVersionIncrement){
                                 $smsg = "-MinVersionIncrement override specified: incrementing by min .Build" ; 
@@ -341,11 +331,11 @@ function Step-ModuleVersionCalculated {
                 } 
                 'Percentage' {
                     # implement's Martin Pugh's revision step code on percentage of files changed after psd1.LastWriteTime
-                    $smsg = "Module:PSD1:calculating *PERCENTAGE* change Version Step" ; 
+                    $smsg = "Module:psd1M:calculating *PERCENTAGE* change Version Step" ; 
                     if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
                     else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
 
-                    $LastChange = (Get-ChildItem $psd1.fullname).LastWriteTime ; 
+                    $LastChange = (Get-ChildItem $psd1M).LastWriteTime ; 
                     $ChangedFiles = ($moddirfiles | Where LastWriteTime -gt $LastChange).Count ; 
                     $PercentChange = 100 - ((($moddirfiles.Count - $ChangedFiles) / $moddirfiles.Count) * 100) ; 
                     $smsg = "PercentChange:$($PercentChange)" ; 
@@ -390,7 +380,7 @@ function Step-ModuleVersionCalculated {
             } # switch-E
 
             if($TestReport -AND $applyChange ){ 
-                $pltStepMV=[ordered]@{Path=$psd1.FullName ; By=$bumpVersionType ; ErrorAction='STOP';} ; 
+                $pltStepMV=[ordered]@{Path=$psd1M ; By=$bumpVersionType ; ErrorAction='STOP';} ; 
 
                 $smsg = "Step-ModuleVersion w`n$(($pltStepMV|out-string).trim())" ; 
                 if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
@@ -435,7 +425,7 @@ $($Method) analysis recommends ModuleVersion Step:$($bumpVersionType).
 
 This can be implemented with the following command:
 
-Step-ModuleVersion -Path $($psd1.fullname) -By $($bumpVersionType)
+Step-ModuleVersion -Path $($psd1M) -By $($bumpVersionType)
 
 (the above will use the BuildHelpers module to update the revision stored in the Manifest .psd1 file for the module).
 
