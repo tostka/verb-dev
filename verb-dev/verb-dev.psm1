@@ -5,7 +5,7 @@
 .SYNOPSIS
 VERB-dev - Development PS Module-related generic functions
 .NOTES
-Version     : 1.4.53
+Version     : 1.4.54
 Author      : Todd Kadrie
 Website     :	https://www.toddomation.com
 Twitter     :	@tostka
@@ -934,6 +934,127 @@ function get-FunctionBlocks {
 
 #*------^ get-FunctionBlocks.ps1 ^------
 
+#*------v Get-PSModuleFile.ps1 v------
+function Get-PSModuleFile {
+    <#
+    .SYNOPSIS
+    Get-PSModuleFile.ps1 - Locate a module's manifest .psd1 file, given the root path of the moodule (direct lift from BuildHelpers:Get-PSModuleManifest, but I want a sep copy wo BH as a dependancy)
+    .NOTES
+    Version     : 1.0.0
+    Author      : Todd Kadrie
+    Website     : http://www.toddomation.com
+    Twitter     : @tostka / http://twitter.com/tostka
+    CreatedDate : 2021-10-15
+    FileName    : Get-PSModuleFile.ps1
+    License     : MIT License 
+    Copyright   : (none asserted)
+    Github      : https://github.com/tostka/verb-dev
+    Tags        : Powershell
+    AddedCredit :  RamblingCookieMonster (Warren Frame)
+    AddedWebsite: https://github.com/RamblingCookieMonster
+    AddedTwitter: @pscookiemonster
+    AddedWebsite: https://github.com/RamblingCookieMonster/BuildHelpers
+    REVISIONS
+    * 11:38 AM 10/15/2021 init version, added support for locating both .psd1 & .psm1, a new -Extension param to drive the choice, and a 'both' optional extension spec to retrieve both file type paths.
+    * 1/1/2019 BuildHelpers most recent rev of the get-PsModuleManifest function.
+    .DESCRIPTION
+    Get-PSModuleFile.ps1 - Locate a module's Manifest (.psd1) or Module (.psm1) file, given the root path of the moodule (direct lift from BuildHelpers:Get-PSModuleManifest, but extended to do either psd1 or psm1)
+    Get the PowerShell key psd1|psm1 for a project ;
+        Evaluates based on the following scenarios: ;
+            * Subfolder with the same name as the current folder with a psd1|psm1 file in it ;
+            * Subfolder with a <subfolder-name>.psd1|psm1 file in it ;
+            * Current folder with a <currentfolder-name>.psd1|psm1 file in it ;
+            + Subfolder called "Source" or "src" (not case-sensitive) with a psd1|psm1 file in it ;
+        Note: This does not handle paths in the format Folder\ModuleName\Version\ ;
+    .PARAMETER Path
+    Path to project root. Defaults to the current working path [-path 'C:\sc\PowerShell-Statistics\']
+    .INPUTS
+    None. Does not accepted piped input.(.NET types, can add description)
+    .OUTPUTS
+    None. Returns no objects or output (.NET types)
+    System.Boolean
+    .EXAMPLE
+    $psd1M = Get-PSModuleFile -path c:\sc\someproj\
+    Retrieve the defualt .psd1 Manifest from the specified project, and assign the fullpath to the $psd1M variable
+    .EXAMPLE
+    Get-PSModuleFile -path c:\sc\someproj\ -extension 'psm1'
+    Use the -Extension 'Both' option to find and return the path to the .psm1 Module file for the specified project, 
+    .EXAMPLE
+    $modulefiles = Get-PSModuleFile -path c:\sc\someproj\ -extension both
+    Use the -Extension 'Both' option to find and return the paths of both the .psd1 Manifest and the .psm1 Module for the specified project, and assign the fullpath to the $modulefiles variable
+    .LINK
+    https://github.com/tostka/verb-dev
+    .LINK
+    https://github.com/RamblingCookieMonster/BuildHelpers
+    #>
+    #Requires -Version 3
+    ##Requires -Modules BuildHelpers,verb-IO, verb-logging, verb-Mods, verb-Text
+    ##Requires -RunasAdministrator    
+    [CmdletBinding()]
+    PARAM(
+        [Parameter(Mandatory=$True,ValueFromPipeline=$true,ValueFromPipelineByPropertyName=$true,HelpMessage="Path to project root. Defaults to the current working path [-path 'C:\sc\PowerShell-Statistics\']")]
+        [ValidateScript({Test-Path $_ -PathType 'Container'})]
+        [string]$Path = $PWD.Path,
+        [Parameter(HelpMessage="Specify Module file type: Module .psm1 file or Manifest .psd1 file (psd1|psm1 - defaults psd1)[-Extension .psm1]")]
+        [ValidateSet('.psd1','.psm1','both')]
+        [string] $Extension='.psd1'
+    ) ;
+    
+        # function self-name (equiv to script's: $MyInvocation.MyCommand.Path) ;
+        ${CmdletName} = $PSCmdlet.MyInvocation.MyCommand.Name ;
+        $sBnr="#*======v RUNNING :$($CmdletName):$($Extension):$($Path) v======" ; 
+        $smsg = "$($sBnr)" ;
+        if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
+        else{ write-verbose "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+
+        if($Extension -eq 'Both'){
+            [array]$Exts = '.psd1','.psm1'
+            write-verbose "(-extension Both specified: Running both:$($Exts -join ','))" ; 
+        } else {
+            $Exts = $Extension ; 
+        } ; 
+        $Path = ( Resolve-Path $Path ).Path ; 
+        $CurrentFolder = Split-Path $Path -Leaf ;
+        $ExpectedPath = Join-Path -Path $Path -ChildPath $CurrentFolder ;
+        
+        foreach($ext in $Exts){
+            $ExpectedFile = Join-Path -Path $ExpectedPath -ChildPath "$CurrentFolder$($ext)" ;
+            if(Test-Path $ExpectedFile){$ExpectedFile  } 
+            else {
+                # Look for properly organized modules (name\name.ps(d|m)1)
+                $ProjectPaths = Get-ChildItem $Path -Directory |
+                    ForEach-Object {
+                        $ThisFolder = $_ ;
+                        write-verbose "checking:$($ThisFolder)" ; 
+                        $ExpectedFile = Join-Path -path $ThisFolder.FullName -child "$($ThisFolder.Name)$($ext)" ;
+                        If( Test-Path $ExpectedFile) {$ExpectedFile  } ;
+                    } ;
+                if( @($ProjectPaths).Count -gt 1 ){
+                    Write-Warning "Found more than one project path via subfolders with psd1 files" ;
+                    $ProjectPaths  ;
+                } elseif( @($ProjectPaths).Count -eq 1 )  {$ProjectPaths  } 
+                elseif( Test-Path "$ExpectedPath$($ext)" ) {
+                    write-verbose "`$ExpectedPath:$($ExpectedPath)" ; 
+                    #PSD1 in root of project - ick, but happens.
+                    "$ExpectedPath$($ext)"  ;
+                } elseif( Get-Item "$Path\S*rc*\*$($ext)" -OutVariable SourceFiles)  {
+                    # PSD1 in Source or Src folder
+                    If ( $SourceFiles.Count -gt 1 ) {
+                        Write-Warning "Found more than one project $($ext) file in the Source folder" ;
+                    } ;
+                    $SourceFiles.FullName ;
+                } else {
+                    Write-Warning "Could not find a PowerShell module $($ext) file from $($Path)" ;
+                } ;
+            } ;
+        } ; 
+        $smsg = "$($sBnr.replace('=v','=^').replace('v=','^='))" ;
+        if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
+        else{ write-verbose "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+}
+
+#*------^ Get-PSModuleFile.ps1 ^------
+
 #*------v get-ScriptProfileAST.ps1 v------
 function get-ScriptProfileAST {
     <#
@@ -1348,6 +1469,7 @@ function Initialize-ModuleFingerprint {
     AddedWebsite: https://powershellexplained.com/2017-10-14-Powershell-module-semantic-version/
     AddedTwitter: 
     REVISIONS
+    * 8:47 AM 10/15/2021 rem'd # raa, convert-tomodule etc run as UID, and I have this loading in profile...
     * 12:36 PM 10/13/2021 added else block to catch mods with inconsistent names between root dir, and .psm1 file, (or even .psm1 location); upgraded catchblock to curr std; added splats and verbose echos for debugging outlier processing errors
     * 7:41 PM 10/11/2021 cleaned up rem'd requires
     * 9:08 PM 10/9/2021 init version
@@ -1378,7 +1500,7 @@ function Initialize-ModuleFingerprint {
     https://powershellexplained.com/2017-10-14-Powershell-module-semantic-version/
     #>
     #Requires -Version 3
-    #Requires -RunasAdministrator
+    ##Requires -RunasAdministrator
     # VALIDATORS: [ValidateNotNull()][ValidateNotNullOrEmpty()][ValidateLength(24,25)][ValidateLength(5)][ValidatePattern("(lyn|bcc|spb|adl)ms6(4|5)(0|1).(china|global)\.ad\.toro\.com")][ValidateSet("USEA","GBMK","AUSYD")][ValidateScript({Test-Path $_ -PathType 'Container'})][ValidateScript({Test-Path $_})][ValidateRange(21,65)][ValidateCount(1,3)]
     [CmdletBinding()]
     ###[Alias('Alias','Alias2')]
@@ -4847,6 +4969,7 @@ function Step-ModuleVersionCalculated {
     AddedWebsite: www.thesurlyadmin.com
     AddedTwitter: @thesurlyadm1n
     REVISIONS
+    * 8:47 AM 10/15/2021 rem'd # raa, convert-tomodule etc run as UID, and I have this loading in profile...
     * 2:51 PM 10/13/2021 subbed pswls's for wv's ; added else block to catch mods with inconsistent names between root dir, and .psm1 file, (or even .psm1 location); added path to sBnr
     * 3:55 PM 10/10/2021 added output of final psd1 info on applychange ; recoded to use buildhelper; added -applyChange to exec step-moduleversion, and -NoBuildInfo to bypass reliance on BuildHelpers mod (where acting up for a module). 
     * 9:08 PM 10/9/2021 init version
@@ -4921,7 +5044,7 @@ function Step-ModuleVersionCalculated {
     #>
     #Requires -Version 3
     #Requires -Modules BuildHelpers,verb-IO, verb-logging, verb-Mods, verb-Text
-    #Requires -RunasAdministrator    
+    ##Requires -RunasAdministrator    
     [CmdletBinding()]
     PARAM(
         [Parameter(Mandatory=$True,ValueFromPipeline=$true,ValueFromPipelineByPropertyName=$true,HelpMessage="Path to root directory of the Module[-path 'C:\sc\PowerShell-Statistics\']")]
@@ -5306,14 +5429,14 @@ which was applied via the BuildHelper:Step-ModulerVersion cmdlet (above)
 
 #*======^ END FUNCTIONS ^======
 
-Export-ModuleMember -Function build-VSCConfig,check-PsLocalRepoRegistration,convert-CommandLine2VSCDebugJson,export-ISEBreakPoints,Get-CommentBlocks,get-FunctionBlock,get-FunctionBlocks,get-ScriptProfileAST,get-VersionInfo,import-ISEBreakPoints,import-ISEConsoleColors,Initialize-ModuleFingerprint,Merge-Module,Merge-ModulePs1,new-CBH,New-GitHubGist,parseHelp,process-NewModule,restore-ISEConsoleColors,save-ISEConsoleColors,shift-ISEBreakPoints,Split-CommandLine,Step-ModuleVersionCalculated -Alias *
+Export-ModuleMember -Function build-VSCConfig,check-PsLocalRepoRegistration,convert-CommandLine2VSCDebugJson,export-ISEBreakPoints,Get-CommentBlocks,get-FunctionBlock,get-FunctionBlocks,Get-PSModuleFile,get-ScriptProfileAST,get-VersionInfo,import-ISEBreakPoints,import-ISEConsoleColors,Initialize-ModuleFingerprint,Merge-Module,Merge-ModulePs1,new-CBH,New-GitHubGist,parseHelp,process-NewModule,restore-ISEConsoleColors,save-ISEConsoleColors,shift-ISEBreakPoints,Split-CommandLine,Step-ModuleVersionCalculated -Alias *
 
 
 # SIG # Begin signature block
 # MIIELgYJKoZIhvcNAQcCoIIEHzCCBBsCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUY0qS97MEbzGgzWUWWz01Nbxi
-# 3YWgggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUqVPouzsd0eVsLCcoiU+rTrpm
+# 7J+gggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
 # MCwxKjAoBgNVBAMTIVBvd2VyU2hlbGwgTG9jYWwgQ2VydGlmaWNhdGUgUm9vdDAe
 # Fw0xNDEyMjkxNzA3MzNaFw0zOTEyMzEyMzU5NTlaMBUxEzARBgNVBAMTClRvZGRT
 # ZWxmSUkwgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBALqRVt7uNweTkZZ+16QG
@@ -5328,9 +5451,9 @@ Export-ModuleMember -Function build-VSCConfig,check-PsLocalRepoRegistration,conv
 # AWAwggFcAgEBMEAwLDEqMCgGA1UEAxMhUG93ZXJTaGVsbCBMb2NhbCBDZXJ0aWZp
 # Y2F0ZSBSb290AhBaydK0VS5IhU1Hy6E1KUTpMAkGBSsOAwIaBQCgeDAYBgorBgEE
 # AYI3AgEMMQowCKACgAChAoAAMBkGCSqGSIb3DQEJAzEMBgorBgEEAYI3AgEEMBwG
-# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBTd/wuH
-# dhAxn2OrPXa3izYz44vHbzANBgkqhkiG9w0BAQEFAASBgHWU+5C24x/scSOVdpOZ
-# XiyQ/3hS5hzP+INP3ud8FFtzhb8Hav69XIAfF5fspobn9e1S5U8m1J8hY9N8o+Bb
-# A+DrmJ2BRy+YgE2mNKwxa6Qz9CRTTEb96Jbknbynb7tBJSyKv4984jHDJiJ69X9D
-# IJGjW7bZmIAy++1zUTCkZ6pV
+# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBSwrEy0
+# E5GQmh3E1in1QHaSOGa1PzANBgkqhkiG9w0BAQEFAASBgCsHEvh/EEaI0fh9x8ix
+# CT3VJ6wjqTeJ56yTEHEZZRxpKFfvXCDqyDvtmqzWTohII9d2u6wTKdpa4Kz3OyuQ
+# 8wHKuAPTunk54Um3ekAJZX0pRaub5wCHaMsjZghOTfHIkjp4jfSUwbMxNe+v/1N8
+# Shm/eVizvromMhl+eCM4DyPH
 # SIG # End signature block

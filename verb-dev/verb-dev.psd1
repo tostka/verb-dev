@@ -12,7 +12,7 @@
 RootModule = 'VERB-dev.psm1'
 
 # Version number of this module.
-ModuleVersion = '1.4.53'
+ModuleVersion = '1.4.54'
 
 # Supported PSEditions
 # CompatiblePSEditions = @()
@@ -69,7 +69,7 @@ Description = 'Development PS Module-related generic functions'
 # NestedModules = @()
 
 # Functions to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no functions to export.
-FunctionsToExport = @('build-VSCConfig','check-PsLocalRepoRegistration','convert-CommandLine2VSCDebugJson','export-ISEBreakPoints','Get-CommentBlocks','get-FunctionBlock','get-FunctionBlocks','get-ScriptProfileAST','get-VersionInfo','import-ISEBreakPoints','import-ISEConsoleColors','Initialize-ModuleFingerprint','Merge-Module','Merge-ModulePs1','new-CBH','New-GitHubGist','parseHelp','process-NewModule','restore-ISEConsoleColors','save-ISEConsoleColors','shift-ISEBreakPoints','Split-CommandLine','Step-ModuleVersionCalculated')
+FunctionsToExport = @('build-VSCConfig','check-PsLocalRepoRegistration','convert-CommandLine2VSCDebugJson','export-ISEBreakPoints','Get-CommentBlocks','get-FunctionBlock','get-FunctionBlocks','Get-PSModuleFile','get-ScriptProfileAST','get-VersionInfo','import-ISEBreakPoints','import-ISEConsoleColors','Initialize-ModuleFingerprint','Merge-Module','Merge-ModulePs1','new-CBH','New-GitHubGist','parseHelp','process-NewModule','restore-ISEConsoleColors','save-ISEConsoleColors','shift-ISEBreakPoints','Split-CommandLine','Step-ModuleVersionCalculated')
 
 # Cmdlets to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no cmdlets to export.
 CmdletsToExport = '*'
@@ -126,8 +126,8 @@ PrivateData = @{
 # SIG # Begin signature block
 # MIIELgYJKoZIhvcNAQcCoIIEHzCCBBsCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUQYpH2AT0ht3HqRvfNELZk8LG
-# AAegggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUjLiT9oBBOroYa/eq/+sSo/dz
+# 6TugggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
 # MCwxKjAoBgNVBAMTIVBvd2VyU2hlbGwgTG9jYWwgQ2VydGlmaWNhdGUgUm9vdDAe
 # Fw0xNDEyMjkxNzA3MzNaFw0zOTEyMzEyMzU5NTlaMBUxEzARBgNVBAMTClRvZGRT
 # ZWxmSUkwgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBALqRVt7uNweTkZZ+16QG
@@ -142,9 +142,9 @@ PrivateData = @{
 # AWAwggFcAgEBMEAwLDEqMCgGA1UEAxMhUG93ZXJTaGVsbCBMb2NhbCBDZXJ0aWZp
 # Y2F0ZSBSb290AhBaydK0VS5IhU1Hy6E1KUTpMAkGBSsOAwIaBQCgeDAYBgorBgEE
 # AYI3AgEMMQowCKACgAChAoAAMBkGCSqGSIb3DQEJAzEMBgorBgEEAYI3AgEEMBwG
-# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBQ5UXBB
-# p7KayorfVlRlWVTTXF1B/DANBgkqhkiG9w0BAQEFAASBgHldyDmvChkzvxq6Vv6Q
-# cbJ01yiMofp2XL4tCe4N3C19mheN8AZ/byFov51BH2HBKkqzitoMCZCdBdGsgAvv
-# oSrb5qYmqMDRs6uvUkJUdaWckMfBAIFiwivlMD4Adk6ScFtAS+md1xHFKbVTEfiw
-# VthS6Fhbqe8RwCmO516a+XIF
+# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBQowuS/
+# kC/k48/Z2klrI5bVA1ptbDANBgkqhkiG9w0BAQEFAASBgKZ5o4OHVJjVGW67U5TU
+# pvPvQGAggs8rtXWQdV0C4uh6wxYGm2zSUVUbmoBEeiSmfQehYUJiIMVC8EhwRK2S
+# 1wa3+G8WEMRUhcfHP307HaFnNSZwTalxM1TYPx44zAN7B7qty+z+ZVOTW+MPqHnH
+# IeWzpx1AdncOJc8xAZp6YI50
 # SIG # End signature block
