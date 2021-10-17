@@ -15,6 +15,7 @@ function process-NewModule {
     Github      : https://github.com/tostka/verb-dev
     Tags        : Powershell,Module,Build,Development
     REVISIONS
+    * 8:47 PM 10/16/2021 rem'd out ReqMods code, was breaking exec from home
     * 1:17 PM 10/12/2021 revised post publish code, find-module was returning an array (bombming nupkg gci), so sort on version and take highest single.
     * 3:43 PM 10/7/2021 revised .nupkg caching code to use the returned (find-module).version string to find the repo .nupkg file, for caching (works around behavior where 4-digit semvars, with 4th digit(rev) 0, get only a 3-digit version string in the .nupkg file name)
     * 3:43 PM 9/27/2021 spliced in updated start-log pre-proc code ; fixed $Repo escape in update herestring block
@@ -301,6 +302,7 @@ function process-NewModule {
         } ; 
     } ; 
 
+    <# breaking runs
     [array]$reqMods = $null ; # force array, otherwise single first makes it a [string]
     $reqMods += "Test-TranscriptionSupported;Test-Transcribing;Stop-TranscriptLog;Start-IseTranscript;Start-TranscriptLog;get-ArchivePath;Archive-Log;Start-TranscriptLog;Write-Log;Start-Log".split(";") ;
     $reqMods+="Get-CommentBlocks;parseHelp;get-ScriptProfileAST;build-VSCConfig;Merge-Module;get-VersionInfo".split(";") ; 
@@ -309,7 +311,7 @@ function process-NewModule {
     $reqMods = $reqMods | Select-Object -Unique ;
 
     if ( !(check-ReqMods $reqMods) ) { write-error "$((get-date).ToString("yyyyMMdd HH:mm:ss")):Missing function. EXITING." ; throw "FAILURE" ; }  ;
-
+    #>
     # 2:32 PM 9/27/2021 updated start-log code
     if(!(get-variable LogPathDrives -ea 0)){$LogPathDrives = 'd','c' };
     foreach($budrv in $LogPathDrives){if(test-path -path "$($budrv):\scripts" -ea 0 ){break} } ;

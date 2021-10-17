@@ -21,6 +21,7 @@ function Step-ModuleVersionCalculated {
     AddedWebsite: www.thesurlyadmin.com
     AddedTwitter: @thesurlyadm1n
     REVISIONS
+    * 2:19 PM 10/16/2021 actually implemented the new -Silent param ; updated ModuleName locater; 
     * 6:11 PM 10/15/2021 rem'd # raa, replaced psd1/psm1-location code with Get-PSModuleFile(), which is a variant of BuildHelpers get-psModuleManifest. 
     * 2:51 PM 10/13/2021 subbed pswls's for wv's ; added else block to catch mods with inconsistent names between root dir, and .psm1 file, (or even .psm1 location); added path to sBnr
     * 3:55 PM 10/10/2021 added output of final psd1 info on applychange ; recoded to use buildhelper; added -applyChange to exec step-moduleversion, and -NoBuildInfo to bypass reliance on BuildHelpers mod (where acting up for a module). 
@@ -122,7 +123,7 @@ function Step-ModuleVersionCalculated {
         $sBnr="#*======v RUNNING :$($CmdletName):$($Path) v======" ; 
         $smsg = "$($sBnr)" ;
         if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
-        else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+        elseif(-not $Silent){ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
         
         # Get parameters this function was invoked with
         #$PSParameters = New-Object -TypeName PSObject -Property $PSBoundParameters ;
@@ -132,7 +133,7 @@ function Step-ModuleVersionCalculated {
             $smsg = "You have specified -whatif, but have not also specified -applyChange" ; 
             $smsg += "`nThere is no reason to use -whatif without -applyChange."  ; 
             if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
-            else{ write-host -foregroundcolor yellow "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+            elseif(-not $Silent){ write-host -foregroundcolor yellow "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
         } ; 
         
 
@@ -142,7 +143,7 @@ function Step-ModuleVersionCalculated {
         TRY {
             $smsg = "profiling existing content..."
             if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
-            else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+            elseif(-not $Silent){ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
 
             $Path = $moddir = (Resolve-Path $Path).Path ; 
             $moddirfiles = gci -path $path -recur 
@@ -216,7 +217,10 @@ function Step-ModuleVersionCalculated {
 
             $psd1M = Get-PSModuleFile -path $Path -ext .psd1 -verbose:$($VerbosePreference -eq 'Continue');
             $psm1 = Get-PSModuleFile -path $Path -ext .psm1 -verbose:$($VerbosePreference -eq 'Continue' ); 
-
+            if ((split-path (split-path $psd1m) -leaf) -eq (gci $psd1m).basename){
+                $ModuleName = split-path -leaf (split-path $psd1m) 
+            } else {throw "`$ModuleName:Unable to match psd1.Basename $((gci $psd1m).basename) to psd1.parentfolder.name $(split-path (split-path $psd1m) -leaf)" }  ;
+        
             $pltXMO=@{Name=$null ; force=$true ; ErrorAction='STOP'} ;
             $pltXpsd1M=[ordered]@{path=$psd1M ; ErrorAction='STOP'} ; 
 
@@ -231,7 +235,7 @@ function Step-ModuleVersionCalculated {
             if($? ){ 
                 $smsg= "(Test-ModuleManifest:PASSED)" ;
                 if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info }  #Error|Warn|Debug 
-                else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                elseif(-not $Silent){ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
                 $ModuleName = $TestReport.Name ; 
             } 
             
@@ -241,7 +245,7 @@ function Step-ModuleVersionCalculated {
 
                     $smsg = "Module:psd1M:calculating *FINGERPRINT* change Version Step" ; 
                     if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
-                    else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                    elseif(-not $Silent){ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
 
                     if($moddirfiles.name -contains "fingerprint"){
                         $oldfingerprint = Get-Content  ($moddirfiles|?{$_.name -eq "fingerprint"}).FullName ; 
@@ -282,7 +286,7 @@ function Step-ModuleVersionCalculated {
                             if($MinVersionIncrement){
                                 $smsg = "-MinVersionIncrement override specified: incrementing by min .Build" ; 
                                 if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
-                                else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                                elseif(-not $Silent){ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
                                 #$Version.Build ++ ;
                                 #$Version.Revision = 0 ; 
                                 # drop through min patch rev above
@@ -290,12 +294,12 @@ function Step-ModuleVersionCalculated {
                                 # KM's core logic code:
                                 $smsg = "Detecting new features" ; 
                                 if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
-                                else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                                elseif(-not $Silent){ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
                                 $fingerprint | Where {$_ -notin $oldFingerprint } | 
                                     ForEach-Object {$bumpVersionType = 'Minor'; "  $_"} ; 
                                 $smsg = "Detecting breaking changes" ; 
                                 if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
-                                else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                                elseif(-not $Silent){ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
                                 $oldFingerprint | Where {$_ -notin $fingerprint } | 
                                     ForEach-Object {$bumpVersionType = 'Major'; "  $_"} ; 
                             } ;
@@ -321,7 +325,7 @@ function Step-ModuleVersionCalculated {
                         $pltOFile=[ordered]@{Encoding='utf8' ;FilePath=(join-path -path $moddir -childpath 'fingerprint') ;whatif=$($whatif) ;} ; 
                         $smsg = "Writing fingerprint: Out-File w`n$(($pltOFile|out-string).trim())" ; 
                         if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
-                        else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                        elseif(-not $Silent){ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
                         $fingerprint | out-file @pltOFile ; 
                     } else {
                         $smsg = "No funtional Module `$fingerprint generated for path specified`n$($Path)" ; 
@@ -333,7 +337,7 @@ function Step-ModuleVersionCalculated {
                     # implement's Martin Pugh's revision step code on percentage of files changed after psd1.LastWriteTime
                     $smsg = "Module:psd1M:calculating *PERCENTAGE* change Version Step" ; 
                     if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
-                    else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                    elseif(-not $Silent){ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
 
                     $LastChange = (Get-ChildItem $psd1M).LastWriteTime ; 
                     $ChangedFiles = ($moddirfiles | Where LastWriteTime -gt $LastChange).Count ; 
@@ -384,19 +388,19 @@ function Step-ModuleVersionCalculated {
 
                 $smsg = "Step-ModuleVersion w`n$(($pltStepMV|out-string).trim())" ; 
                 if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
-                else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                elseif(-not $Silent){ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
                 if(!$whatif){
                     # Step-ModuleVersion -Path $env:BHPSModuleManifest -By $bumpVersionType ; 
                     Step-ModuleVersion @pltStepMV ; 
                     $PsdInfo = Import-PowerShellDataFile -path $env:BHPSModuleManifest ;
                     $smsg = "----PsdVers incremented from $($PsdInfoPre.ModuleVersion) to $((Import-PowerShellDataFile -path $env:BHPSModuleManifest).ModuleVersion)" ;
                     if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
-                    else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                    elseif(-not $Silent){ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
 
                 } else {
                     $smsg = "(-whatif, skipping exec:`nStep-ModuleVersion -Path $($env:BHPSModuleManifest) -By $($bumpVersionType)) ;" ; 
                     if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
-                    else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                    elseif(-not $Silent){ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
                     $PsdInfo.ModuleVersion | write-output ; 
                 } ;
             } ; 
@@ -441,7 +445,7 @@ which was applied via the BuildHelper:Step-ModulerVersion cmdlet (above)
 
             $smsg = "`n$($hmsg)" ; 
             if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
-            else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+            elseif(-not $Silent){ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
 
         } else {
             $smsg = "Unable to generate a 'bumpVersionType' for path specified`n$($Path)" ; 
@@ -452,19 +456,19 @@ which was applied via the BuildHelper:Step-ModulerVersion cmdlet (above)
         if($PsdInfo -AND $applyChange ){ 
             $smsg = "(returning updated ManifestPsd1 Content to pipeline)" ; 
             if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
-            else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+            elseif(-not $Silent){ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
             $PsdInfo | write-output 
         } else {
             $smsg = "-applyChange *not* specified, returning 'bumpVersionType' specification to pipeline:" ; 
             if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
-            else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+            elseif(-not $Silent){ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
             #$PsdInfo.ModuleVersion | write-output 
              $bumpVersionType | write-output  ; 
         } ;  ;
 
         $smsg = "$($sBnr.replace('=v','=^').replace('v=','^='))" ;
         if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
-        else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+        elseif(-not $Silent){ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
     } ;  # END-E
 }
 

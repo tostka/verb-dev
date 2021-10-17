@@ -5,7 +5,7 @@
 .SYNOPSIS
 VERB-dev - Development PS Module-related generic functions
 .NOTES
-Version     : 1.4.55
+Version     : 1.5.2
 Author      : Todd Kadrie
 Website     :	https://www.toddomation.com
 Twitter     :	@tostka
@@ -933,6 +933,155 @@ function get-FunctionBlocks {
 }
 
 #*------^ get-FunctionBlocks.ps1 ^------
+
+#*------v get-ProjectNameTDO.ps1 v------
+function get-ProjectNameTDO {
+    <#
+    .SYNOPSIS
+    get-ProjectNameTDO.ps1 - Get the name for this project (lifted from BuildHelpers module, and renamed to avoid collisions
+    .NOTES
+    Version     : 1.0.0
+    Author      : Todd Kadrie
+    Website     : http://www.toddomation.com
+    Twitter     : @tostka / http://twitter.com/tostka
+    CreatedDate : 2021-10-15
+    FileName    : get-ProjectNameTDO.ps1
+    License     : MIT License 
+    Copyright   : (none asserted)
+    Github      : https://github.com/tostka/verb-dev
+    Tags        : Powershell
+    AddedCredit :  RamblingCookieMonster (Warren Frame)
+    AddedWebsite: https://github.com/RamblingCookieMonster
+    AddedTwitter: @pscookiemonster
+    AddedWebsite: https://github.com/RamblingCookieMonster/BuildHelpers
+    REVISIONS
+    * 11:51 AM 10/16/2021 init version, minor CBH mods, put into OTB format. 
+    * 1/1/2019 BuildHelpers most recent rev of the get-PsModuleManifest function.
+    .DESCRIPTION
+    Get the name for this project
+
+        Evaluates based on the following scenarios:
+            * Subfolder with the same name as the current folder
+            * Subfolder with a <subfolder-name>.psd1 file in it
+            * Current folder with a <currentfolder-name>.psd1 file in it
+            + Subfolder called "Source" or "src" (not case-sensitive) with a psd1 file in it
+
+        If no suitable project name is discovered, the function will return
+        the name of the root folder as the project name.
+        
+         We assume you are in the project root, for several of the fallback options
+         
+         [How to Write a PowerShell Module Manifest - PowerShell | Microsoft Docs - docs.microsoft.com/](https://docs.microsoft.com/en-us/powershell/scripting/developer/module/how-to-write-a-powershell-module-manifest?view=powershell-7.1)
+         "You link a manifest file to a module by naming the manifest the same as the module, and storing the manifest in the module's root directory."
+         
+         [Understanding a Windows PowerShell Module - PowerShell | Microsoft Docs - docs.microsoft.com/](https://docs.microsoft.com/en-us/powershell/scripting/developer/module/understanding-a-windows-powershell-module?view=powershell-7.1)
+          "A module is a set of related Windows PowerShell functionalities, grouped together as a convenient unit (usually saved in a single directory)."
+          "Regardless, the path of the folder is referred to as the base of the module (ModuleBase), and the name of the script, binary, or manifest module file (.psm1) should be the same as the module folder name, with the following exceptions:..."
+          
+    .FUNCTIONALITY
+    CI/CD
+    .PARAMETER Path
+    Path to project root. Defaults to the current working path [-path 'C:\sc\PowerShell-Statistics\']
+    .EXAMPLE
+    $ModuleName = get-ProjectNameTDO -path c:\sc\someproj\
+    Retrieve the Name from the specified project, and assign it to the $ModuleName variable
+    .LINK
+    https://github.com/tostka/verb-dev
+    .LINK
+    https://github.com/RamblingCookieMonster/BuildHelpers
+    .LINK
+    Get-BuildVariable
+    .LINK
+    Set-BuildEnvironment
+    .LINK
+    about_BuildHelpers
+    #>
+    #Requires -Version 3
+    ##Requires -Modules BuildHelpers,verb-IO, verb-logging, verb-Mods, verb-Text
+    ##Requires -RunasAdministrator    
+    [CmdletBinding()]
+    PARAM(
+        [Parameter(Mandatory=$True,ValueFromPipeline=$true,ValueFromPipelineByPropertyName=$true,HelpMessage="Path to project root. Defaults to the current working path [-path 'C:\sc\PowerShell-Statistics\']")]
+        [ValidateScript({Test-Path $_ -PathType 'Container'})]
+        [string]$Path = $PWD.Path,
+        [validatescript({
+            if(-not (Get-Command $_ -ErrorAction SilentlyContinue))
+            {
+                throw "Could not find command at GitPath [$_]"
+            }
+            $true
+        })]
+        $GitPath = 'git'
+    ) ;
+    
+    # function self-name (equiv to script's: $MyInvocation.MyCommand.Path) ;
+    ${CmdletName} = $PSCmdlet.MyInvocation.MyCommand.Name ;
+    $sBnr="#*======v RUNNING :$($CmdletName):$($Extension):$($Path) v======" ; 
+    $smsg = "$($sBnr)" ;
+    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
+    else{ write-verbose "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+
+    if(!$PSboundParameters.ContainsKey('GitPath')) {
+        $GitPath = (Get-Command $GitPath -ErrorAction SilentlyContinue)[0].Path ; 
+    } ; 
+
+    $WeCanGit = ( (Test-Path $( Join-Path $Path .git )) -and (Get-Command $GitPath -ErrorAction SilentlyContinue) ) ; 
+
+    $Path = ( Resolve-Path $Path ).Path ; 
+    $CurrentFolder = Split-Path $Path -Leaf   ; 
+    $ExpectedPath = Join-Path -Path $Path -ChildPath $CurrentFolder ; 
+    if(Test-Path $ExpectedPath) { $result = $CurrentFolder }
+    else{
+        # Look for properly organized modules
+        $ProjectPaths = Get-ChildItem $Path -Directory |
+            Where-Object {
+                Test-Path $(Join-Path $_.FullName "$($_.name).psd1")  
+            } |
+                Select-Object -ExpandProperty Fullname ; 
+
+        if( @($ProjectPaths).Count -gt 1 ){
+            Write-Warning "Found more than one project path via subfolders with psd1 files" ; 
+            $result = Split-Path $ProjectPaths -Leaf ; 
+        } elseif( @($ProjectPaths).Count -eq 1 ){
+            $result = Split-Path $ProjectPaths -Leaf ; 
+        } elseif( Get-Item "$Path\S*rc*\*.psd1" -OutVariable SourceManifests){
+            # PSD1 in Source or Src folder
+            If ( $SourceManifests.Count -gt 1 ){
+                Write-Warning "Found more than one project manifest in the Source folder" ; 
+            } ; 
+            $result = $SourceManifests.BaseName
+        } elseif( Test-Path "$ExpectedPath.psd1" ) {
+            #PSD1 in root of project - ick, but happens.
+            $result = $CurrentFolder ; 
+        } elseif ( $PSDs = Get-ChildItem -Path $Path "*.psd1" ){
+            #PSD1 in root of project but name doesn't match
+            #very ick or just an icky time in Azure Pipelines
+            if ($PSDs.count -gt 1) {
+                Write-Warning "Found more than one project manifest in the root folder" ; 
+            } ; 
+            $result = $PSDs.BaseName ; 
+        } elseif ( $WeCanGit ) {
+            #Last ditch, are you in Azure Pipelines or another CI that checks into a folder unrelated to the project?
+            #let's try some git
+            $result = (Invoke-Git -Path $Path -GitPath $GitPath -Arguments "remote get-url origin").Split('/')[-1] -replace "\.git","" ; 
+        } else {
+            Write-Warning "Could not find a project from $($Path); defaulting to project root for name" ; 
+            $result = Split-Path $Path -Leaf ; 
+        } ; 
+    } ; 
+
+    if ($env:APPVEYOR_PROJECT_NAME -and $env:APPVEYOR_JOB_ID -and ($result -like $env:APPVEYOR_PROJECT_NAME)) {
+        $env:APPVEYOR_PROJECT_NAME ; 
+    } else {
+        $result ; 
+    } ; 
+        
+    $smsg = "$($sBnr.replace('=v','=^').replace('v=','^='))" ;
+    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
+    else{ write-verbose "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+}
+
+#*------^ get-ProjectNameTDO.ps1 ^------
 
 #*------v Get-PSModuleFile.ps1 v------
 function Get-PSModuleFile {
@@ -3537,6 +3686,7 @@ function process-NewModule {
     Github      : https://github.com/tostka/verb-dev
     Tags        : Powershell,Module,Build,Development
     REVISIONS
+    * 8:47 PM 10/16/2021 rem'd out ReqMods code, was breaking exec from home
     * 1:17 PM 10/12/2021 revised post publish code, find-module was returning an array (bombming nupkg gci), so sort on version and take highest single.
     * 3:43 PM 10/7/2021 revised .nupkg caching code to use the returned (find-module).version string to find the repo .nupkg file, for caching (works around behavior where 4-digit semvars, with 4th digit(rev) 0, get only a 3-digit version string in the .nupkg file name)
     * 3:43 PM 9/27/2021 spliced in updated start-log pre-proc code ; fixed $Repo escape in update herestring block
@@ -3823,6 +3973,7 @@ function process-NewModule {
         } ; 
     } ; 
 
+    <# breaking runs
     [array]$reqMods = $null ; # force array, otherwise single first makes it a [string]
     $reqMods += "Test-TranscriptionSupported;Test-Transcribing;Stop-TranscriptLog;Start-IseTranscript;Start-TranscriptLog;get-ArchivePath;Archive-Log;Start-TranscriptLog;Write-Log;Start-Log".split(";") ;
     $reqMods+="Get-CommentBlocks;parseHelp;get-ScriptProfileAST;build-VSCConfig;Merge-Module;get-VersionInfo".split(";") ; 
@@ -3831,7 +3982,7 @@ function process-NewModule {
     $reqMods = $reqMods | Select-Object -Unique ;
 
     if ( !(check-ReqMods $reqMods) ) { write-error "$((get-date).ToString("yyyyMMdd HH:mm:ss")):Missing function. EXITING." ; throw "FAILURE" ; }  ;
-
+    #>
     # 2:32 PM 9/27/2021 updated start-log code
     if(!(get-variable LogPathDrives -ea 0)){$LogPathDrives = 'd','c' };
     foreach($budrv in $LogPathDrives){if(test-path -path "$($budrv):\scripts" -ea 0 ){break} } ;
@@ -5034,6 +5185,7 @@ function Step-ModuleVersionCalculated {
     AddedWebsite: www.thesurlyadmin.com
     AddedTwitter: @thesurlyadm1n
     REVISIONS
+    * 2:19 PM 10/16/2021 actually implemented the new -Silent param ; updated ModuleName locater; 
     * 6:11 PM 10/15/2021 rem'd # raa, replaced psd1/psm1-location code with Get-PSModuleFile(), which is a variant of BuildHelpers get-psModuleManifest. 
     * 2:51 PM 10/13/2021 subbed pswls's for wv's ; added else block to catch mods with inconsistent names between root dir, and .psm1 file, (or even .psm1 location); added path to sBnr
     * 3:55 PM 10/10/2021 added output of final psd1 info on applychange ; recoded to use buildhelper; added -applyChange to exec step-moduleversion, and -NoBuildInfo to bypass reliance on BuildHelpers mod (where acting up for a module). 
@@ -5135,7 +5287,7 @@ function Step-ModuleVersionCalculated {
         $sBnr="#*======v RUNNING :$($CmdletName):$($Path) v======" ; 
         $smsg = "$($sBnr)" ;
         if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
-        else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+        elseif(-not $Silent){ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
         
         # Get parameters this function was invoked with
         #$PSParameters = New-Object -TypeName PSObject -Property $PSBoundParameters ;
@@ -5145,7 +5297,7 @@ function Step-ModuleVersionCalculated {
             $smsg = "You have specified -whatif, but have not also specified -applyChange" ; 
             $smsg += "`nThere is no reason to use -whatif without -applyChange."  ; 
             if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
-            else{ write-host -foregroundcolor yellow "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+            elseif(-not $Silent){ write-host -foregroundcolor yellow "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
         } ; 
         
 
@@ -5155,7 +5307,7 @@ function Step-ModuleVersionCalculated {
         TRY {
             $smsg = "profiling existing content..."
             if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
-            else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+            elseif(-not $Silent){ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
 
             $Path = $moddir = (Resolve-Path $Path).Path ; 
             $moddirfiles = gci -path $path -recur 
@@ -5229,7 +5381,10 @@ function Step-ModuleVersionCalculated {
 
             $psd1M = Get-PSModuleFile -path $Path -ext .psd1 -verbose:$($VerbosePreference -eq 'Continue');
             $psm1 = Get-PSModuleFile -path $Path -ext .psm1 -verbose:$($VerbosePreference -eq 'Continue' ); 
-
+            if ((split-path (split-path $psd1m) -leaf) -eq (gci $psd1m).basename){
+                $ModuleName = split-path -leaf (split-path $psd1m) 
+            } else {throw "`$ModuleName:Unable to match psd1.Basename $((gci $psd1m).basename) to psd1.parentfolder.name $(split-path (split-path $psd1m) -leaf)" }  ;
+        
             $pltXMO=@{Name=$null ; force=$true ; ErrorAction='STOP'} ;
             $pltXpsd1M=[ordered]@{path=$psd1M ; ErrorAction='STOP'} ; 
 
@@ -5244,7 +5399,7 @@ function Step-ModuleVersionCalculated {
             if($? ){ 
                 $smsg= "(Test-ModuleManifest:PASSED)" ;
                 if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info }  #Error|Warn|Debug 
-                else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                elseif(-not $Silent){ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
                 $ModuleName = $TestReport.Name ; 
             } 
             
@@ -5254,7 +5409,7 @@ function Step-ModuleVersionCalculated {
 
                     $smsg = "Module:psd1M:calculating *FINGERPRINT* change Version Step" ; 
                     if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
-                    else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                    elseif(-not $Silent){ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
 
                     if($moddirfiles.name -contains "fingerprint"){
                         $oldfingerprint = Get-Content  ($moddirfiles|?{$_.name -eq "fingerprint"}).FullName ; 
@@ -5295,7 +5450,7 @@ function Step-ModuleVersionCalculated {
                             if($MinVersionIncrement){
                                 $smsg = "-MinVersionIncrement override specified: incrementing by min .Build" ; 
                                 if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
-                                else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                                elseif(-not $Silent){ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
                                 #$Version.Build ++ ;
                                 #$Version.Revision = 0 ; 
                                 # drop through min patch rev above
@@ -5303,12 +5458,12 @@ function Step-ModuleVersionCalculated {
                                 # KM's core logic code:
                                 $smsg = "Detecting new features" ; 
                                 if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
-                                else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                                elseif(-not $Silent){ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
                                 $fingerprint | Where {$_ -notin $oldFingerprint } | 
                                     ForEach-Object {$bumpVersionType = 'Minor'; "  $_"} ; 
                                 $smsg = "Detecting breaking changes" ; 
                                 if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
-                                else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                                elseif(-not $Silent){ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
                                 $oldFingerprint | Where {$_ -notin $fingerprint } | 
                                     ForEach-Object {$bumpVersionType = 'Major'; "  $_"} ; 
                             } ;
@@ -5334,7 +5489,7 @@ function Step-ModuleVersionCalculated {
                         $pltOFile=[ordered]@{Encoding='utf8' ;FilePath=(join-path -path $moddir -childpath 'fingerprint') ;whatif=$($whatif) ;} ; 
                         $smsg = "Writing fingerprint: Out-File w`n$(($pltOFile|out-string).trim())" ; 
                         if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
-                        else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                        elseif(-not $Silent){ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
                         $fingerprint | out-file @pltOFile ; 
                     } else {
                         $smsg = "No funtional Module `$fingerprint generated for path specified`n$($Path)" ; 
@@ -5346,7 +5501,7 @@ function Step-ModuleVersionCalculated {
                     # implement's Martin Pugh's revision step code on percentage of files changed after psd1.LastWriteTime
                     $smsg = "Module:psd1M:calculating *PERCENTAGE* change Version Step" ; 
                     if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
-                    else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                    elseif(-not $Silent){ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
 
                     $LastChange = (Get-ChildItem $psd1M).LastWriteTime ; 
                     $ChangedFiles = ($moddirfiles | Where LastWriteTime -gt $LastChange).Count ; 
@@ -5397,19 +5552,19 @@ function Step-ModuleVersionCalculated {
 
                 $smsg = "Step-ModuleVersion w`n$(($pltStepMV|out-string).trim())" ; 
                 if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
-                else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                elseif(-not $Silent){ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
                 if(!$whatif){
                     # Step-ModuleVersion -Path $env:BHPSModuleManifest -By $bumpVersionType ; 
                     Step-ModuleVersion @pltStepMV ; 
                     $PsdInfo = Import-PowerShellDataFile -path $env:BHPSModuleManifest ;
                     $smsg = "----PsdVers incremented from $($PsdInfoPre.ModuleVersion) to $((Import-PowerShellDataFile -path $env:BHPSModuleManifest).ModuleVersion)" ;
                     if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
-                    else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                    elseif(-not $Silent){ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
 
                 } else {
                     $smsg = "(-whatif, skipping exec:`nStep-ModuleVersion -Path $($env:BHPSModuleManifest) -By $($bumpVersionType)) ;" ; 
                     if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
-                    else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                    elseif(-not $Silent){ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
                     $PsdInfo.ModuleVersion | write-output ; 
                 } ;
             } ; 
@@ -5454,7 +5609,7 @@ which was applied via the BuildHelper:Step-ModulerVersion cmdlet (above)
 
             $smsg = "`n$($hmsg)" ; 
             if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
-            else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+            elseif(-not $Silent){ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
 
         } else {
             $smsg = "Unable to generate a 'bumpVersionType' for path specified`n$($Path)" ; 
@@ -5465,19 +5620,19 @@ which was applied via the BuildHelper:Step-ModulerVersion cmdlet (above)
         if($PsdInfo -AND $applyChange ){ 
             $smsg = "(returning updated ManifestPsd1 Content to pipeline)" ; 
             if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
-            else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+            elseif(-not $Silent){ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
             $PsdInfo | write-output 
         } else {
             $smsg = "-applyChange *not* specified, returning 'bumpVersionType' specification to pipeline:" ; 
             if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
-            else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+            elseif(-not $Silent){ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
             #$PsdInfo.ModuleVersion | write-output 
              $bumpVersionType | write-output  ; 
         } ;  ;
 
         $smsg = "$($sBnr.replace('=v','=^').replace('v=','^='))" ;
         if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
-        else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+        elseif(-not $Silent){ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
     } ;  # END-E
 }
 
@@ -5485,14 +5640,14 @@ which was applied via the BuildHelper:Step-ModulerVersion cmdlet (above)
 
 #*======^ END FUNCTIONS ^======
 
-Export-ModuleMember -Function build-VSCConfig,check-PsLocalRepoRegistration,convert-CommandLine2VSCDebugJson,export-ISEBreakPoints,Get-CommentBlocks,get-FunctionBlock,get-FunctionBlocks,Get-PSModuleFile,get-ScriptProfileAST,get-VersionInfo,import-ISEBreakPoints,import-ISEConsoleColors,Initialize-ModuleFingerprint,Get-PSModuleFile,Merge-Module,Merge-ModulePs1,new-CBH,New-GitHubGist,parseHelp,process-NewModule,restore-ISEConsoleColors,save-ISEConsoleColors,shift-ISEBreakPoints,Split-CommandLine,Step-ModuleVersionCalculated,Get-PSModuleFile -Alias *
+Export-ModuleMember -Function build-VSCConfig,check-PsLocalRepoRegistration,convert-CommandLine2VSCDebugJson,export-ISEBreakPoints,Get-CommentBlocks,get-FunctionBlock,get-FunctionBlocks,get-ProjectNameTDO,Get-PSModuleFile,get-ScriptProfileAST,get-VersionInfo,import-ISEBreakPoints,import-ISEConsoleColors,Initialize-ModuleFingerprint,Get-PSModuleFile,Merge-Module,Merge-ModulePs1,new-CBH,New-GitHubGist,parseHelp,process-NewModule,restore-ISEConsoleColors,save-ISEConsoleColors,shift-ISEBreakPoints,Split-CommandLine,Step-ModuleVersionCalculated,Get-PSModuleFile -Alias *
 
 
 # SIG # Begin signature block
 # MIIELgYJKoZIhvcNAQcCoIIEHzCCBBsCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQU4VfO5m2emlKp7a4h90A9xz9P
-# GpKgggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQU3azsBhKxivf+ipnxGZMGuP33
+# rIGgggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
 # MCwxKjAoBgNVBAMTIVBvd2VyU2hlbGwgTG9jYWwgQ2VydGlmaWNhdGUgUm9vdDAe
 # Fw0xNDEyMjkxNzA3MzNaFw0zOTEyMzEyMzU5NTlaMBUxEzARBgNVBAMTClRvZGRT
 # ZWxmSUkwgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBALqRVt7uNweTkZZ+16QG
@@ -5507,9 +5662,9 @@ Export-ModuleMember -Function build-VSCConfig,check-PsLocalRepoRegistration,conv
 # AWAwggFcAgEBMEAwLDEqMCgGA1UEAxMhUG93ZXJTaGVsbCBMb2NhbCBDZXJ0aWZp
 # Y2F0ZSBSb290AhBaydK0VS5IhU1Hy6E1KUTpMAkGBSsOAwIaBQCgeDAYBgorBgEE
 # AYI3AgEMMQowCKACgAChAoAAMBkGCSqGSIb3DQEJAzEMBgorBgEEAYI3AgEEMBwG
-# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBTGKY87
-# RW+XohvU6hZe64sIWVWoBDANBgkqhkiG9w0BAQEFAASBgIlgUbbUrppLcGMRoOwn
-# Y/nSL8A+XMsJ3eN+JYm4CbHIUJVHpH5nbCseL/ZMuSdW9MudLbMb2/KWHmPUBUwF
-# MOHQwaXPWLeKF6QRJKQQ2JIxTp7s8/iKsrVPO3rV1quLDgHiQtXSzf13fG6O2MEm
-# Nf9gCVzl+mbkd7QfYSOOorkF
+# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBQd+MVQ
+# wNc7BHlXVvKMESy/CRTNMDANBgkqhkiG9w0BAQEFAASBgHgrSCNKeDkvO61UJTMm
+# 0W6vHINVz/DUEj96IC0AYUdLinmAgcGZdCDiimlZAVk/QR+9Bj4yRA7U2EeEisxu
+# Sp5bcOgC+S5RDkYRZa4jEgDhhFnbLxpFjQ6EInT7HQpdQAHU+1rtl+hjlCljKtTa
+# z7Hum/nTwTwsjqjNsXBNgytX
 # SIG # End signature block
