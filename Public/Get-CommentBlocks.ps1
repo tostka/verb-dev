@@ -56,7 +56,6 @@ function Get-CommentBlocks {
     $preCBHBlock = $oBlkComments.interText ;
     .LINK
     #>
-    #Requires -Version 3
     ##Requires -RunasAdministrator
 
     [CmdletBinding()]

@@ -51,7 +51,6 @@ function Get-PSModuleFile {
     .LINK
     https://github.com/RamblingCookieMonster/BuildHelpers
     #>
-    #Requires -Version 3
     ##Requires -Modules BuildHelpers,verb-IO, verb-logging, verb-Mods, verb-Text
     ##Requires -RunasAdministrator    
     [CmdletBinding()]

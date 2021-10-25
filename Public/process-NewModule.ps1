@@ -96,7 +96,6 @@ function process-NewModule {
     .LINK
     #>
 
-    ##Requires -Version 3 # rem'd already in module
     ##Requires -Module verb-dev # added to verb-dev (recursive if present)
     #Requires -Modules BuildHelpers,verb-IO, verb-logging, verb-Mods, verb-Text
     [CmdletBinding()]

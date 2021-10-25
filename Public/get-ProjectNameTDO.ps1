@@ -60,7 +60,6 @@ function get-ProjectNameTDO {
     .LINK
     about_BuildHelpers
     #>
-    #Requires -Version 3
     ##Requires -Modules BuildHelpers,verb-IO, verb-logging, verb-Mods, verb-Text
     ##Requires -RunasAdministrator    
     [CmdletBinding()]

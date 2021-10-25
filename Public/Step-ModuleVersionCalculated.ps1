@@ -21,6 +21,7 @@ function Step-ModuleVersionCalculated {
     AddedWebsite: www.thesurlyadmin.com
     AddedTwitter: @thesurlyadm1n
     REVISIONS
+    * 4:54 PM 10/25/2021 fingerprint code was dropping matches into pipeline, and blowing up returned bumprev string (ingested the outputs) ; added .psm1 test for multi '#requires -version' (crashes all ipmos) ; add verbose support into all the splats
     * 2:19 PM 10/16/2021 actually implemented the new -Silent param ; updated ModuleName locater; 
     * 6:11 PM 10/15/2021 rem'd # raa, replaced psd1/psm1-location code with Get-PSModuleFile(), which is a variant of BuildHelpers get-psModuleManifest. 
     * 2:51 PM 10/13/2021 subbed pswls's for wv's ; added else block to catch mods with inconsistent names between root dir, and .psm1 file, (or even .psm1 location); added path to sBnr
@@ -96,7 +97,6 @@ function Step-ModuleVersionCalculated {
     .LINK
     https://powershellexplained.com/2017-10-14-Powershell-module-semantic-version/
     #>
-    #Requires -Version 3
     #Requires -Modules BuildHelpers,verb-IO, verb-logging, verb-Mods, verb-Text
     ##Requires -RunasAdministrator    
     [CmdletBinding()]
@@ -136,6 +136,7 @@ function Step-ModuleVersionCalculated {
             elseif(-not $Silent){ write-host -foregroundcolor yellow "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
         } ; 
         
+        $rgxRequreVersionLine = '^((\s)*)#[Rr]equires\s+-[Vv]ersion\s[\d\.]+((\s)*)$' # revised to ignore ##-rem-d 
 
     } ;  # BEGIN-E
     PROCESS {
@@ -221,8 +222,8 @@ function Step-ModuleVersionCalculated {
                 $ModuleName = split-path -leaf (split-path $psd1m) 
             } else {throw "`$ModuleName:Unable to match psd1.Basename $((gci $psd1m).basename) to psd1.parentfolder.name $(split-path (split-path $psd1m) -leaf)" }  ;
         
-            $pltXMO=@{Name=$null ; force=$true ; ErrorAction='STOP'} ;
-            $pltXpsd1M=[ordered]@{path=$psd1M ; ErrorAction='STOP'} ; 
+            $pltXMO=@{Name=$null ; force=$true ; ErrorAction='STOP'; Verbose = $($VerbosePreference -eq 'Continue') } ;
+            $pltXpsd1M=[ordered]@{path=$psd1M ; ErrorAction='STOP'; Verbose = $($VerbosePreference -eq 'Continue') } ; 
 
             $smsg = "Import-PowerShellDataFile w`n$(($pltXpsd1M|out-string).trim())" ;                         
             if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
@@ -252,6 +253,20 @@ function Step-ModuleVersionCalculated {
                 
                         if($psm1){
                             $pltXMO.Name = $psm1 # load via full path to .psm1
+                            # incidental ipmo crasher: multiple #require -versions, pretest (everything to that point is fine, just won't ipmo, and catch returns zippo)
+                            if ((get-content $psm1 | sls -Pattern $rgxRequreVersionLine | measure).count -gt 1){
+                                $MultReqVers = (get-content $pltXMO.name | sls -Pattern $rgxRequreVersionLine) ; 
+                                $smsg =  "MULTIPLE #requires -version strings in:`n$($psm1)`n(not-permited, wrecks ipmo)`n$(($multreqvers | ft -auto Pattern,LineNumber,Line|out-string).trim())" ; 
+                                if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Warn } #Error|Warn|Debug 
+                                elseif(-not $Silent){ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                                
+                                $smsg =  "Assoc'd Source files:`n$((gci C:\sc\$($ModuleName)\public\*.ps1 | sls -Pattern $rgxRequreVersionLine |out-string).trim())`n`n(both must be corrected to pass future builds)" ; 
+                                if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Warn } #Error|Warn|Debug 
+                                elseif(-not $Silent){ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                                
+                                Throw $smsg ; 
+                            } ; 
+
                             $smsg = "import-module w`n$(($pltXMO|out-string).trim())" ; 
                             if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
                             else{ write-verbose "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; 
@@ -295,6 +310,7 @@ function Step-ModuleVersionCalculated {
                                 $smsg = "Detecting new features" ; 
                                 if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
                                 elseif(-not $Silent){ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                                <# below dumped matched text into pipeline, which ended up in the return and blew up the bumprev value
                                 $fingerprint | Where {$_ -notin $oldFingerprint } | 
                                     ForEach-Object {$bumpVersionType = 'Minor'; "  $_"} ; 
                                 $smsg = "Detecting breaking changes" ; 
@@ -302,6 +318,16 @@ function Step-ModuleVersionCalculated {
                                 elseif(-not $Silent){ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
                                 $oldFingerprint | Where {$_ -notin $fingerprint } | 
                                     ForEach-Object {$bumpVersionType = 'Major'; "  $_"} ; 
+                                #>
+                                # yank out the pipeline drops (or accumulate them)
+                                $NewChgs = $BreakChgs =@() ; 
+                                $fingerprint | Where {$_ -notin $oldFingerprint } | 
+                                    ForEach-Object {$bumpVersionType = 'Minor'; $NewChgs += "`n  $_"} ; 
+                                $smsg = "Detecting breaking changes" ; 
+                                if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
+                                elseif(-not $Silent){ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                                $oldFingerprint | Where {$_ -notin $fingerprint } | 
+                                    ForEach-Object {$bumpVersionType = 'Major'; $BreakChgs += "`n  $_"} ; 
                             } ;
 
                         } else {
@@ -322,7 +348,7 @@ function Step-ModuleVersionCalculated {
                     } ;  
 
                     if ( $fingerprint ){
-                        $pltOFile=[ordered]@{Encoding='utf8' ;FilePath=(join-path -path $moddir -childpath 'fingerprint') ;whatif=$($whatif) ;} ; 
+                        $pltOFile=[ordered]@{Encoding='utf8' ;FilePath=(join-path -path $moddir -childpath 'fingerprint') ;whatif=$($whatif) ; Verbose = $($VerbosePreference -eq 'Continue') } ;
                         $smsg = "Writing fingerprint: Out-File w`n$(($pltOFile|out-string).trim())" ; 
                         if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
                         elseif(-not $Silent){ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
@@ -378,6 +404,14 @@ function Step-ModuleVersionCalculated {
                             #$Version.Revision ++ ; # NORMALLY +BUILD (pre-release and build metadata) # doesn't look like buildhelper  does 4-digit Build variants
                             $bumpVersionType = 'Patch' 
                         } ; 
+                    } ; 
+                    # run a multi #requires -version check for Perc tests
+                    if ((get-content $psm1 | sls -Pattern $rgxRequreVersionLine | measure).count -gt 1){
+                        $MultReqVers = (get-content $psm1 | sls -Pattern '#requires\s-version\s') ; 
+                        $smsg =  "MULTIPLE #requires -version strings! (not-permited, wrecks ipmo)`n$(($multreqvers | ft -auto Pattern,LineNumber,Line|out-string).trim())" ; 
+                        if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
+                        elseif(-not $Silent){ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                        Throw $smsg ; 
                     } ; 
 
                 } ;
