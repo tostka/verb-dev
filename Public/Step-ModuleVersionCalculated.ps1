@@ -21,7 +21,7 @@ function Step-ModuleVersionCalculated {
     AddedWebsite: www.thesurlyadmin.com
     AddedTwitter: @thesurlyadm1n
     REVISIONS
-    * 9:24 AM 10/26/2021 shifted 'good' exit to within bumpvers test, and output $false otherwise ; updated mult #requires code to profile -version variants, and look for -gt 1; added verbose dump of Minor/Major changes in trailing outputs. 
+    * 2:09 PM 10/26/2021 requires vers code: only run if $PsFilesWVers populated ; shifted 'good' exit to within bumpvers test, and output $false otherwise ; updated mult #requires code to profile -version variants, and look for -gt 1; added verbose dump of Minor/Major changes in trailing outputs. 
     * 3:46 PM 10/25/2021 fingerprint code was dropping matches into pipeline, and blowing up returned bumprev string (ingested the outputs) ; added .psm1 test for multi '#requires -version' (crashes all ipmos) ; add verbose support into all the splats
     * 2:19 PM 10/16/2021 actually implemented the new -Silent param ; updated ModuleName locater; 
     * 6:11 PM 10/15/2021 rem'd # raa, replaced psd1/psm1-location code with Get-PSModuleFile(), which is a variant of BuildHelpers get-psModuleManifest. 
@@ -226,20 +226,22 @@ function Step-ModuleVersionCalculated {
         
             # check for incidental ipmo crasher: multiple #require -versions, pretest (everything to that point is fine, just won't ipmo, and catch returns zippo)
             # no, revise, it's multi-versions of -vers, not mult instances. Has to be a single version spec across entire .psm1 (and $moddir of source files)
-            $PsFilesWVers = gci $moddir -include *.ps*1 -recur | sls -Pattern $rgxRequreVersionLine ; 
-            $profilePsFilesVersions = $PsFilesWVers.line | %{$_.trim()} | group ;
-            if($profilePsFilesVersions.count -gt 1){
-                # $PsFilesWVers| ft -auto file*,line*
-                $smsg =  "MULTIPLE #requires -version strings matched in:`n$($psm1)`n(not-permited, wrecks ipmo) - psm1 and constitutent .ps1 files:`n$(($PsFilesWVers| ft -auto file*,line*|out-string).trim())" ; 
-                if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN } #Error|Warn|Debug 
-                else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
-                $bRet=Read-Host "Enter YYY to continue *anyway*. Anything else will exit" 
-                if ($bRet.ToUpper() -eq "YYY") {
-                        Write-host "Moving on"
-                } else {
-                        Throw $smsg ; 
-                } ;
-            } 
+            if($PsFilesWVers = gci $moddir -include *.ps*1 -recur | sls -Pattern $rgxRequreVersionLine){
+                # only run if $PsFilesWVers populated
+                $profilePsFilesVersions = $PsFilesWVers.line | %{$_.trim()} | group ;
+                if($profilePsFilesVersions.count -gt 1){
+                    # $PsFilesWVers| ft -auto file*,line*
+                    $smsg =  "MULTIPLE #requires -version strings matched in:`n$($psm1)`n(not-permited, wrecks ipmo) - psm1 and constitutent .ps1 files:`n$(($PsFilesWVers| ft -auto file*,line*|out-string).trim())" ; 
+                    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN } #Error|Warn|Debug 
+                    else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                    $bRet=Read-Host "Enter YYY to continue *anyway*. Anything else will exit" 
+                    if ($bRet.ToUpper() -eq "YYY") {
+                            Write-host "Moving on"
+                    } else {
+                            Throw $smsg ; 
+                    } ;
+                } 
+            } ; 
             <#if ((get-content $psm1 | sls -Pattern $rgxRequreVersionLine | measure).count -gt 1){
                 $MultReqVers = (get-content $pltXMO.name | sls -Pattern $rgxRequreVersionLine) ; 
                 $smsg =  "MULTIPLE #requires -version strings in:`n$($psm1)`n(not-permited, wrecks ipmo)`n$(($multreqvers | ft -auto Pattern,LineNumber,Line|out-string).trim())" ; 
