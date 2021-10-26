@@ -18,6 +18,7 @@ function Initialize-ModuleFingerprint {
     AddedWebsite: https://powershellexplained.com/2017-10-14-Powershell-module-semantic-version/
     AddedTwitter: 
     REVISIONS
+    * 9:58 AM 10/26/2021 updated all echos, wh, ww, wv's with wlts's, updated KM logic to match step-ModuleVersionCalculated's latest
     * 6:11 PM 10/15/2021 rem'd # raa, replaced psd1/psm1-location code with Get-PSModuleFile(), which is a variant of BuildHelpers get-psModuleManifest. 
     * 12:36 PM 10/13/2021 added else block to catch mods with inconsistent names between root dir, and .psm1 file, (or even .psm1 location); upgraded catchblock to curr std; added splats and verbose echos for debugging outlier processing errors
     * 7:41 PM 10/11/2021 cleaned up rem'd requires
@@ -64,7 +65,9 @@ function Initialize-ModuleFingerprint {
         ${CmdletName} = $PSCmdlet.MyInvocation.MyCommand.Name ;
 
         $sBnr="#*======v RUNNING :$($CmdletName):$($Path) v======" ; 
-        write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($sBnr)" ;
+        $smsg = "$($sBnr)" ;
+        if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
+        elseif(-not $Silent){ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
 
         # Get parameters this function was invoked with
         #$PSParameters = New-Object -TypeName PSObject -Property $PSBoundParameters ;
@@ -73,8 +76,10 @@ function Initialize-ModuleFingerprint {
     PROCESS {
         $error.clear() ;
         TRY {
-            write-host "profiling existing content..."
-
+            $smsg = "profiling existing content..."
+            if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
+        elseif(-not $Silent){ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+        
             if( ($path -like 'BounShell') -OR ($path -like 'VERB-transcript')){
                 write-verbose "GOTCHA!" ;
             } ; 
@@ -82,7 +87,10 @@ function Initialize-ModuleFingerprint {
             $pltXMO=@{Name=$null ; force=$true ; ErrorAction='STOP'} ;
             
             $pltGCI=[ordered]@{path=$moddir.FullName ;recurse=$true ; ErrorAction='STOP'} ;
-            write-verbose "gci w`n$(($pltGCI|out-string).trim())" ; 
+            $smsg =  "gci w`n$(($pltGCI|out-string).trim())" ; 
+            if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
+            else{ write-verbose "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; 
+            
             $moddirfiles = gci @pltGCI ;
             
             $Path = (Resolve-Path $Path).Path ; 
@@ -109,7 +117,9 @@ function Initialize-ModuleFingerprint {
 
                     if($Extension -eq 'Both'){
                         [array]$Exts = '.psd1','.psm1'
-                        write-verbose "(-extension Both specified: Running both:$($Exts -join ','))" ; 
+                        $smsg =  "(-extension Both specified: Running both:$($Exts -join ','))" ; 
+                        if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
+                        else{ write-verbose "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; 
                     } else {
                         $Exts = $Extension ; 
                     } ; 
@@ -125,26 +135,36 @@ function Initialize-ModuleFingerprint {
                             $ProjectPaths = Get-ChildItem $Path -Directory |
                                 ForEach-Object {
                                     $ThisFolder = $_ ;
-                                    write-verbose "checking:$($ThisFolder)" ; 
+                                    $smsg =  "checking:$($ThisFolder)" ; 
+                                    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
+                                    else{ write-verbose "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; 
                                     $ExpectedFile = Join-Path -path $ThisFolder.FullName -child "$($ThisFolder.Name)$($ext)" ;
                                     If( Test-Path $ExpectedFile) {$ExpectedFile  } ;
                                 } ;
                             if( @($ProjectPaths).Count -gt 1 ){
-                                Write-Warning "Found more than one project path via subfolders with psd1 files" ;
+                                $smsg = "Found more than one project path via subfolders with psd1 files" ;
+                                if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN } #Error|Warn|Debug 
+                                else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
                                 $ProjectPaths  ;
                             } elseif( @($ProjectPaths).Count -eq 1 )  {$ProjectPaths  } 
                             elseif( Test-Path "$ExpectedPath$($ext)" ) {
-                                write-verbose "`$ExpectedPath:$($ExpectedPath)" ; 
+                                $smsg =  "`$ExpectedPath:$($ExpectedPath)" ; 
+                                if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
+                                else{ write-verbose "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; 
                                 #PSD1 in root of project - ick, but happens.
                                 "$ExpectedPath$($ext)"  ;
                             } elseif( Get-Item "$Path\S*rc*\*$($ext)" -OutVariable SourceFiles)  {
                                 # PSD1 in Source or Src folder
                                 If ( $SourceFiles.Count -gt 1 ) {
-                                    Write-Warning "Found more than one project $($ext) file in the Source folder" ;
+                                    $smsg = "Found more than one project $($ext) file in the Source folder" ;
+                                    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN } #Error|Warn|Debug 
+                                    else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
                                 } ;
                                 $SourceFiles.FullName ;
                             } else {
-                                Write-Warning "Could not find a PowerShell module $($ext) file from $($Path)" ;
+                                $smsg = "Could not find a PowerShell module $($ext) file from $($Path)" ;
+                                if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN } #Error|Warn|Debug 
+                                else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
                             } ;
                         } ;
                     } ; 
@@ -167,23 +187,36 @@ function Initialize-ModuleFingerprint {
                 if($modname -ne $psd1MBasename){
                     $smsg = "Module has non-standard root-dir name`n$($moddir.fullname)"
                     $smsg += "`ncorrecting `$modname variable to use *actual* .psm1 basename:$($psd1MBasename)" ; 
-                    write-warning $smsg ; 
+                    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN } #Error|Warn|Debug 
+                    else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; 
                     $modname = $psd1MBasename ; 
                 } ; 
                 $pltXMO.Name = $psd1M.fullname # load via full path to .psm1
-                write-verbose "import-module w`n$(($pltXMO|out-string).trim())" ; 
+                $smsg =  "import-module w`n$(($pltXMO|out-string).trim())" ; 
+                if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
+                else{ write-verbose "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; 
                 import-module @pltXMO ;
                 $commandList = Get-Command -Module $modname ;
                 $pltXMO.Name = $psd1MBasename ; # have to rmo using *basename*
-                write-verbose "remove-module w`n$(($pltXMO|out-string).trim())" ; 
+                $smsg =  "remove-module w`n$(($pltXMO|out-string).trim())" ; 
+                if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
+                else{ write-verbose "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; 
                 remove-module @pltXMO ;
 
-                write-host  'Calculating fingerprint...'
+                $smsg = "Calculating fingerprint"
+                if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
+                else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
+                else{ write-verbose "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; 
                 # KM's core logic code:
                 $fingerprint = foreach ( $command in $commandList ){
-                    write-verbose "(=cmd:$($command)...)" ;
+                    $smsg = "(=cmd:$($command)...)" ;
+                    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
+                    else{ write-verbose "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; 
                     foreach ( $parameter in $command.parameters.keys ){
-                        write-verbose "(---param:$($parameter)...)" ;
+                        $smsg = "(---param:$($parameter)...)" ;
+                        if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
+                        else{ write-verbose "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; 
                         '{0}:{1}' -f $command.name, $command.parameters[$parameter].Name
                         $command.parameters[$parameter].aliases | 
                             Foreach-Object { '{0}:{1}' -f $command.name, $_}
@@ -197,7 +230,7 @@ function Initialize-ModuleFingerprint {
         } CATCH {
             $ErrTrapd=$Error[0] ;
             $smsg = "$('*'*5)`nFailed processing $($ErrTrapd.Exception.ItemName). `nError Message: $($ErrTrapd.Exception.Message)`nError Details: `n$(($ErrTrapd|out-string).trim())`n$('-'*5)" ;
-            if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
+            if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN } #Error|Warn|Debug 
             else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
             #-=-record a STATUSWARN=-=-=-=-=-=-=
             $statusdelta = ";WARN"; # CHANGE|INCOMPLETE|ERROR|WARN|FAIL ;
@@ -206,7 +239,7 @@ function Initialize-ModuleFingerprint {
             #-=-=-=-=-=-=-=-=
             $smsg = "FULL ERROR TRAPPED (EXPLICIT CATCH BLOCK WOULD LOOK LIKE): } catch[$($ErrTrapd.Exception.GetType().FullName)]{" ; 
             if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level ERROR } #Error|Warn|Debug 
-            else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+            else{ write-warning -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
             Break #Opts: STOP(debug)|EXIT(close)|CONTINUE(move on in loop cycle)|BREAK(exit loop iteration)|THROW $_/'CustomMsg'(end script with Err output)
         } ; 
     } ;  # PROC-E
@@ -216,9 +249,13 @@ function Initialize-ModuleFingerprint {
             write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):Out-File w`n$(($pltOFile|out-string).trim())" ; 
             $fingerprint | out-file @pltOFile ; 
         } else {
-            write-warning "$((get-date).ToString('HH:mm:ss')):No funtional Module `$fingerprint generated for path specified`n$($Path)" ; 
+            $smsg = "No funtional Module `$fingerprint generated for path specified`n$($Path)" ; 
+            if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN } #Error|Warn|Debug 
+            else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
         } ; 
-        write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($sBnr.replace('=v','=^').replace('v=','^='))" ;
+        $smsg = "$($sBnr.replace('=v','=^').replace('v=','^='))" ;
+        if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
+        elseif(-not $Silent){ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
     } ;  # END-E
 }
 
