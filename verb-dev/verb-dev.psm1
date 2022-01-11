@@ -5,7 +5,7 @@
 .SYNOPSIS
 VERB-dev - Development PS Module-related generic functions
 .NOTES
-Version     : 1.5.7
+Version     : 1.5.8
 Author      : Todd Kadrie
 Website     :	https://www.toddomation.com
 Twitter     :	@tostka
@@ -1645,7 +1645,7 @@ function Initialize-ModuleFingerprint {
     https://powershellexplained.com/2017-10-14-Powershell-module-semantic-version/
     #>
     ##Requires -RunasAdministrator
-    # VALIDATORS: [ValidateNotNull()][ValidateNotNullOrEmpty()][ValidateLength(24,25)][ValidateLength(5)][ValidatePattern("(lyn|bcc|spb|adl)ms6(4|5)(0|1).(china|global)\.ad\.toro\.com")][ValidateSet("USEA","GBMK","AUSYD")][ValidateScript({Test-Path $_ -PathType 'Container'})][ValidateScript({Test-Path $_})][ValidateRange(21,65)][ValidateCount(1,3)]
+    # VALIDATORS: [ValidateNotNull()][ValidateNotNullOrEmpty()][ValidateLength(24,25)][ValidateLength(5)][ValidatePattern("some\sregex\sexpr")][ValidateSet("USEA","GBMK","AUSYD")][ValidateScript({Test-Path $_ -PathType 'Container'})][ValidateScript({Test-Path $_})][ValidateRange(21,65)][ValidateCount(1,3)]
     [CmdletBinding()]
     ###[Alias('Alias','Alias2')]
     PARAM(
@@ -5722,8 +5722,8 @@ Export-ModuleMember -Function build-VSCConfig,check-PsLocalRepoRegistration,conv
 # SIG # Begin signature block
 # MIIELgYJKoZIhvcNAQcCoIIEHzCCBBsCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUTyBrndchZ+uWjs0Pl3z7XbQN
-# Cf6gggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUxaCglR3po+XsudC1zsGPLXb4
+# 79SgggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
 # MCwxKjAoBgNVBAMTIVBvd2VyU2hlbGwgTG9jYWwgQ2VydGlmaWNhdGUgUm9vdDAe
 # Fw0xNDEyMjkxNzA3MzNaFw0zOTEyMzEyMzU5NTlaMBUxEzARBgNVBAMTClRvZGRT
 # ZWxmSUkwgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBALqRVt7uNweTkZZ+16QG
@@ -5738,9 +5738,9 @@ Export-ModuleMember -Function build-VSCConfig,check-PsLocalRepoRegistration,conv
 # AWAwggFcAgEBMEAwLDEqMCgGA1UEAxMhUG93ZXJTaGVsbCBMb2NhbCBDZXJ0aWZp
 # Y2F0ZSBSb290AhBaydK0VS5IhU1Hy6E1KUTpMAkGBSsOAwIaBQCgeDAYBgorBgEE
 # AYI3AgEMMQowCKACgAChAoAAMBkGCSqGSIb3DQEJAzEMBgorBgEEAYI3AgEEMBwG
-# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBTpov+f
-# +MGKAE4W5A88M/g/LVtsujANBgkqhkiG9w0BAQEFAASBgKjiYhQfBNfS432tWqC2
-# oBhQsxYjXcV7u0WaMdZePMEGDFmdz4HnhjudKilp+tmCVFHWRoBuWJKOW2kWngpv
-# t+Vf8vu9N35FoOw7me05AoMuig200V5ChwUtl4W+EeWRNbGoG2KvEsk7+8lgtB3l
-# whs+ECtMCFJ/KICJyrapEUB3
+# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBT6OYnU
+# P8TdLZnbDK1D3jyIIBWkBDANBgkqhkiG9w0BAQEFAASBgHPj0f7YgtIRuFODxBYl
+# XxTXy2iC3qmYxE0G3SONNuqGwOuei5rJWevQevxpzDDvXJdiCeAAcRIr348Fi+DS
+# PVR8DwEmxwMYwjLmu0iqPJCRbEXFT7pP3pHhe2ZBiO2wCBvhtk/ueiVQFnmBjdgi
+# +St7wrQv9fQrLwYla6NvSdmx
 # SIG # End signature block
