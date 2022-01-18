@@ -5,7 +5,7 @@
 .SYNOPSIS
 VERB-dev - Development PS Module-related generic functions
 .NOTES
-Version     : 1.5.8
+Version     : 1.5.9
 Author      : Todd Kadrie
 Website     :	https://www.toddomation.com
 Twitter     :	@tostka
@@ -5215,6 +5215,11 @@ function Step-ModuleVersionCalculated {
     AddedWebsite: www.thesurlyadmin.com
     AddedTwitter: @thesurlyadm1n
     REVISIONS
+    * 9:42 AM 1/18/2022 added test for recursed nested #requires -module [modname] 
+        strings - this one's a brute to recover from, just like the version clash, both 
+        hard-break build and require reverting installed rev of module to get past. 
+        Everything works, bbuild, publish, install, except the trailing ipmo dies 
+        *hard* ; updated $rgxRequreVersionLine prefix (\s|^) to suppress returns of double-#'d rem'd requires lines.
     * 2:09 PM 10/26/2021 requires vers code: only run if $PsFilesWVers populated ; shifted 'good' exit to within bumpvers test, and output $false otherwise ; updated mult #requires code to profile -version variants, and look for -gt 1; added verbose dump of Minor/Major changes in trailing outputs. 
     * 3:46 PM 10/25/2021 fingerprint code was dropping matches into pipeline, and blowing up returned bumprev string (ingested the outputs) ; added .psm1 test for multi '#requires -version' (crashes all ipmos) ; add verbose support into all the splats
     * 2:19 PM 10/16/2021 actually implemented the new -Silent param ; updated ModuleName locater; 
@@ -5332,7 +5337,14 @@ function Step-ModuleVersionCalculated {
             elseif(-not $Silent){ write-host -foregroundcolor yellow "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
         } ; 
         
-        $rgxRequreVersionLine = '#requires\s+-version\s' 
+        #$rgxRequreVersionLine = '#requires\s+-version\s' ;
+        # add filter for BOL or \s lead, drop the ##-rem'd lines
+        $rgxRequreVersionLine = '(\s|^)#requires\s+-version\s' ;
+        # also should check for nested recursion - ensure the Module isn't in any #requires\s-module
+        # '((\s)*)#Requires\s+-Modules\s+.*,((\s)*)verb-exo' ; # module name
+        # $Path will be c:\sc\verb-exo ; split-path c:\sc\verb-exo -leaf gets you the modulename back
+        $ModName = split-path -Path $path -leaf ; 
+        $rgxRequireModNested = "(\s|^)#Requires\s+-Modules\s+.*,((\s)*)$($ModName)" ;  # added: either BOL or after a space
 
     } ;  # BEGIN-E
     PROCESS {
@@ -5444,6 +5456,28 @@ function Step-ModuleVersionCalculated {
                 Throw $smsg ; 
             } ; 
             #>
+            # check for recursion call of the hosting module in subs: $rgxRequireModNested
+            if($PsFilesWNestedMod = gci $moddir -include *.ps*1 -recur | sls -Pattern $rgxRequireModNested){
+                # only run if $PsFilesWNestedMod populated, and unique single entry of matches, trimmed
+                $profilePsFilesRecursive = $PsFilesWNestedMod.line | %{$_.trim()} | group ;
+                if($profilePsFilesRecursive.count -gt 0){
+                    # $PsFilesWNestedMod| ft -auto file*,line*
+                    $smsg =  "RECURSIVE #requires strings matched in:"
+                    $smsg += "`n$($psm1)`n(not-permited, wrecks ipmo) - psm1 and constitutent .ps1 files:"
+                    $smsg += "`nEDIT OUT any #requires -Modules line spec'ing '$($ModName) !'"
+                    $smsg += "`nOR THIS MODULE BUILD WILL CRASH AND REQUIRE REVISION ROLLBACK!" 
+                    $smsg += "`n$(($PsFilesWNestedMod| ft -auto file*,line*|out-string).trim())" ; 
+                    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN } #Error|Warn|Debug 
+                    else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                    $bRet=Read-Host "Enter YYY to continue *anyway*. Anything else will exit" 
+                    if ($bRet.ToUpper() -eq "YYY") {
+                            Write-host "Moving on"
+                    } else {
+                            Throw $smsg ; 
+                    } ;
+                } 
+            } ; 
+
 
             $pltXMO=@{Name=$null ; force=$true ; ErrorAction='STOP'; Verbose = $($VerbosePreference -eq 'Continue') } ;
             $pltXpsd1M=[ordered]@{path=$psd1M ; ErrorAction='STOP'; Verbose = $($VerbosePreference -eq 'Continue') } ; 
@@ -5722,8 +5756,8 @@ Export-ModuleMember -Function build-VSCConfig,check-PsLocalRepoRegistration,conv
 # SIG # Begin signature block
 # MIIELgYJKoZIhvcNAQcCoIIEHzCCBBsCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUxaCglR3po+XsudC1zsGPLXb4
-# 79SgggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUgbyEb3npCRpHwt7eulqHi/hM
+# qm2gggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
 # MCwxKjAoBgNVBAMTIVBvd2VyU2hlbGwgTG9jYWwgQ2VydGlmaWNhdGUgUm9vdDAe
 # Fw0xNDEyMjkxNzA3MzNaFw0zOTEyMzEyMzU5NTlaMBUxEzARBgNVBAMTClRvZGRT
 # ZWxmSUkwgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBALqRVt7uNweTkZZ+16QG
@@ -5738,9 +5772,9 @@ Export-ModuleMember -Function build-VSCConfig,check-PsLocalRepoRegistration,conv
 # AWAwggFcAgEBMEAwLDEqMCgGA1UEAxMhUG93ZXJTaGVsbCBMb2NhbCBDZXJ0aWZp
 # Y2F0ZSBSb290AhBaydK0VS5IhU1Hy6E1KUTpMAkGBSsOAwIaBQCgeDAYBgorBgEE
 # AYI3AgEMMQowCKACgAChAoAAMBkGCSqGSIb3DQEJAzEMBgorBgEEAYI3AgEEMBwG
-# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBT6OYnU
-# P8TdLZnbDK1D3jyIIBWkBDANBgkqhkiG9w0BAQEFAASBgHPj0f7YgtIRuFODxBYl
-# XxTXy2iC3qmYxE0G3SONNuqGwOuei5rJWevQevxpzDDvXJdiCeAAcRIr348Fi+DS
-# PVR8DwEmxwMYwjLmu0iqPJCRbEXFT7pP3pHhe2ZBiO2wCBvhtk/ueiVQFnmBjdgi
-# +St7wrQv9fQrLwYla6NvSdmx
+# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBSMKiCy
+# AxyRRrRKL9ap+JII0PfIOjANBgkqhkiG9w0BAQEFAASBgF2MnB8R0ZXJu3IY2q78
+# Kr671cHDDwSoghIcbiRiJR88SSun6QUfjaQAZgk5ocvQMYAwCI162FaunRGKdMXm
+# NHz3HtWVlqVzV64VdP2MMGHPqJBcRRl6rVwffbH6bbfw+rXASOG0iMRzMNknLH9c
+# 1NG4oqVSf4vtGULsZ0tptIPB
 # SIG # End signature block
