@@ -19,6 +19,7 @@ function Get-PSModuleFile {
     AddedTwitter: @pscookiemonster
     AddedWebsite: https://github.com/RamblingCookieMonster/BuildHelpers
     REVISIONS
+    * 10:48 AM 3/14/2022 updated CBH for missing extension param
     * 11:38 AM 10/15/2021 init version, added support for locating both .psd1 & .psm1, a new -Extension param to drive the choice, and a 'both' optional extension spec to retrieve both file type paths.
     * 1/1/2019 BuildHelpers most recent rev of the get-PsModuleManifest function.
     .DESCRIPTION
@@ -32,6 +33,8 @@ function Get-PSModuleFile {
         Note: This does not handle paths in the format Folder\ModuleName\Version\ ;
     .PARAMETER Path
     Path to project root. Defaults to the current working path [-path 'C:\sc\PowerShell-Statistics\']
+    .PARAMETER Path Extension
+    Specify Module file type: Module .psm1 file or Manifest .psd1 file (psd1|psm1|both - defaults psd1)[-Extension .psm1]
     .INPUTS
     None. Does not accepted piped input.(.NET types, can add description)
     .OUTPUTS
