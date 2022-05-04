@@ -18,6 +18,7 @@ function Merge-Module {
     Tags        : Powershell,Module,Development
     AddedTwitter:
     REVISIONS
+    * 3:40 PM 5/3/2022 coded in, untested, remove-authenticodesignature(), and Psv2 DYN exclude $PostCBHBlock content
     * 11:25 AM 9/21/2021 added code to remove obsolete gens of .nupkgs & build log files (calls to new verb-io:remove-UnneededFileVariants()); CBH:added Tags; fixed missing CmdletBinding (which breaks functional verbose); added brcketing Banr (easier to tell where breaks occur)
     * 12:15 PM 4/21/2021 expanded select-string aliases
     * 11:42 AM 6/30/2020 fixed Public\_CommonCode.ps1, -ea 0 when not present
@@ -107,6 +108,7 @@ function Merge-Module {
 
     $rgxSigStart='#\sSIG\s#\sBegin\ssignature\sblock' ;
     $rgxSigEnd='#\sSIG\s#\sEnd\ssignature\sblock' ;
+    $rgxSigStartEnd = '^# SIG # Begin signature block|^<!-- SIG # Begin signature block -->' ; 
 
     $PassStatus = $null ;
     $PassStatus = @() ;
@@ -172,8 +174,8 @@ function Merge-Module {
         #$rgxPurgeBlockEnd = 'Export-ModuleMember\s-Function\s\$publicFunctions\s;';
         # updated version of dyn end, that also explicitly exports -alias *
         $rgxPurgeBlockEnd = 'Export-ModuleMember\s-Function\s\$publicFunctions\s-Alias\s\*\s;\s'
-        $dynIncludeOpen = (select-string -Path  $PsmName -Pattern $rgxPurgeblockStart).linenumber ;
-        $dynIncludeClose = (select-string -Path  $PsmName -Pattern $rgxPurgeBlockEnd).linenumber ;
+        $dynIncludeOpen = ($rawsourcelines | select-string -Pattern $rgxPurgeblockStart).linenumber ;
+        $dynIncludeClose = ($rawsourcelines | select-string -Pattern $rgxPurgeBlockEnd).linenumber ;
         if(!$dynIncludeOpen){$dynIncludeClose = 0 } ;
         $updatedContent = @() ; $DropContent=@() ;
 
@@ -229,11 +231,30 @@ function Merge-Module {
             if($oBlkComments.interText ){$updatedContent += $oBlkComments.interText  |out-string ; } ;
             $updatedContent += $oBlkComments.cbhBlock |out-string ;
 
+            # grab and add psv2 exclude customization, or add empty defaults (should be present in either MON or DYN .psm1ss, to support going back and forth)
+            #$Psv2PublicExcl = @('ConvertFrom-SourceTable.ps1','Test-PendingReboot.ps1') ;
+            $rgxPsv2Publvar = "\`$Psv2PublicExcl\s=\s@\(" ;  
+            $psv2PubLine = (select-string -Path  $PsmName -Pattern $rgxPsv2Publvar).line ; 
+            $rgxPsv2PrivExcl = "\`$Psv2PrivateExcl\s=\s@\(" ;  
+            $psv2PrivLine = (select-string -Path  $PsmName -Pattern $rgxPsv2PrivExcl).line
+
             # Post CBH always add the helper/alias-export command (functions are covered in the psd1 manifest, dyn's have in the template)
             $PostCBHBlock=@"
 
-`$script:ModuleRoot = `$PSScriptRoot ;
-`$script:ModuleVersion = (Import-PowerShellDataFile -Path (get-childitem `$script:moduleroot\*.psd1).fullname).moduleversion ;
+    `$script:ModuleRoot = `$PSScriptRoot ;
+    `$script:ModuleVersion = (Import-PowerShellDataFile -Path (get-childitem `$script:moduleroot\*.psd1).fullname).moduleversion ;
+    `$runningInVsCode = `$env:TERM_PROGRAM -eq 'vscode' ;
+    $(
+    if($psv2PubLine){
+        "$($psv2PubLine)"
+    } else {
+        "`$Psv2PublicExcl = @() ;"
+    })
+    $(if($psv2PrivLine){
+        "$($psv2PrivLine)"
+    } else {
+        "`$Psv2PrivateExcl = @() ;"
+    })
 
 #*======v FUNCTIONS v======
 
@@ -378,28 +399,30 @@ function Merge-Module {
                 $ComponentScripts = Get-ChildItem -Path $ModuleSource\*.ps1 -Exclude _CommonCode.ps1 -Recurse -ErrorAction SilentlyContinue | Sort-Object name  ;
                 $ComponentModules = Get-ChildItem -Path $ModuleSource\*.psm1 -Recurse -ErrorAction SilentlyContinue | Sort-Object name;
             } ;
-            $pltAdd = @{
-                Path=$PsmNameTmp ;
-                whatif=$whatif;
-            } ;
+            #$pltAdd = @{ Path=$PsmNameTmp ; whatif=$whatif; } ;
+            $pltAdd = [ordered]@{Path=$PsmNameTmp ; PassThru=$true ;Verbose=$($verbose) ;whatif= $($whatif) ; } 
+            # just do a batch remove-authenticodesignature pass on all of the above
+            $smsg= "Processing $($ComponentScripts.count) `$ComponentScripts files through Remove-AuthenticodeSignature..." ;
+            if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info }  #Error|Warn|Debug
+            else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+            $pltRAS=[ordered]@{ Path = $ComponentScripts.fullname ;  whatif = $($whatif) ;  verbose = $($verbose) ;  } ; 
+            $smsg = "Remove-AuthenticodeSignature w`n$(($pltRAS|out-string).trim())" ; 
+            if($verbose){ if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
+            else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; } ; 
+            # nocap, isn't currently built to return status
+            Remove-AuthenticodeSignature @pltRAS ; 
+
             foreach ($ScriptFile in $ComponentScripts) {
                 $smsg= "Processing:$($ScriptFile)..." ;
                 if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info }  #Error|Warn|Debug
                 else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
                 $ParsedContent = [System.Management.Automation.Language.Parser]::ParseFile($ScriptFile, [ref]$null, [ref]$null) ;
-                # detect and throw up on sigs
-                if($ParsedContent| Where-Object{$_ -match $rgxSigStart -OR $_ -match $rgxSigEnd} ){
-                    $smsg= "*WARNING*:SUBFILE`n$($scriptfile.fullname)`nHAS AUTHENTICODE SIGNATURE MARKERS PRESENT!`nREVIEW THE FILE AND REMOVE ANY EVIDENCE OF SIGNING!" ;
-                    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Error } #Error|Warn|Debug
-                    else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
-                    exit
-                } ;
-
                 # above is literally the entire AST, unfiltered. Should be ALL parsed entities.
                 # add demarc comments - this is AST parsed, so it prob doesn't include delimiters
                 $sBnrSStart = "`n#*------v $($ScriptFile.name) v------" ;
                 $sBnrSEnd = "$($sBnrSStart.replace('-v','-^').replace('v-','^-'))" ;
-                "$($sBnrSStart)`n$($ParsedContent.EndBlock.Extent.Text)`n$($sBnrSEnd)" | Add-Content @pltAdd ;
+                $bRet = "$($sBnrSStart)`n$($ParsedContent.EndBlock.Extent.Text)`n$($sBnrSEnd)" | Add-ContentFixEncoding @pltAdd ;
+                if(-not $bRet){throw "Add-ContentFixEncoding $($pltAdd.Path)!" } ;
 
                 $AST = [System.Management.Automation.Language.Parser]::ParseFile($ScriptFile, [ref]$null, [ref]$Null ) ;
                 $ASTFunctions =  $AST.FindAll( { $args[0] -is [System.Management.Automation.Language.FunctionDefinitionAst] }, $true) ;
@@ -437,7 +460,8 @@ function Merge-Module {
                     } ;
                     exit ;
                 } ;
-                $Content | Add-Content @pltAdd ;
+                $bRet = $Content | Add-ContentFixEncoding @pltAdd ;
+                if(-not $bRet){throw "Add-ContentFixEncoding $($pltAdd.Path)!" } ;
                 $PassStatus += ";Add-Content:UPDATED";
                 # by contrast, this is NON-AST parsed - it's appending the entire raw file content. Shouldn't need delimiters - they'd already be in source .psm1
             } ;
@@ -472,7 +496,8 @@ function Merge-Module {
             $smsg= "Adding:$($ModFile)..." ;
             if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info }  #Error|Warn|Debug
             else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
-            "#*======v _CommonCode v======" | Add-Content @pltAdd ;
+            $bRet = "#*======v _CommonCode v======" | Add-ContentFixEncoding @pltAdd ;
+            if(-not $bRet){throw "Add-ContentFixEncoding $($pltAdd.Path)!" } ;
             $Content = Get-Content $ModFile ;
             if($Content| Where-Object{$_ -match $rgxSigStart -OR $_ -match $rgxSigEnd} ){
                 $smsg= "*WARNING*:SUBFILE`n$($ModFile.fullname)`nHAS AUTHENTICODE SIGNATURE MARKERS PRESENT!`nREVIEW THE FILE AND REMOVE ANY EVIDENCE OF SIGNING!" ;
@@ -482,8 +507,10 @@ function Merge-Module {
                 } ;
                 exit ;
             } ;
-            $Content | Add-Content @pltAdd ;
-            "#*======^ END _CommonCode ^======" | Add-Content @pltAdd ;
+            $bRet =$Content | Add-ContentFixEncoding @pltAdd ;
+            if(-not $bRet){throw "Add-ContentFixEncoding $($pltAdd.Path)!" } ;
+            $bRet ="#*======^ END _CommonCode ^======" | Add-ContentFixEncoding @pltAdd ;
+            if(-not $bRet){throw "Add-ContentFixEncoding $($pltAdd.Path)!" } ;
             $PassStatus += ";Add-Content:UPDATED";
         } else {
             write-verbose "(no Public\_CommonCode.ps1)" ;
@@ -514,17 +541,17 @@ Export-ModuleMember -Function $(($ExportFunctions) -join ',') -Alias *
         if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info }  #Error|Warn|Debug
         else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
         #$updatedContent += $FooterBlock |out-string ;
-        $pltAdd = @{
-            Path=$PsmNameTmp ;
-            whatif=$whatif;
-        } ;
-        $FooterBlock | Add-Content @pltAdd ;
+        # $pltAdd = @{ Path=$PsmNameTmp ; whatif=$whatif; } ;
+        $pltAdd = [ordered]@{Path=$PsmNameTmp ; PassThru=$true ;Verbose=$($verbose) ;whatif= $($whatif) ; } 
+        $bRet = $FooterBlock | Add-ContentFixEncoding @pltAdd ;
+        if(-not $bRet){throw "Add-ContentFixEncoding $($pltAdd.Path)!" } ;
         $PassStatus += ";Add-Content:UPDATED";
     } else {
         $smsg= "NoAliasExport specified:Skipping FooterBlock add" ;
         if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info }  #Error|Warn|Debug
         else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
-        "#*======^ END FUNCTIONS ^======" | Add-Content @pltAdd ;
+        $bRet = "#*======^ END FUNCTIONS ^======" | Add-ContentFixEncoding @pltAdd ;
+        if(-not $bRet){throw "Add-ContentFixEncoding $($pltAdd.Path)!" } ;
         $PassStatus += ";Add-Content:UPDATED";
     } ;
 
@@ -536,8 +563,9 @@ Export-ModuleMember -Function $(($ExportFunctions) -join ',') -Alias *
     $rgxFuncs2Export = 'FunctionsToExport((\s)*)=((\s)*).*' ;
     $tf = $PsdName ;
     # switch back to manual local updates
+    $pltSCFE=[ordered]@{PassThru=$true ;Verbose=$($verbose) ;whatif= $($whatif) ; } 
     if($psd1ExpMatch = Get-ChildItem $tf | select-string -Pattern $rgxFuncs2Export ){
-        $enc=$null ; $enc=get-FileEncoding -path $tf ;
+        <#$enc=$null ; $enc=get-FileEncoding -path $tf ;
         if($enc -eq 'ASCII') {
             $enc = 'UTF8' ;
             $smsg = "(ASCI encoding detected, converting to UTF8)" ;
@@ -546,9 +574,12 @@ Export-ModuleMember -Function $(($ExportFunctions) -join ',') -Alias *
         } ; # force damaged/ascii to UTF8
         $pltSetCon=[ordered]@{ Path=$PsdNameTmp ; whatif=$($whatif) ;  } ;
         if($enc){$pltSetCon.add('encoding',$enc) } ;
-        (Get-Content $tf) | Foreach-Object {
+        #>
+        $bRet = (Get-Content $tf) | Foreach-Object {
             $_ -replace $rgxFuncs2Export , ("FunctionsToExport = " + "@('" + $($ExportFunctions -join "','") + "')")
-        } | Set-Content @pltSetCon ;
+        #} | Set-Content @pltSetCon ;
+        } | Set-ContentFixEncoding @pltSCFE ;
+        if(-not $bRet){throw "Set-ContentFixEncoding $($tf)!" } ;
         $PassStatus += ";Set-Content:UPDATED";
     } else {
         $smsg = "UNABLE TO Regex out $($rgxFuncs2Export) from $($tf)`nFunctionsToExport CAN'T BE UPDATED!" ;
