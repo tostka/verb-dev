@@ -347,13 +347,29 @@ function process-NewModuleDotsourced {
 
     $ModPsmName = "$($ModuleName).psm1" ;
     # C:\sc\verb-AAD\verb-AAD\verb-AAD.psd1
-    $ModPsdPath = (gci "$($ModDirPath)\$($ModuleName)\$($ModuleName).psd1").FullName
-    $PublicDirPath = "$($ModDirPath)\Public" ;
-    $InternalDirPath = "$($ModDirPath)\Internal" ;
+    # default to Public, but support External, if it pre-exists:
+    if(test-path "$($ModDirPath)\External" ){
+        $smsg = "Pre-existing variant found, and put into use:$($ModDirPath)\External" ;
+        if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
+        else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+        $PublicDirPath = "$($ModDirPath)\External" ;
+    } else { 
+        $PublicDirPath = "$($ModDirPath)\Public" ;
+    } ; 
+    # default to Internal, but support Private, if it pre-exists:
+    if(test-path "$($ModDirPath)\Private" ){
+        $smsg = "Pre-existing variant found, and put into use:$($ModDirPath)\Private" ;
+        if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
+        else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+        $InternalDirPath = "$($ModDirPath)\Private" ;
+    } else { 
+        $InternalDirPath = "$($ModDirPath)\Internal" ;
+    } ; 
     # "C:\sc\verb-AAD" ; C:\sc\verb-AAD\Tests\verb-AAD.tests.ps1
     $TestScriptPath = "$($ModDirPath)\Tests\$($ModuleName).tests.ps1" ;
     $rgxSignFiles='\.(CAT|MSI|JAR,OCX|PS1|PSM1|PSD1|PS1XML|PSC1|MSP|CMD|BAT|VBS)$' ;
-    $rgxIncludeDirs='\\(Public|Internal|Classes)\\' ;
+    # expand to cover External & Private variant names as well
+    $rgxIncludeDirs='\\(Public|Internal|External|Private|Classes)\\' ;
 
     $editor = "notepad2.exe" ;
 
