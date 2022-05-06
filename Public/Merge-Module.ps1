@@ -98,7 +98,8 @@ function Merge-Module {
     # function self-name (equiv to script's: $MyInvocation.MyCommand.Path) ;
     ${CmdletName} = $PSCmdlet.MyInvocation.MyCommand.Name ;
     # Get parameters this function was invoked with
-    #$PSParameters = New-Object -TypeName PSObject -Property $PSBoundParameters ;
+    $PSParameters = New-Object -TypeName PSObject -Property $PSBoundParameters ;
+    write-verbose -verbose:$verbose "`$PSBoundParameters:`n$(($PSBoundParameters|out-string).trim())" ;
     $verbose = ($VerbosePreference -eq "Continue") ;
     
     $sBnr="#*======v $(${CmdletName}): v======" ; 
@@ -422,7 +423,7 @@ function Merge-Module {
                 $sBnrSStart = "`n#*------v $($ScriptFile.name) v------" ;
                 $sBnrSEnd = "$($sBnrSStart.replace('-v','-^').replace('v-','^-'))" ;
                 $bRet = "$($sBnrSStart)`n$($ParsedContent.EndBlock.Extent.Text)`n$($sBnrSEnd)" | Add-ContentFixEncoding @pltAdd ;
-                if(-not $bRet){throw "Add-ContentFixEncoding $($pltAdd.Path)!" } ;
+                if(-not $bRet -AND -not $whatif){throw "Add-ContentFixEncoding $($pltAdd.Path)!" } ;
 
                 $AST = [System.Management.Automation.Language.Parser]::ParseFile($ScriptFile, [ref]$null, [ref]$Null ) ;
                 $ASTFunctions =  $AST.FindAll( { $args[0] -is [System.Management.Automation.Language.FunctionDefinitionAst] }, $true) ;
@@ -461,7 +462,7 @@ function Merge-Module {
                     exit ;
                 } ;
                 $bRet = $Content | Add-ContentFixEncoding @pltAdd ;
-                if(-not $bRet){throw "Add-ContentFixEncoding $($pltAdd.Path)!" } ;
+                if(-not $bRet -AND -not $whatif){throw "Add-ContentFixEncoding $($pltAdd.Path)!" } ;
                 $PassStatus += ";Add-Content:UPDATED";
                 # by contrast, this is NON-AST parsed - it's appending the entire raw file content. Shouldn't need delimiters - they'd already be in source .psm1
             } ;
@@ -497,7 +498,7 @@ function Merge-Module {
             if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info }  #Error|Warn|Debug
             else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
             $bRet = "#*======v _CommonCode v======" | Add-ContentFixEncoding @pltAdd ;
-            if(-not $bRet){throw "Add-ContentFixEncoding $($pltAdd.Path)!" } ;
+            if(-not $bRet -AND -not $whatif){throw "Add-ContentFixEncoding $($pltAdd.Path)!" } ;
             $Content = Get-Content $ModFile ;
             if($Content| Where-Object{$_ -match $rgxSigStart -OR $_ -match $rgxSigEnd} ){
                 $smsg= "*WARNING*:SUBFILE`n$($ModFile.fullname)`nHAS AUTHENTICODE SIGNATURE MARKERS PRESENT!`nREVIEW THE FILE AND REMOVE ANY EVIDENCE OF SIGNING!" ;
@@ -508,9 +509,9 @@ function Merge-Module {
                 exit ;
             } ;
             $bRet =$Content | Add-ContentFixEncoding @pltAdd ;
-            if(-not $bRet){throw "Add-ContentFixEncoding $($pltAdd.Path)!" } ;
+            if(-not $bRet -AND -not $whatif){throw "Add-ContentFixEncoding $($pltAdd.Path)!" } ;
             $bRet ="#*======^ END _CommonCode ^======" | Add-ContentFixEncoding @pltAdd ;
-            if(-not $bRet){throw "Add-ContentFixEncoding $($pltAdd.Path)!" } ;
+            if(-not $bRet -AND -not $whatif){throw "Add-ContentFixEncoding $($pltAdd.Path)!" } ;
             $PassStatus += ";Add-Content:UPDATED";
         } else {
             write-verbose "(no Public\_CommonCode.ps1)" ;
@@ -544,14 +545,14 @@ Export-ModuleMember -Function $(($ExportFunctions) -join ',') -Alias *
         # $pltAdd = @{ Path=$PsmNameTmp ; whatif=$whatif; } ;
         $pltAdd = [ordered]@{Path=$PsmNameTmp ; PassThru=$true ;Verbose=$($verbose) ;whatif= $($whatif) ; } 
         $bRet = $FooterBlock | Add-ContentFixEncoding @pltAdd ;
-        if(-not $bRet){throw "Add-ContentFixEncoding $($pltAdd.Path)!" } ;
+        if(-not $bRet -AND -not $whatif){throw "Add-ContentFixEncoding $($pltAdd.Path)!" } ;
         $PassStatus += ";Add-Content:UPDATED";
     } else {
         $smsg= "NoAliasExport specified:Skipping FooterBlock add" ;
         if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info }  #Error|Warn|Debug
         else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
         $bRet = "#*======^ END FUNCTIONS ^======" | Add-ContentFixEncoding @pltAdd ;
-        if(-not $bRet){throw "Add-ContentFixEncoding $($pltAdd.Path)!" } ;
+        if(-not $bRet -AND -not $whatif){throw "Add-ContentFixEncoding $($pltAdd.Path)!" } ;
         $PassStatus += ";Add-Content:UPDATED";
     } ;
 
@@ -563,7 +564,7 @@ Export-ModuleMember -Function $(($ExportFunctions) -join ',') -Alias *
     $rgxFuncs2Export = 'FunctionsToExport((\s)*)=((\s)*).*' ;
     $tf = $PsdName ;
     # switch back to manual local updates
-    $pltSCFE=[ordered]@{PassThru=$true ;Verbose=$($verbose) ;whatif= $($whatif) ; } 
+    $pltSCFE=[ordered]@{Path=$PsdNameTmp ; PassThru=$true ;Verbose=$($verbose) ;whatif= $($whatif) ; } 
     if($psd1ExpMatch = Get-ChildItem $tf | select-string -Pattern $rgxFuncs2Export ){
         <#$enc=$null ; $enc=get-FileEncoding -path $tf ;
         if($enc -eq 'ASCII') {
@@ -579,7 +580,7 @@ Export-ModuleMember -Function $(($ExportFunctions) -join ',') -Alias *
             $_ -replace $rgxFuncs2Export , ("FunctionsToExport = " + "@('" + $($ExportFunctions -join "','") + "')")
         #} | Set-Content @pltSetCon ;
         } | Set-ContentFixEncoding @pltSCFE ;
-        if(-not $bRet){throw "Set-ContentFixEncoding $($tf)!" } ;
+        if(-not $bRet -AND -not $whatif){throw "Set-ContentFixEncoding $($tf)!" } ;
         $PassStatus += ";Set-Content:UPDATED";
     } else {
         $smsg = "UNABLE TO Regex out $($rgxFuncs2Export) from $($tf)`nFunctionsToExport CAN'T BE UPDATED!" ;
