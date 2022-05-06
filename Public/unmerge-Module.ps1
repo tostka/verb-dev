@@ -73,7 +73,8 @@ function unmerge-Module {
     # function self-name (equiv to script's: $MyInvocation.MyCommand.Path) ;
     ${CmdletName} = $PSCmdlet.MyInvocation.MyCommand.Name ;
     # Get parameters this function was invoked with
-    #$PSParameters = New-Object -TypeName PSObject -Property $PSBoundParameters ;
+    $PSParameters = New-Object -TypeName PSObject -Property $PSBoundParameters ;
+    write-verbose -verbose:$verbose "`$PSBoundParameters:`n$(($PSBoundParameters|out-string).trim())" ;
     $verbose = ($VerbosePreference -eq "Continue") ;
     
     $sBnr="#*======v $(${CmdletName}): v======" ; 
@@ -294,9 +295,9 @@ function unmerge-Module {
         if($updatedContent){
             #$bRet = Set-FileContent -Text $updatedContent -Path $PsmNameTmp -showdebug:$($showdebug) -whatif:$($whatif) ;
             $pltSCFE=[ordered]@{PassThru=$true ;Verbose=$($verbose) ;whatif= $($whatif) ; } 
-            $bRet = Set-ContentFixEncoding -Value $updatedContent -Path $outfile @pltSCFE ; 
-            if(-not $bRet){throw "Add-ContentFixEncoding $($outfile)!" } else {
-                $PassStatus += ";UPDATED:Add-ContentFixEncoding ";
+            $bRet = Set-ContentFixEncoding -Value $updatedContent -Path $PsmNameTmp @pltSCFE ; 
+            if(-not $bRet -AND -not $whatif){throw "Set-ContentFixEncoding $($PsmNameTmp)!" } else {
+                $PassStatus += ";UPDATED:Set-ContentFixEncoding ";
             }  ;
         } else {
             $PassStatus += ";ERROR:Set-FileContent";
@@ -493,7 +494,7 @@ function unmerge-Module {
             else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
             #"#*======v _CommonCode v======" | Add-Content @pltAdd ;
             $bRet = "#*======v _CommonCode v======" | Add-ContentFixEncoding @pltAdd ;
-            if(-not $bRet){throw "Add-ContentFixEncoding $($pltAdd.Path)!" } ;
+            if(-not $bRet -AND -not $whatif){throw "Add-ContentFixEncoding $($pltAdd.Path)!" } ;
             $Content = Get-Content $ModFile ;
             if($Content| Where-Object{$_ -match $rgxSigStart -OR $_ -match $rgxSigEnd} ){
                 $smsg= "*WARNING*:SUBFILE`n$($ModFile.fullname)`nHAS AUTHENTICODE SIGNATURE MARKERS PRESENT!`nREVIEW THE FILE AND REMOVE ANY EVIDENCE OF SIGNING!" ;
@@ -504,9 +505,9 @@ function unmerge-Module {
                 exit ;
             } ;
             $bRet = $Content | Add-ContentFixEncoding @pltAdd ;
-            if(-not $bRet){throw "Add-ContentFixEncoding $($pltAdd.Path)!" } ;
+            if(-not $bRet -AND -not $whatif){throw "Add-ContentFixEncoding $($pltAdd.Path)!" } ;
             $bRet = "#*======^ END _CommonCode ^======" | Add-ContentFixEncoding @pltAdd ;
-            if(-not $bRet){throw "Add-ContentFixEncoding $($pltAdd.Path)!" } ;
+            if(-not $bRet -AND -not $whatif){throw "Add-ContentFixEncoding $($pltAdd.Path)!" } ;
             $PassStatus += ";Add-Content:UPDATED";
         } else {
             write-verbose "(no Public\_CommonCode.ps1)" ;
@@ -549,14 +550,14 @@ Export-ModuleMember -Function `$(`$Public.Basename) -join ',') -Alias *
         # $pltAdd = @{ Path=$PsmNameTmp ; whatif=$whatif; } ;
         $pltAdd = [ordered]@{Path=$PsmNameTmp ; PassThru=$true ;Verbose=$($verbose) ;whatif= $($whatif) ; } 
         $bRet = $FooterBlock | Add-ContentFixEncoding @pltAdd ;
-        if(-not $bRet){throw "Add-ContentFixEncoding $($pltAdd.Path)!" } ;
+        if(-not $bRet -AND -not $whatif){throw "Add-ContentFixEncoding $($pltAdd.Path)!" } ;
         $PassStatus += ";Add-Content:UPDATED";
     } else {
         $smsg= "NoAliasExport specified:Skipping FooterBlock add" ;
         if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info }  #Error|Warn|Debug
         else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
         $bRet = "#*======^ END FUNCTIONS ^======" | Add-ContentFixEncoding @pltAdd ;
-        if(-not $bRet){throw "Add-ContentFixEncoding $($pltAdd.Path)!" } ;
+        if(-not $bRet -AND -not $whatif){throw "Add-ContentFixEncoding $($pltAdd.Path)!" } ;
         $PassStatus += ";Add-Content:UPDATED";
     } ;
 
@@ -584,7 +585,7 @@ Export-ModuleMember -Function `$(`$Public.Basename) -join ',') -Alias *
             $_ -replace $rgxFuncs2Export , ("FunctionsToExport = " + "@('" + $($ExportFunctions -join "','") + "')")
         #} | Set-Content @pltSetCon ;
         } | Set-ContentFixEncoding @pltSCFE ;
-        if(-not $bRet){throw "Set-ContentFixEncoding $($tf)!" } ;
+        if(-not $bRet -AND -not $whatif){throw "Set-ContentFixEncoding $($tf)!" } ;
         $PassStatus += ";Set-Content:UPDATED";
     } else {
         $smsg = "UNABLE TO Regex out $($rgxFuncs2Export) from $($tf)`nFunctionsToExport CAN'T BE UPDATED!" ;
