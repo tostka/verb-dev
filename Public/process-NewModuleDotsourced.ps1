@@ -87,7 +87,8 @@ function process-NewModuleDotsourced {
     # function self-name (equiv to script's: $MyInvocation.MyCommand.Path) ;
     ${CmdletName} = $PSCmdlet.MyInvocation.MyCommand.Name ;
     # Get parameters this function was invoked with
-    #$PSParameters = New-Object -TypeName PSObject -Property $PSBoundParameters ;
+    $PSParameters = New-Object -TypeName PSObject -Property $PSBoundParameters ;
+    write-verbose -verbose:$verbose "`$PSBoundParameters:`n$(($PSBoundParameters|out-string).trim())" ;
     $verbose = ($VerbosePreference -eq "Continue") ;
     $Merge = $false ; # merge hard-code false
     if ($psISE){
@@ -347,13 +348,29 @@ function process-NewModuleDotsourced {
 
     $ModPsmName = "$($ModuleName).psm1" ;
     # C:\sc\verb-AAD\verb-AAD\verb-AAD.psd1
-    $ModPsdPath = (gci "$($ModDirPath)\$($ModuleName)\$($ModuleName).psd1").FullName
-    $PublicDirPath = "$($ModDirPath)\Public" ;
-    $InternalDirPath = "$($ModDirPath)\Internal" ;
+    # default to Public, but support External, if it pre-exists:
+    if(test-path "$($ModDirPath)\External" ){
+        $smsg = "Pre-existing variant found, and put into use:$($ModDirPath)\External" ;
+        if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
+        else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+        $PublicDirPath = "$($ModDirPath)\External" ;
+    } else { 
+        $PublicDirPath = "$($ModDirPath)\Public" ;
+    } ; 
+    # default to Internal, but support Private, if it pre-exists:
+    if(test-path "$($ModDirPath)\Private" ){
+        $smsg = "Pre-existing variant found, and put into use:$($ModDirPath)\Private" ;
+        if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
+        else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+        $InternalDirPath = "$($ModDirPath)\Private" ;
+    } else { 
+        $InternalDirPath = "$($ModDirPath)\Internal" ;
+    } ; 
     # "C:\sc\verb-AAD" ; C:\sc\verb-AAD\Tests\verb-AAD.tests.ps1
     $TestScriptPath = "$($ModDirPath)\Tests\$($ModuleName).tests.ps1" ;
     $rgxSignFiles='\.(CAT|MSI|JAR,OCX|PS1|PSM1|PSD1|PS1XML|PSC1|MSP|CMD|BAT|VBS)$' ;
-    $rgxIncludeDirs='\\(Public|Internal|Classes)\\' ;
+    # expand to cover External & Private variant names as well
+    $rgxIncludeDirs='\\(Public|Internal|External|Private|Classes)\\' ;
 
     $editor = "notepad2.exe" ;
 
@@ -598,13 +615,13 @@ $(if($Merge){'MERGE parm specified as well:`n-Merge Public|Internal|Classes incl
         #>
         #$pltSetCon=[ordered]@{ Path=$tf ; whatif=$($whatif) ;  } ;
         #if($enc){$pltSetCon.add('encoding',$enc) } ;
-        $pltSCFE=[ordered]@{PassThru=$true ;Verbose=$($verbose) ;whatif= $($whatif) ; } 
+        $pltSCFE=[ordered]@{Path=$tf ; PassThru=$true ;Verbose=$($verbose) ;whatif= $($whatif) ; } 
         if($psd1ExpMatch = gci $tf |select-string -Pattern $rgxTestScriptNOGuid ){
             $bRet = (Get-Content $tf) | Foreach-Object {
                 $_ -replace $rgxTestScriptNOGuid, "$($psd1guid)"
             #} | Set-Content @pltSetCon ;
             } | Set-ContentFixEncoding @pltSCFE ;
-            if(-not $bRet){throw "Set-ContentFixEncoding $($tf)!" } ;
+            if(-not $bRet -AND -not $whatif){throw "Set-ContentFixEncoding $($tf)!" } ;
         } elseif($psd1ExpMatch = gci $tf |select-string -Pattern $rgxTestScriptGuid ){
             $testGuid = $psd1ExpMatch.matches[0].Groups[9].value.tostring() ;  ;
             if($testGuid -eq $psd1guid){
@@ -620,7 +637,7 @@ $(if($Merge){'MERGE parm specified as well:`n-Merge Public|Internal|Classes incl
                     $_ -replace $testGuid, "$($psd1guid)"
                 #} | Set-Content @pltSetCon ;
                 } | Set-ContentFixEncoding @pltSCFE ;
-                if(-not $bRet){throw "Set-ContentFixEncoding $($tf)!" } ;
+                if(-not $bRet -AND -not $whatif){throw "Set-ContentFixEncoding $($tf)!" } ;
             } ;
         } else {
             $smsg = "UNABLE TO Regex out...`n$($rgxTestScriptNOGuid)`n...from $($tf)`nTestScript hasn't been UPDATED!" ;
@@ -656,12 +673,12 @@ $(if($Merge){'MERGE parm specified as well:`n-Merge Public|Internal|Classes incl
         $pltSetCon=[ordered]@{ Path=$tf ; whatif=$($whatif) ;  } ;
         if($enc){$pltSetCon.add('encoding',$enc) } ;
         #>
-        $pltSCFE=[ordered]@{PassThru=$true ;Verbose=$($verbose) ;whatif= $($whatif) ; } 
+        $pltSCFE=[ordered]@{Path=$tf ; PassThru=$true ;Verbose=$($verbose) ;whatif= $($whatif) ; } 
         $bRet = (Get-Content $tf) | Foreach-Object {
             $_ -replace $psm1Profile.matches[0].captures.groups[0].value.tostring(), "Version     : $($psd1Vers)"
         #} | Set-Content @pltSetCon ;
         } | Set-ContentFixEncoding @pltSCFE ;
-        if(-not $bRet){throw "Set-ContentFixEncoding $($tf)!" } ;
+        if(-not $bRet -AND -not $whatif){throw "Set-ContentFixEncoding $($tf)!" } ;
     } else {
         $smsg = "(Psd1:Psm1 versions match)" ;
         if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug
