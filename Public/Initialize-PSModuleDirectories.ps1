@@ -84,7 +84,7 @@ Function Initialize-PSModuleDirectories {
         # function self-name (equiv to script's: $MyInvocation.MyCommand.Path) ;
         ${CmdletName} = $PSCmdlet.MyInvocation.MyCommand.Name ;
         $PSParameters = New-Object -TypeName PSObject -Property $PSBoundParameters ;
-        write-verbose -verbose:$verbose "`$PSBoundParameters:`n$(($PSBoundParameters|out-string).trim())" ;
+        write-verbose  "`$PSBoundParameters:`n$(($PSBoundParameters|out-string).trim())" ;
         $Verbose = ($VerbosePreference -eq 'Continue') ; 
         
         if ($PSCmdlet.MyInvocation.ExpectingInput) {
