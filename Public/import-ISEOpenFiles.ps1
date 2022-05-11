@@ -43,12 +43,13 @@ function import-ISEOpenFiles {
             $error.clear() ;
             TRY {
                 $allISEScripts = import-Clixml -Path $txmlf ;
-                if($tTabs){
-                    #if($psise.powershelltabs.files.count -eq 1){
+                $smsg = "Opening $($allISEScripts| measure | select -expand count) files" ; 
+                write-verbose $smsg ; 
+                if($allISEScripts){
                     foreach($ISES in $allISEScripts){
                         if($psise.powershelltabs.files.fullpath -contains $ISES){
-                            write-host "($ISES) is already OPEN in Current ISE tab list (skipping)" ; 
-                        } else { 
+                            write-host "($ISES) is already OPEN in Current ISE tab list (skipping)" ;
+                        } else {
                             if(test-path $ISES){
                                 <# #New tab & open in new tab: - no we want them all in one tab
                                 write-verbose "(adding tab, opening:$($ISES))"
@@ -57,10 +58,10 @@ function import-ISEOpenFiles {
                                 #>
                                 #open in current tab
                                 write-verbose "(opening:$($ISES))"
-                                $psISE.CurrentPowerShellTab.Files.Add($ISES) ;  ; 
+                                $psISE.CurrentPowerShellTab.Files.Add($ISES) ;  ;
                             } else {  write-warning "Unable to Open missing orig file:`n$($ISES)" };
-                        } ; 
-                    }; 
+                        } ;
+                    }; # loop-E
                 }
             } CATCH {
                 $ErrTrapd=$Error[0] ;
