@@ -18,6 +18,7 @@ function unmerge-Module {
     Tags        : Powershell,Module,Development
     AddedTwitter:
     REVISIONS
+    * 4:06 PM 5/12/2022 merge over latest working updates to merge-module.ps1; *untested*
     * 8:08 AM 5/3/2022 WIP init convert of Merge-Module to unmerge-module
     .DESCRIPTION
     unmerge-Module.ps1 - Revert a monolisthic module.psm1 module file, to dynamic include .psm1. Returns a hash with status:$true/$false, and PsmNameBU:The name of a backup of the original .psm1 file (for restoring on failures)
@@ -45,10 +46,16 @@ function unmerge-Module {
     PS>     ModuleName="verb-AAD" ;
     PS>     ModuleSourcePath="C:\sc\verb-AAD\Public","C:\sc\verb-AAD\Internal" ;
     PS>     ModuleDestinationPath="C:\sc\verb-AAD\verb-AAD" ;
-    PS>     showdebug=$true ;
+    PS>     LogSpec = $logspec ;
+    PS>     NoAliasExport=$($NoAliasExport) ;
+    PS>     ErrorAction="Stop" ;
+    PS>     showdebug=$($showdebug);
     PS>     whatif=$($whatif);
     PS> } ;
-    PS> unmerge-Module @pltmergeModule ;
+    PS> $smsg= "Unmerge-Module w`n$(($pltmergeModule|out-string).trim())" ;
+    PS> if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info }  #Error|Warn|Debug
+    PS> else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+    PS> $ReportObj = Unmerge-Module @pltmergeModule ;
     Splatted example (from process-NewModule.ps1)
     .LINK
     https://www.toddomation.com
@@ -76,13 +83,13 @@ function unmerge-Module {
     $PSParameters = New-Object -TypeName PSObject -Property $PSBoundParameters ;
     write-verbose -verbose:$verbose "`$PSBoundParameters:`n$(($PSBoundParameters|out-string).trim())" ;
     $verbose = ($VerbosePreference -eq "Continue") ;
-    
-    $sBnr="#*======v $(${CmdletName}): v======" ; 
-    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
+
+    $sBnr="#*======v $(${CmdletName}): v======" ;
+    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug
     else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
-    
+
     # path to stock dynamic psm1, to be used to reconstruct the existing .psm1 to dynamic.
-    $Psm1TemplatePath = "C:\sc\powershell\PlasterModuleTemplate-master\PPoShModuleTemplate\template.psm1" ; 
+    $Psm1TemplatePath = "C:\sc\powershell\PlasterModuleTemplate-master\PPoShModuleTemplate\template.psm1" ;
     $rgxSigStart='#\sSIG\s#\sBegin\ssignature\sblock' ;
     $rgxSigEnd='#\sSIG\s#\sEnd\ssignature\sblock' ;
 
@@ -101,10 +108,12 @@ function unmerge-Module {
         $transcript=$logspec.transcript ;
     } ;
 
+    <# doesn't do anything: resolve to gci, but assigned to strong-typed [string] vari -> just re-coerces back to [string} on fullname property
     if ($ModuleDestinationPath.GetType().FullName -ne 'System.IO.DirectoryInfo') {
         $ModuleDestinationPath = get-item -path $ModuleDestinationPath ;
+        # doesn't do anything: resolve to gci, but on [string] vari, just re-coercess back to string on fullname
     } ;
-
+    #>
     $ModuleRootPath = split-path $ModuleDestinationPath -Parent ;
 
     $ttl = ($ModuleSourcePath | Measure-Object).count ;
@@ -138,8 +147,8 @@ function unmerge-Module {
             KeepToday = $true ;
             verbose=$true ;
             whatif=$($whatif) ;
-        } ; 
-        write-host -foregroundcolor green "DEADWOOD REMOVAL:remove-UnneededFileVariants w`n$(($pltRGens|out-string).trim())" ; 
+        } ;
+        write-host -foregroundcolor green "DEADWOOD REMOVAL:remove-UnneededFileVariants w`n$(($pltRGens|out-string).trim())" ;
         remove-UnneededFileVariants @pltRGens ;
 
         # this script *appends* to the existing .psm1 file.
@@ -203,14 +212,14 @@ function unmerge-Module {
             $updatedContent += $oBlkComments.cbhBlock |out-string ;
 
             # add $ModuleRoot & $ModuleVersion, if not already present
-            #$rgxModRootvar = '\$script:ModuleRoot\s=\s\$PSScriptRoot\s;' ; 
+            #$rgxModRootvar = '\$script:ModuleRoot\s=\s\$PSScriptRoot\s;' ;
             #$rgxModVersvar = '\$script:ModuleVersion\s=\s\(Import-PowerShellDataFile\s-Path\s\(get-childitem\s\$script:moduleroot\\\*\.psd1\)\.fullname\)\.moduleversion\s;'
             # $runningInVsCode = $env:TERM_PROGRAM -eq 'vscode' ;
 
             # grab and add psv2 DYN exclude customization, or add empty defaults (should be present in either MON or DYN .psm1, to support going back and forth)
-            $rgxPsv2Publvar = "\`$Psv2PublicExcl\s=\s@\(" ;  
-            $psv2PubLine = (select-string -Path  $PsmName -Pattern $rgxPsv2Publvar).line ; 
-            $rgxPsv2PrivExcl = "\`$Psv2PrivateExcl\s=\s@\(" ;  
+            $rgxPsv2Publvar = "\`$Psv2PublicExcl\s=\s@\(" ;
+            $psv2PubLine = (select-string -Path  $PsmName -Pattern $rgxPsv2Publvar).line ;
+            $rgxPsv2PrivExcl = "\`$Psv2PrivateExcl\s=\s@\(" ;
             $psv2PrivLine = (select-string -Path  $PsmName -Pattern $rgxPsv2PrivExcl).line
 
             # Post CBH always add the helper/alias-export command (functions are covered in the psd1 manifest, dyn's have in the template)
@@ -236,13 +245,13 @@ function unmerge-Module {
             if($PostCBHBlock){
                 write-verbose "adding `$PostCBHBlock"
                 $updatedContent += $PostCBHBlock |out-string ;
-            } ; 
+            } ;
 
             # alt, instead of building block, we could subtract out the functions block from the existing .psm1 and sub in dyn
             <# locate the monolithic functions block to be purged/replaced with the dyn-incl content
             between:
             #*======v FUNCTIONS v======
-            and 
+            and
             #*======^ END FUNCTIONS ^======
             -- issue with these: I frequently use them within functions to delimit *internal* functions. So we need to start with [0], and end with [-1] to get the broadest block
             #>
@@ -268,7 +277,7 @@ function unmerge-Module {
             if(test-path -path $Psm1TemplatePath){
                 # $dynIncludeOpen, $dynIncludeClose
                 $rgxTmpDynStart = '#Get\spublic\sand\sprivate\sfunction\sdefinition\sfiles\.' ;
-                $rgxTmpDynEnd = 'Export-ModuleMember\s-Function' ; 
+                $rgxTmpDynEnd = 'Export-ModuleMember\s-Function' ;
                 $TmplrawSourceLines = get-content -path $Psm1TemplatePath  ;
                 $TmplSrcLineTtl = ($TmplrawSourceLines | Measure-Object).count ;
                 $TmpldynIncludeOpen = ($TmplrawSourceLines | select-string -Pattern $rgxTmpDynStart).linenumber ;
@@ -276,31 +285,28 @@ function unmerge-Module {
                 if($TmpldynIncludeOpen -AND $TmpldynIncludeClose){
                     $dynBlock = $TmplrawSourceLines[($TmpldynIncludeOpen-2)..($TmpldynIncludeClose-2)] ;
                     #$dynBlock += $TmplrawSourceLines[($TmpldynIncludeClose)..$Srclinettl] ;
-                } else { 
+                } else {
 
-                } ; 
+                } ;
                 $updatedContent += $dynBlock |out-string ;
 
 
             } else {
-        
-            } ; 
+
+            } ;
 
 
         } ;  # if-E mono to dyn conversion
 
-
-        
-
         if($updatedContent){
             #$bRet = Set-FileContent -Text $updatedContent -Path $PsmNameTmp -showdebug:$($showdebug) -whatif:$($whatif) ;
-            $pltSCFE=[ordered]@{PassThru=$true ;Verbose=$($verbose) ;whatif= $($whatif) ; } 
-            $bRet = Set-ContentFixEncoding -Value $updatedContent -Path $PsmNameTmp @pltSCFE ; 
+            $pltSCFE=[ordered]@{PassThru=$true ;Verbose=$($verbose) ;whatif= $($whatif) ; }
+            $bRet = Set-ContentFixEncoding -Value $updatedContent -Path $PsmNameTmp @pltSCFE ;
             if(-not $bRet -AND -not $whatif){throw "Set-ContentFixEncoding $($PsmNameTmp)!" } else {
                 $PassStatus += ";UPDATED:Set-ContentFixEncoding ";
             }  ;
         } else {
-            $PassStatus += ";ERROR:Set-FileContent";
+            $PassStatus += ";ERROR:Set-ContentFixEncoding";
             $smsg= "NO PARSEABLE METADATA/CBH CONTENT IN EXISTING FILE, TO BUILD UPDATED PSM1 FROM!`n$($PsmName)" ;
             if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Error } #Error|Warn
             else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
@@ -313,59 +319,46 @@ function unmerge-Module {
             $ReportObj | write-output ;
             Exit #STOP(debug)|EXIT(close)|Continue(move on in loop cycle) ;
         } ;
-    } ;
+    } ; # if(test-path -path $PsmName)
 
     # DEFAULT - DIRS CREATION - git doesn't reproduce empty dirs, create if empty (avoids errors later)
     # exempt the .git & .vscode dirs, we don't publish those to modules dir
-    $DefaultModDirs = "Public","Internal","Classes","Tests","Docs","Docs\Cab","Docs\en-US","Docs\Markdown" ;
-    foreach($Dir in $DefaultModDirs){
-        $tPath = join-path -path $ModuleRootPath -ChildPath $Dir ;
-        if(!(test-path -path $tPath)){
-            $pltDir = [ordered]@{
-                path     = $tPath ;
-                ItemType = "Directory" ;
-                ErrorAction="Stop" ;
-                whatif   = $($whatif) ;
-            } ;
-            $smsg = "Creating missing dir:new-Item w`n$(($pltDir|out-string).trim())" ;
-            if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info }  #Error|Warn|Debug
-            else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
-            $error.clear() ;
-            $bRetry=$false ;
-            TRY {
-                new-item @pltDir | out-null ;
-                $PassStatus += ";new-item:UPDATED";
-            } CATCH {
-                $ErrorTrapped = $Error[0] ;
-                $PassStatus += ";new-item:ERROR";
-                $smsg= "Failed processing $($ErrorTrapped.Exception.ItemName). `nError Message: $($ErrorTrapped.Exception.Message)`nError Details: $($ErrorTrapped)" ;
-                if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Error } #Error|Warn
-                else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" }
-                $bRetry=$true ;
-            } ;
-            if($bRetry){
-                $pltDir.add('force',$true) ;
-                $smsg = "Retry:FORCE:Creating missing dir:new-Item w`n$(($pltDir|out-string).trim())" ;
-                if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug
-                else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
-                $error.clear() ;
-                TRY {
-                    new-item @pltDir | out-null ;
-                    $PassStatus += ";new-item:UPDATED";
-                } CATCH {
-                    $ErrorTrapped = $Error[0] ;
-                    $PassStatus += ";new-item:ERROR";
-                    $smsg= "Failed processing $($ErrorTrapped.Exception.ItemName). `nError Message: $($ErrorTrapped.Exception.Message)`nError Details: $($ErrorTrapped)" ;
-                    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Error }  #Error|Warn
-                    else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
-                    $bRetry=$false ;
-                    EXIT #STOP(debug)|EXIT(close)|Continue(move on in loop cycle) ;
-                } ;
-            } ;
+    # use the func
+    $pltInitPsMDirs=[ordered]@{
+        #ModuleName=$($ModuleName) ;
+        ModuleSourcePath=$ModuleSourcePath ;
+        ModuleDestinationPath=$ModuleDestinationPath ;
+        #ModuleRootPath = $ModuleRootPath ;
+        ErrorAction="Stop" ;
+        #showdebug=$($showdebug);
+        whatif=$($whatif);
+    } ;
+    $smsg= "Initialize-PSModuleDirectories w`n$(($pltInitPsMDirs|out-string).trim())" ;
+    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info }
+    else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+    TRY {
+        $sRet = Initialize-PSModuleDirectories @pltInitPsMDirs ;
+        #if($sRet.split(';') -contains "new-item:ERROR"){
+        if($sRet){
+            if([array]$sRet.split(';').trim() -contains 'new-item:ERROR'){
+            # or, work with raw ;-delim'd string:
+            #if($sret.indexof('new-item:ERROR')){
+                $smsg = "Initialize-PSModuleDirectories:new-item:ERROR!"  ;
+                write-warning $smsg ;
+                throw $smsg ;
+            }
+        } else {
+            $smsg = "(no `$sRet returned on call)" ;
+            if($verbose){if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug
+            else{ write-verbose "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; } ;
         } ;
-    } ;  # loop-E
+    } CATCH {
+        $PassStatus += ";ERROR";
+        write-warning  "$(get-date -format 'HH:mm:ss'): Failed processing $($_.Exception.ItemName). `nError Message: $($_.Exception.Message)`nError Details: $($_)" ;
+        Break ;
+    } ;
 
-    # $MODULESOURCEPATH - DIRS CREATION
+    # $MODULESOURCEPATH - DIRS CREATION ( & loops the public files and adds to monolith .psm1)
     foreach ($ModuleSource in $ModuleSourcePath) {
         $iProcd++ ;
         if ($ModuleSource.GetType().FullName -ne 'System.IO.DirectoryInfo') {
@@ -434,9 +427,12 @@ function unmerge-Module {
             } ;
             #$pltAdd = @{Path=$PsmNameTmp ; whatif=$whatif;} ;
             # shift to Add-ContentFixEncoding
-            $pltAdd =[ordered]@{Path=$PsmNameTmp ; PassThru=$true ;Verbose=$($verbose) ;whatif= $($whatif) ; } 
+            $pltAdd =[ordered]@{Path=$PsmNameTmp ; PassThru=$true ;Verbose=$($verbose) ;whatif= $($whatif) ; }
+
+            $ttlCS = ($ComponentScripts|measure).count ; $pCS=0 ;
             foreach ($ScriptFile in $ComponentScripts) {
-                $smsg= "Processing:$($ScriptFile)..." ;
+                $pCS++ ;
+                $smsg= "Processing ($($pCS)/$($ttlCS)):$($ScriptFile)..." ;
                 if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info }  #Error|Warn|Debug
                 else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
 
@@ -444,7 +440,7 @@ function unmerge-Module {
                 $ASTFunctions =  $AST.FindAll( { $args[0] -is [System.Management.Automation.Language.FunctionDefinitionAst] }, $true) ;
 
                 # public & functions = public ; private & internal = private - flip output to -showdebug or -verbose, only
-                if($ModuleSource -match '(Public|Functions)'){
+                if($ModuleSource.fullname -match '(Public|Functions)'){
                     $smsg= "$($ScriptFile.name):PUB FUNC:`n$(($ASTFunctions) -join ',' |out-string)" ;
                     if($showDebug) {
                         if ($logging -AND ($showDebug -OR $verbose)) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Debug }  #Error|Warn|Debug
@@ -484,7 +480,7 @@ function unmerge-Module {
         else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; } ;
 
 
-    } ; # loop-E
+    } ; # loop-E foreach ($ModuleSource in $ModuleSourcePath) {
 
     # add support for Public\_CommonCode.ps1 (module-spanning code that trails the functions block in the .psm1)
     if($PublicPath = $ModuleSourcePath |Where-Object{$_ -match 'Public'}){
@@ -492,7 +488,6 @@ function unmerge-Module {
             $smsg= "Adding:$($ModFile)..." ;
             if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info }  #Error|Warn|Debug
             else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
-            #"#*======v _CommonCode v======" | Add-Content @pltAdd ;
             $bRet = "#*======v _CommonCode v======" | Add-ContentFixEncoding @pltAdd ;
             if(-not $bRet -AND -not $whatif){throw "Add-ContentFixEncoding $($pltAdd.Path)!" } ;
             $Content = Get-Content $ModFile ;
@@ -535,20 +530,18 @@ Export-ModuleMember -Function $(($ExportFunctions) -join ',') -Alias *
 "@ ;
 #>
     # unmerged version:
-    # Export-ModuleMember -Function $Public.Basename ;    
+    # Export-ModuleMember -Function $Public.Basename ;
     $FooterBlock=@"
 
 Export-ModuleMember -Function `$(`$Public.Basename) -join ',') -Alias *
 
 "@ ;
 
+    $pltAdd = [ordered]@{Path=$PsmNameTmp ; PassThru=$true ;Verbose=$($verbose) ;whatif= $($whatif) ; }
     if(-not($NoAliasExport)){
         $smsg= "Adding:FooterBlock..." ;
         if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info }  #Error|Warn|Debug
         else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
-        #$updatedContent += $FooterBlock |out-string ;
-        # $pltAdd = @{ Path=$PsmNameTmp ; whatif=$whatif; } ;
-        $pltAdd = [ordered]@{Path=$PsmNameTmp ; PassThru=$true ;Verbose=$($verbose) ;whatif= $($whatif) ; } 
         $bRet = $FooterBlock | Add-ContentFixEncoding @pltAdd ;
         if(-not $bRet -AND -not $whatif){throw "Add-ContentFixEncoding $($pltAdd.Path)!" } ;
         $PassStatus += ";Add-Content:UPDATED";
@@ -567,24 +560,21 @@ Export-ModuleMember -Function `$(`$Public.Basename) -join ',') -Alias *
     if($verbose){ if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug
     else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; } ;
     $rgxFuncs2Export = 'FunctionsToExport((\s)*)=((\s)*).*' ;
-    $tf = $PsdName ;
+
+    $tf = $PsdNameTmp ;
     # switch back to manual local updates
+    $pltSCFE=[ordered]@{Path = $tf ; PassThru=$true ;Verbose=$($verbose) ;whatif= $($whatif) ; }
     if($psd1ExpMatch = Get-ChildItem $tf | select-string -Pattern $rgxFuncs2Export ){
-        <#$enc=$null ; $enc=get-FileEncoding -path $tf ;
-        if($enc -eq 'ASCII') {
-            $enc = 'UTF8' ;
-            $smsg = "(ASCI encoding detected, converting to UTF8)" ;
-            if($verbose){ if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info }
-            else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; } ;
-        } ; # force damaged/ascii to UTF8
-        $pltSetCon=[ordered]@{ Path=$PsdNameTmp ; whatif=$($whatif) ;  } ;
-        if($enc){$pltSetCon.add('encoding',$enc) } ;
-        #>
-        $pltSCFE=[ordered]@{PassThru=$true ;Verbose=$($verbose) ;whatif= $($whatif) ; } 
+        <##>
         (Get-Content $tf) | Foreach-Object {
             $_ -replace $rgxFuncs2Export , ("FunctionsToExport = " + "@('" + $($ExportFunctions -join "','") + "')")
-        #} | Set-Content @pltSetCon ;
         } | Set-ContentFixEncoding @pltSCFE ;
+        #>
+        # 2-step it, we're getting only $value[-1] through the pipeline
+        $newContent = (Get-Content $tf) | Foreach-Object {
+            $_ -replace $rgxFuncs2Export , ("FunctionsToExport = " + "@('" + $($ExportFunctions -join "','") + "')")
+        }# this writes to $PsdNameTmp
+        $bRet = Set-ContentFixEncoding @pltSCFE -Value $newContent ;
         if(-not $bRet -AND -not $whatif){throw "Set-ContentFixEncoding $($tf)!" } ;
         $PassStatus += ";Set-Content:UPDATED";
     } else {
@@ -593,12 +583,52 @@ Export-ModuleMember -Function `$(`$Public.Basename) -join ',') -Alias *
         else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; } ;
     } ;
 
+     if(-not $whatif){
+        $bRet = Test-ModuleTMPFiles @pltTMTmp ;
+
+        if ($bRet.valid -AND $bRet.Manifest -AND $bRet.Module){
+            $PassStatus += ";Test-ModuleTMPFiles:UPDATE";
+            $pltCpyPsm1 = @{ Path=$PsmNameTmp ; Destination=$PsmName ; whatif=$whatif; ErrorAction="STOP" ; } ;
+            $smsg = "Processing error free: Overwriting temp .psm1 with temp copy`ncopy-item w`n$(($pltCpyPsm1|out-string).trim())" ;
+            if($verbose){ if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug
+            else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; } ;
+            $pltCpyPsd1 = @{ Path=$PsdNameTmp ; Destination=$PsdName ; whatif=$whatif; ErrorAction="STOP" ; } ;
+            $error.clear() ;
+            TRY {
+                copy-Item  @pltCpyPsm1 ;
+                $PassStatus += ";copy-Item:UPDATE";
+                $smsg = "Processing error free: Overwriting temp .psd1 with temp copy`ncopy-item w`n$(($pltCpyPsd1|out-string).trim())" ;
+
+                if($verbose){ if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info }
+                else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; } ;
+                copy-Item @pltCpyPsd1 ;
+                $PassStatus += ";copy-Item:UPDATE";
+
+            } CATCH {
+                Write-Warning "$(get-date -format 'HH:mm:ss'): Failed processing $($_.Exception.ItemName). `nError Message: $($_.Exception.Message)`nError Details: $($_)" ;
+                $PassStatus += ";copy-Item:ERROR";
+                Break  ;
+            } ;
+        } else {
+            $smsg = "Test-ModuleTMPFiles:FAIL! Aborting!" ;
+            $PassStatus += ";Test-ModuleTMPFiles :ERROR";
+            if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info }
+            else{ write-verbose "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+            Break ;
+        } ;
+    } else {
+        $smsg = "(whatif:skipping updates)" ;
+        if($verbose){ if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info} #Error|Warn|Debug
+        else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; } ;
+    };
+
     #if($PassStatus.tolower().contains('error')){ # not properly matching, switch to select-string regex, the appends are line per append, multiline seems to break contains.
     if($PassStatus.tolower() | select-string '.*error.*'){
         $smsg = "ERRORS LOGGED, ABORTING UPDATE OF ORIGINAL .PSM1!:`n$($pltCpy.Destination)" ;
         if($verbose){ if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level ERROR} #Error|Warn|Debug
         else{ write-WARNING "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; } ;
     } elseif(!$whatif) {
+        <# defer to block above
         if(test-path $PsmNameTmp){
             $pltCpy = @{
                 Path=$PsmNameTmp ;
@@ -650,9 +680,10 @@ Export-ModuleMember -Function `$(`$Public.Basename) -join ',') -Alias *
             else{ write-WARNING "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; } ;
             $PassStatus += ";test-path $PsdNameTmp:ERROR";
         } ;
+        #>
     } else {
         $smsg = "(whatif:skipping updates)" ;
-        if($verbose){ if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level ERROR} #Error|Warn|Debug
+        if($verbose){ if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info} #Error|Warn|Debug
         else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; } ;
     };
     $ReportObj=[ordered]@{
@@ -664,9 +695,9 @@ Export-ModuleMember -Function `$(`$Public.Basename) -join ',') -Alias *
         $ReportObj.Status=$false ;
     } ;
     $ReportObj | write-output ;
-    
+
     $smsg = $sBnr.replace('=v','=^').replace('v=','^=') ;
-    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
+    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug
     else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
 }
 
