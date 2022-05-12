@@ -16,6 +16,7 @@ Function Test-ModuleTMPFiles {
     Github      : https://github.com/tostka/verb-dev
     Tags        : Powershell,Module,Management,Lifecycle
     REVISIONS
+    * 2:27 PM 5/12/2022 fix typo #217 & 220, added w-v echoes; expanded #218 echo
     * 2:08 PM 5/11/2022 move the module test code out to a portable func
     .DESCRIPTION
     Test-ModuleTMPFiles.ps1 - Test the tempoary C:\sc\[[mod]]\[mod]\[mod].psd1_TMP & [mod].psm1_TMP files with Test-ModuleManifest  & import-module -force, to ensure the files will function at a basic level, before overwriting the current .psm1 & .psd1 files for the module.
@@ -173,7 +174,7 @@ Function Test-ModuleTMPFiles {
                 $smsg = "(remove-module -name $($pltIpmo.name) -force)" ;
                 if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug
                 else{ write-verbose "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
-                remove-module -name $pltIpmo.name -force -verbose:$($verbose) ;
+                remove-module -name $pltIpmo.name -force -verbose:$($verbose) -ErrorAction SilentlyContinue;
 
                 $smsg = "(remove-item -path $($testpsm1) -ErrorAction SilentlyContinue ; " ;
                 if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug
@@ -205,10 +206,20 @@ Function Test-ModuleTMPFiles {
                 Module = $null ;
                 Valid = $false ;
             }#>
+            $smsg = "`$objReport`n$(($objReport|out-string).trim())" ; 
+            if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug
+            else{ write-verbose "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
             if($objReport.Manifest -AND $objReport.Module){
+                $smsg = "(SET:`$objReport.Valid = `$true ;)" ;
+                if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug
+                else{ write-verbose "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
                 $objReport.Valid = $true ;
             }
-            New-Object PSObject -Property $object | write-output ;
+            $smsg = "(PIPELINE:New-Object PSObject -Property `$objReport | write-output)" ;
+            $smsg += "`n`$objReport`n$(($objReport|out-string).trim())" ;
+            if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug
+            else{ write-verbose "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+            New-Object PSObject -Property $objReport | write-output ;
         } ;  # loop-E
 
     } ;  # PROC-E
