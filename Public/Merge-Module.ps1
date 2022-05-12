@@ -18,7 +18,7 @@ function Merge-Module {
     Tags        : Powershell,Module,Development
     AddedTwitter:
     REVISIONS
-    * 3:17 PM 5/12/2022 got through a full non -Dyn pass, to publish and ipmo -for. Still need to port over latest merge-module.ps1 chgs -> unmerge-module.ps1. 
+    * 4:08 PM 5/12/2022 got through a full non -Dyn pass, to publish and ipmo -for. Still need to port over latest merge-module.ps1 chgs -> unmerge-module.ps1. ; updated CBH expl ; cleanedup, duped over minor items from unmerge-module()
     * 2:24 PM 5/9/2022 backed in, untested, updates from unmerge-module, to bring roughly back into sync.
     * 3:40 PM 5/3/2022 coded in, untested, remove-authenticodesignature(), and Psv2 DYN exclude $PostCBHBlock content
     * 11:25 AM 9/21/2021 added code to remove obsolete gens of .nupkgs & build log files (calls to new verb-io:remove-UnneededFileVariants()); CBH:added Tags; fixed missing CmdletBinding (which breaks functional verbose); added brcketing Banr (easier to tell where breaks occur)
@@ -68,14 +68,20 @@ function Merge-Module {
     .\merge-Module.ps1 -ModuleName verb-AAD -ModuleSourcePath C:\sc\verb-AAD\Public -ModuleDestinationPath C:\sc\verb-AAD\verb-AAD -showdebug -whatif ;
     Command line process
     .EXAMPLE
-    $pltmergeModule=[ordered]@{
-        ModuleName="verb-AAD" ;
-        ModuleSourcePath="C:\sc\verb-AAD\Public","C:\sc\verb-AAD\Internal" ;
-        ModuleDestinationPath="C:\sc\verb-AAD\verb-AAD" ;
-        showdebug=$true ;
-        whatif=$($whatif);
-    } ;
-    Merge-Module @pltmergeModule ;
+    PS> $pltmergeModule=[ordered]@{
+    PS>     ModuleName="verb-AAD" ;
+    PS>     ModuleSourcePath="C:\sc\verb-AAD\Public","C:\sc\verb-AAD\Internal" ;
+    PS>     ModuleDestinationPath="C:\sc\verb-AAD\verb-AAD" ;
+    PS>     LogSpec = $logspec ;
+    PS>     NoAliasExport=$($NoAliasExport) ;
+    PS>     ErrorAction="Stop" ;
+    PS>     showdebug=$($showdebug);
+    PS>     whatif=$($whatif);
+    PS> } ;
+    PS> $smsg= "Merge-Module w`n$(($pltmergeModule|out-string).trim())" ;
+    PS> if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info }  #Error|Warn|Debug
+    PS> else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+    PS> $ReportObj = Merge-Module @pltmergeModule ;
     Splatted example (from process-NewModule.ps1)
     .LINK
     https://www.toddomation.com
@@ -265,6 +271,7 @@ function Merge-Module {
 #*======v FUNCTIONS v======
 
 "@ ;
+            write-verbose "adding `$PostCBHBlock"
             $updatedContent += $PostCBHBlock |out-string ;
 
         } ;  # if-E dyn/monolithic source psm1
@@ -427,7 +434,7 @@ function Merge-Module {
                 $ASTFunctions =  $AST.FindAll( { $args[0] -is [System.Management.Automation.Language.FunctionDefinitionAst] }, $true) ;
 
                 # public & functions = public ; private & internal = private - flip output to -showdebug or -verbose, only
-                if($ModuleSource -match '(Public|Functions)'){
+                if($ModuleSource.fullname -match '(Public|Functions)'){
                     $smsg= "$($ScriptFile.name):PUB FUNC:`n$(($ASTFunctions) -join ',' |out-string)" ;
                     if($showDebug) {
                         if ($logging -AND ($showDebug -OR $verbose)) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Debug }  #Error|Warn|Debug
@@ -529,6 +536,14 @@ function Merge-Module {
     #"`nExport-ModuleMember -Function $(($ExportFunctions) -join ',') -Alias *" | Add-Content @pltAdd ;
 
     # tack in footerblock to the merged psm1 (primarily export-modulemember -alias * ; can also be any function-trailing content you want in the psm1)
+    <# unmerged version:
+    $FooterBlock=@"
+
+Export-ModuleMember -Function `$(`$Public.Basename) -join ',') -Alias *
+
+"@ ;
+#>
+    # merged version
     $FooterBlock=@"
 
 #*======^ END FUNCTIONS ^======
@@ -562,8 +577,6 @@ Export-ModuleMember -Function $(($ExportFunctions) -join ',') -Alias *
     # build a dummy name for testing .psm1|psd1
     #$testpsm1 = join-path -path (split-path $PsmNameTmp) -ChildPath "$(new-guid).psm1" ; 
 
-    #$tf = $PsdName ;
-    # no, don't do $psdname, until test- manifested!
     $tf = $PsdNameTmp ;
     # switch back to manual local updates
     $pltSCFE=[ordered]@{Path = $tf ; PassThru=$true ;Verbose=$($verbose) ;whatif= $($whatif) ; } 
@@ -586,86 +599,6 @@ Export-ModuleMember -Function $(($ExportFunctions) -join ',') -Alias *
         if($verbose){ if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN } #Error|Warn|Debug
         else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; } ;
     } ;
-
-    <# 4:37 PM 5/10/2022 new pretests before fully overwriting everything and tearing out local functional mod copy in CU
-    # should test-modulemanifest the updated .psd1, berfore continuing
-    TRY {
-        #$psd1Profile = Test-ModuleManifest -path $PsdName   ;
-        $psd1Profile = Test-ModuleManifest -path $pltSCFE.Path  ;
-        if($? ){
-            $smsg= "Test-ModuleManifest:PASSED: saving update to $($psdName)" ;
-            if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info }  
-            else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
-
-            # overwrite the live copy with the tested version
-            $bRet = Set-ContentFixEncoding @pltSCFE -Value $newContent ; 
-        } ; 
-    } CATCH {
-        $PassStatus += ";ERROR";
-        write-warning  "$(get-date -format 'HH:mm:ss'): Failed processing $($_.Exception.ItemName). `nError Message: $($_.Exception.Message)`nError Details: $($_)" ;
-        Break ;
-    } ;
-    
-    # should also ipmo -for the .psm1 before commiting
-    if(-not $whatif){
-        # it's throwing errors trying to ipmo from the temp dir, so lets create a local file, named a guid:
-        #$testpsm1 = [System.IO.Path]::GetTempFileName().replace(".tmp",".psm1") ;
-        #
-        #$testpsm1 = join-path -path (split-path $PsmNameTmp) -ChildPath "$(new-guid).psm1"
-        $pltCpy = @{ Path = $PsmNameTmp ; Destination = $testpsm1 ; whatif = $($whatif); ErrorAction="STOP" ; } ; 
-        #$smsg = "Creating Testable tmp.psm1 to validate $($PsmNameTmp) will ipmo:`ncopy-item w`n$(($pltCpy|out-string).trim())" ;
-        $smsg = "Creating Testable $($testpsm1) to validate $($PsmNameTmp) will ipmo"
-        if($verbose){ if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } 
-        else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; } ;
-
-        $pltIpmo = @{ Name=$testpsm1 ;Force=$true ;verbose=$($VerbosePreference -eq "Continue") ; ErrorAction="STOP" ; } ; 
-        $error.clear() ;
-        TRY {
-            copy-Item @pltCpy ;
-
-            $smsg = "n import-module w`n$(($pltIpmo|out-string).trim())" ;
-            if($verbose){ if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } 
-            else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; } ;    
-
-            import-module $pltIpmo ; 
-            
-            $smsg = "Ipmo: PASSED, MOVING ON`n(removing $($testpsm1))" ; 
-            if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
-            else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
-
-            # - leave in memory, otherwise removal below could leave a non-func module in place.
-            # no, since we're using a dummy, remove the $testPsm1 from mem
-            $smsg = "(remove-module -name $($pltIpmo.name) -force)" ; 
-            if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
-            else{ write-verbose "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; 
-            remove-module -name $pltIpmo.name -force -verbose:$($verbose) ; 
-
-            $smsg = "(remove-item -path $($testpsm1) -ErrorAction SilentlyContinue ; " ; 
-            if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
-            else{ write-verbose "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; 
-            remove-item -path $testpsm1 -ErrorAction SilentlyContinue ;
-            
-        }CATCH{
-            #Write-Error -Message $_.Exception.Message ;
-            $ErrTrapd=$Error[0] ;
-            $smsg = "$('*'*5)`nFailed processing $($ErrTrapd.Exception.ItemName). `nError Message: $($ErrTrapd.Exception.Message)`nError Details: `n$(($ErrTrapd|out-string).trim())`n$('-'*5)" ;
-            if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN } #Error|Warn|Debug
-            else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
-            #-=-record a STATUSWARN=-=-=-=-=-=-=
-            $statusdelta = ";ERROR"; # CHANGE|INCOMPLETE|ERROR|WARN|FAIL ;
-            if(gv passstatus -scope Script -ea 0){$script:PassStatus += $statusdelta } ;
-            if(gv -Name PassStatus_$($tenorg) -scope Script -ea 0){set-Variable -Name PassStatus_$($tenorg) -scope Script -Value ((get-Variable -Name PassStatus_$($tenorg)).value + $statusdelta)} ;
-            Write-Warning "Unable to Add-ContentFixEncoding:$($Path.FullName)" ;
-            $false | write-output ;
-            start-sleep -s $RetrySleep ;
-            Break #Opts: STOP(debug)|EXIT(close)|CONTINUE(move on in loop cycle)|BREAK(exit loop iteration)|THROW $_/'CustomMsg'(end script with Err output)
-        } ;
-    } else { 
-        $smsg = "(-whatif: skipping exec)" ; 
-        if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
-        else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
-    } ; 
-    #>
 
     # 3:20 PM 5/11/2022 move psd1_tmp|psm1_tmp testing to func: 
     # whatif = $($whatif) 
