@@ -15,6 +15,7 @@ function process-NewModuleHybrid {
     Github      : https://github.com/tostka/verb-dev
     Tags        : Powershell,Module,Build,Development
     REVISIONS
+    * 4:10 PM 5/12/2022 got through a full non -Dyn pass, to publish and ipmo -for. Need to dbg unmerged-module.psm1 interaction yet, but this *looks* like it could be ready to be the process-NewModule().
     * 8:45 AM 5/10/2022 attempt to merge over dotsource updates and logic, create a single hosting both flows
     * 2:59 PM 5/9/2022 back-reved process-NewModuleHybridDotsourced updates in
     * 8:47 PM 10/16/2021 rem'd out ReqMods code, was breaking exec from home
