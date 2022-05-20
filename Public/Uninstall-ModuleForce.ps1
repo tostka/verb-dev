@@ -16,7 +16,8 @@ Function Uninstall-ModuleForce {
     Github      : https://github.com/tostka/verb-dev
     Tags        : Powershell,Module,Management,Lifecycle
     REVISIONS
-   * 11:11 AM 5/10/2022 init, split out process-NewModule #773: $smsg= "Removing existing profile $($ModuleName) content..."  block, to have a single maintainable shared func
+    * 10:10 AM 5/17/2022 updated post test, also don't want it to abort/break, on any single failure.
+    * 11:11 AM 5/10/2022 init, split out process-NewModule #773: $smsg= "Removing existing profile $($ModuleName) content..."  block, to have a single maintainable shared func
     .DESCRIPTION
     Uninstall-ModuleForce.ps1 - Uninstalls a module (via Uninstall-Module -force), and then searches through all PSModulePath directories, and deletes any unregistered copies as well.
     Note: *installed* mods have PSGetModuleInfo.xml files
@@ -132,7 +133,10 @@ Function Uninstall-ModuleForce {
                 $searchPath = join-path -path $modpath -ChildPath "$($Mod)\*.*" ;
                 # adding -GracefulFail to get past locked verb-dev cmdlets
                 $bRet = remove-ItemRetry -Path $searchPath -Recurse -showdebug:$($showdebug) -whatif:$($whatif) -GracefulFail ;
-                if (!$bRet) {throw "FAILURE" ; Break ; } ;
+                #if (-not$bRet) {throw "FAILURE" ; Break ; } ;
+                if(-not $bRet -AND -not $whatif){throw "remove-ItemRetry -Path $($searchPath)!" } else {
+                    $PassStatus += ";UPDATED:remove-ItemRetry ";
+                }  ;
             } ;
         } ;  # loop-E
 
