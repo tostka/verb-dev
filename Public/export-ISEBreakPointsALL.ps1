@@ -15,6 +15,7 @@ function export-ISEBreakPointsALL {
     Github      : https://github.com/tostka/verb-dev
     Tags        : Powershell,ISE,development,debugging
     REVISIONS
+    * 9:19 AM 5/20/2022 add: eIseBpAll alias (using these a lot lately)
     * 12:14 PM 5/11/2022 init
     .DESCRIPTION
     export-ISEBreakPointsALL - Loop open tabs in ISE, and foreach: Export all 'Line' ise breakpoints to XML file
@@ -29,7 +30,7 @@ function export-ISEBreakPointsALL {
     https://github.com/tostka/verb-dev
     #>
     [CmdletBinding()]
-    #[Alias('eIseBp')]
+    [Alias('eIseBpAll')]
     PARAM(
         [Parameter(HelpMessage="Whatif Flag  [-whatIf]")]
         [switch] $whatIf
