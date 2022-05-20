@@ -15,7 +15,9 @@ function process-NewModuleHybrid {
     Github      : https://github.com/tostka/verb-dev
     Tags        : Powershell,Module,Build,Development
     REVISIONS
-    * 8:53 AM 5/20/2022 WIP, still debugging: add: $rgxOldFingerprint (for identifying backup-fileTDO fingerprint files); revert|backup-file -> restore|backup-fileTDO; add restore-fileTDO fingerprint, and psm1/psd1 (using the new func)
+    * 4:01 PM 5/20/2022 WIP, left off, got through the psdUpdatedVers reset - works, just before the uninstall-moduleforce(), need to complete debugging on that balance of material. 
+    still debugging: add: buffer and post build compare/restore the $psd1UpdatedVers, to the psd1Version (fix odd bug that's causing rebuild to have the pre-update moduleversion); 
+        $rgxOldFingerprint (for identifying backup-fileTDO fingerprint files); revert|backup-file -> restore|backup-fileTDO; add restore-fileTDO fingerprint, and psm1/psd1 (using the new func)
     * 4:00 PM 5/13/2022 ren merge-module() refs -> ConvertTo-ModuleDynamicTDO() ; ren unmerge-module() refs -> ConvertTo-ModuleDynamicTDO
     * 4:10 PM 5/12/2022 got through a full non -Dyn pass, to publish and ipmo -for. Need to dbg unmerged-module.psm1 interaction yet, but this *looks* like it could be ready to be the process-NewModule().
     * 8:45 AM 5/10/2022 attempt to merge over dotsource updates and logic, create a single hosting both flows
@@ -495,6 +497,15 @@ function process-NewModuleHybrid {
 	    BHBuildNumber                  0
     #>
 
+    # we're losing the psdversion post rebuild, store the value just set by Step-ModuleVersion
+    TRY{
+        $psd1UpdatedVers = (Import-PowerShellDataFile -Path $ModPsdPath).ModuleVersion.tostring() ;
+    } CATCH {
+        $PassStatus += ";ERROR";
+        write-warning  "$(get-date -format 'HH:mm:ss'): Failed processing $($_.Exception.ItemName). `nError Message: $($_.Exception.Message)`nError Details: $($_)" ;
+        Exit ;
+    } ;
+
     if(!$Republish){
         $sHS=@"
 NON-Republish pass detected:
@@ -620,6 +631,8 @@ $(if($Merge){'MERGE parm specified as well:`n-Merge Public|Internal|Classes incl
                 } ;
             #>
             $PsmNameBu=$ReportObj.PsmNameBU ;
+            # get the psd as well: 
+            $PsdNameBU = $ReportObj.sdNameBU ;
             if($ReportObj.Status){
 
             } else {
@@ -768,6 +781,33 @@ $(if($Merge){'MERGE parm specified as well:`n-Merge Public|Internal|Classes incl
         if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level INfo } #Error|Warn|Debug
         else{ write-verbose -verbose:$true "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
     } ;
+
+    # Verify and re-sync psd version to the input newbuild incremented version (in case it got lost in the rebuild)
+    if($psd1Vers -ne $psd1UpdatedVers){
+        $smsg = "$($ModPsdPath):ModuleVersion`n*does not* properly match the Step-ModuleVersion modified ModuleVersion:$($psd1UpdatedVers)`nFORCING MATCHING UPDATE!" ;
+        if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN } #Error|Warn|Debug
+        else{ write-WARNING "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+        $pltUMD=[ordered]@{
+            Path = $ModPsdPath ;
+            Value = $psd1UpdatedVers 
+            whatif=$($whatif);    
+        } ; 
+        $smsg = "Update-Metadata w`n$(($pltUMD|out-string).trim())" ;
+        if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug
+        else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+        Update-Metadata @pltUMD ; 
+        # pull back the updated psd1.ModuleVersion
+        $smsg = "Pull back the updated Psd1.ModuleVersion..." ; 
+        if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
+        else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+        TRY{
+            $psd1Vers = (Import-PowerShellDataFile -path $ModPsdPath).ModuleVersion.tostring() ;
+        } CATCH {
+            $PassStatus += ";ERROR";
+            write-warning  "$(get-date -format 'HH:mm:ss'): Failed processing $($_.Exception.ItemName). `nError Message: $($_.Exception.Message)`nError Details: $($_)" ;
+            bREAK ;
+        } ;
+    } ; 
 
     # sync Psd Version to psm1
     # regex approach - necc for psm1 version updates (lacks a ps cmdlet to parse)
