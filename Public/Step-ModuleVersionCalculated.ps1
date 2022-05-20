@@ -21,7 +21,7 @@ function Step-ModuleVersionCalculated {
     AddedWebsite: www.thesurlyadmin.com
     AddedTwitter: @thesurlyadm1n
     REVISIONS
-    * 8:58 AM 5/20/2022 WIP, add: $MinVersionIncrementBump (coerce Min failthrough rev to Build, constant, rather than hard-coded in code) ; 
+    * 10:56 AM 5/20/2022 WIP: add: validator for ... ; -MinVersionIncrementBump (coerce Min fail through rev to Build; or use as explicit step driver, constant, rather than hard-coded in code) ; 
         address gcm bug where failing to return any but 3 old renamed funcs from verb-io.psm1: 
         add $ASTMatchThreshold (reps min percentage match gcm to sls -pattern parse of function lines in .psm1), along with a raft of new eval testing code. 
         tried running AST profiling to pull functions & aliases, but takes _3Mins_ to run. Simpler, and 90% effective to do an sls parse.
@@ -42,6 +42,8 @@ function Step-ModuleVersionCalculated {
     Step-ModuleVersionCalculated.ps1 - Profile a fresh revision of specified module for changes compared to prior semantic-version 'fingerprint'.
     
     ## relies on BuildHelpers module, and it's Set-BuildEnvironment profiling tool, and Step-ModuleVersion manifest .psd1-file revision-incrementing tool. 
+
+    - step-ModuleVersion() supports -By: "Major", "Minor", "Build","Patch"
 
     ## -Method: Default via 'Fingerprint': 
         
@@ -77,8 +79,16 @@ function Step-ModuleVersionCalculated {
     
     .PARAMETER Path
     Path to root directory of the Module[-path 'C:\sc\PowerShell-Statistics\']
+    .PARAMETER Method
+    Version level calculation basis (Fingerprint[default]|Percentage)[-Method Percentage]
+    .PARAMETER MinVersionIncrement
+    Switch to force-increment ModuleVersion by minimum step (Patch), regardless of calculated changes[-MinVersionIncrement]
+    .PARAMETER MinVersionIncrementBump
+    Step increment level used with -MinVersionIncrementBump parameter (Major|Minor|Build|Patch, defaults to 'Build')[-MinVersionIncrementBump 'Patch']
     .PARAMETER applyChange
     switch to apply the Version Update (execute step-moduleversion cmd)[-applyChange]
+    .PARAMETER Silent
+    Suppress all but error-related outputs[-Silent]
     .PARAMETER Whatif
     Parameter to run a Test no-change pass [-Whatif switch]
     .INPUTS
@@ -100,7 +110,7 @@ function Step-ModuleVersionCalculated {
     Demo use of the optional 'Percentage' -Method (vs default 'Fingerprint' basis). 
     .EXAMPLE
     PS> $newRevBump = Step-ModuleVersionCalculated -path 'C:\sc\Get-MediaInfo' ;
-        Step-ModuleVersion -path 'C:\sc\Get-MediaInfo\MediaInfo.psd1' -By $newRevBump ;
+    PS> Step-ModuleVersion -path 'C:\sc\Get-MediaInfo\MediaInfo.psd1' -By $newRevBump ;
     Analyze the specified module, calculate a revision BumpVersionType, and return the calculated value tp the pipeline
     Then run Step-ModuleVersion -By `$bumpVersionType to increment the ModuleVersion (independantly, rather than within this function using -ApplyChange)
     .LINK
@@ -119,8 +129,11 @@ function Step-ModuleVersionCalculated {
         [Parameter(Mandatory=$False,ValueFromPipeline=$true,ValueFromPipelineByPropertyName=$true,HelpMessage="Version level calculation basis (Fingerprint[default]|Percentage)[-Method Percentage]")]
         [ValidateSet("Fingerprint","Percentage")]
         [string]$Method='Fingerprint',
-        [Parameter(HelpMessage="Switch to force-increment ModuleVersion by minimum step (Patch), regardless of calculated changes[-MinVersionIncrement]")]
+        [Parameter(HelpMessage="Switch to force-increment ModuleVersion by minimum step (as per `$MinVersionIncrementBump), regardless of calculated changes[-MinVersionIncrement]")]
         [switch] $MinVersionIncrement,
+        [Parameter(HelpMessage="Step increment level used with -MinVersionIncrementBump parameter (Major|Minor|Build|Patch, defaults to 'Build')[-MinVersionIncrementBump 'Patch']")]
+        [ValidateSet('Major','Minor','Build','Patch')]
+        $MinVersionIncrementBump = 'Build',
         [Parameter(HelpMessage="switch to apply the Version Update (execute step-moduleversion cmd)[-applyChange]")]
         [switch] $applyChange,
         [Parameter(HelpMessage="Suppress all but error-related outputs[-Silent]")]
@@ -148,9 +161,8 @@ function Step-ModuleVersionCalculated {
             elseif(-not $Silent){ write-host -foregroundcolor yellow "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
         } ; 
         
-        #$rgxRequreVersionLine = '#requires\s+-version\s' ;
         # add filter for BOL or \s lead, drop the ##-rem'd lines
-        $rgxRequreVersionLine = '(\s|^)#requires\s+-version\s' ;
+        $rgxRequireVersionLine = '(\s|^)#requires\s+-version\s' ;
         # also should check for nested recursion - ensure the Module isn't in any #requires\s-module
         # '((\s)*)#Requires\s+-Modules\s+.*,((\s)*)verb-exo' ; # module name
         # $Path will be c:\sc\verb-exo ; split-path c:\sc\verb-exo -leaf gets you the modulename back
@@ -158,7 +170,7 @@ function Step-ModuleVersionCalculated {
         $rgxRequireModNested = "(\s|^)#Requires\s+-Modules\s+.*,((\s)*)$($ModName)" ;  # added: either BOL or after a space
         $ASTMatchThreshold = .8 ; # gcm must be w/in 80% of AST functions count, or this forces a 'Build' revision, to patch bugs in get-command -module xxx, where it fails to return full func/alias list from the module
         # increment bump used with -MinVersionIncrementBump
-        $MinVersionIncrementBump = 'Build'
+        #$MinVersionIncrementBump = 'Build' # moved to a full param, to permit explicit build spec, using step-ModuleVersionCalculated - adds the followup testing etc this provides, wo the fingerprinting
 
     } ;  # BEGIN-E
     PROCESS {
@@ -246,7 +258,7 @@ function Step-ModuleVersionCalculated {
         
             # check for incidental ipmo crasher: multiple #require -versions, pretest (everything to that point is fine, just won't ipmo, and catch returns zippo)
             # no, revise, it's multi-versions of -vers, not mult instances. Has to be a single version spec across entire .psm1 (and $moddir of source files)
-            if($PsFilesWVers = gci $moddir -include *.ps*1 -recur | sls -Pattern $rgxRequreVersionLine){
+            if($PsFilesWVers = gci $moddir -include *.ps*1 -recur | sls -Pattern $rgxRequireVersionLine){
                 # only run if $PsFilesWVers populated
                 $profilePsFilesVersions = $PsFilesWVers.line | %{$_.trim()} | group ;
                 if($profilePsFilesVersions.count -gt 1){
@@ -262,8 +274,8 @@ function Step-ModuleVersionCalculated {
                     } ;
                 } 
             } ; 
-            <#if ((get-content $psm1 | sls -Pattern $rgxRequreVersionLine | measure).count -gt 1){
-                $MultReqVers = (get-content $pltXMO.name | sls -Pattern $rgxRequreVersionLine) ; 
+            <#if ((get-content $psm1 | sls -Pattern $rgxRequireVersionLine | measure).count -gt 1){
+                $MultReqVers = (get-content $pltXMO.name | sls -Pattern $rgxRequireVersionLine) ; 
                 $smsg =  "MULTIPLE #requires -version strings in:`n$($psm1)`n(not-permited, wrecks ipmo)`n$(($multreqvers | ft -auto Pattern,LineNumber,Line|out-string).trim())" ; 
                 if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Warn } #Error|Warn|Debug 
                 elseif(-not $Silent){ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
@@ -352,15 +364,15 @@ function Step-ModuleVersionCalculated {
                                 $smsg = "get-command failed to return a complete Func/Alias list from $($ModuleName) -lt AST $($ASTMatchThreshold * 100)% match:" ; 
                                 $smsg += "`nAST profile (get-FunctionBlocks+get-AliasAssignsAST) returned:$($ASTCmds.count)"
                                 $smsg += "`nFORCING STEP EVAL INTO 'PATCH' TO WORK AROUND BUG" ;
-                                if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
-                                else{ write-verbose "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; 
+                                if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN } #Error|Warn|Debug 
+                                else{ write-WARNING "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; 
                                 $MinVersionIncrement = $true ; 
                             } else { 
                                 $smsg = "get-command $($ModuleName) -gt AST $($ASTMatchThreshold * 100)% match:" ; 
                                 if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
                                 else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
                             } ;
-                            <# AST based approach - dirt slow, adds 3min wait to the build process better to regex sls out the functions and use that as a guage ^
+                            <# AST based approach - dirt slow, adds 3min wait to the build process for 126 function .psm1:  better to regex sls out the functions and use that as a guage ^
                             # -----------
                             #if(( ($commandList.count / $rawfunccount) -lt $ASTMatchThreshold ) -AND (get-command get-FunctionBlocks) -AND (get-command get-AliasAssignsAST)){
                                 $smsg = "(ASTprofile: get-FunctionBlocks $($ModuleName)..." ; 
@@ -395,29 +407,33 @@ function Step-ModuleVersionCalculated {
                             # -----------
                             #>
 
-                            
                             $pltXMO.Name = $ModuleName; # have to rmo using *basename*
                             $smsg = "remove-module w`n$(($pltXMO|out-string).trim())" ; 
                             if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
                             else{ write-verbose "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; 
                             remove-module @pltXMO ;
 
-                            $smsg = "Calculating fingerprint"
-                            # KM's core logic code:
-                            $fingerprint = foreach ( $command in $commandList ){
-                                $smsg = "(=cmd:$($command)...)" ;
-                                if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
-                                else{ write-verbose "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; 
-                                foreach ( $parameter in $command.parameters.keys ){
-                                    $smsg = "(---param:$($parameter)...)" ;
+                            if(-not $MinVersionIncrement){
+                                $smsg = "Calculating fingerprint"
+                                # KM's core logic code:
+                                $fingerprint = foreach ( $command in $commandList ){
+                                    $smsg = "(=cmd:$($command)...)" ;
                                     if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
                                     else{ write-verbose "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; 
-                                    '{0}:{1}' -f $command.name, $command.parameters[$parameter].Name
-                                    $command.parameters[$parameter].aliases | 
-                                        Foreach-Object { '{0}:{1}' -f $command.name, $_}
-                                };  
-                            } ;   
-
+                                    foreach ( $parameter in $command.parameters.keys ){
+                                        $smsg = "(---param:$($parameter)...)" ;
+                                        if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
+                                        else{ write-verbose "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; 
+                                        '{0}:{1}' -f $command.name, $command.parameters[$parameter].Name
+                                        $command.parameters[$parameter].aliases | 
+                                            Foreach-Object { '{0}:{1}' -f $command.name, $_}
+                                    };  
+                                } ;   
+                            } else { 
+                                $smsg = "(-MinVersionIncrement: skipped fingerprint calculation)" ; 
+                                if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
+                                else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                            } ; 
                             # step-ModuleVersion supports -By: "Major", "Minor", "Build","Patch"
                             # SemVers uses 3-digits, a prerelease tag and a build meta tag (only 3 are used in pkg builds etc)
                             $bumpVersionType = 'Patch' ; 
