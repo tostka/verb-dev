@@ -1,23 +1,60 @@
-﻿#*------v process-NewModuleDotsourced.ps1 v------
-function process-NewModuleDotsourced {
+﻿#*------v process-NewModule.ps1 v------
+function process-NewModule {
     <#
     .SYNOPSIS
-    process-NewModuleDotsourced - dyanmic include/dot-stourced post-module conversion or component update: sign - all files (this vers), publish to repo, and install back script
+    process-NewModule - post-module conversion or component update: sign, publish to repo, and install back script
     .NOTES
     Version     : 1.1.0
     Author      : Todd Kadrie
     Website     :	http://www.toddomation.com
     Twitter     :	@tostka / http://twitter.com/tostka
     CreatedDate : 2020-02-24
-    FileName    : process-NewModuleDotsourced.ps1
+    FileName    : process-NewModule.ps1
     License     : MIT License
     Copyright   : (c) 2021 Todd Kadrie
     Github      : https://github.com/tostka/verb-dev
     Tags        : Powershell,Module,Build,Development
     REVISIONS
-    * 1:37 PM 4/28/2022 WIP , only started on port process-NewModule to a dynamic include dot-source leaf .ps1 file version
+    * 2:59 PM 5/9/2022 back-reved process-NewModuleDotsourced updates in
+    * 8:47 PM 10/16/2021 rem'd out ReqMods code, was breaking exec from home
+    * 1:17 PM 10/12/2021 revised post publish code, find-module was returning an array (bombming nupkg gci), so sort on version and take highest single.
+    * 3:43 PM 10/7/2021 revised .nupkg caching code to use the returned (find-module).version string to find the repo .nupkg file, for caching (works around behavior where 4-digit semvars, with 4th digit(rev) 0, get only a 3-digit version string in the .nupkg file name)
+    * 3:43 PM 9/27/2021 spliced in updated start-log pre-proc code ; fixed $Repo escape in update herestring block
+    * 2:14 PM 9/21/2021 functionalized & added to verb-dev ; updated $FinalReport to leverage varis, simpler to port install cmds between mods; added #requires (left in loadmod support against dependancy breaks); cleaned up rems
+    * 11:25 AM 9/21/2021 added code to remove obsolete gens of .nupkgs & build log files (calls to new verb-io:remove-UnneededFileVariants()); 
+    * 12:40 PM 6/2/2021 example used verb-trans, swapped in verb-logging
+    * 12:07 PM 4/21/2021 expanded ss aliases
+    * 10:17 AM 3/16/2021 added -ea 0 to the install BP output, suppress remove-module error when not already loaded
+    * 10:35 AM 6/29/2020 added new -NoBuildInfo param, to skip reliance on BuildHelpers module (get/Set-BuildEnvironment hang when run at join-object module)
+    * 1:19 PM 4/10/2020 swapped in 7psmodhybrid mods
+    * 3:38 PM 4/7/2020 added Remove-Module to the trailing demo install command - pulls down the upgraded mod from the session (otherwise, old & new remain in session); added AllUser demo trailing code too, less likely to misupgrade jumpbox
+    * 9:21 AM 4/1/2020 added -RunTest to trigger pester test exec, also wrapped test-modulemanifest in try/catch to capture fails (a broken psd1 isn't going to work on install), fail immed exits processing, also added detection of invalid test script guids and force match to psd1
+    * 8:44 AM 3/17/2020 added new rebuild-module.ps1 to excludes on install/publish
+    * 10:11 AM 3/16/2020 swapped verb-IO to mod code, added AllowClobber to the demo reinstall end text
+    * 3:46 PM 3/15/2020 reworked module copy process - went back to original 'copy all w isolated exclusions' and dropped the attempt at -include control of final extensions. Did a post-copy purge of undesired file types instead.
+    * 9:59 AM 3/9/2020 fixed bug in module copy process, needed to sort dirs first, to ensure they pre-exist before files are attempted (supresses error)
+    * 4:32 PM 3/7/2020 revised the module copy process to only target common module components by type (instead of all but .git & .vscode)
+    * 7:05 PM 3/3/2020 added code to detect and echo psd1 guid match, updated export modules code, added buffering of proc log
+    * 8:39 AM 3/2/2020 still trying to get things to smoothly fail through missing installed mod, to dev .psm1, and finally into uwes copy of the mod, to ensure the commands are mounted, under any circ, working, still not happy when updating a module that the script itself is dependant on. Updated Final Report to sort other machine update sample
+    * 7:31 AM 3/2/2020 spliced over Set-ModuleFunction FunctionsToExport maint code from converTo-Module.ps1
+    * 4:03 PM 3/1/2020 excluded module load block from verbose output
+    * 4:32 PM 2/27/2020: ammended test import-module force (hard reload curr version) & verbose output ; added trailing FinalReport with post install guidence & testing 
+    * 7:21 PM 2/26/2020 sorted a typo/dupe in the nupkg copy echo ; updated psm1 version code, fixd bug, replic'd it to the convert script. shifted FunctionsToExport into buildhelpers mod (added #requires), added -DisableNameChecking to mod imports
+    * 6:30 PM 2/25/2020 added code to update the guid from the psd1 into the pester test scrpit
+    * 2:00 PM 2/24/2020 added material re: uninstall in description/example
+    * 4:00 PM 2/18/2020 added new descriptive -Tag $ModuleName  spec to the start-Log call
+    * 7:36 PM 1/15/2020 added code to create 'Package' subdir, and copy in post-publish .nupkg file (easier to buffer into other repos, than publish-module) had to splice in broken installed module backfill for verb-dev 
+    * 7:58 PM 1/14/2020 converted dev-verb call into #requires Module call ; #459 flipped to using .net to pull the mydocs specfolder out of the OS (in case of fut redir) ; ren parm (to match convertto-module.ps1): DemoRepo -> Repository, added manual removal of old version from all $env:psmodulepath entries, shifted $psd1vers code to always, and used it with the install-module -requiredversion, to work around the cmds lack of auto-priority, if it finds multiples, it doesn't install latest, just throws up. (could have used -minrev too and it *should* have done this, or any later). Ran full publish & validate on verb-dev (work)
+    * 10:49 AM 1/13/2020 updated echos for Republish/non-republish output (enum specific steps each will cover), was throwing deep acc error on copy to local prof for md file, added retry, which 2x's and fails past it. Doesn't seem mpactful, the md wasn't even one id' pop'd, just a defaupt template file
+    * 7:35 AM 12/30/2019 got through a full pass to import-module on verb-dev. *appears* functional
+    * 12:03 PM 12/29/2019 added else wh on pswls entries
+    * 1:53 PM 12/28/2019 shifted to verb-* loads for all local functions, added pre-publish check for existing conflicting verison. Still throwing exec code in sig block
+    * 12:28 PM 12/27/2019 subbed write-warning for write-error throughout
+    * 1:38 PM 12/26/2019 #251 filter public|internal|classes include subdirs - don't sign them (if including/dyn-including causes 'Executable script code found in signature block.' errors ; 12/26/2019 flipped #399 from Error to Info in write-log, ran a full clean pass on verb-dev. ; ADD #342 -AllowClobber, to permit install command overlap (otherwise it aborts the install-module attempt), updated SID test to leverage regx
+    * 9:29 AM 12/20/2019 fixed quote/dbl-quote issue in the profile copy code (was suppressing vari expansion)
+    * 7:05 PM 12/19/2019 subbed in write-log support ; init, ran through Republish pass on verb-AAD
     .DESCRIPTION
-    process-NewModuleDotsourced - dyanmic include/dot-stourced post-module conversion or component update: sign - all files (this vers), publish to repo, and install back script
+    process-NewModule - dyanmic include/dot-stourced post-module conversion or component update: sign - all files (this vers), publish to repo, and install back script
     I've hit an insurmoutable bug in psv2, when using psGet to install psv3+ modules into older legacy machines. Verb-IO *won't* properly parse and load my ConvertFrom-SourceTable function at all. So we need the ability to conditionally load module functions, skipping psv2-incompatibles when running that rev
     Preqeq Installs:
     Install-Module BuildHelpers -scope currentuser # buildhelpers metadata handling https://github.com/RamblingCookieMonster/BuildHelpers
@@ -48,15 +85,15 @@ function process-NewModuleDotsourced {
     processbulk-NewModule.ps1 -mod verb-text,verb-io -verbose
     Example using the separate processbulk-NewModule.ps1 pre-procesesor to feed an array of mods through bulk processing, uses BuildEnvironment Step-ModuleVersion to increment the psd1 version, and specs -merge & -RunTest processing
     .EXAMPLE
-    process-NewModuleDotsourced.ps1 -ModuleName "verb-AAD" -ModDirPath "C:\sc\verb-AAD" -Repository $localPSRepo  -Merge -showdebug -whatif ;
+    process-NewModule.ps1 -ModuleName "verb-AAD" -ModDirPath "C:\sc\verb-AAD" -Repository $localPSRepo  -Merge -showdebug -whatif ;
     Full Merge Build/Rebuild from components & Publish/Install/Test specified module, with debug messages, and whatif pass.
     .EXAMPLE
-    process-NewModuleDotsourced.ps1 -ModuleName "verb-AAD" -ModDirPath "C:\sc\verb-AAD" -Repository $localPSRepo  -showdebug -whatif ;
+    process-NewModule.ps1 -ModuleName "verb-AAD" -ModDirPath "C:\sc\verb-AAD" -Repository $localPSRepo  -showdebug -whatif ;
     Non-Merge pass: Re-sign specified module & Publish/Install/Test specified module, with debug messages, and whatif pass.
     .EXAMPLE
     # pre-remove installed module
     # re-increment the psd1 file ModuleVersion (unique new val req'd to publish)
-    process-NewModuleDotsourced.ps1 -ModuleName "verb-AAD" -ModDirPath "C:\sc\verb-AAD" -Repository $localPSRepo -Merge -Republish -showdebug -whatif ;
+    process-NewModule.ps1 -ModuleName "verb-AAD" -ModDirPath "C:\sc\verb-AAD" -Repository $localPSRepo -Merge -Republish -showdebug -whatif ;
     Merge & Republish pass: Only Publish/Install/Test specified module, with debug messages, and whatif pass.
     .LINK
     #>
@@ -87,7 +124,7 @@ function process-NewModuleDotsourced {
     # function self-name (equiv to script's: $MyInvocation.MyCommand.Path) ;
     ${CmdletName} = $PSCmdlet.MyInvocation.MyCommand.Name ;
     # Get parameters this function was invoked with
-    #$PSParameters = New-Object -TypeName PSObject -Property $PSBoundParameters ;
+    $PSParameters = New-Object -TypeName PSObject -Property $PSBoundParameters ;
     $verbose = ($VerbosePreference -eq "Continue") ;
 
     if ($psISE){
@@ -365,6 +402,7 @@ function process-NewModuleDotsourced {
     } else { 
         $InternalDirPath = "$($ModDirPath)\Internal" ;
     } ; 
+    #$ModPsdPath = "$(join-path -path (join-path -path $Moddirpath -ChildPath $modulename) -ChildPath $modulename).psd1"
     # "C:\sc\verb-AAD" ; C:\sc\verb-AAD\Tests\verb-AAD.tests.ps1
     $TestScriptPath = "$($ModDirPath)\Tests\$($ModuleName).tests.ps1" ;
     $rgxSignFiles='\.(CAT|MSI|JAR,OCX|PS1|PSM1|PSD1|PS1XML|PSC1|MSP|CMD|BAT|VBS)$' ;
@@ -380,7 +418,20 @@ function process-NewModuleDotsourced {
         # so use psd1version and manually increment, skipping BuildHelper mod use entirely
         write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):(-NoBuildInfo specified:Skipping use of buggy BuildHelpers module)" ;
         TRY {
-            #$ModPsdPath = (gci "$($modroot)\$($ModuleName)\$($ModuleName).psd1").FullName
+            if($ModPsdPath = (gci "$($modroot)\$($ModuleName)\$($ModuleName).psd1").FullName){
+
+            } elseif ($ModPsdPath = Get-PSModuleFile -path $ModRoot -Extension .psd1){
+
+            } else { 
+                $smsg = "Unable to resolve manifest .psd1 path for module dir:$($modroot)" ; 
+                write-warning $smsg ; 
+                throw $smsg
+                break ; 
+            } ; 
+            $smsg = "Resolved `$ModPsdPath:`n$($ModPsdPath)" ; 
+            if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
+            else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+
             # $ModPsdPath
             $psd1Profile = Test-ModuleManifest -path $ModPsdPath  ;
             # check for failure of last command
@@ -399,6 +450,11 @@ function process-NewModuleDotsourced {
         # stock buildhelper e-varis - I don't even see it in *use*
         write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):(executing:Get-BuildEnvironment -Path $($ModDirPath) `n(use -NoBuildInfo if hangs))" ;
         $BuildVariable = Get-BuildVariable -path $ModDirPath
+        #if(test-path $env:BHPSModuleManifest){
+        if(test-path $BuildVariable.BHPSModuleManifest){
+            $ModPsdPath = $env:BHPSModuleManifest ; 
+        } ;             
+
     } ;
     <# 	Get-Item ENV:BH* ;
         returned as an object when run above:
@@ -548,19 +604,11 @@ $(if($Merge){'MERGE parm specified as well:`n-Merge Public|Internal|Classes incl
         $rgxGuid = "[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}" ;
         # also maintain encoding (set-content defaults ascii)
         $tf = $TestScriptPath;
-        $enc=$null ; $enc=get-FileEncoding -path $tf ;
-        if($enc -eq 'ASCII') {
-            $enc = 'UTF8' ;
-            $smsg = "(ASCI encoding detected, converting to UTF8)" ;
-            if($verbose){ if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug
-            else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; } ;
-        } ; # force damaged/ascii to UTF8
-        $pltSetCon=[ordered]@{ Path=$tf ; whatif=$($whatif) ;  } ;
-        if($enc){$pltSetCon.add('encoding',$enc) } ;
+        $pltSCFE=[ordered]@{Path=$tf ; PassThru=$true ;Verbose=$($verbose) ;whatif= $($whatif) ; } 
         if($psd1ExpMatch = gci $tf |select-string -Pattern $rgxTestScriptNOGuid ){
             (Get-Content $tf) | Foreach-Object {
                 $_ -replace $rgxTestScriptNOGuid, "$($psd1guid)"
-            } | Set-Content @pltSetCon ;
+            } | Set-ContentFixEncoding @pltSCFE ;
         } elseif($psd1ExpMatch = gci $tf |select-string -Pattern $rgxTestScriptGuid ){
             $testGuid = $psd1ExpMatch.matches[0].Groups[9].value.tostring() ;  ;
             if($testGuid -eq $psd1guid){
@@ -574,7 +622,7 @@ $(if($Merge){'MERGE parm specified as well:`n-Merge Public|Internal|Classes incl
                 # generic guid replace: $_ -replace $rgxGuid, "$($psd1guid)"
                 (Get-Content $tf) | Foreach-Object {
                     $_ -replace $testGuid, "$($psd1guid)"
-                } | Set-Content @pltSetCon ;
+                } | Set-ContentFixEncoding @pltSCFE ;
             } ;
         } else {
             $smsg = "UNABLE TO Regex out...`n$($rgxTestScriptNOGuid)`n...from $($tf)`nTestScript hasn't been UPDATED!" ;
@@ -600,18 +648,10 @@ $(if($Merge){'MERGE parm specified as well:`n-Merge Public|Internal|Classes incl
         else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
 
         $tf = $ModPsmPath;
-        $enc=$null ; $enc=get-FileEncoding -path $tf ;
-        if($enc -eq 'ASCII') {
-            $enc = 'UTF8' ;
-            $smsg = "(ASCI encoding detected, converting to UTF8)" ;
-            if($verbose){ if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug
-            else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; } ;
-        } ; # force damaged/ascii to UTF8
-        $pltSetCon=[ordered]@{ Path=$tf ; whatif=$($whatif) ;  } ;
-        if($enc){$pltSetCon.add('encoding',$enc) } ;
+        $pltSCFE=[ordered]@{Path=$tf ; PassThru=$true ;Verbose=$($verbose) ;whatif= $($whatif) ; } 
         (Get-Content $tf) | Foreach-Object {
             $_ -replace $psm1Profile.matches[0].captures.groups[0].value.tostring(), "Version     : $($psd1Vers)"
-        } | Set-Content @pltSetCon ;
+        } | Set-ContentFixEncoding @pltSCFE ;
     } else {
         $smsg = "(Psd1:Psm1 versions match)" ;
         if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug
@@ -860,7 +900,7 @@ $($tExistingPkg.fullname)!
 ...in the source psd1:
 $($ModPsdPath)
 
-And then re-run process-NewModuleDotsourced.
+And then re-run process-NewModule.
 * NOW EXITING *
 "@ ;
                             $smsg= $blkMsg ;
@@ -1169,7 +1209,7 @@ $($logfile)
     } ;
 
     # this is where we should maintain accumulated old logs, post log close
-    # $logfile =  'C:\sc\verb-Auth\process-NewModuleDotsourced-verb-auth-LOG-BATCH-EXEC-20210917-1504PM-log.txt'
+    # $logfile =  'C:\sc\verb-Auth\process-NewModule-verb-auth-LOG-BATCH-EXEC-20210917-1504PM-log.txt'
 
     $pltRGens =[ordered]@{
         Path = $ModDirPath ;
@@ -1193,4 +1233,4 @@ $($logfile)
     #*======^ END SUB MAIN ^======
 }
 
-#*------^ process-NewModuleDotsourced.ps1 ^------
+#*------^ process-NewModule.ps1 ^------
