@@ -15,6 +15,7 @@ function import-ISEBreakPointsALL {
     Github      : https://github.com/tostka/verb-dev
     Tags        : Powershell,ISE,development,debugging
     REVISIONS
+    * 9:19 AM 5/20/2022 add: iIseBpAll alias (using these a lot lately; w freq crashouts of ise, and need to recover all files open & BPs to quickly get back to function)
     * 1:58 PM 5/16/2022 rem'd whatif (not supported in child func)
     * 12:16 PM 5/11/2022 init
     .DESCRIPTION
@@ -29,7 +30,7 @@ function import-ISEBreakPointsALL {
     https://github.com/tostka/verb-dev
     #>
     [CmdletBinding()]
-    #[Alias('eIseBp')]
+    [Alias('iIseBpAll')]
     PARAM(
         #[Parameter(HelpMessage="Whatif Flag  [-whatIf]")]
         #[switch] $whatIf
