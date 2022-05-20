@@ -9,6 +9,7 @@ function get-FunctionBlocks {
     Website:	http://tinstoys.blogspot.com
     Twitter:	http://twitter.com/tostka
     REVISIONS   :
+    * 2:53 PM 5/18/2022 $parsefile -> $path, strong typed
     # 5:55 PM 3/15/2020 fix corrupt ABC typo
     # 10:21 AM 9/27/2019 just pull the functions in a file and pipeline them, nothing more.
     .DESCRIPTION
@@ -46,11 +47,13 @@ function get-FunctionBlocks {
 
     Param(
         [Parameter(Position = 0, Mandatory = $True, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true, HelpMessage = "Script to be parsed [path-to\script.ps1]")][ValidateNotNullOrEmpty()]
-        $ParseFile
+        [Alias('ParseFile')]
+        [system.io.fileinfo]$Path
     )  ;
-
-    # 2:07 PM 8/31/2016 alt code:
-    $AST = [System.Management.Automation.Language.Parser]::ParseFile($ParseFile, [ref]$null, [ref]$Null ) ;
+    $sw = [Diagnostics.Stopwatch]::StartNew();
+    write-verbose "$((get-date).ToString('HH:mm:ss')):(running AST parse...)" ; 
+    $AST = [System.Management.Automation.Language.Parser]::ParseFile($Path.fullname, [ref]$null, [ref]$Null ) ;
+    write-verbose "$((get-date).ToString('HH:mm:ss')):(parsing Functions from AST...)" ; 
     $funcsInFile = $AST.FindAll( { $args[0] -is [System.Management.Automation.Language.FunctionDefinitionAst] }, $true) ;
     # this variant pulls commands v functions
     #$AST.FindAll({$args[0] -is [System.Management.Automation.Language.CommandAst]}, $true)
@@ -58,4 +61,6 @@ function get-FunctionBlocks {
     foreach ($func in $funcsInFile) {
         $func | write-output ;
     } ;
+    $sw.Stop() ;
+    write-verbose ("Elapsed Time: {0:dd}d {0:hh}h {0:mm}m {0:ss}s {0:fff}ms" -f $sw.Elapsed) ; 
 } ; #*------^ END Function get-FunctionBlocks ^------

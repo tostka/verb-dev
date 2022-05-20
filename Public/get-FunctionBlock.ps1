@@ -9,6 +9,7 @@ function get-FunctionBlock {
     Website:	http://tinstoys.blogspot.com
     Twitter:	http://twitter.com/tostka
     REVISIONS   :
+    * 2:51 PM 5/18/2022 updated parsefile -> path, and strong typed
     # 10:07 AM 9/27/2019 ren'd GetFuncBlock -> get-FunctionBlock & tighted up, added named param expl
     3:19 PM 8/31/2016 - initial version, functional
     .DESCRIPTION
@@ -33,14 +34,15 @@ function get-FunctionBlock {
 
     Param(
         [Parameter(Position=0,MandaTory=$True,ValueFromPipeline=$true,ValueFromPipelineByPropertyName=$true,HelpMessage="Script to be parsed [path-to\script.ps1]")][ValidateNotNullOrEmpty()]
-        $ParseFile
+        [Alias('ParseFile')]
+        [system.io.fileinfo]$Path
         ,[Parameter(Position=1,MandaTory=$True,HelpMessage="Function name to be found and displayed from ParseFile")]
         $functionName
     )  ;
 
 
     # 2:07 PM 8/31/2016 alt code:
-    $AST = [System.Management.Automation.Language.Parser]::ParseFile($ParseFile,[ref]$null,[ref]$Null ) ;
+    $AST = [System.Management.Automation.Language.Parser]::ParseFile($Path.fullname,[ref]$null,[ref]$Null ) ;
     $funcsInFile = $AST.FindAll({$args[0] -is [System.Management.Automation.Language.FunctionDefinitionAst]}, $true) ;
     # this variant pulls commands v functions
     #$AST.FindAll({$args[0] -is [System.Management.Automation.Language.CommandAst]}, $true)
@@ -60,15 +62,15 @@ function get-FunctionBlock {
 
     # 2:20 PM 8/31/2016 return the function with bracketing
 
-    $sPre="$("=" * 50)`n#*------v Function $($matchfunc.name) from Script:$($ParseFile) v------" ;
-    $sPost="#*------^ END Function $($matchfunc.name) from Script:$($ParseFile) ^------ ;`n$("=" * 50)" ;
+    $sPre="$("=" * 50)`n#*------v Function $($matchfunc.name) from Script:$($Path.fullname) v------" ;
+    $sPost="#*------^ END Function $($matchfunc.name) from Script:$($Path.fullname) ^------ ;`n$("=" * 50)" ;
 
     # here string seems to make it crap out, just append together
     $sOut = $null ;
     $sOut += "$($sPre)`nFunction $($matchfunc.name) " ;
     $sOut += "$($matchfunc.Body) $($sPost)" ;
 
-    write-verbose -verbose:$true "Script:$($ParseFile): Matched Function:$($functionName) " ;
+    write-verbose -verbose:$true "Script:$($Path.fullname): Matched Function:$($functionName) " ;
     $sOut | write-output ;
 
 } ; #*------^ END Function get-FunctionBlock ^------
