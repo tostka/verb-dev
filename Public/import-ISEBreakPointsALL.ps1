@@ -15,6 +15,7 @@ function import-ISEBreakPointsALL {
     Github      : https://github.com/tostka/verb-dev
     Tags        : Powershell,ISE,development,debugging
     REVISIONS
+    * 1:58 PM 5/16/2022 rem'd whatif (not supported in child func)
     * 12:16 PM 5/11/2022 init
     .DESCRIPTION
     import-ISEBreakPointsALL - Loop open tabs in ISE, and foreach: Import all 'Line' ise breakpoints from assoc'd XML file
@@ -30,8 +31,8 @@ function import-ISEBreakPointsALL {
     [CmdletBinding()]
     #[Alias('eIseBp')]
     PARAM(
-        [Parameter(HelpMessage="Whatif Flag  [-whatIf]")]
-        [switch] $whatIf
+        #[Parameter(HelpMessage="Whatif Flag  [-whatIf]")]
+        #[switch] $whatIf
     ) ;
     BEGIN {
         ${CmdletName} = $PSCmdlet.MyInvocation.MyCommand.Name ;
@@ -47,7 +48,7 @@ function import-ISEBreakPointsALL {
                 $sBnrS="`n#*------v PROCESSING : $($ISES) v------" ; 
                 write-host -foregroundcolor white "$((get-date).ToString('HH:mm:ss')):$($sBnrS)" ;
                 write-host "==importing $($ISES):" ;
-                $pltEISEBP=@{Script= $ISES ;whatif=$($whatif) ;verbose=$($verbose) ; } ;
+                $pltEISEBP=@{Script= $ISES ;verbose=$($verbose) ; } ; # whatif=$($whatif) ;
                 $smsg  = "import-ISEBreakPoints w`n$(($pltEISEBP|out-string).trim())" ;
                 write-verbose $smsg ;
                 import-ISEBreakPoints @pltEISEBP ;
