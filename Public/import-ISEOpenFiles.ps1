@@ -15,6 +15,7 @@ function import-ISEOpenFiles {
     Github      : https://github.com/tostka/verb-dev
     Tags        : Powershell,ISE,development,debugging
     REVISIONS
+    * 9:19 AM 5/20/2022 add: iIseOpen alias (using these a lot lately; w freq crashouts of ise, and need to recover all files open & BPs to quickly get back to function)
     * 12:12 PM 5/11/2022 init
     .DESCRIPTION
     import-ISEOpenFiles - Import/Re-Open a list of all ISE tab files, from CU Documents\WindowsPowershell\Scripts\ISESavedSession.psXML file
@@ -26,7 +27,7 @@ function import-ISEOpenFiles {
     https://github.com/tostka/verb-dev
     #>
     [CmdletBinding()]
-    #[Alias('eIseBp')]
+    [Alias('iIseOpen')]
     PARAM() ;
     BEGIN {
         ${CmdletName} = $PSCmdlet.MyInvocation.MyCommand.Name ;
