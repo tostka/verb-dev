@@ -366,11 +366,13 @@ function process-NewModuleDotsourced {
     } else { 
         $InternalDirPath = "$($ModDirPath)\Internal" ;
     } ; 
+    $ModPsdPath = "$(join-path -path (join-path -path $Moddirpath -ChildPath $modulename) -ChildPath $modulename).psd1"
     # "C:\sc\verb-AAD" ; C:\sc\verb-AAD\Tests\verb-AAD.tests.ps1
     $TestScriptPath = "$($ModDirPath)\Tests\$($ModuleName).tests.ps1" ;
     $rgxSignFiles='\.(CAT|MSI|JAR,OCX|PS1|PSM1|PSD1|PS1XML|PSC1|MSP|CMD|BAT|VBS)$' ;
     # expand to cover External & Private variant names as well
     $rgxIncludeDirs='\\(Public|Internal|External|Private|Classes)\\' ;
+
 
     $editor = "notepad2.exe" ;
 
@@ -382,6 +384,19 @@ function process-NewModuleDotsourced {
         write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):(-NoBuildInfo specified:Skipping use of buggy BuildHelpers module)" ;
         TRY {
             #$ModPsdPath = (gci "$($modroot)\$($ModuleName)\$($ModuleName).psd1").FullName
+            if($ModPsdPath = (gci "$($modroot)\$($ModuleName)\$($ModuleName).psd1").FullName){
+
+            } elseif ($ModPsdPath = Get-PSModuleFile -path $ModRoot -Extension .psd1){
+
+            } else { 
+                $smsg = "Unable to resolve manifest .psd1 path for module dir:$($modroot)" ; 
+                write-warning $smsg ; 
+                throw $smsg
+                break ; 
+            } ; 
+            $smsg = "Resolved `$ModPsdPath:`n$($ModPsdPath)" ; 
+            if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
+            else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
             # $ModPsdPath
             $psd1Profile = Test-ModuleManifest -path $ModPsdPath  ;
             # check for failure of last command
@@ -505,14 +520,14 @@ $(if($Merge){'MERGE parm specified as well:`n-Merge Public|Internal|Classes incl
             if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug
             else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
             $pltmergeModule=[ordered]@{
-              ModuleName=$($ModuleName) ;
-              ModuleSourcePath="$($PublicDirPath)","$($InternalDirPath)" ;
-              ModuleDestinationPath="$($ModDirPath)\$($ModuleName)" ;
-              LogSpec = $logspec ;
-              NoAliasExport=$($NoAliasExport) ;
-              ErrorAction="Stop" ;
-              showdebug=$($showdebug);
-              whatif=$($whatif);
+                ModuleName=$($ModuleName) ;
+                ModuleSourcePath="$($PublicDirPath)","$($InternalDirPath)" ;
+                ModuleDestinationPath="$($ModDirPath)\$($ModuleName)" ;
+                LogSpec = $logspec ;
+                NoAliasExport=$($NoAliasExport) ;
+                ErrorAction="Stop" ;
+                showdebug=$($showdebug);
+                whatif=$($whatif);
             } ;
             $smsg= "Unmerge-Module w`n$(($pltmergeModule|out-string).trim())" ;
             if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info }  #Error|Warn|Debug
@@ -604,22 +619,10 @@ $(if($Merge){'MERGE parm specified as well:`n-Merge Public|Internal|Classes incl
         $rgxGuid = "[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}" ;
         # also maintain encoding (set-content defaults ascii)
         $tf = $TestScriptPath;
-        <# # disable to defer to Set-ContentFixEncoding
-        $enc=$null ; $enc=get-FileEncoding -path $tf ;
-        if($enc -eq 'ASCII') {
-            $enc = 'UTF8' ;
-            $smsg = "(ASCI encoding detected, converting to UTF8)" ;
-            if($verbose){ if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug
-            else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; } ;
-        } ; # force damaged/ascii to UTF8
-        #>
-        #$pltSetCon=[ordered]@{ Path=$tf ; whatif=$($whatif) ;  } ;
-        #if($enc){$pltSetCon.add('encoding',$enc) } ;
         $pltSCFE=[ordered]@{Path=$tf ; PassThru=$true ;Verbose=$($verbose) ;whatif= $($whatif) ; } 
         if($psd1ExpMatch = gci $tf |select-string -Pattern $rgxTestScriptNOGuid ){
             $bRet = (Get-Content $tf) | Foreach-Object {
                 $_ -replace $rgxTestScriptNOGuid, "$($psd1guid)"
-            #} | Set-Content @pltSetCon ;
             } | Set-ContentFixEncoding @pltSCFE ;
             if(-not $bRet -AND -not $whatif){throw "Set-ContentFixEncoding $($tf)!" } ;
         } elseif($psd1ExpMatch = gci $tf |select-string -Pattern $rgxTestScriptGuid ){
@@ -635,7 +638,6 @@ $(if($Merge){'MERGE parm specified as well:`n-Merge Public|Internal|Classes incl
                 # generic guid replace: $_ -replace $rgxGuid, "$($psd1guid)"
                 $bRet = (Get-Content $tf) | Foreach-Object {
                     $_ -replace $testGuid, "$($psd1guid)"
-                #} | Set-Content @pltSetCon ;
                 } | Set-ContentFixEncoding @pltSCFE ;
                 if(-not $bRet -AND -not $whatif){throw "Set-ContentFixEncoding $($tf)!" } ;
             } ;
@@ -661,18 +663,7 @@ $(if($Merge){'MERGE parm specified as well:`n-Merge Public|Internal|Classes incl
         $smsg = "Psd1<>Psm1 version mis-match ($($psd1Vers)<>$($Psm1Vers)):`nUpdating $($ModPsmPath) to *match*`n$($ModPsdPath)" ;
         if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN } #Error|Warn|Debug
         else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
-
         $tf = $ModPsmPath;
-        <#$enc=$null ; $enc=get-FileEncoding -path $tf ;
-        if($enc -eq 'ASCII') {
-            $enc = 'UTF8' ;
-            $smsg = "(ASCI encoding detected, converting to UTF8)" ;
-            if($verbose){ if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug
-            else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; } ;
-        } ; # force damaged/ascii to UTF8
-        $pltSetCon=[ordered]@{ Path=$tf ; whatif=$($whatif) ;  } ;
-        if($enc){$pltSetCon.add('encoding',$enc) } ;
-        #>
         $pltSCFE=[ordered]@{Path=$tf ; PassThru=$true ;Verbose=$($verbose) ;whatif= $($whatif) ; } 
         $bRet = (Get-Content $tf) | Foreach-Object {
             $_ -replace $psm1Profile.matches[0].captures.groups[0].value.tostring(), "Version     : $($psd1Vers)"
@@ -686,8 +677,7 @@ $(if($Merge){'MERGE parm specified as well:`n-Merge Public|Internal|Classes incl
     } ;
 
     # Update the psd1 FunctionsToExport : (moved to merge-module, after the export-modulemember code)
-
-
+    
     $smsg= "Signing appropriate files..." ;
     if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info }  #Error|Warn|Debug
     else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
