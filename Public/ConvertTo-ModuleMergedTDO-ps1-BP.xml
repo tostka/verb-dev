@@ -1,0 +1,305 @@
+﻿<Objs Version="1.1.0.1" xmlns="http://schemas.microsoft.com/powershell/2004/04">
+  <Obj RefId="0">
+    <TN RefId="0">
+      <T>System.Management.Automation.LineBreakpoint</T>
+      <T>System.Management.Automation.Breakpoint</T>
+      <T>System.Object</T>
+    </TN>
+    <ToString>Line breakpoint on 'C:\sc\verb-dev\Public\ConvertTo-ModuleMergedTDO.ps1:162'</ToString>
+    <Props>
+      <I32 N="Column">0</I32>
+      <I32 N="Line">162</I32>
+      <Nil N="Action" />
+      <B N="Enabled">true</B>
+      <I32 N="HitCount">3</I32>
+      <I32 N="Id">133</I32>
+      <S N="Script">C:\sc\verb-dev\Public\ConvertTo-ModuleMergedTDO.ps1</S>
+    </Props>
+  </Obj>
+  <Obj RefId="1">
+    <TNRef RefId="0" />
+    <ToString>Line breakpoint on 'C:\sc\verb-dev\Public\ConvertTo-ModuleMergedTDO.ps1:113'</ToString>
+    <Props>
+      <I32 N="Column">0</I32>
+      <I32 N="Line">113</I32>
+      <Nil N="Action" />
+      <B N="Enabled">true</B>
+      <I32 N="HitCount">3</I32>
+      <I32 N="Id">147</I32>
+      <S N="Script">C:\sc\verb-dev\Public\ConvertTo-ModuleMergedTDO.ps1</S>
+    </Props>
+  </Obj>
+  <Obj RefId="2">
+    <TNRef RefId="0" />
+    <ToString>Line breakpoint on 'C:\sc\verb-dev\Public\ConvertTo-ModuleMergedTDO.ps1:166'</ToString>
+    <Props>
+      <I32 N="Column">0</I32>
+      <I32 N="Line">166</I32>
+      <Nil N="Action" />
+      <B N="Enabled">true</B>
+      <I32 N="HitCount">3</I32>
+      <I32 N="Id">283</I32>
+      <S N="Script">C:\sc\verb-dev\Public\ConvertTo-ModuleMergedTDO.ps1</S>
+    </Props>
+  </Obj>
+  <Obj RefId="3">
+    <TNRef RefId="0" />
+    <ToString>Line breakpoint on 'C:\sc\verb-dev\Public\ConvertTo-ModuleMergedTDO.ps1:170'</ToString>
+    <Props>
+      <I32 N="Column">0</I32>
+      <I32 N="Line">170</I32>
+      <Nil N="Action" />
+      <B N="Enabled">true</B>
+      <I32 N="HitCount">1</I32>
+      <I32 N="Id">284</I32>
+      <S N="Script">C:\sc\verb-dev\Public\ConvertTo-ModuleMergedTDO.ps1</S>
+    </Props>
+  </Obj>
+  <Obj RefId="4">
+    <TNRef RefId="0" />
+    <ToString>Line breakpoint on 'C:\sc\verb-dev\Public\ConvertTo-ModuleMergedTDO.ps1:479'</ToString>
+    <Props>
+      <I32 N="Column">0</I32>
+      <I32 N="Line">479</I32>
+      <Nil N="Action" />
+      <B N="Enabled">true</B>
+      <I32 N="HitCount">0</I32>
+      <I32 N="Id">1574</I32>
+      <S N="Script">C:\sc\verb-dev\Public\ConvertTo-ModuleMergedTDO.ps1</S>
+    </Props>
+  </Obj>
+  <Obj RefId="5">
+    <TNRef RefId="0" />
+    <ToString>Line breakpoint on 'C:\sc\verb-dev\Public\ConvertTo-ModuleMergedTDO.ps1:557'</ToString>
+    <Props>
+      <I32 N="Column">0</I32>
+      <I32 N="Line">557</I32>
+      <Nil N="Action" />
+      <B N="Enabled">true</B>
+      <I32 N="HitCount">2</I32>
+      <I32 N="Id">1579</I32>
+      <S N="Script">C:\sc\verb-dev\Public\ConvertTo-ModuleMergedTDO.ps1</S>
+    </Props>
+  </Obj>
+  <Obj RefId="6">
+    <TNRef RefId="0" />
+    <ToString>Line breakpoint on 'C:\sc\verb-dev\Public\ConvertTo-ModuleMergedTDO.ps1:615'</ToString>
+    <Props>
+      <I32 N="Column">0</I32>
+      <I32 N="Line">615</I32>
+      <Nil N="Action" />
+      <B N="Enabled">true</B>
+      <I32 N="HitCount">0</I32>
+      <I32 N="Id">1615</I32>
+      <S N="Script">C:\sc\verb-dev\Public\ConvertTo-ModuleMergedTDO.ps1</S>
+    </Props>
+  </Obj>
+  <Obj RefId="7">
+    <TNRef RefId="0" />
+    <ToString>Line breakpoint on 'C:\sc\verb-dev\Public\ConvertTo-ModuleMergedTDO.ps1:621'</ToString>
+    <Props>
+      <I32 N="Column">0</I32>
+      <I32 N="Line">621</I32>
+      <Nil N="Action" />
+      <B N="Enabled">true</B>
+      <I32 N="HitCount">1</I32>
+      <I32 N="Id">1616</I32>
+      <S N="Script">C:\sc\verb-dev\Public\ConvertTo-ModuleMergedTDO.ps1</S>
+    </Props>
+  </Obj>
+  <Obj RefId="8">
+    <TNRef RefId="0" />
+    <ToString>Line breakpoint on 'C:\sc\verb-dev\Public\ConvertTo-ModuleMergedTDO.ps1:642'</ToString>
+    <Props>
+      <I32 N="Column">0</I32>
+      <I32 N="Line">642</I32>
+      <Nil N="Action" />
+      <B N="Enabled">true</B>
+      <I32 N="HitCount">0</I32>
+      <I32 N="Id">1617</I32>
+      <S N="Script">C:\sc\verb-dev\Public\ConvertTo-ModuleMergedTDO.ps1</S>
+    </Props>
+  </Obj>
+  <Obj RefId="9">
+    <TNRef RefId="0" />
+    <ToString>Line breakpoint on 'C:\sc\verb-dev\Public\ConvertTo-ModuleMergedTDO.ps1:200'</ToString>
+    <Props>
+      <I32 N="Column">0</I32>
+      <I32 N="Line">200</I32>
+      <Nil N="Action" />
+      <B N="Enabled">true</B>
+      <I32 N="HitCount">2</I32>
+      <I32 N="Id">2306</I32>
+      <S N="Script">C:\sc\verb-dev\Public\ConvertTo-ModuleMergedTDO.ps1</S>
+    </Props>
+  </Obj>
+  <Obj RefId="10">
+    <TNRef RefId="0" />
+    <ToString>Line breakpoint on 'C:\sc\verb-dev\Public\ConvertTo-ModuleMergedTDO.ps1:201'</ToString>
+    <Props>
+      <I32 N="Column">0</I32>
+      <I32 N="Line">201</I32>
+      <Nil N="Action" />
+      <B N="Enabled">true</B>
+      <I32 N="HitCount">2</I32>
+      <I32 N="Id">2307</I32>
+      <S N="Script">C:\sc\verb-dev\Public\ConvertTo-ModuleMergedTDO.ps1</S>
+    </Props>
+  </Obj>
+  <Obj RefId="11">
+    <TNRef RefId="0" />
+    <ToString>Line breakpoint on 'C:\sc\verb-dev\Public\ConvertTo-ModuleMergedTDO.ps1:286'</ToString>
+    <Props>
+      <I32 N="Column">0</I32>
+      <I32 N="Line">286</I32>
+      <Nil N="Action" />
+      <B N="Enabled">true</B>
+      <I32 N="HitCount">2</I32>
+      <I32 N="Id">2308</I32>
+      <S N="Script">C:\sc\verb-dev\Public\ConvertTo-ModuleMergedTDO.ps1</S>
+    </Props>
+  </Obj>
+  <Obj RefId="12">
+    <TNRef RefId="0" />
+    <ToString>Line breakpoint on 'C:\sc\verb-dev\Public\ConvertTo-ModuleMergedTDO.ps1:330'</ToString>
+    <Props>
+      <I32 N="Column">0</I32>
+      <I32 N="Line">330</I32>
+      <Nil N="Action" />
+      <B N="Enabled">true</B>
+      <I32 N="HitCount">2</I32>
+      <I32 N="Id">2309</I32>
+      <S N="Script">C:\sc\verb-dev\Public\ConvertTo-ModuleMergedTDO.ps1</S>
+    </Props>
+  </Obj>
+  <Obj RefId="13">
+    <TNRef RefId="0" />
+    <ToString>Line breakpoint on 'C:\sc\verb-dev\Public\ConvertTo-ModuleMergedTDO.ps1:337'</ToString>
+    <Props>
+      <I32 N="Column">0</I32>
+      <I32 N="Line">337</I32>
+      <Nil N="Action" />
+      <B N="Enabled">true</B>
+      <I32 N="HitCount">0</I32>
+      <I32 N="Id">2311</I32>
+      <S N="Script">C:\sc\verb-dev\Public\ConvertTo-ModuleMergedTDO.ps1</S>
+    </Props>
+  </Obj>
+  <Obj RefId="14">
+    <TNRef RefId="0" />
+    <ToString>Line breakpoint on 'C:\sc\verb-dev\Public\ConvertTo-ModuleMergedTDO.ps1:488'</ToString>
+    <Props>
+      <I32 N="Column">0</I32>
+      <I32 N="Line">488</I32>
+      <Nil N="Action" />
+      <B N="Enabled">true</B>
+      <I32 N="HitCount">0</I32>
+      <I32 N="Id">2313</I32>
+      <S N="Script">C:\sc\verb-dev\Public\ConvertTo-ModuleMergedTDO.ps1</S>
+    </Props>
+  </Obj>
+  <Obj RefId="15">
+    <TNRef RefId="0" />
+    <ToString>Line breakpoint on 'C:\sc\verb-dev\Public\ConvertTo-ModuleMergedTDO.ps1:497'</ToString>
+    <Props>
+      <I32 N="Column">0</I32>
+      <I32 N="Line">497</I32>
+      <Nil N="Action" />
+      <B N="Enabled">true</B>
+      <I32 N="HitCount">0</I32>
+      <I32 N="Id">2314</I32>
+      <S N="Script">C:\sc\verb-dev\Public\ConvertTo-ModuleMergedTDO.ps1</S>
+    </Props>
+  </Obj>
+  <Obj RefId="16">
+    <TNRef RefId="0" />
+    <ToString>Line breakpoint on 'C:\sc\verb-dev\Public\ConvertTo-ModuleMergedTDO.ps1:503'</ToString>
+    <Props>
+      <I32 N="Column">0</I32>
+      <I32 N="Line">503</I32>
+      <Nil N="Action" />
+      <B N="Enabled">true</B>
+      <I32 N="HitCount">4</I32>
+      <I32 N="Id">2315</I32>
+      <S N="Script">C:\sc\verb-dev\Public\ConvertTo-ModuleMergedTDO.ps1</S>
+    </Props>
+  </Obj>
+  <Obj RefId="17">
+    <TNRef RefId="0" />
+    <ToString>Line breakpoint on 'C:\sc\verb-dev\Public\ConvertTo-ModuleMergedTDO.ps1:568'</ToString>
+    <Props>
+      <I32 N="Column">0</I32>
+      <I32 N="Line">568</I32>
+      <Nil N="Action" />
+      <B N="Enabled">true</B>
+      <I32 N="HitCount">2</I32>
+      <I32 N="Id">2317</I32>
+      <S N="Script">C:\sc\verb-dev\Public\ConvertTo-ModuleMergedTDO.ps1</S>
+    </Props>
+  </Obj>
+  <Obj RefId="18">
+    <TNRef RefId="0" />
+    <ToString>Line breakpoint on 'C:\sc\verb-dev\Public\ConvertTo-ModuleMergedTDO.ps1:598'</ToString>
+    <Props>
+      <I32 N="Column">0</I32>
+      <I32 N="Line">598</I32>
+      <Nil N="Action" />
+      <B N="Enabled">true</B>
+      <I32 N="HitCount">2</I32>
+      <I32 N="Id">2318</I32>
+      <S N="Script">C:\sc\verb-dev\Public\ConvertTo-ModuleMergedTDO.ps1</S>
+    </Props>
+  </Obj>
+  <Obj RefId="19">
+    <TNRef RefId="0" />
+    <ToString>Line breakpoint on 'C:\sc\verb-dev\Public\ConvertTo-ModuleMergedTDO.ps1:654'</ToString>
+    <Props>
+      <I32 N="Column">0</I32>
+      <I32 N="Line">654</I32>
+      <Nil N="Action" />
+      <B N="Enabled">true</B>
+      <I32 N="HitCount">0</I32>
+      <I32 N="Id">2319</I32>
+      <S N="Script">C:\sc\verb-dev\Public\ConvertTo-ModuleMergedTDO.ps1</S>
+    </Props>
+  </Obj>
+  <Obj RefId="20">
+    <TNRef RefId="0" />
+    <ToString>Line breakpoint on 'C:\sc\verb-dev\Public\ConvertTo-ModuleMergedTDO.ps1:671'</ToString>
+    <Props>
+      <I32 N="Column">0</I32>
+      <I32 N="Line">671</I32>
+      <Nil N="Action" />
+      <B N="Enabled">true</B>
+      <I32 N="HitCount">0</I32>
+      <I32 N="Id">2320</I32>
+      <S N="Script">C:\sc\verb-dev\Public\ConvertTo-ModuleMergedTDO.ps1</S>
+    </Props>
+  </Obj>
+  <Obj RefId="21">
+    <TNRef RefId="0" />
+    <ToString>Line breakpoint on 'C:\sc\verb-dev\Public\ConvertTo-ModuleMergedTDO.ps1:673'</ToString>
+    <Props>
+      <I32 N="Column">0</I32>
+      <I32 N="Line">673</I32>
+      <Nil N="Action" />
+      <B N="Enabled">true</B>
+      <I32 N="HitCount">1</I32>
+      <I32 N="Id">2321</I32>
+      <S N="Script">C:\sc\verb-dev\Public\ConvertTo-ModuleMergedTDO.ps1</S>
+    </Props>
+  </Obj>
+  <Obj RefId="22">
+    <TNRef RefId="0" />
+    <ToString>Line breakpoint on 'C:\sc\verb-dev\Public\ConvertTo-ModuleMergedTDO.ps1:676'</ToString>
+    <Props>
+      <I32 N="Column">0</I32>
+      <I32 N="Line">676</I32>
+      <Nil N="Action" />
+      <B N="Enabled">true</B>
+      <I32 N="HitCount">0</I32>
+      <I32 N="Id">2322</I32>
+      <S N="Script">C:\sc\verb-dev\Public\ConvertTo-ModuleMergedTDO.ps1</S>
+    </Props>
+  </Obj>
+</Objs>
