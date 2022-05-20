@@ -17,6 +17,8 @@ function get-CodeProfileAST {
     AddedWebsite:
     AddedTwitter:
     REVISIONS
+    * 8:44 AM 5/20/2022 flip output hash -> obj; renamed $fileparam -> $path; fliped $path from string to sys.fileinfo; 
+        flipped AST call to include asttokens in returns; added verbose echos - runs 3m on big .psm1's (125 funcs)
     # 12:30 PM 4/28/2022 ren get-ScriptProfileAST -> get-CodeProfileAST, aliased original name (more descriptive, as covers .ps1|.psm1), add extension validator for -File; ren'd -File -> Path, aliased: 'PSPath','File', strongly typed [string] (per BP).
     # 1:01 PM 5/27/2020 moved alias: profile-FileAST win func
     # 5:25 PM 2/29/2020 ren profile-FileASt -> get-ScriptProfileAST (aliased orig name)
@@ -46,7 +48,7 @@ function get-CodeProfileAST {
     .INPUTS
     None
     .OUTPUTS
-    Outputs a hashtable object containing:
+    Outputs a system.object containing:
     * Parameters : Details on all Parameters in the file
     * Functions : Details on all Functions in the file
     * VariableAssignments : Details on all Variables assigned in the file
@@ -77,7 +79,7 @@ function get-CodeProfileAST {
         [Parameter(Position = 0, Mandatory = $True, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true, HelpMessage = "Path to script[-File path-to\script.ps1]")]
         [ValidateScript( {Test-Path $_})][ValidatePattern( "\.(ps1|psm1|txt)$")]
         [Alias('PSPath','File')]
-        [string]$Path,
+        [system.io.fileinfo]$Path,
         [Parameter(HelpMessage = "Flag to return Functions-only [-Functions]")]
         [switch] $Functions,
         [Parameter(HelpMessage = "Flag to return Parameters-only [-Functions]")]
@@ -98,30 +100,40 @@ function get-CodeProfileAST {
     BEGIN {
         $Verbose = ($VerbosePreference -eq "Continue") ;
         write-verbose "(convert path to gci)" ; 
-        if ($File.GetType().FullName -ne 'System.IO.FileInfo') {
-            $File = get-childitem -path $File ;
+        if ($Path.GetType().FullName -ne 'System.IO.FileInfo') {
+            $Path = get-childitem -path $Path ;
         } ;
     } ;
     PROCESS {
-        $AST = [System.Management.Automation.Language.Parser]::ParseFile($File.fullname, [ref]$null, [ref]$Null ) ;
+        $sw = [Diagnostics.Stopwatch]::StartNew();
+
+        write-verbose "$((get-date).ToString('HH:mm:ss')):(running AST parse...)" ; 
+        New-Variable astTokens -Force ; New-Variable astErr -Force ; 
+        #$AST = [System.Management.Automation.Language.Parser]::ParseFile($Path.fullname, [ref]$null, [ref]$Null ) ;
+        $AST = [System.Management.Automation.Language.Parser]::ParseFile($Path, [ref]$astTokens, [ref]$astErr)
 
         $objReturn = [ordered]@{ } ;
 
         if ($Functions -OR $All) {
+            write-verbose "$((get-date).ToString('HH:mm:ss')):(parsing Functions from AST...)" ; 
             $ASTFunctions = $AST.FindAll( { $args[0] -is [System.Management.Automation.Language.FunctionDefinitionAst] }, $true) ;
             $objReturn.add('Functions', $ASTFunctions) ;
         } ;
         if ($Parameters -OR $All) {
+            write-verbose "$((get-date).ToString('HH:mm:ss')):(parsing Parameters from AST...)" ; 
             $ASTParameters = $ast.ParamBlock.Parameters.Name.variablepath.userpath ;
             $objReturn.add('Parameters', $ASTParameters) ;
         } ;
         if ($Variables -OR $All) {
+            write-verbose "$((get-date).ToString('HH:mm:ss')):(parsing Variables from AST...)" ; 
             $AstVariableAssignments = $ast.FindAll( { $args[0] -is [System.Management.Automation.Language.VariableExpressionAst] }, $true) ;
             $objReturn.add('Variables', $AstVariableAssignments) ;
         } ;
         if ($($Aliases -OR $GenericCommands) -OR $All) {
+            write-verbose "$((get-date).ToString('HH:mm:ss')):(parsing ASTGenericCommands from AST...)" ; 
             $ASTGenericCommands = $ast.FindAll( { $args[0] -is [System.Management.Automation.Language.CommandAst] }, $true) ;
             if ($Aliases -OR $All) {
+                write-verbose "$((get-date).ToString('HH:mm:ss')):(post-filtering (set|new)-Alias from AST...)" ; 
                 $ASTAliasAssigns = ($ASTGenericCommands | ? { $_.extent.text -match '(set|new)-alias' }) ;
                 $objReturn.add('Aliases', $ASTAliasAssigns) ;
             } ;
@@ -129,7 +141,11 @@ function get-CodeProfileAST {
                 $objReturn.add('GenericCommands', $ASTGenericCommands) ;
             } ;
         } ;
-        $objReturn | Write-Output ;
+        #$objReturn | Write-Output ;
+        New-Object PSObject -Property $objReturn | Write-Output ;
     } ;
-    END { } ;
+    END {
+        $sw.Stop() ;
+        write-verbose ("Elapsed Time: {0:dd}d {0:hh}h {0:mm}m {0:ss}s {0:fff}ms" -f $sw.Elapsed) ; 
+    } ;
 } ; #*------^ END Function get-CodeProfileAST ^------
