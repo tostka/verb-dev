@@ -1,0 +1,331 @@
+﻿<Objs Version="1.1.0.1" xmlns="http://schemas.microsoft.com/powershell/2004/04">
+  <Obj RefId="0">
+    <TN RefId="0">
+      <T>System.Management.Automation.LineBreakpoint</T>
+      <T>System.Management.Automation.Breakpoint</T>
+      <T>System.Object</T>
+    </TN>
+    <ToString>Line breakpoint on 'C:\sc\verb-dev\Public\ConvertTo-ModuleDynamicTDO.ps1:256'</ToString>
+    <Props>
+      <I32 N="Column">0</I32>
+      <I32 N="Line">256</I32>
+      <Nil N="Action" />
+      <B N="Enabled">true</B>
+      <I32 N="HitCount">3</I32>
+      <I32 N="Id">194</I32>
+      <S N="Script">C:\sc\verb-dev\Public\ConvertTo-ModuleDynamicTDO.ps1</S>
+    </Props>
+  </Obj>
+  <Obj RefId="1">
+    <TNRef RefId="0" />
+    <ToString>Line breakpoint on 'C:\sc\verb-dev\Public\ConvertTo-ModuleDynamicTDO.ps1:280'</ToString>
+    <Props>
+      <I32 N="Column">0</I32>
+      <I32 N="Line">280</I32>
+      <Nil N="Action" />
+      <B N="Enabled">true</B>
+      <I32 N="HitCount">0</I32>
+      <I32 N="Id">195</I32>
+      <S N="Script">C:\sc\verb-dev\Public\ConvertTo-ModuleDynamicTDO.ps1</S>
+    </Props>
+  </Obj>
+  <Obj RefId="2">
+    <TNRef RefId="0" />
+    <ToString>Line breakpoint on 'C:\sc\verb-dev\Public\ConvertTo-ModuleDynamicTDO.ps1:249'</ToString>
+    <Props>
+      <I32 N="Column">0</I32>
+      <I32 N="Line">249</I32>
+      <Nil N="Action" />
+      <B N="Enabled">true</B>
+      <I32 N="HitCount">3</I32>
+      <I32 N="Id">196</I32>
+      <S N="Script">C:\sc\verb-dev\Public\ConvertTo-ModuleDynamicTDO.ps1</S>
+    </Props>
+  </Obj>
+  <Obj RefId="3">
+    <TNRef RefId="0" />
+    <ToString>Line breakpoint on 'C:\sc\verb-dev\Public\ConvertTo-ModuleDynamicTDO.ps1:166'</ToString>
+    <Props>
+      <I32 N="Column">0</I32>
+      <I32 N="Line">166</I32>
+      <Nil N="Action" />
+      <B N="Enabled">true</B>
+      <I32 N="HitCount">2</I32>
+      <I32 N="Id">197</I32>
+      <S N="Script">C:\sc\verb-dev\Public\ConvertTo-ModuleDynamicTDO.ps1</S>
+    </Props>
+  </Obj>
+  <Obj RefId="4">
+    <TNRef RefId="0" />
+    <ToString>Line breakpoint on 'C:\sc\verb-dev\Public\ConvertTo-ModuleDynamicTDO.ps1:165'</ToString>
+    <Props>
+      <I32 N="Column">0</I32>
+      <I32 N="Line">165</I32>
+      <Nil N="Action" />
+      <B N="Enabled">true</B>
+      <I32 N="HitCount">0</I32>
+      <I32 N="Id">198</I32>
+      <S N="Script">C:\sc\verb-dev\Public\ConvertTo-ModuleDynamicTDO.ps1</S>
+    </Props>
+  </Obj>
+  <Obj RefId="5">
+    <TNRef RefId="0" />
+    <ToString>Line breakpoint on 'C:\sc\verb-dev\Public\ConvertTo-ModuleDynamicTDO.ps1:135'</ToString>
+    <Props>
+      <I32 N="Column">0</I32>
+      <I32 N="Line">135</I32>
+      <Nil N="Action" />
+      <B N="Enabled">true</B>
+      <I32 N="HitCount">4</I32>
+      <I32 N="Id">199</I32>
+      <S N="Script">C:\sc\verb-dev\Public\ConvertTo-ModuleDynamicTDO.ps1</S>
+    </Props>
+  </Obj>
+  <Obj RefId="6">
+    <TNRef RefId="0" />
+    <ToString>Line breakpoint on 'C:\sc\verb-dev\Public\ConvertTo-ModuleDynamicTDO.ps1:84'</ToString>
+    <Props>
+      <I32 N="Column">0</I32>
+      <I32 N="Line">84</I32>
+      <Nil N="Action" />
+      <B N="Enabled">true</B>
+      <I32 N="HitCount">5</I32>
+      <I32 N="Id">200</I32>
+      <S N="Script">C:\sc\verb-dev\Public\ConvertTo-ModuleDynamicTDO.ps1</S>
+    </Props>
+  </Obj>
+  <Obj RefId="7">
+    <TNRef RefId="0" />
+    <ToString>Line breakpoint on 'C:\sc\verb-dev\Public\ConvertTo-ModuleDynamicTDO.ps1:138'</ToString>
+    <Props>
+      <I32 N="Column">0</I32>
+      <I32 N="Line">138</I32>
+      <Nil N="Action" />
+      <B N="Enabled">true</B>
+      <I32 N="HitCount">3</I32>
+      <I32 N="Id">285</I32>
+      <S N="Script">C:\sc\verb-dev\Public\ConvertTo-ModuleDynamicTDO.ps1</S>
+    </Props>
+  </Obj>
+  <Obj RefId="8">
+    <TNRef RefId="0" />
+    <ToString>Line breakpoint on 'C:\sc\verb-dev\Public\ConvertTo-ModuleDynamicTDO.ps1:142'</ToString>
+    <Props>
+      <I32 N="Column">0</I32>
+      <I32 N="Line">142</I32>
+      <Nil N="Action" />
+      <B N="Enabled">true</B>
+      <I32 N="HitCount">2</I32>
+      <I32 N="Id">286</I32>
+      <S N="Script">C:\sc\verb-dev\Public\ConvertTo-ModuleDynamicTDO.ps1</S>
+    </Props>
+  </Obj>
+  <Obj RefId="9">
+    <TNRef RefId="0" />
+    <ToString>Line breakpoint on 'C:\sc\verb-dev\Public\ConvertTo-ModuleDynamicTDO.ps1:559'</ToString>
+    <Props>
+      <I32 N="Column">0</I32>
+      <I32 N="Line">559</I32>
+      <Nil N="Action" />
+      <B N="Enabled">true</B>
+      <I32 N="HitCount">0</I32>
+      <I32 N="Id">1629</I32>
+      <S N="Script">C:\sc\verb-dev\Public\ConvertTo-ModuleDynamicTDO.ps1</S>
+    </Props>
+  </Obj>
+  <Obj RefId="10">
+    <TNRef RefId="0" />
+    <ToString>Line breakpoint on 'C:\sc\verb-dev\Public\ConvertTo-ModuleDynamicTDO.ps1:577'</ToString>
+    <Props>
+      <I32 N="Column">0</I32>
+      <I32 N="Line">577</I32>
+      <Nil N="Action" />
+      <B N="Enabled">true</B>
+      <I32 N="HitCount">0</I32>
+      <I32 N="Id">1630</I32>
+      <S N="Script">C:\sc\verb-dev\Public\ConvertTo-ModuleDynamicTDO.ps1</S>
+    </Props>
+  </Obj>
+  <Obj RefId="11">
+    <TNRef RefId="0" />
+    <ToString>Line breakpoint on 'C:\sc\verb-dev\Public\ConvertTo-ModuleDynamicTDO.ps1:571'</ToString>
+    <Props>
+      <I32 N="Column">0</I32>
+      <I32 N="Line">571</I32>
+      <Nil N="Action" />
+      <B N="Enabled">true</B>
+      <I32 N="HitCount">0</I32>
+      <I32 N="Id">1631</I32>
+      <S N="Script">C:\sc\verb-dev\Public\ConvertTo-ModuleDynamicTDO.ps1</S>
+    </Props>
+  </Obj>
+  <Obj RefId="12">
+    <TNRef RefId="0" />
+    <ToString>Line breakpoint on 'C:\sc\verb-dev\Public\ConvertTo-ModuleDynamicTDO.ps1:614'</ToString>
+    <Props>
+      <I32 N="Column">0</I32>
+      <I32 N="Line">614</I32>
+      <Nil N="Action" />
+      <B N="Enabled">true</B>
+      <I32 N="HitCount">0</I32>
+      <I32 N="Id">1632</I32>
+      <S N="Script">C:\sc\verb-dev\Public\ConvertTo-ModuleDynamicTDO.ps1</S>
+    </Props>
+  </Obj>
+  <Obj RefId="13">
+    <TNRef RefId="0" />
+    <ToString>Line breakpoint on 'C:\sc\verb-dev\Public\ConvertTo-ModuleDynamicTDO.ps1:554'</ToString>
+    <Props>
+      <I32 N="Column">0</I32>
+      <I32 N="Line">554</I32>
+      <Nil N="Action" />
+      <B N="Enabled">true</B>
+      <I32 N="HitCount">0</I32>
+      <I32 N="Id">1633</I32>
+      <S N="Script">C:\sc\verb-dev\Public\ConvertTo-ModuleDynamicTDO.ps1</S>
+    </Props>
+  </Obj>
+  <Obj RefId="14">
+    <TNRef RefId="0" />
+    <ToString>Line breakpoint on 'C:\sc\verb-dev\Public\ConvertTo-ModuleDynamicTDO.ps1:549'</ToString>
+    <Props>
+      <I32 N="Column">0</I32>
+      <I32 N="Line">549</I32>
+      <Nil N="Action" />
+      <B N="Enabled">true</B>
+      <I32 N="HitCount">0</I32>
+      <I32 N="Id">1634</I32>
+      <S N="Script">C:\sc\verb-dev\Public\ConvertTo-ModuleDynamicTDO.ps1</S>
+    </Props>
+  </Obj>
+  <Obj RefId="15">
+    <TNRef RefId="0" />
+    <ToString>Line breakpoint on 'C:\sc\verb-dev\Public\ConvertTo-ModuleDynamicTDO.ps1:546'</ToString>
+    <Props>
+      <I32 N="Column">0</I32>
+      <I32 N="Line">546</I32>
+      <Nil N="Action" />
+      <B N="Enabled">true</B>
+      <I32 N="HitCount">0</I32>
+      <I32 N="Id">1635</I32>
+      <S N="Script">C:\sc\verb-dev\Public\ConvertTo-ModuleDynamicTDO.ps1</S>
+    </Props>
+  </Obj>
+  <Obj RefId="16">
+    <TNRef RefId="0" />
+    <ToString>Line breakpoint on 'C:\sc\verb-dev\Public\ConvertTo-ModuleDynamicTDO.ps1:524'</ToString>
+    <Props>
+      <I32 N="Column">0</I32>
+      <I32 N="Line">524</I32>
+      <Nil N="Action" />
+      <B N="Enabled">true</B>
+      <I32 N="HitCount">0</I32>
+      <I32 N="Id">1636</I32>
+      <S N="Script">C:\sc\verb-dev\Public\ConvertTo-ModuleDynamicTDO.ps1</S>
+    </Props>
+  </Obj>
+  <Obj RefId="17">
+    <TNRef RefId="0" />
+    <ToString>Line breakpoint on 'C:\sc\verb-dev\Public\ConvertTo-ModuleDynamicTDO.ps1:517'</ToString>
+    <Props>
+      <I32 N="Column">0</I32>
+      <I32 N="Line">517</I32>
+      <Nil N="Action" />
+      <B N="Enabled">true</B>
+      <I32 N="HitCount">0</I32>
+      <I32 N="Id">1637</I32>
+      <S N="Script">C:\sc\verb-dev\Public\ConvertTo-ModuleDynamicTDO.ps1</S>
+    </Props>
+  </Obj>
+  <Obj RefId="18">
+    <TNRef RefId="0" />
+    <ToString>Line breakpoint on 'C:\sc\verb-dev\Public\ConvertTo-ModuleDynamicTDO.ps1:437'</ToString>
+    <Props>
+      <I32 N="Column">0</I32>
+      <I32 N="Line">437</I32>
+      <Nil N="Action" />
+      <B N="Enabled">true</B>
+      <I32 N="HitCount">0</I32>
+      <I32 N="Id">1638</I32>
+      <S N="Script">C:\sc\verb-dev\Public\ConvertTo-ModuleDynamicTDO.ps1</S>
+    </Props>
+  </Obj>
+  <Obj RefId="19">
+    <TNRef RefId="0" />
+    <ToString>Line breakpoint on 'C:\sc\verb-dev\Public\ConvertTo-ModuleDynamicTDO.ps1:397'</ToString>
+    <Props>
+      <I32 N="Column">0</I32>
+      <I32 N="Line">397</I32>
+      <Nil N="Action" />
+      <B N="Enabled">true</B>
+      <I32 N="HitCount">0</I32>
+      <I32 N="Id">1639</I32>
+      <S N="Script">C:\sc\verb-dev\Public\ConvertTo-ModuleDynamicTDO.ps1</S>
+    </Props>
+  </Obj>
+  <Obj RefId="20">
+    <TNRef RefId="0" />
+    <ToString>Line breakpoint on 'C:\sc\verb-dev\Public\ConvertTo-ModuleDynamicTDO.ps1:598'</ToString>
+    <Props>
+      <I32 N="Column">0</I32>
+      <I32 N="Line">598</I32>
+      <Nil N="Action" />
+      <B N="Enabled">true</B>
+      <I32 N="HitCount">0</I32>
+      <I32 N="Id">1640</I32>
+      <S N="Script">C:\sc\verb-dev\Public\ConvertTo-ModuleDynamicTDO.ps1</S>
+    </Props>
+  </Obj>
+  <Obj RefId="21">
+    <TNRef RefId="0" />
+    <ToString>Line breakpoint on 'C:\sc\verb-dev\Public\ConvertTo-ModuleDynamicTDO.ps1:331'</ToString>
+    <Props>
+      <I32 N="Column">0</I32>
+      <I32 N="Line">331</I32>
+      <Nil N="Action" />
+      <B N="Enabled">true</B>
+      <I32 N="HitCount">0</I32>
+      <I32 N="Id">1641</I32>
+      <S N="Script">C:\sc\verb-dev\Public\ConvertTo-ModuleDynamicTDO.ps1</S>
+    </Props>
+  </Obj>
+  <Obj RefId="22">
+    <TNRef RefId="0" />
+    <ToString>Line breakpoint on 'C:\sc\verb-dev\Public\ConvertTo-ModuleDynamicTDO.ps1:617'</ToString>
+    <Props>
+      <I32 N="Column">0</I32>
+      <I32 N="Line">617</I32>
+      <Nil N="Action" />
+      <B N="Enabled">true</B>
+      <I32 N="HitCount">0</I32>
+      <I32 N="Id">1642</I32>
+      <S N="Script">C:\sc\verb-dev\Public\ConvertTo-ModuleDynamicTDO.ps1</S>
+    </Props>
+  </Obj>
+  <Obj RefId="23">
+    <TNRef RefId="0" />
+    <ToString>Line breakpoint on 'C:\sc\verb-dev\Public\ConvertTo-ModuleDynamicTDO.ps1:561'</ToString>
+    <Props>
+      <I32 N="Column">0</I32>
+      <I32 N="Line">561</I32>
+      <Nil N="Action" />
+      <B N="Enabled">true</B>
+      <I32 N="HitCount">0</I32>
+      <I32 N="Id">1643</I32>
+      <S N="Script">C:\sc\verb-dev\Public\ConvertTo-ModuleDynamicTDO.ps1</S>
+    </Props>
+  </Obj>
+  <Obj RefId="24">
+    <TNRef RefId="0" />
+    <ToString>Line breakpoint on 'C:\sc\verb-dev\Public\ConvertTo-ModuleDynamicTDO.ps1:565'</ToString>
+    <Props>
+      <I32 N="Column">0</I32>
+      <I32 N="Line">565</I32>
+      <Nil N="Action" />
+      <B N="Enabled">true</B>
+      <I32 N="HitCount">0</I32>
+      <I32 N="Id">1644</I32>
+      <S N="Script">C:\sc\verb-dev\Public\ConvertTo-ModuleDynamicTDO.ps1</S>
+    </Props>
+  </Obj>
+</Objs>
