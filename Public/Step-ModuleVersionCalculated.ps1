@@ -21,6 +21,11 @@ function Step-ModuleVersionCalculated {
     AddedWebsite: www.thesurlyadmin.com
     AddedTwitter: @thesurlyadm1n
     REVISIONS
+    * 8:58 AM 5/20/2022 WIP, add: $MinVersionIncrementBump (coerce Min failthrough rev to Build, constant, rather than hard-coded in code) ; 
+        address gcm bug where failing to return any but 3 old renamed funcs from verb-io.psm1: 
+        add $ASTMatchThreshold (reps min percentage match gcm to sls -pattern parse of function lines in .psm1), along with a raft of new eval testing code. 
+        tried running AST profiling to pull functions & aliases, but takes _3Mins_ to run. Simpler, and 90% effective to do an sls parse.
+    * 2:29 PM 5/16/2022 add: backup-fileTDO of the fingerprintfile
     * 9:42 AM 1/18/2022 added test for recursed nested #requires -module [modname] 
         strings - this one's a brute to recover from, just like the version clash, both 
         hard-break build and require reverting installed rev of module to get past. 
@@ -151,6 +156,9 @@ function Step-ModuleVersionCalculated {
         # $Path will be c:\sc\verb-exo ; split-path c:\sc\verb-exo -leaf gets you the modulename back
         $ModName = split-path -Path $path -leaf ; 
         $rgxRequireModNested = "(\s|^)#Requires\s+-Modules\s+.*,((\s)*)$($ModName)" ;  # added: either BOL or after a space
+        $ASTMatchThreshold = .8 ; # gcm must be w/in 80% of AST functions count, or this forces a 'Build' revision, to patch bugs in get-command -module xxx, where it fails to return full func/alias list from the module
+        # increment bump used with -MinVersionIncrementBump
+        $MinVersionIncrementBump = 'Build'
 
     } ;  # BEGIN-E
     PROCESS {
@@ -311,18 +319,83 @@ function Step-ModuleVersionCalculated {
                     if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
                     elseif(-not $Silent){ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
 
-                    if($moddirfiles.name -contains "fingerprint"){
-                        $oldfingerprint = Get-Content  ($moddirfiles|?{$_.name -eq "fingerprint"}).FullName ; 
+                    #$fingerprintfile = get-childitem -path "$($ModDirPath)\fingerprint*" -ea 0 | select -expand fullname ; 
+                    if($fingerprintfile = ($moddirfiles|?{$_.name -eq "fingerprint"}).FullName){
+                        $oldfingerprint = Get-Content $fingerprintfile ; 
                 
                         if($psm1){
-                            $pltXMO.Name = $psm1 # load via full path to .psm1
+                            $pltXMO.Name = $psm1 # ipmo via full path to .psm1
                             
                             $smsg = "import-module w`n$(($pltXMO|out-string).trim())" ; 
                             if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
                             else{ write-verbose "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; 
                             import-module @pltXMO ;
 
-                            $commandList = Get-Command -Module $ModuleName
+                            $commandList = Get-Command -Module $ModuleName # gcm doesn't support full path to module .psm1 
+                            $rgxFuncDeclare = '(^|((\s)*))Function\s+[\w-_]+\s+((\(.*)*)\{' ;  # supports opt inline param syntax as well; and func names made from [A-Za-z0-9-_]chars
+                            $rawfunccount = get-childitem -path $psm1 | select-string -pattern $rgxFuncDeclare |  measure | select -expand count  ; 
+                            <# 8:52 AM 5/18/2022 issue:
+                                get-command -module verb-io is only returning the 3 renamed funcs 
+                                gcm invoke-com*
+
+                                CommandType     Name                                               Version    Source                                                                                                                                                                                                      
+                                -----------     ----                                               -------    ------                                                                                                                                                                                                      
+                                Function        Invoke-CommandAs                                   2.2        Invoke-CommandAs                                                                                                                                                                                            
+                                Cmdlet          Invoke-Command                                     3.0.0.0    Microsoft.PowerShell.Core                                                                                                                                                                                   
+                                Cmdlet          Invoke-CommandInDesktopPackage                     2.0.0.0    Appx    
+
+                                 detect and redir the build process into step:BUILD, as the above completely breaks the fingerprint-based step process
+                                 Otherwise it under revs the build.
+                            #>
+                            # use Select-String regex parse to prxy count # of funcs that roughly should come back from gcm w/in $ASTMatchThreshold
+                            if( ($commandList.count / $rawfunccount) -lt $ASTMatchThreshold ){
+                                $smsg = "get-command failed to return a complete Func/Alias list from $($ModuleName) -lt AST $($ASTMatchThreshold * 100)% match:" ; 
+                                $smsg += "`nAST profile (get-FunctionBlocks+get-AliasAssignsAST) returned:$($ASTCmds.count)"
+                                $smsg += "`nFORCING STEP EVAL INTO 'PATCH' TO WORK AROUND BUG" ;
+                                if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
+                                else{ write-verbose "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; 
+                                $MinVersionIncrement = $true ; 
+                            } else { 
+                                $smsg = "get-command $($ModuleName) -gt AST $($ASTMatchThreshold * 100)% match:" ; 
+                                if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
+                                else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                            } ;
+                            <# AST based approach - dirt slow, adds 3min wait to the build process better to regex sls out the functions and use that as a guage ^
+                            # -----------
+                            #if(( ($commandList.count / $rawfunccount) -lt $ASTMatchThreshold ) -AND (get-command get-FunctionBlocks) -AND (get-command get-AliasAssignsAST)){
+                                $smsg = "(ASTprofile: get-FunctionBlocks $($ModuleName)..." ; 
+                                if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
+                                else{ write-verbose "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; 
+                                #$ASTfuncs = get-FunctionBlocks $ModuleName ; 
+                                $ASTcmds = @() ; 
+                                $ASTProfile = get-codeprofileast -path 'C:\sc\verb-IO\verb-IO\verb-IO.psm1' -Functions -aliases -verbose:$($VerbosePreference -eq "Continue")  ;
+                                $ASTCmds = $ASTProfile.Functions.name ; 
+                                $ASTCmds += $ASTProfile.Aliases.extent.text ; 
+                                $diffCount = $ASTCmds.count - $commandList.name.count ;
+                                $diffPerc = $commandList.name.count / $ASTCmds.count ; ;
+                                if($diffPerc -lt $ASTMatchThreshold ){
+                                    $smsg = "get-command failed to return a complete Func/Alias list from $($ModuleName) -lt AST $($ASTMatchThreshold * 100)% match:" ; 
+                                    $smsg += "`nAST profile (get-FunctionBlocks+get-AliasAssignsAST) returned:$($ASTCmds.count)"
+                                    $smsg += "`nFORCING STEP EVAL INTO 'PATCH' TO WORK AROUND BUG" ;
+                                    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
+                                    else{ write-verbose "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; 
+                                    $MinVersionIncrement = $true ; 
+                                } else { 
+                                    $smsg = "get-command $($ModuleName) -gt AST $($ASTMatchThreshold * 100)% match:" ; 
+                                    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
+                                    else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                                } ;
+
+                            } else { 
+                                $smsg = "Unable to gcm get-FunctionBlocks & get-AliasAssignsAST!" ;
+                                if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Warn } #Error|Warn|Debug 
+                                else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                                throw $smsg ;
+                            } ;
+                            # -----------
+                            #>
+
+                            
                             $pltXMO.Name = $ModuleName; # have to rmo using *basename*
                             $smsg = "remove-module w`n$(($pltXMO|out-string).trim())" ; 
                             if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
@@ -349,26 +422,17 @@ function Step-ModuleVersionCalculated {
                             # SemVers uses 3-digits, a prerelease tag and a build meta tag (only 3 are used in pkg builds etc)
                             $bumpVersionType = 'Patch' ; 
                             if($MinVersionIncrement){
-                                $smsg = "-MinVersionIncrement override specified: incrementing by min .Build" ; 
+                                $smsg = "-MinVersionIncrement override specified: incrementing by min .$($MinVersionIncrementBump)" ; 
                                 if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
                                 elseif(-not $Silent){ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
                                 #$Version.Build ++ ;
                                 #$Version.Revision = 0 ; 
-                                # drop through min patch rev above
+                                # drop through min patch rev above - no, it now uses $MinVersionIncrementBump
                             } else { 
                                 # KM's core logic code:
                                 $smsg = "Detecting new features" ; 
                                 if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
                                 elseif(-not $Silent){ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
-                                <# below dumped matched text into pipeline, which ended up in the return and blew up the bumprev value
-                                $fingerprint | Where {$_ -notin $oldFingerprint } | 
-                                    ForEach-Object {$bumpVersionType = 'Minor'; "  $_"} ; 
-                                $smsg = "Detecting breaking changes" ; 
-                                if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
-                                elseif(-not $Silent){ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
-                                $oldFingerprint | Where {$_ -notin $fingerprint } | 
-                                    ForEach-Object {$bumpVersionType = 'Major'; "  $_"} ; 
-                                #>
                                 # yank out the pipeline drops (or accumulate them)
                                 $NewChgs = $BreakChgs =@() ; 
                                 $fingerprint | Where {$_ -notin $oldFingerprint } | 
@@ -398,6 +462,15 @@ function Step-ModuleVersionCalculated {
                     } ;  
 
                     if ( $fingerprint ){
+
+                        if($fingerprintfile){
+                            write-verbose "(backup-FileTDO -path $($fingerprintfile))" ;
+                            $fingerprintBU = backup-FileTDO -path $fingerprintfile -showdebug:$($showdebug) -whatif:$($whatif) ;
+                            if(-not $FingerprintBU -AND -not $whatif){throw "backup-FileTDO -Source $($fingerprintfile)!" }
+                        } else { 
+                           write-verbose "(no fingerprint file to backup)" ;  
+                        } ; 
+
                         $pltOFile=[ordered]@{Encoding='utf8' ;FilePath=(join-path -path $moddir -childpath 'fingerprint') ;whatif=$($whatif) ; Verbose = $($VerbosePreference -eq 'Continue') } ;
                         $smsg = "Writing fingerprint: Out-File w`n$(($pltOFile|out-string).trim())" ; 
                         if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
@@ -430,10 +503,10 @@ function Step-ModuleVersionCalculated {
                     $PriorVers =  $Version | Select Major,Minor,Build,Revision
                     #>
                     if($MinVersionIncrement){
-                        write-host -foregroundcolor green "-MinVersionIncrement override specified: incrementing by min .Build" ; 
+                        write-host -foregroundcolor green "-MinVersionIncrement override specified: incrementing by min:$($MinVersionIncrementBump)" ; 
                         #$Version.Build ++ ;
                         #$Version.Revision = 0 ; 
-                        $bumpVersionType = 'Patch' 
+                        $bumpVersionType = $MinVersionIncrementBump  ; 
                     } else { 
                         If ($PercentChange -ge 50){
                             #$Version.Major ++ ; # MAJOR (breaking change)
