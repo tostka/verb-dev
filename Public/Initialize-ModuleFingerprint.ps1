@@ -18,6 +18,7 @@ function Initialize-ModuleFingerprint {
     AddedWebsite: https://powershellexplained.com/2017-10-14-Powershell-module-semantic-version/
     AddedTwitter: 
     REVISIONS
+    * 2:29 PM 5/16/2022 add: backup-fileTDO of the fingerprintfile
     * 9:58 AM 10/26/2021 updated all echos, wh, ww, wv's with wlts's, updated KM logic to match step-ModuleVersionCalculated's latest
     * 6:11 PM 10/15/2021 rem'd # raa, replaced psd1/psm1-location code with Get-PSModuleFile(), which is a variant of BuildHelpers get-psModuleManifest. 
     * 12:36 PM 10/13/2021 added else block to catch mods with inconsistent names between root dir, and .psm1 file, (or even .psm1 location); upgraded catchblock to curr std; added splats and verbose echos for debugging outlier processing errors
@@ -245,7 +246,23 @@ function Initialize-ModuleFingerprint {
     } ;  # PROC-E
     END {
         if ( $fingerprint ){
+            
+            <# fingerprint is the diff, not the $oldfingprint file (which is used in step-moduleversioncalculated())
+            write-verbose "(backup-FileTDO -path $($fingerprint))" ;
+            $fingerprintBU = backup-FileTDO -path $fingerprint -showdebug:$($showdebug) -whatif:$($whatif) ;
+            if (!$fingerprintBU) {throw "FAILURE" } ;
+            #> 
+
             $pltOFile=[ordered]@{Encoding='utf8' ;FilePath=(join-path -path $moddir.fullname -childpath 'fingerprint') ;whatif=$($whatif) ;} ; 
+
+            if(test-path $pltOFile.FilePath){
+                write-verbose "(backup-FileTDO -path $($pltOFile.FilePath))" ;
+                $fingerprintBU = backup-FileTDO -path $pltOFile.FilePath -showdebug:$($showdebug) -whatif:$($whatif) ;
+                if(-not $FingerprintBU -AND -not $whatif){throw "backup-FileTDO -Source $($pltOFile.FilePath)!" }
+            } else { 
+                write-verbose "(no old fingerprint file to backup)" ;  
+            } ;  
+
             write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):Out-File w`n$(($pltOFile|out-string).trim())" ; 
             $fingerprint | out-file @pltOFile ; 
         } else {
