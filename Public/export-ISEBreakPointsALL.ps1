@@ -15,6 +15,7 @@ function export-ISEBreakPointsALL {
     Github      : https://github.com/tostka/verb-dev
     Tags        : Powershell,ISE,development,debugging
     REVISIONS
+    * 12:23 PM 5/23/2022 added try/catch: failed out hard on Untitled.ps1's
     * 9:19 AM 5/20/2022 add: eIseBpAll alias (using these a lot lately)
     * 12:14 PM 5/11/2022 init
     .DESCRIPTION
@@ -52,7 +53,15 @@ function export-ISEBreakPointsALL {
                 $pltEISEBP=@{Script= $ISES ;whatif=$($whatif) ;verbose=$($verbose) ; } ;
                 $smsg  = "export-ISEBreakPoints w`n$(($pltEISEBP|out-string).trim())" ;
                 write-verbose $smsg ;
-                export-ISEBreakPoints @pltEISEBP ;
+                try{
+                    export-ISEBreakPoints @pltEISEBP ;
+                } catch {
+                    $ErrTrapd=$Error[0] ;
+                    $smsg = "$('*'*5)`nFailed processing $($ErrTrapd.Exception.ItemName). `nError Message: $($ErrTrapd.Exception.Message)`nError Details: `n$(($ErrTrapd|out-string).trim())`n$('-'*5)" ;
+                    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN } #Error|Warn|Debug 
+                    else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                    CONTINUE ; 
+                } ; 
                 write-host -foregroundcolor white "$((get-date).ToString('HH:mm:ss')):$($sBnrS.replace('-v','-^').replace('v-','^-'))" ;
             } ;
         } else {  write-warning "This script only functions within PS ISE, with a script file open for editing" };

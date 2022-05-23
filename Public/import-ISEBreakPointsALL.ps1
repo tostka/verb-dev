@@ -15,6 +15,7 @@ function import-ISEBreakPointsALL {
     Github      : https://github.com/tostka/verb-dev
     Tags        : Powershell,ISE,development,debugging
     REVISIONS
+    * 12:23 PM 5/23/2022 added try/catch: failed out hard on Untitled.ps1's
     * 9:19 AM 5/20/2022 add: iIseBpAll alias (using these a lot lately; w freq crashouts of ise, and need to recover all files open & BPs to quickly get back to function)
     * 1:58 PM 5/16/2022 rem'd whatif (not supported in child func)
     * 12:16 PM 5/11/2022 init
@@ -52,13 +53,21 @@ function import-ISEBreakPointsALL {
                 $pltEISEBP=@{Script= $ISES ;verbose=$($verbose) ; } ; # whatif=$($whatif) ;
                 $smsg  = "import-ISEBreakPoints w`n$(($pltEISEBP|out-string).trim())" ;
                 write-verbose $smsg ;
-                import-ISEBreakPoints @pltEISEBP ;
+                try{
+                    import-ISEBreakPoints @pltEISEBP ;
+                } catch {
+                    $ErrTrapd=$Error[0] ;
+                    $smsg = "$('*'*5)`nFailed processing $($ErrTrapd.Exception.ItemName). `nError Message: $($ErrTrapd.Exception.Message)`nError Details: `n$(($ErrTrapd|out-string).trim())`n$('-'*5)" ;
+                    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN } #Error|Warn|Debug 
+                    else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                    CONTINUE ; 
+                } ; 
                 write-host -foregroundcolor white "$((get-date).ToString('HH:mm:ss')):$($sBnrS.replace('-v','-^').replace('v-','^-'))" ;
             } ;
         } else {  write-warning "This script only functions within PS ISE, with a script file open for editing" };
     } # PROC-E
     END{
         write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($sBnr.replace('=v','=^').replace('v=','^='))" ;
-    }
+    } ;
 }
 #*------^ import-ISEBreakPointsALL.ps1 ^------
