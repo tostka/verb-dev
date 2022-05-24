@@ -2,7 +2,7 @@
 function process-NewModule {
     <#
     .SYNOPSIS
-    process-NewModule - post-module conversion or component update: sign, publish to repo, and install back script
+    process-NewModule - Hybrid Monolithic/Dynam vers post-module conversion or component update: sign, publish to repo, and install back script
     .NOTES
     Version     : 1.1.0
     Author      : Todd Kadrie
@@ -15,13 +15,22 @@ function process-NewModule {
     Github      : https://github.com/tostka/verb-dev
     Tags        : Powershell,Module,Build,Development
     REVISIONS
-    * 2:59 PM 5/9/2022 back-reved process-NewModuleDotsourced updates in
+    * 2:38 PM 5/24/2022: Time to resave process-NewModuleHybrid.ps1 => C:\sc\verb-dev\Public\process-NewModule.ps1
+    * 2:54 PM 5/23/2022 add: verbose to pltUMD splat for update-metadata (psd1 enforce curr modvers); added missing testscript-targeting remove-UnneededFileVariants @pltRGens ;  
+        got through full dbg/publish/install pass on vio merged, wo issues. Appears functional. 
+    * 4:01 PM 5/20/2022 WIP, left off, got through the psdUpdatedVers reset - works, just before the uninstall-moduleforce(), need to complete debugging on that balance of material. 
+    still debugging: add: buffer and post build compare/restore the $psd1UpdatedVers, to the psd1Version (fix odd bug that's causing rebuild to have the pre-update moduleversion); 
+        $rgxOldFingerprint (for identifying backup-fileTDO fingerprint files); revert|backup-file -> restore|backup-fileTDO; add restore-fileTDO fingerprint, and psm1/psd1 (using the new func)
+    * 4:00 PM 5/13/2022 ren merge-module() refs -> ConvertTo-ModuleDynamicTDO() ; ren unmerge-module() refs -> ConvertTo-ModuleDynamicTDO
+    * 4:10 PM 5/12/2022 got through a full non -Dyn pass, to publish and ipmo -for. Need to dbg unmerged-module.psm1 interaction yet, but this *looks* like it could be ready to be the process-NewModule().
+    * 8:45 AM 5/10/2022 attempt to merge over dotsource updates and logic, create a single hosting both flows
+    * 2:59 PM 5/9/2022 back-reved process-NewModuleHybridDotsourced updates in
     * 8:47 PM 10/16/2021 rem'd out ReqMods code, was breaking exec from home
     * 1:17 PM 10/12/2021 revised post publish code, find-module was returning an array (bombming nupkg gci), so sort on version and take highest single.
     * 3:43 PM 10/7/2021 revised .nupkg caching code to use the returned (find-module).version string to find the repo .nupkg file, for caching (works around behavior where 4-digit semvars, with 4th digit(rev) 0, get only a 3-digit version string in the .nupkg file name)
     * 3:43 PM 9/27/2021 spliced in updated start-log pre-proc code ; fixed $Repo escape in update herestring block
     * 2:14 PM 9/21/2021 functionalized & added to verb-dev ; updated $FinalReport to leverage varis, simpler to port install cmds between mods; added #requires (left in loadmod support against dependancy breaks); cleaned up rems
-    * 11:25 AM 9/21/2021 added code to remove obsolete gens of .nupkgs & build log files (calls to new verb-io:remove-UnneededFileVariants()); 
+    * 11:25 AM 9/21/2021 added code to remove obsolete gens of .nupkgs & build log files (calls to new verb-io:remove-UnneededFileVariants());
     * 12:40 PM 6/2/2021 example used verb-trans, swapped in verb-logging
     * 12:07 PM 4/21/2021 expanded ss aliases
     * 10:17 AM 3/16/2021 added -ea 0 to the install BP output, suppress remove-module error when not already loaded
@@ -38,12 +47,12 @@ function process-NewModule {
     * 8:39 AM 3/2/2020 still trying to get things to smoothly fail through missing installed mod, to dev .psm1, and finally into uwes copy of the mod, to ensure the commands are mounted, under any circ, working, still not happy when updating a module that the script itself is dependant on. Updated Final Report to sort other machine update sample
     * 7:31 AM 3/2/2020 spliced over Set-ModuleFunction FunctionsToExport maint code from converTo-Module.ps1
     * 4:03 PM 3/1/2020 excluded module load block from verbose output
-    * 4:32 PM 2/27/2020: ammended test import-module force (hard reload curr version) & verbose output ; added trailing FinalReport with post install guidence & testing 
+    * 4:32 PM 2/27/2020: ammended test import-module force (hard reload curr version) & verbose output ; added trailing FinalReport with post install guidence & testing
     * 7:21 PM 2/26/2020 sorted a typo/dupe in the nupkg copy echo ; updated psm1 version code, fixd bug, replic'd it to the convert script. shifted FunctionsToExport into buildhelpers mod (added #requires), added -DisableNameChecking to mod imports
     * 6:30 PM 2/25/2020 added code to update the guid from the psd1 into the pester test scrpit
     * 2:00 PM 2/24/2020 added material re: uninstall in description/example
     * 4:00 PM 2/18/2020 added new descriptive -Tag $ModuleName  spec to the start-Log call
-    * 7:36 PM 1/15/2020 added code to create 'Package' subdir, and copy in post-publish .nupkg file (easier to buffer into other repos, than publish-module) had to splice in broken installed module backfill for verb-dev 
+    * 7:36 PM 1/15/2020 added code to create 'Package' subdir, and copy in post-publish .nupkg file (easier to buffer into other repos, than publish-module) had to splice in broken installed module backfill for verb-dev
     * 7:58 PM 1/14/2020 converted dev-verb call into #requires Module call ; #459 flipped to using .net to pull the mydocs specfolder out of the OS (in case of fut redir) ; ren parm (to match convertto-module.ps1): DemoRepo -> Repository, added manual removal of old version from all $env:psmodulepath entries, shifted $psd1vers code to always, and used it with the install-module -requiredversion, to work around the cmds lack of auto-priority, if it finds multiples, it doesn't install latest, just throws up. (could have used -minrev too and it *should* have done this, or any later). Ran full publish & validate on verb-dev (work)
     * 10:49 AM 1/13/2020 updated echos for Republish/non-republish output (enum specific steps each will cover), was throwing deep acc error on copy to local prof for md file, added retry, which 2x's and fails past it. Doesn't seem mpactful, the md wasn't even one id' pop'd, just a defaupt template file
     * 7:35 AM 12/30/2019 got through a full pass to import-module on verb-dev. *appears* functional
@@ -55,6 +64,7 @@ function process-NewModule {
     * 7:05 PM 12/19/2019 subbed in write-log support ; init, ran through Republish pass on verb-AAD
     .DESCRIPTION
     process-NewModule - dyanmic include/dot-stourced post-module conversion or component update: sign - all files (this vers), publish to repo, and install back script
+    Note: -Merge drivese logic to build Monolithic .psm1 (-Merge), vs Dynamic-include .psm1 (-not -Merge)
     I've hit an insurmoutable bug in psv2, when using psGet to install psv3+ modules into older legacy machines. Verb-IO *won't* properly parse and load my ConvertFrom-SourceTable function at all. So we need the ability to conditionally load module functions, skipping psv2-incompatibles when running that rev
     Preqeq Installs:
     Install-Module BuildHelpers -scope currentuser # buildhelpers metadata handling https://github.com/RamblingCookieMonster/BuildHelpers
@@ -70,7 +80,7 @@ function process-NewModule {
     .PARAMETER  Repository
     Target local Repo[-Repository lyncRepo
     .PARAMETER Merge
-    Flag that indicates Module should be Merged into a monoolithic .psm1 [-Merge]
+    Flag that indicates Module should be Merged into a monoolithic .psm1 (otherwise, a Dynamic-Include version is built)[-Merge]
     .PARAMETER RunTest
     Flag that indicates Pester test script should be run, at end of processing [-RunTest]
     .PARAMETER NoBuildInfo
@@ -78,12 +88,15 @@ function process-NewModule {
     .PARAMETER ShowDebug
     Parameter to display Debugging messages [-ShowDebug switch]
     .PARAMETER Republish
-    Flag that indicates Module should be republished into local Repo (skips Merge-Module & Sign-file steps) [-Republish]
+    Flag that indicates Module should be republished into local Repo (skips ConvertTo-ModuleDynamicTDO & Sign-file steps) [-Republish]
     .PARAMETER Whatif
     Parameter to run a Test no-change pass [-Whatif switch]
     .EXAMPLE
     processbulk-NewModule.ps1 -mod verb-text,verb-io -verbose
     Example using the separate processbulk-NewModule.ps1 pre-procesesor to feed an array of mods through bulk processing, uses BuildEnvironment Step-ModuleVersion to increment the psd1 version, and specs -merge & -RunTest processing
+    .EXAMPLE
+    processbulk-NewModule.ps1 -mod -Dynamic verb-io -verbose
+    Example using the separate processbulk-NewModule.ps1 pre-procesesor to drive a Dyanmic include .psm1 build to feed one mod through bulk processing, uses BuildEnvironment Step-ModuleVersion to increment the psd1 version, and specs -merge & -RunTest processing
     .EXAMPLE
     process-NewModule.ps1 -ModuleName "verb-AAD" -ModDirPath "C:\sc\verb-AAD" -Repository $localPSRepo  -Merge -showdebug -whatif ;
     Full Merge Build/Rebuild from components & Publish/Install/Test specified module, with debug messages, and whatif pass.
@@ -110,7 +123,7 @@ function process-NewModule {
         [ValidateNotNullOrEmpty()]$Repository,
         [Parameter(HelpMessage="Flag that indicates Module should be Merged into a monoolithic .psm1 [-Merge]")]
         [switch] $Merge,
-        [Parameter(HelpMessage="Flag that indicates Module should be republished into local Repo (skips Merge-Module & Sign-file steps) [-Republish]")]
+        [Parameter(HelpMessage="Flag that indicates Module should be republished into local Repo (skips ConvertTo-ModuleDynamicTDO & Sign-file steps) [-Republish]")]
         [switch] $Republish,
         [Parameter(HelpMessage="Flag that indicates Pester test script should be run, at end of processing [-RunTest]")]
         [switch] $RunTest,
@@ -124,7 +137,9 @@ function process-NewModule {
     # function self-name (equiv to script's: $MyInvocation.MyCommand.Path) ;
     ${CmdletName} = $PSCmdlet.MyInvocation.MyCommand.Name ;
     # Get parameters this function was invoked with
+    # Get parameters this function was invoked with
     $PSParameters = New-Object -TypeName PSObject -Property $PSBoundParameters ;
+    write-verbose  "`$PSBoundParameters:`n$(($PSBoundParameters|out-string).trim())" ;
     $verbose = ($VerbosePreference -eq "Continue") ;
 
     if ($psISE){
@@ -306,7 +321,7 @@ function process-NewModule {
     <# breaking runs
     [array]$reqMods = $null ; # force array, otherwise single first makes it a [string]
     $reqMods += "Test-TranscriptionSupported;Test-Transcribing;Stop-TranscriptLog;Start-IseTranscript;Start-TranscriptLog;get-ArchivePath;Archive-Log;Start-TranscriptLog;Write-Log;Start-Log".split(";") ;
-    $reqMods+="Get-CommentBlocks;parseHelp;get-ScriptProfileAST;build-VSCConfig;Merge-Module;get-VersionInfo".split(";") ;
+    $reqMods+="Get-CommentBlocks;parseHelp;get-ScriptProfileAST;build-VSCConfig;ConvertTo-ModuleDynamicTDO;get-VersionInfo".split(";") ;
     # verb-IO reqMods
     $reqMods+="Set-FileContent;backup-File;Set-FileContent;backup-File;remove-ItemRetry".split(";") ;
     $reqMods = $reqMods | Select-Object -Unique ;
@@ -369,14 +384,7 @@ function process-NewModule {
         if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug
         else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
     } ;
-    <# prior code
-    $logspec = start-Log -Path ($MyInvocation.MyCommand.Definition) -Tag $ModuleName -showdebug:$($showdebug) -whatif:$($whatif) ;
-    if($logspec){
-        $logging=$logspec.logging ;
-        $logfile=$logspec.logfile ;
-        $transcript=$logspec.transcript ;
-    } else {throw "Unable to configure logging!" } ;
-    #>
+    
     $sBnr="#*======v $($ScriptBaseName):$($ModuleName) v======" ;
     $smsg= "$($sBnr)" ;
     if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug
@@ -387,27 +395,29 @@ function process-NewModule {
     # default to Public, but support External, if it pre-exists:
     if(test-path "$($ModDirPath)\External" ){
         $smsg = "Pre-existing variant found, and put into use:$($ModDirPath)\External" ;
-        if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
+        if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug
         else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
         $PublicDirPath = "$($ModDirPath)\External" ;
-    } else { 
+    } else {
         $PublicDirPath = "$($ModDirPath)\Public" ;
-    } ; 
+    } ;
     # default to Internal, but support Private, if it pre-exists:
     if(test-path "$($ModDirPath)\Private" ){
         $smsg = "Pre-existing variant found, and put into use:$($ModDirPath)\Private" ;
-        if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
+        if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug
         else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
         $InternalDirPath = "$($ModDirPath)\Private" ;
-    } else { 
+    } else {
         $InternalDirPath = "$($ModDirPath)\Internal" ;
-    } ; 
-    #$ModPsdPath = "$(join-path -path (join-path -path $Moddirpath -ChildPath $modulename) -ChildPath $modulename).psd1"
+    } ;
+    # provide a fall back to 'stock' location in case it's unresolved below
+    $ModPsdPath = "$(join-path -path (join-path -path $Moddirpath -ChildPath $modulename) -ChildPath $modulename).psd1"
     # "C:\sc\verb-AAD" ; C:\sc\verb-AAD\Tests\verb-AAD.tests.ps1
     $TestScriptPath = "$($ModDirPath)\Tests\$($ModuleName).tests.ps1" ;
     $rgxSignFiles='\.(CAT|MSI|JAR,OCX|PS1|PSM1|PSD1|PS1XML|PSC1|MSP|CMD|BAT|VBS)$' ;
     # expand to cover External & Private variant names as well
     $rgxIncludeDirs='\\(Public|Internal|External|Private|Classes)\\' ;
+    $rgxOldFingerprint = 'fingerprint\._\d{8}-\d{4}(A|P)M' ; 
 
     $editor = "notepad2.exe" ;
 
@@ -418,18 +428,18 @@ function process-NewModule {
         # so use psd1version and manually increment, skipping BuildHelper mod use entirely
         write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):(-NoBuildInfo specified:Skipping use of buggy BuildHelpers module)" ;
         TRY {
-            if($ModPsdPath = (gci "$($modroot)\$($ModuleName)\$($ModuleName).psd1").FullName){
+            if($ModPsdPath = (gci "$($modroot)\$($ModuleName)\$($ModuleName).psd1" -ea 0).FullName){
 
             } elseif ($ModPsdPath = Get-PSModuleFile -path $ModRoot -Extension .psd1){
 
-            } else { 
-                $smsg = "Unable to resolve manifest .psd1 path for module dir:$($modroot)" ; 
-                write-warning $smsg ; 
+            } else {
+                $smsg = "Unable to resolve manifest .psd1 path for module dir:$($modroot)" ;
+                write-warning $smsg ;
                 throw $smsg
-                break ; 
-            } ; 
-            $smsg = "Resolved `$ModPsdPath:`n$($ModPsdPath)" ; 
-            if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
+                break ;
+            } ;
+            $smsg = "Resolved `$ModPsdPath:`n$($ModPsdPath)" ;
+            if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug
             else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
 
             # $ModPsdPath
@@ -450,10 +460,19 @@ function process-NewModule {
         # stock buildhelper e-varis - I don't even see it in *use*
         write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):(executing:Get-BuildEnvironment -Path $($ModDirPath) `n(use -NoBuildInfo if hangs))" ;
         $BuildVariable = Get-BuildVariable -path $ModDirPath
-        #if(test-path $env:BHPSModuleManifest){
-        if(test-path $BuildVariable.BHPSModuleManifest){
-            $ModPsdPath = $env:BHPSModuleManifest ; 
-        } ;             
+        <# *not* equiv to Set-BuildEnvironment -Path $ModRoot -Force! only returns a tiny subset of the evaris set by sbe
+            $BuildVariable | fl *
+            BuildSystem   : Unknown
+            ProjectPath   : C:\sc\verb-io
+            BranchName    : master
+            CommitMessage : Update Set-ContentFixEncoding.ps1
+                            3:40 PM 5/6/2022 added echo top 2 lines of passed Value, and added pswlt
+            CommitHash    : 454b1f8e4b5afb76ac1038d723089ac802db6f1a
+            BuildNumber   : 0
+        #>
+        if(test-path $env:BHPSModuleManifest){        
+            $ModPsdPath = $env:BHPSModuleManifest ;
+        } ;
 
     } ;
     <# 	Get-Item ENV:BH* ;
@@ -480,6 +499,15 @@ function process-NewModule {
 	    BHBranchName                   master
 	    BHBuildNumber                  0
     #>
+
+    # we're losing the psdversion post rebuild, store the value just set by Step-ModuleVersion
+    TRY{
+        $psd1UpdatedVers = (Import-PowerShellDataFile -Path $ModPsdPath).ModuleVersion.tostring() ;
+    } CATCH {
+        $PassStatus += ";ERROR";
+        write-warning  "$(get-date -format 'HH:mm:ss'): Failed processing $($_.Exception.ItemName). `nError Message: $($_.Exception.Message)`nError Details: $($_)" ;
+        Exit ;
+    } ;
 
     if(!$Republish){
         $sHS=@"
@@ -513,17 +541,12 @@ $(if($Merge){'MERGE parm specified as well:`n-Merge Public|Internal|Classes incl
               showdebug=$($showdebug);
               whatif=$($whatif);
             } ;
-            $smsg= "Merge-Module w`n$(($pltmergeModule|out-string).trim())" ;
+            $smsg= "ConvertTo-ModuleMergedTDO w`n$(($pltmergeModule|out-string).trim())" ;
             if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info }  #Error|Warn|Debug
             else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
 
-            TRY {
-                $ReportObj = Merge-Module @pltmergeModule ;
-            } CATCH {
-                $PassStatus += ";ERROR";
-                write-warning  "$(get-date -format 'HH:mm:ss'): Failed processing $($_.Exception.ItemName). `nError Message: $($_.Exception.Message)`nError Details: $($_)" ;
-                Exit ;
-            } ;
+            $ReportObj = ConvertTo-ModuleMergedTDO @pltmergeModule ;
+            
             <#  $ReportObj=[ordered]@{
                     Status=$true ;
                     PsmNameBU = $PsmNameBU ;
@@ -534,28 +557,139 @@ $(if($Merge){'MERGE parm specified as well:`n-Merge Public|Internal|Classes incl
             if($ReportObj.Status){
 
             } else {
-                $smsg= "Merge-Module failure.`nPassStatus:$($reportobj.PassStatus)" ;
+                $smsg= "ConvertTo-ModuleMergedTDO failure.`nPassStatus:$($reportobj.PassStatus)" ;
                 if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug
                 else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
                 if($PsmNameBu){
-                    $smsg= "Reverting PSM1 from backup:" ;
+                    $smsg= "Restoring PSM1 from backup:" ;
                     if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug
                     else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
-                    $error.clear() ;
-                    TRY {
-                        $bRet = revert-File -Source $PsmNameBu -Destination "$($ModDirPath)\$($ModuleName)\$($ModuleName).psm1" -showdebug:$($showdebug) -whatif:$($whatif)
-                    } CATCH {
-                        $PassStatus += ";ERROR";
-                        Write-Warning "$(get-date -format 'HH:mm:ss'): Failed processing $($_.Exception.ItemName). `nError Message: $($_.Exception.Message)`nError Details: $($_)" ;
-                        Exit #STOP(debug)|EXIT(close)|Continue(move on in loop cycle) ;
-                    } ;
+                    
+                    $bRet = restore-FileTDO -Source $PsmNameBu -Destination $ModPsmPath -showdebug:$($showdebug) -whatif:$($whatif)
+                    if(-not $bRet -AND -not $whatif){throw "restore-FileTDO -Source $($PsmNameBu) -Destination $($ModPsmPath)!" } else {
+                        $PassStatus += ";UPDATED:restore-FileTDO PsmNameBu";
+                    }  ;
+                    
                 } else {
                     $smsg= "(no backup .psm1 to revert from)" ;
+                    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN } #Error|Warn|Debug
+                    else{ write-WARNING $smsg } ;
+                } ;
+                if($PsdNameBu){
+                    $smsg= "Restoring PSD1 from backup:" ;
                     if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug
                     else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                    
+                    $bRet = restore-FileTDO -Source $PsdNameBu -Destination $ModPsdPath -showdebug:$($showdebug) -whatif:$($whatif)
+                    if(-not $bRet -AND -not $whatif){throw "restore-FileTDO -Source $($PsdNameBu) -Destination $($ModPsdPath)!" } else {
+                        $PassStatus += ";UPDATED:restore-FileTDO PsdNameBu";
+                    }  ;
+                } else {
+                    $smsg= "(no backup .psm1 to revert from)" ;
+                    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN } #Error|Warn|Debug
+                    else{ write-WARNING $smsg } ;
+                } ;
+
+                # should restore fingerprint as well
+                #$rgxOldFingerprint = 'fingerprint\._\d{8}-\d{4}(A|P)M' ; 
+                if($oldfingerprint = get-childitem -path "$($ModDirPath)\fingerprint*" | ?{$_.name -match $rgxOldFingerprint } | sort LastWriteTime | select -last 1 | select -expand fullname){
+                   $smsg= "Restoring`n$($oldfingerprint)`nfrom backup:" ;
+                    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug
+                    else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                    
+                    $bRet = restore-FileTDO -Source $oldfingerprint -Destination "$($ModDirPath)\fingerprint" -showdebug:$($showdebug) -whatif:$($whatif)
+                    if(-not $bRet -AND -not $whatif){throw "restore-FileTDO -Source $($oldfingerprint) -Destination $($ModDirPath)\fingerprint!" } else {
+                        $PassStatus += ";UPDATED:restore-FileTDO oldfingerprint";
+                    }  ;
+                } else {
+                    $smsg= "(no backup fingerprint._yyyymmdd-hhmmtt to revert from)" ;
+                    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN } #Error|Warn|Debug
+                    else{ write-WARNING $smsg } ;
                 } ;
             } ;
-        } ;
+        } else {
+            $smsg= "-Merge *not* specified: UNMERGE implied (dynamic include .psm1 build)..." ;
+            if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug
+            else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+            $pltmergeModule=[ordered]@{
+                ModuleName=$($ModuleName) ;
+                ModuleSourcePath="$($PublicDirPath)","$($InternalDirPath)" ;
+                ModuleDestinationPath="$($ModDirPath)\$($ModuleName)" ;
+                LogSpec = $logspec ;
+                NoAliasExport=$($NoAliasExport) ;
+                ErrorAction="Stop" ;
+                showdebug=$($showdebug);
+                whatif=$($whatif);
+            } ;
+            $smsg= "ConvertTo-ModuleDynamicTDO w`n$(($pltmergeModule|out-string).trim())" ;
+            if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info }  #Error|Warn|Debug
+            else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+
+            $ReportObj = ConvertTo-ModuleDynamicTDO @pltmergeModule ;
+           
+            <#  $ReportObj=[ordered]@{
+                    Status=$true ;
+                    PsmNameBU = $PsmNameBU ;
+                    PassStatus = $PassStatus ;
+                } ;
+            #>
+            $PsmNameBu=$ReportObj.PsmNameBU ;
+            # get the psd as well: 
+            $PsdNameBU = $ReportObj.sdNameBU ;
+            if($ReportObj.Status){
+
+            } else {
+                $smsg= "ConvertTo-ModuleDynamicTDO failure.`nPassStatus:$($reportobj.PassStatus)" ;
+                if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug
+                else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                if($PsmNameBu){
+                    $smsg= "Restoring PSM1 from backup:" ;
+                    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug
+                    else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                    
+                    $bRet = restore-FileTDO -Source $PsmNameBu -Destination $ModPsmPath -showdebug:$($showdebug) -whatif:$($whatif)
+                    if(-not $bRet -AND -not $whatif){throw "restore-FileTDO -Source $($PsmNameBu) -Destination $($ModPsmPath)!" } else {
+                        $PassStatus += ";UPDATED:restore-FileTDO PsmNameBu";
+                    }  ;
+                    
+                } else {
+                    $smsg= "(no backup .psm1 to revert from)" ;
+                    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN } #Error|Warn|Debug
+                    else{ write-WARNING $smsg } ;
+                } ;
+                if($PsdNameBu){
+                    $smsg= "Restoring PSD1 from backup:" ;
+                    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug
+                    else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                    
+                    $bRet = restore-FileTDO -Source $PsdNameBu -Destination $ModPsdPath -showdebug:$($showdebug) -whatif:$($whatif)
+                    if(-not $bRet -AND -not $whatif){throw "restore-FileTDO -Source $($PsdNameBu) -Destination $($ModPsdPath)!" } else {
+                        $PassStatus += ";UPDATED:restore-FileTDO PsdNameBu";
+                    }  ;
+                } else {
+                    $smsg= "(no backup .psm1 to revert from)" ;
+                    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN } #Error|Warn|Debug
+                    else{ write-WARNING $smsg } ;
+                } ;
+
+                # should restore fingerprint as well
+                #$rgxOldFingerprint = 'fingerprint\._\d{8}-\d{4}(A|P)M' ; 
+                if($oldfingerprint = get-childitem -path "$($ModDirPath)\fingerprint*" | ?{$_.name -match $rgxOldFingerprint } | sort LastWriteTime | select -last 1 | select -expand fullname){
+                   $smsg= "Restoring`n$($oldfingerprint)`nfrom backup:" ;
+                    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug
+                    else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                    
+                    $bRet = restore-FileTDO -Source $oldfingerprint -Destination "$($ModDirPath)\fingerprint" -showdebug:$($showdebug) -whatif:$($whatif)
+                    if(-not $bRet -AND -not $whatif){throw "restore-FileTDO -Source $($oldfingerprint) -Destination $($ModDirPath)\fingerprint!" } else {
+                        $PassStatus += ";UPDATED:restore-FileTDO oldfingerprint";
+                    }  ;
+                } else {
+                    $smsg= "(no backup fingerprint._yyyymmdd-hhmmtt to revert from)" ;
+                    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN } #Error|Warn|Debug
+                    else{ write-WARNING $smsg } ;
+                } ;
+            } ;
+        }
 
     } else {
         $sHS=@"
@@ -604,11 +738,19 @@ $(if($Merge){'MERGE parm specified as well:`n-Merge Public|Internal|Classes incl
         $rgxGuid = "[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}" ;
         # also maintain encoding (set-content defaults ascii)
         $tf = $TestScriptPath;
-        $pltSCFE=[ordered]@{Path=$tf ; PassThru=$true ;Verbose=$($verbose) ;whatif= $($whatif) ; } 
+        $pltSCFE=[ordered]@{Path=$tf ; PassThru=$true ;Verbose=$($verbose) ;whatif= $($whatif) ; }
         if($psd1ExpMatch = gci $tf |select-string -Pattern $rgxTestScriptNOGuid ){
-            (Get-Content $tf) | Foreach-Object {
+            <#
+            $bRet = (Get-Content $tf) | Foreach-Object {
                 $_ -replace $rgxTestScriptNOGuid, "$($psd1guid)"
             } | Set-ContentFixEncoding @pltSCFE ;
+            #>
+            # 2-step it, we're getting only $value[-1] through the pipeline
+            $newContent = (Get-Content $tf) | Foreach-Object {
+                $_ -replace $rgxTestScriptNOGuid, "$($psd1guid)"
+            } ;
+            $bRet = Set-ContentFixEncoding @pltSCFE -Value $newContent ; 
+            if(-not $bRet -AND -not $whatif){throw "Set-ContentFixEncoding $($tf)!" } ;
         } elseif($psd1ExpMatch = gci $tf |select-string -Pattern $rgxTestScriptGuid ){
             $testGuid = $psd1ExpMatch.matches[0].Groups[9].value.tostring() ;  ;
             if($testGuid -eq $psd1guid){
@@ -620,9 +762,16 @@ $(if($Merge){'MERGE parm specified as well:`n-Merge Public|Internal|Classes incl
                 if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN } #Error|Warn|Debug
                 else{ write-WARNING "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
                 # generic guid replace: $_ -replace $rgxGuid, "$($psd1guid)"
-                (Get-Content $tf) | Foreach-Object {
+                <#
+                $bRet = (Get-Content $tf) | Foreach-Object {
                     $_ -replace $testGuid, "$($psd1guid)"
                 } | Set-ContentFixEncoding @pltSCFE ;
+                #>
+                $newContent = (Get-Content $tf) | Foreach-Object {
+                    $_ -replace $testGuid, "$($psd1guid)"
+                } ;
+                $bRet = Set-ContentFixEncoding @pltSCFE -Value $newContent ; 
+                if(-not $bRet -AND -not $whatif){throw "Set-ContentFixEncoding $($tf)!" } ;
             } ;
         } else {
             $smsg = "UNABLE TO Regex out...`n$($rgxTestScriptNOGuid)`n...from $($tf)`nTestScript hasn't been UPDATED!" ;
@@ -636,6 +785,34 @@ $(if($Merge){'MERGE parm specified as well:`n-Merge Public|Internal|Classes incl
         else{ write-verbose -verbose:$true "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
     } ;
 
+    # Verify and re-sync psd version to the input newbuild incremented version (in case it got lost in the rebuild)
+    if($psd1Vers -ne $psd1UpdatedVers){
+        $smsg = "$($ModPsdPath):ModuleVersion`n*does not* properly match the Step-ModuleVersion modified ModuleVersion:$($psd1UpdatedVers)`nFORCING MATCHING UPDATE!" ;
+        if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN } #Error|Warn|Debug
+        else{ write-WARNING "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+        $pltUMD=[ordered]@{
+            Path = $ModPsdPath ;
+            Value = $psd1UpdatedVers 
+            whatif = $($whatif);    
+            verbose = ($VerbosePreference -eq "Continue") ;
+        } ; 
+        $smsg = "Update-Metadata w`n$(($pltUMD|out-string).trim())" ;
+        if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug
+        else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+        Update-Metadata @pltUMD ; 
+        # pull back the updated psd1.ModuleVersion
+        $smsg = "Pull back the updated Psd1.ModuleVersion..." ; 
+        if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
+        else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+        TRY{
+            $psd1Vers = (Import-PowerShellDataFile -path $ModPsdPath).ModuleVersion.tostring() ;
+        } CATCH {
+            $PassStatus += ";ERROR";
+            write-warning  "$(get-date -format 'HH:mm:ss'): Failed processing $($_.Exception.ItemName). `nError Message: $($_.Exception.Message)`nError Details: $($_)" ;
+            bREAK ;
+        } ;
+    } ; 
+
     # sync Psd Version to psm1
     # regex approach - necc for psm1 version updates (lacks a ps cmdlet to parse)
     $rgxPsM1Version='Version((\s*)*):((\s*)*)(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?' ;
@@ -646,28 +823,54 @@ $(if($Merge){'MERGE parm specified as well:`n-Merge Public|Internal|Classes incl
         $smsg = "Psd1<>Psm1 version mis-match ($($psd1Vers)<>$($Psm1Vers)):`nUpdating $($ModPsmPath) to *match*`n$($ModPsdPath)" ;
         if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN } #Error|Warn|Debug
         else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
-
         $tf = $ModPsmPath;
-        $pltSCFE=[ordered]@{Path=$tf ; PassThru=$true ;Verbose=$($verbose) ;whatif= $($whatif) ; } 
-        (Get-Content $tf) | Foreach-Object {
+        $pltSCFE=[ordered]@{Path=$tf ; PassThru=$true ;Verbose=$($verbose) ;whatif= $($whatif) ; }
+        <#
+        $bRet = (Get-Content $tf) | Foreach-Object {
             $_ -replace $psm1Profile.matches[0].captures.groups[0].value.tostring(), "Version     : $($psd1Vers)"
         } | Set-ContentFixEncoding @pltSCFE ;
+        #>
+        # 2-step it, we're getting only $value[-1] through the pipeline
+        $newContent =  (Get-Content $tf) | Foreach-Object {
+            $_ -replace $psm1Profile.matches[0].captures.groups[0].value.tostring(), "Version     : $($psd1Vers)"
+        } ;
+        $bRet = Set-ContentFixEncoding @pltSCFE -Value $newContent ; 
+        if(-not $bRet -AND -not $whatif){throw "Set-ContentFixEncoding $($tf)!" } ;
     } else {
         $smsg = "(Psd1:Psm1 versions match)" ;
         if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug
         else{ write-host -foregroundcolor gray "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
     } ;
 
-    # Update the psd1 FunctionsToExport : (moved to merge-module, after the export-modulemember code)
-
+    # Update the psd1 FunctionsToExport : (moved to ConvertTo-ModuleDynamicTDO, after the export-modulemember code)
+    write-verbose "Get-ChildItem $($ModDirPath)\* -recur | where-object {$_.name -match `$rgxGuidModFiles}"
+    $rgxGuidModFiles = "[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}\.ps(d|m)1"
+    $testfiles = Get-ChildItem "$($ModDirPath)\*" -recur | where-object {$_.name -match $rgxGuidModFiles} ; 
+    if($testfiles){
+        $smsg= "(Purging left-over test files...)" ;
+        if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info }  #Error|Warn|Debug
+        else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+        $bRet = remove-ItemRetry -Path $testfiles.fullname -showdebug:$($showdebug) -whatif:$($whatif) -GracefulFail  ;
+        if (!$bRet) {
+            #throw "FAILURE" ; EXIT ; 
+            $smsg = "(failed to remove testfiles:`n$($testfiles.fullname)`nNON-IMPACTFUL)" ; 
+            if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug
+            else{ write-host -foregroundcolor gray "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+        } ;  
+    } ; 
 
     $smsg= "Signing appropriate files..." ;
     if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info }  #Error|Warn|Debug
     else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
 
-    #$files = Get-ChildItem "$($ModDirPath)\*" -recur |Where-Object{$_.extension -match $rgxSignFiles} ;
-    # 1:38 PM 12/26/2019#251 filter public|internal|classes include subdirs - don't sign them (if including/dyn-including causes 'Executable script code found in signature block.' errors
-    $files = Get-ChildItem "$($ModDirPath)\*" -recur |Where-Object{$_.extension -match $rgxSignFiles} | ?{$_.fullname -notmatch $rgxIncludeDirs} ;
+    if($Merge){
+        # 1:38 PM 12/26/2019#251 filter public|internal|classes include subdirs - don't sign them (if including/dyn-including causes 'Executable script code found in signature block.' errors
+        write-verbose "(MONOLITH module:collecting non-include sign files)" ;
+        $files = Get-ChildItem "$($ModDirPath)\*" -recur |Where-Object{$_.extension -match $rgxSignFiles} | ?{$_.fullname -notmatch $rgxIncludeDirs} ;
+    } else {
+        write-verbose "(DYN module: collecting *all* sign files)" ;
+        $files = Get-ChildItem "$($ModDirPath)\*" -recur |Where-Object{$_.extension -match $rgxSignFiles}  ;
+    } ;
     if($files){
         $pltSignFile=[ordered]@{
             file=$files.fullname ;
@@ -694,7 +897,7 @@ $(if($Merge){'MERGE parm specified as well:`n-Merge Public|Internal|Classes incl
     $smsg= "Removing existing profile $($ModuleName) content..." ;
     if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info }  #Error|Warn|Debug
     else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
-
+    <# rem defer to new Uninstall-ModuleForce()
     if($PsGInstalled=Get-InstalledModule -name $($ModuleName) -AllVersions -ea 0 ){
         foreach($PsGMod in $PsGInstalled){
             $sBnrS="`n#*------v Uninstall PSGet Mod:$($PsGMod.name):v$($PsGMod.version) v------" ;
@@ -726,9 +929,8 @@ $(if($Merge){'MERGE parm specified as well:`n-Merge Public|Internal|Classes incl
             else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
         } ;
     } ;
-    <# installed mods have PSGetModuleInfo.xml files
-    #>
-
+    # installed mods have PSGetModuleInfo.xml files
+    
     # 12:20 PM 1/14/2020 #438: surviving conflicts locking install-module: need to check everywhere, loop the entire $env:psprofilepath list
     $modpaths = $env:PSModulePath.split(';') ;
     foreach($modpath in $modpaths){
@@ -742,7 +944,34 @@ $(if($Merge){'MERGE parm specified as well:`n-Merge Public|Internal|Classes incl
         $bRet = remove-ItemRetry -Path $searchPath -Recurse -showdebug:$($showdebug) -whatif:$($whatif) -GracefulFail ;
         if (!$bRet) {throw "FAILURE" ; EXIT ; } ;
     } ;
-
+    #>
+    $pltUMF=[ordered]@{
+        ModuleName = $ModuleName ;
+        #ErrorAction="Stop" ;
+        Verbose = $($VerbosePreference -eq 'Continue') ; 
+        whatif=$($whatif);
+    } ;
+    $smsg= "Uninstall-ModuleForce w`n$(($pltUMF|out-string).trim())" ;
+    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info }  #Error|Warn|Debug
+    else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+    $bRet = Uninstall-ModuleForce @pltUMF ;
+    #$passtatus string returned, check it        
+    #if($sRet.split(';') -contains "uninstall-module:ERRO"){
+    # ;uninstall-module:ERROR
+    if($sRet){
+        if([array]$sRet.split(';').trim() -contains 'uninstall-module:ERROR'){
+         # or, work with raw ;-delim'd string:
+        #if($sret.indexof('uninstall-module:ERROR')){
+            $smsg = "Uninstall-ModuleForce:uninstall-module:ERRO!"  ;
+            write-warning $smsg ; 
+            throw $smsg ;
+        } ; 
+    } else { 
+        $smsg = "(no `$sRet returned on call)" ; 
+        if($verbose){if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
+        else{ write-verbose "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; } ; 
+    } ; 
+   
 
     $smsg= "Copying module to profile (net of .git & .vscode dirs, and backed up content)..." ;
     if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info }  #Error|Warn|Debug
@@ -1091,6 +1320,30 @@ And then re-run process-NewModule.
                 else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
 
                 remove-UnneededFileVariants @pltRGens ; # fr verb-IO
+
+                # should cleanup old test logs as well: C:\sc\verb-IO\Tests\ScriptAnalyzer-Results-20220314-1137AM.xml $pkgdir = join-path -path $ModDirPath -childpath "Package" ;
+                # 2:35 PM 5/23/2022 still there: # get the Pester log accum's as well: C:\sc\verb-IO\Tests\ScriptAnalyzer-Results-20220512-1512PM.xml
+                $pltRGens =[ordered]@{
+                    # "$(join-path -path 'C:\sc\verb-IO\' -childpath "Tests")\*"
+                    #Path = "$(join-path -path $ModDirPath -childpath 'Tests')\*" ;
+                    # 2:47 PM 5/23/2022 r-ufv no now has an Iscontainer test on the param, drop the wildcard
+                    Path = $(join-path -path $ModDirPath -childpath 'Tests') ;
+                    #Include =(($tNewPkg.split('.') | ?{$_ -notmatch '[0-9]+'} ) -join '*.') ;
+                    #Include = (( (split-path $tNewPkg.fullname -leaf).split('.') | ?{$_ -notmatch '[0-9]+'}) -join '*.') ;
+                    Include = 'ScriptAnalyzer-Results-*.xml' ; 
+                    Pattern = $null ; #'verb-\w*\.ps(m|d)1_\d{8}-\d{3,4}(A|P)M' ;
+                    FilterOn = 'CreationTime' ;
+                    Keep = 4 ;
+                    KeepToday = $true ;
+                    verbose=$true ;
+                    whatif=$($whatif) ;
+                } ;
+                $smsg = "remove-UnneededFileVariants w`n$(($pltRGens|out-string).trim())" ;
+                if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug
+                else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+
+                # 2:43 PM 5/23/2022 heh, seems I never put in the fire command. [facepalm]
+                remove-UnneededFileVariants @pltRGens ; 
 
                 # RUNTEST
                 if($RunTest -AND (test-path $TestScriptPath)){
