@@ -15,6 +15,8 @@ function process-NewModuleHybrid {
     Github      : https://github.com/tostka/verb-dev
     Tags        : Powershell,Module,Build,Development
     REVISIONS
+    * 2:54 PM 5/23/2022 add: verbose to pltUMD splat for update-metadata (psd1 enforce curr modvers); added missing testscript-targeting remove-UnneededFileVariants @pltRGens ;  
+        got through full dbg/publish/install pass on vio merged, wo issues. Appears functional. Time to resave process-NewModuleHybrid.ps1 => C:\sc\verb-dev\Public\process-NewModule.ps1
     * 4:01 PM 5/20/2022 WIP, left off, got through the psdUpdatedVers reset - works, just before the uninstall-moduleforce(), need to complete debugging on that balance of material. 
     still debugging: add: buffer and post build compare/restore the $psd1UpdatedVers, to the psd1Version (fix odd bug that's causing rebuild to have the pre-update moduleversion); 
         $rgxOldFingerprint (for identifying backup-fileTDO fingerprint files); revert|backup-file -> restore|backup-fileTDO; add restore-fileTDO fingerprint, and psm1/psd1 (using the new func)
@@ -790,7 +792,8 @@ $(if($Merge){'MERGE parm specified as well:`n-Merge Public|Internal|Classes incl
         $pltUMD=[ordered]@{
             Path = $ModPsdPath ;
             Value = $psd1UpdatedVers 
-            whatif=$($whatif);    
+            whatif = $($whatif);    
+            verbose = ($VerbosePreference -eq "Continue") ;
         } ; 
         $smsg = "Update-Metadata w`n$(($pltUMD|out-string).trim())" ;
         if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug
@@ -1318,9 +1321,12 @@ And then re-run process-NewModuleHybrid.
                 remove-UnneededFileVariants @pltRGens ; # fr verb-IO
 
                 # should cleanup old test logs as well: C:\sc\verb-IO\Tests\ScriptAnalyzer-Results-20220314-1137AM.xml $pkgdir = join-path -path $ModDirPath -childpath "Package" ;
+                # 2:35 PM 5/23/2022 still there: # get the Pester log accum's as well: C:\sc\verb-IO\Tests\ScriptAnalyzer-Results-20220512-1512PM.xml
                 $pltRGens =[ordered]@{
                     # "$(join-path -path 'C:\sc\verb-IO\' -childpath "Tests")\*"
-                    Path = "$(join-path -path $ModDirPath -childpath 'Tests')\*" ;
+                    #Path = "$(join-path -path $ModDirPath -childpath 'Tests')\*" ;
+                    # 2:47 PM 5/23/2022 r-ufv no now has an Iscontainer test on the param, drop the wildcard
+                    Path = $(join-path -path $ModDirPath -childpath 'Tests') ;
                     #Include =(($tNewPkg.split('.') | ?{$_ -notmatch '[0-9]+'} ) -join '*.') ;
                     #Include = (( (split-path $tNewPkg.fullname -leaf).split('.') | ?{$_ -notmatch '[0-9]+'}) -join '*.') ;
                     Include = 'ScriptAnalyzer-Results-*.xml' ; 
@@ -1334,6 +1340,9 @@ And then re-run process-NewModuleHybrid.
                 $smsg = "remove-UnneededFileVariants w`n$(($pltRGens|out-string).trim())" ;
                 if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug
                 else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+
+                # 2:43 PM 5/23/2022 heh, seems I never put in the fire command. [facepalm]
+                remove-UnneededFileVariants @pltRGens ; 
 
                 # RUNTEST
                 if($RunTest -AND (test-path $TestScriptPath)){
