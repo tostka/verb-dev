@@ -1,0 +1,71 @@
+﻿<Objs Version="1.1.0.1" xmlns="http://schemas.microsoft.com/powershell/2004/04">
+  <Obj RefId="0">
+    <TN RefId="0">
+      <T>System.Management.Automation.LineBreakpoint</T>
+      <T>System.Management.Automation.Breakpoint</T>
+      <T>System.Object</T>
+    </TN>
+    <ToString>Line breakpoint on 'C:\sc\verb-dev\Public\backup-ModuleBuild.ps1:64'</ToString>
+    <Props>
+      <I32 N="Column">0</I32>
+      <I32 N="Line">64</I32>
+      <Nil N="Action" />
+      <B N="Enabled">true</B>
+      <I32 N="HitCount">5</I32>
+      <I32 N="Id">1057</I32>
+      <S N="Script">C:\sc\verb-dev\Public\backup-ModuleBuild.ps1</S>
+    </Props>
+  </Obj>
+  <Obj RefId="1">
+    <TNRef RefId="0" />
+    <ToString>Line breakpoint on 'C:\sc\verb-dev\Public\backup-ModuleBuild.ps1:81'</ToString>
+    <Props>
+      <I32 N="Column">0</I32>
+      <I32 N="Line">81</I32>
+      <Nil N="Action" />
+      <B N="Enabled">true</B>
+      <I32 N="HitCount">4</I32>
+      <I32 N="Id">1058</I32>
+      <S N="Script">C:\sc\verb-dev\Public\backup-ModuleBuild.ps1</S>
+    </Props>
+  </Obj>
+  <Obj RefId="2">
+    <TNRef RefId="0" />
+    <ToString>Line breakpoint on 'C:\sc\verb-dev\Public\backup-ModuleBuild.ps1:117'</ToString>
+    <Props>
+      <I32 N="Column">0</I32>
+      <I32 N="Line">117</I32>
+      <Nil N="Action" />
+      <B N="Enabled">true</B>
+      <I32 N="HitCount">0</I32>
+      <I32 N="Id">1061</I32>
+      <S N="Script">C:\sc\verb-dev\Public\backup-ModuleBuild.ps1</S>
+    </Props>
+  </Obj>
+  <Obj RefId="3">
+    <TNRef RefId="0" />
+    <ToString>Line breakpoint on 'C:\sc\verb-dev\Public\backup-ModuleBuild.ps1:99'</ToString>
+    <Props>
+      <I32 N="Column">0</I32>
+      <I32 N="Line">99</I32>
+      <Nil N="Action" />
+      <B N="Enabled">true</B>
+      <I32 N="HitCount">3</I32>
+      <I32 N="Id">1062</I32>
+      <S N="Script">C:\sc\verb-dev\Public\backup-ModuleBuild.ps1</S>
+    </Props>
+  </Obj>
+  <Obj RefId="4">
+    <TNRef RefId="0" />
+    <ToString>Line breakpoint on 'C:\sc\verb-dev\Public\backup-ModuleBuild.ps1:107'</ToString>
+    <Props>
+      <I32 N="Column">0</I32>
+      <I32 N="Line">107</I32>
+      <Nil N="Action" />
+      <B N="Enabled">true</B>
+      <I32 N="HitCount">1</I32>
+      <I32 N="Id">1063</I32>
+      <S N="Script">C:\sc\verb-dev\Public\backup-ModuleBuild.ps1</S>
+    </Props>
+  </Obj>
+</Objs>
