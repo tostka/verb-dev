@@ -5,18 +5,187 @@
       <T>System.Management.Automation.Breakpoint</T>
       <T>System.Object</T>
     </TN>
-    <ToString>Line breakpoint on 'C:\sc\verb-dev\Public\Step-ModuleVersionCalculated.ps1:484'</ToString>
+    <ToString>Line breakpoint on 'C:\sc\verb-dev\Public\Step-ModuleVersionCalculated.ps1:188'</ToString>
     <Props>
       <I32 N="Column">0</I32>
-      <I32 N="Line">484</I32>
+      <I32 N="Line">188</I32>
       <Nil N="Action" />
       <B N="Enabled">true</B>
-      <I32 N="HitCount">0</I32>
-      <I32 N="Id">688</I32>
+      <I32 N="HitCount">3</I32>
+      <I32 N="Id">787</I32>
       <S N="Script">C:\sc\verb-dev\Public\Step-ModuleVersionCalculated.ps1</S>
     </Props>
   </Obj>
   <Obj RefId="1">
+    <TNRef RefId="0" />
+    <ToString>Line breakpoint on 'C:\sc\verb-dev\Public\Step-ModuleVersionCalculated.ps1:379'</ToString>
+    <Props>
+      <I32 N="Column">0</I32>
+      <I32 N="Line">379</I32>
+      <Nil N="Action" />
+      <B N="Enabled">true</B>
+      <I32 N="HitCount">3</I32>
+      <I32 N="Id">788</I32>
+      <S N="Script">C:\sc\verb-dev\Public\Step-ModuleVersionCalculated.ps1</S>
+    </Props>
+  </Obj>
+  <Obj RefId="2">
+    <TNRef RefId="0" />
+    <ToString>Line breakpoint on 'C:\sc\verb-dev\Public\Step-ModuleVersionCalculated.ps1:373'</ToString>
+    <Props>
+      <I32 N="Column">0</I32>
+      <I32 N="Line">373</I32>
+      <Nil N="Action" />
+      <B N="Enabled">true</B>
+      <I32 N="HitCount">2</I32>
+      <I32 N="Id">789</I32>
+      <S N="Script">C:\sc\verb-dev\Public\Step-ModuleVersionCalculated.ps1</S>
+    </Props>
+  </Obj>
+  <Obj RefId="3">
+    <TNRef RefId="0" />
+    <ToString>Line breakpoint on 'C:\sc\verb-dev\Public\Step-ModuleVersionCalculated.ps1:354'</ToString>
+    <Props>
+      <I32 N="Column">0</I32>
+      <I32 N="Line">354</I32>
+      <Nil N="Action" />
+      <B N="Enabled">true</B>
+      <I32 N="HitCount">3</I32>
+      <I32 N="Id">790</I32>
+      <S N="Script">C:\sc\verb-dev\Public\Step-ModuleVersionCalculated.ps1</S>
+    </Props>
+  </Obj>
+  <Obj RefId="4">
+    <TNRef RefId="0" />
+    <ToString>Line breakpoint on 'C:\sc\verb-dev\Public\Step-ModuleVersionCalculated.ps1:336'</ToString>
+    <Props>
+      <I32 N="Column">0</I32>
+      <I32 N="Line">336</I32>
+      <Nil N="Action" />
+      <B N="Enabled">true</B>
+      <I32 N="HitCount">2</I32>
+      <I32 N="Id">792</I32>
+      <S N="Script">C:\sc\verb-dev\Public\Step-ModuleVersionCalculated.ps1</S>
+    </Props>
+  </Obj>
+  <Obj RefId="5">
+    <TNRef RefId="0" />
+    <ToString>Line breakpoint on 'C:\sc\verb-dev\Public\Step-ModuleVersionCalculated.ps1:341'</ToString>
+    <Props>
+      <I32 N="Column">0</I32>
+      <I32 N="Line">341</I32>
+      <Nil N="Action" />
+      <B N="Enabled">true</B>
+      <I32 N="HitCount">3</I32>
+      <I32 N="Id">796</I32>
+      <S N="Script">C:\sc\verb-dev\Public\Step-ModuleVersionCalculated.ps1</S>
+    </Props>
+  </Obj>
+  <Obj RefId="6">
+    <TNRef RefId="0" />
+    <ToString>Line breakpoint on 'C:\sc\verb-dev\Public\Step-ModuleVersionCalculated.ps1:333'</ToString>
+    <Props>
+      <I32 N="Column">0</I32>
+      <I32 N="Line">333</I32>
+      <Nil N="Action" />
+      <B N="Enabled">true</B>
+      <I32 N="HitCount">3</I32>
+      <I32 N="Id">798</I32>
+      <S N="Script">C:\sc\verb-dev\Public\Step-ModuleVersionCalculated.ps1</S>
+    </Props>
+  </Obj>
+  <Obj RefId="7">
+    <TNRef RefId="0" />
+    <ToString>Line breakpoint on 'C:\sc\verb-dev\Public\Step-ModuleVersionCalculated.ps1:334'</ToString>
+    <Props>
+      <I32 N="Column">0</I32>
+      <I32 N="Line">334</I32>
+      <Nil N="Action" />
+      <B N="Enabled">true</B>
+      <I32 N="HitCount">2</I32>
+      <I32 N="Id">800</I32>
+      <S N="Script">C:\sc\verb-dev\Public\Step-ModuleVersionCalculated.ps1</S>
+    </Props>
+  </Obj>
+  <Obj RefId="8">
+    <TNRef RefId="0" />
+    <ToString>Line breakpoint on 'C:\sc\verb-dev\Public\Step-ModuleVersionCalculated.ps1:431'</ToString>
+    <Props>
+      <I32 N="Column">0</I32>
+      <I32 N="Line">431</I32>
+      <Nil N="Action" />
+      <B N="Enabled">true</B>
+      <I32 N="HitCount">1</I32>
+      <I32 N="Id">863</I32>
+      <S N="Script">C:\sc\verb-dev\Public\Step-ModuleVersionCalculated.ps1</S>
+    </Props>
+  </Obj>
+  <Obj RefId="9">
+    <TNRef RefId="0" />
+    <ToString>Line breakpoint on 'C:\sc\verb-dev\Public\Step-ModuleVersionCalculated.ps1:436'</ToString>
+    <Props>
+      <I32 N="Column">0</I32>
+      <I32 N="Line">436</I32>
+      <Nil N="Action" />
+      <B N="Enabled">true</B>
+      <I32 N="HitCount">0</I32>
+      <I32 N="Id">912</I32>
+      <S N="Script">C:\sc\verb-dev\Public\Step-ModuleVersionCalculated.ps1</S>
+    </Props>
+  </Obj>
+  <Obj RefId="10">
+    <TNRef RefId="0" />
+    <ToString>Line breakpoint on 'C:\sc\verb-dev\Public\Step-ModuleVersionCalculated.ps1:527'</ToString>
+    <Props>
+      <I32 N="Column">0</I32>
+      <I32 N="Line">527</I32>
+      <Nil N="Action" />
+      <B N="Enabled">true</B>
+      <I32 N="HitCount">0</I32>
+      <I32 N="Id">963</I32>
+      <S N="Script">C:\sc\verb-dev\Public\Step-ModuleVersionCalculated.ps1</S>
+    </Props>
+  </Obj>
+  <Obj RefId="11">
+    <TNRef RefId="0" />
+    <ToString>Line breakpoint on 'C:\sc\verb-dev\Public\Step-ModuleVersionCalculated.ps1:525'</ToString>
+    <Props>
+      <I32 N="Column">0</I32>
+      <I32 N="Line">525</I32>
+      <Nil N="Action" />
+      <B N="Enabled">true</B>
+      <I32 N="HitCount">0</I32>
+      <I32 N="Id">964</I32>
+      <S N="Script">C:\sc\verb-dev\Public\Step-ModuleVersionCalculated.ps1</S>
+    </Props>
+  </Obj>
+  <Obj RefId="12">
+    <TNRef RefId="0" />
+    <ToString>Line breakpoint on 'C:\sc\verb-dev\Public\Step-ModuleVersionCalculated.ps1:523'</ToString>
+    <Props>
+      <I32 N="Column">0</I32>
+      <I32 N="Line">523</I32>
+      <Nil N="Action" />
+      <B N="Enabled">true</B>
+      <I32 N="HitCount">0</I32>
+      <I32 N="Id">965</I32>
+      <S N="Script">C:\sc\verb-dev\Public\Step-ModuleVersionCalculated.ps1</S>
+    </Props>
+  </Obj>
+  <Obj RefId="13">
+    <TNRef RefId="0" />
+    <ToString>Line breakpoint on 'C:\sc\verb-dev\Public\Step-ModuleVersionCalculated.ps1:489'</ToString>
+    <Props>
+      <I32 N="Column">0</I32>
+      <I32 N="Line">489</I32>
+      <Nil N="Action" />
+      <B N="Enabled">true</B>
+      <I32 N="HitCount">0</I32>
+      <I32 N="Id">966</I32>
+      <S N="Script">C:\sc\verb-dev\Public\Step-ModuleVersionCalculated.ps1</S>
+    </Props>
+  </Obj>
+  <Obj RefId="14">
     <TNRef RefId="0" />
     <ToString>Line breakpoint on 'C:\sc\verb-dev\Public\Step-ModuleVersionCalculated.ps1:482'</ToString>
     <Props>
@@ -25,150 +194,85 @@
       <Nil N="Action" />
       <B N="Enabled">true</B>
       <I32 N="HitCount">0</I32>
-      <I32 N="Id">689</I32>
+      <I32 N="Id">967</I32>
       <S N="Script">C:\sc\verb-dev\Public\Step-ModuleVersionCalculated.ps1</S>
     </Props>
   </Obj>
-  <Obj RefId="2">
+  <Obj RefId="15">
     <TNRef RefId="0" />
-    <ToString>Line breakpoint on 'C:\sc\verb-dev\Public\Step-ModuleVersionCalculated.ps1:414'</ToString>
+    <ToString>Line breakpoint on 'C:\sc\verb-dev\Public\Step-ModuleVersionCalculated.ps1:537'</ToString>
     <Props>
       <I32 N="Column">0</I32>
-      <I32 N="Line">414</I32>
-      <Nil N="Action" />
-      <B N="Enabled">true</B>
-      <I32 N="HitCount">1</I32>
-      <I32 N="Id">690</I32>
-      <S N="Script">C:\sc\verb-dev\Public\Step-ModuleVersionCalculated.ps1</S>
-    </Props>
-  </Obj>
-  <Obj RefId="3">
-    <TNRef RefId="0" />
-    <ToString>Line breakpoint on 'C:\sc\verb-dev\Public\Step-ModuleVersionCalculated.ps1:521'</ToString>
-    <Props>
-      <I32 N="Column">0</I32>
-      <I32 N="Line">521</I32>
+      <I32 N="Line">537</I32>
       <Nil N="Action" />
       <B N="Enabled">true</B>
       <I32 N="HitCount">0</I32>
-      <I32 N="Id">691</I32>
+      <I32 N="Id">968</I32>
       <S N="Script">C:\sc\verb-dev\Public\Step-ModuleVersionCalculated.ps1</S>
     </Props>
   </Obj>
-  <Obj RefId="4">
+  <Obj RefId="16">
     <TNRef RefId="0" />
-    <ToString>Line breakpoint on 'C:\sc\verb-dev\Public\Step-ModuleVersionCalculated.ps1:480'</ToString>
+    <ToString>Line breakpoint on 'C:\sc\verb-dev\Public\Step-ModuleVersionCalculated.ps1:564'</ToString>
     <Props>
       <I32 N="Column">0</I32>
-      <I32 N="Line">480</I32>
+      <I32 N="Line">564</I32>
       <Nil N="Action" />
       <B N="Enabled">true</B>
       <I32 N="HitCount">0</I32>
-      <I32 N="Id">692</I32>
+      <I32 N="Id">969</I32>
       <S N="Script">C:\sc\verb-dev\Public\Step-ModuleVersionCalculated.ps1</S>
     </Props>
   </Obj>
-  <Obj RefId="5">
+  <Obj RefId="17">
     <TNRef RefId="0" />
-    <ToString>Line breakpoint on 'C:\sc\verb-dev\Public\Step-ModuleVersionCalculated.ps1:440'</ToString>
+    <ToString>Line breakpoint on 'C:\sc\verb-dev\Public\Step-ModuleVersionCalculated.ps1:444'</ToString>
     <Props>
       <I32 N="Column">0</I32>
-      <I32 N="Line">440</I32>
+      <I32 N="Line">444</I32>
       <Nil N="Action" />
       <B N="Enabled">true</B>
       <I32 N="HitCount">0</I32>
-      <I32 N="Id">693</I32>
+      <I32 N="Id">970</I32>
       <S N="Script">C:\sc\verb-dev\Public\Step-ModuleVersionCalculated.ps1</S>
     </Props>
   </Obj>
-  <Obj RefId="6">
+  <Obj RefId="18">
     <TNRef RefId="0" />
-    <ToString>Line breakpoint on 'C:\sc\verb-dev\Public\Step-ModuleVersionCalculated.ps1:326'</ToString>
+    <ToString>Line breakpoint on 'C:\sc\verb-dev\Public\Step-ModuleVersionCalculated.ps1:447'</ToString>
     <Props>
       <I32 N="Column">0</I32>
-      <I32 N="Line">326</I32>
-      <Nil N="Action" />
-      <B N="Enabled">true</B>
-      <I32 N="HitCount">1</I32>
-      <I32 N="Id">694</I32>
-      <S N="Script">C:\sc\verb-dev\Public\Step-ModuleVersionCalculated.ps1</S>
-    </Props>
-  </Obj>
-  <Obj RefId="7">
-    <TNRef RefId="0" />
-    <ToString>Line breakpoint on 'C:\sc\verb-dev\Public\Step-ModuleVersionCalculated.ps1:369'</ToString>
-    <Props>
-      <I32 N="Column">0</I32>
-      <I32 N="Line">369</I32>
-      <Nil N="Action" />
-      <B N="Enabled">true</B>
-      <I32 N="HitCount">1</I32>
-      <I32 N="Id">695</I32>
-      <S N="Script">C:\sc\verb-dev\Public\Step-ModuleVersionCalculated.ps1</S>
-    </Props>
-  </Obj>
-  <Obj RefId="8">
-    <TNRef RefId="0" />
-    <ToString>Line breakpoint on 'C:\sc\verb-dev\Public\Step-ModuleVersionCalculated.ps1:363'</ToString>
-    <Props>
-      <I32 N="Column">0</I32>
-      <I32 N="Line">363</I32>
-      <Nil N="Action" />
-      <B N="Enabled">true</B>
-      <I32 N="HitCount">1</I32>
-      <I32 N="Id">696</I32>
-      <S N="Script">C:\sc\verb-dev\Public\Step-ModuleVersionCalculated.ps1</S>
-    </Props>
-  </Obj>
-  <Obj RefId="9">
-    <TNRef RefId="0" />
-    <ToString>Line breakpoint on 'C:\sc\verb-dev\Public\Step-ModuleVersionCalculated.ps1:331'</ToString>
-    <Props>
-      <I32 N="Column">0</I32>
-      <I32 N="Line">331</I32>
-      <Nil N="Action" />
-      <B N="Enabled">true</B>
-      <I32 N="HitCount">1</I32>
-      <I32 N="Id">697</I32>
-      <S N="Script">C:\sc\verb-dev\Public\Step-ModuleVersionCalculated.ps1</S>
-    </Props>
-  </Obj>
-  <Obj RefId="10">
-    <TNRef RefId="0" />
-    <ToString>Line breakpoint on 'C:\sc\verb-dev\Public\Step-ModuleVersionCalculated.ps1:183'</ToString>
-    <Props>
-      <I32 N="Column">0</I32>
-      <I32 N="Line">183</I32>
-      <Nil N="Action" />
-      <B N="Enabled">true</B>
-      <I32 N="HitCount">1</I32>
-      <I32 N="Id">698</I32>
-      <S N="Script">C:\sc\verb-dev\Public\Step-ModuleVersionCalculated.ps1</S>
-    </Props>
-  </Obj>
-  <Obj RefId="11">
-    <TNRef RefId="0" />
-    <ToString>Line breakpoint on 'C:\sc\verb-dev\Public\Step-ModuleVersionCalculated.ps1:344'</ToString>
-    <Props>
-      <I32 N="Column">0</I32>
-      <I32 N="Line">344</I32>
-      <Nil N="Action" />
-      <B N="Enabled">true</B>
-      <I32 N="HitCount">1</I32>
-      <I32 N="Id">699</I32>
-      <S N="Script">C:\sc\verb-dev\Public\Step-ModuleVersionCalculated.ps1</S>
-    </Props>
-  </Obj>
-  <Obj RefId="12">
-    <TNRef RefId="0" />
-    <ToString>Line breakpoint on 'C:\sc\verb-dev\Public\Step-ModuleVersionCalculated.ps1:494'</ToString>
-    <Props>
-      <I32 N="Column">0</I32>
-      <I32 N="Line">494</I32>
+      <I32 N="Line">447</I32>
       <Nil N="Action" />
       <B N="Enabled">true</B>
       <I32 N="HitCount">0</I32>
-      <I32 N="Id">700</I32>
+      <I32 N="Id">971</I32>
+      <S N="Script">C:\sc\verb-dev\Public\Step-ModuleVersionCalculated.ps1</S>
+    </Props>
+  </Obj>
+  <Obj RefId="19">
+    <TNRef RefId="0" />
+    <ToString>Line breakpoint on 'C:\sc\verb-dev\Public\Step-ModuleVersionCalculated.ps1:451'</ToString>
+    <Props>
+      <I32 N="Column">0</I32>
+      <I32 N="Line">451</I32>
+      <Nil N="Action" />
+      <B N="Enabled">true</B>
+      <I32 N="HitCount">0</I32>
+      <I32 N="Id">972</I32>
+      <S N="Script">C:\sc\verb-dev\Public\Step-ModuleVersionCalculated.ps1</S>
+    </Props>
+  </Obj>
+  <Obj RefId="20">
+    <TNRef RefId="0" />
+    <ToString>Line breakpoint on 'C:\sc\verb-dev\Public\Step-ModuleVersionCalculated.ps1:458'</ToString>
+    <Props>
+      <I32 N="Column">0</I32>
+      <I32 N="Line">458</I32>
+      <Nil N="Action" />
+      <B N="Enabled">true</B>
+      <I32 N="HitCount">0</I32>
+      <I32 N="Id">973</I32>
       <S N="Script">C:\sc\verb-dev\Public\Step-ModuleVersionCalculated.ps1</S>
     </Props>
   </Obj>

@@ -21,6 +21,9 @@ function Step-ModuleVersionCalculated {
     AddedWebsite: www.thesurlyadmin.com
     AddedTwitter: @thesurlyadm1n
     REVISIONS
+    * 3:57 PM 5/26/2022 backstop profile rgxs ; implment pre-cache & post-reload of installed modules ; 
+        found can rmo the temp module ipmo, by targeting gmo | path, rather than common name (like verb-io). ; 
+        fixed asset of $bumpVersionType = $MinVersionIncrementBump (was dropping 'Patch' through, rather than 'build')
     * 10:56 AM 5/20/2022 WIP: add: validator for ... ; -MinVersionIncrementBump (coerce Min fail through rev to Build; or use as explicit step driver, constant, rather than hard-coded in code) ; 
         address gcm bug where failing to return any but 3 old renamed funcs from verb-io.psm1: 
         add $ASTMatchThreshold (reps min percentage match gcm to sls -pattern parse of function lines in .psm1), along with a raft of new eval testing code. 
