@@ -1,0 +1,19 @@
+﻿<Objs Version="1.1.0.1" xmlns="http://schemas.microsoft.com/powershell/2004/04">
+  <Obj RefId="0">
+    <TN RefId="0">
+      <T>System.Management.Automation.LineBreakpoint</T>
+      <T>System.Management.Automation.Breakpoint</T>
+      <T>System.Object</T>
+    </TN>
+    <ToString>Line breakpoint on 'C:\sc\verb-dev\Public\import-ModuleRevised.ps1:70'</ToString>
+    <Props>
+      <I32 N="Column">0</I32>
+      <I32 N="Line">70</I32>
+      <Nil N="Action" />
+      <B N="Enabled">true</B>
+      <I32 N="HitCount">0</I32>
+      <I32 N="Id">500</I32>
+      <S N="Script">C:\sc\verb-dev\Public\import-ModuleRevised.ps1</S>
+    </Props>
+  </Obj>
+</Objs>

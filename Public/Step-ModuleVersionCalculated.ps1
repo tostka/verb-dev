@@ -154,6 +154,11 @@ function Step-ModuleVersionCalculated {
         #$PSParameters = New-Object -TypeName PSObject -Property $PSBoundParameters ;
         $Verbose = ($VerbosePreference -eq 'Continue') ; 
         
+        # backstop profile rgxs
+        if(-not $rgxModsSystemScope){$rgxModsSystemScope = "^[A-Za-z]:\\Windows\\system32\\WindowsPowerShell\\v1\.0\\Modules\\" } ;
+        if(-not $rgxPSAllUsersScopeDyn){$rgxPSAllUsersScopeDyn = "^C:\\Program\ Files\\((Windows)*)PowerShell\\(Scripts|Modules)\\.*\.(ps(((d|m))*)1|dll)$" ; } ;
+        if(-not $rgxPSCurrUserScope ) {$rgxPSCurrUserScope = "^[A-Za-z]:\\Users\\\w*\\((OneDrive\s-\s.*\\)*)Documents\\((Windows)*)PowerShell\\(Scripts|Modules)\\.*\.(ps((d|m)*)1|dll)$" } ; 
+
         if($whatif -AND -not $applyChange){
             $smsg = "You have specified -whatif, but have not also specified -applyChange" ; 
             $smsg += "`nThere is no reason to use -whatif without -applyChange."  ; 
@@ -323,6 +328,11 @@ function Step-ModuleVersionCalculated {
                 $ModuleName = $TestReport.Name ; 
             } 
             
+            # we need to precache the modules loaded - as rmo verb-io takes out both the build module and the installed, so we need a mechanism to put back the installed after testing
+            $loadedMods = get-module ;
+            $loadedInstalledMods = $loadedMods |?{ $_.path -match $rgxPSAllUsersScopeDyn -OR $_.path -match $rgxPSCurrUserScope -OR $_.path -match $rgxModsSystemScope}  ; 
+            $loadedRevisedMods = $loadedMods |?{ $_.path -notmatch $rgxPSAllUsersScopeDyn -AND $_.path -notmatch $rgxPSCurrUserScope -ANd $_.path -notmatch $rgxModsSystemScope}  ; 
+
             switch ($Method) {
 
                 'Fingerprint' {
@@ -363,7 +373,7 @@ function Step-ModuleVersionCalculated {
                             if( ($commandList.count / $rawfunccount) -lt $ASTMatchThreshold ){
                                 $smsg = "get-command failed to return a complete Func/Alias list from $($ModuleName) -lt AST $($ASTMatchThreshold * 100)% match:" ; 
                                 $smsg += "`nAST profile (get-FunctionBlocks+get-AliasAssignsAST) returned:$($ASTCmds.count)"
-                                $smsg += "`nFORCING STEP EVAL INTO 'PATCH' TO WORK AROUND BUG" ;
+                                $smsg += "`nFORCING STEP EVAL INTO '$($MinVersionIncrementBump)' TO WORK AROUND BUG" ;
                                 if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN } #Error|Warn|Debug 
                                 else{ write-WARNING "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; 
                                 $MinVersionIncrement = $true ; 
@@ -407,11 +417,43 @@ function Step-ModuleVersionCalculated {
                             # -----------
                             #>
 
-                            $pltXMO.Name = $ModuleName; # have to rmo using *basename*
-                            $smsg = "remove-module w`n$(($pltXMO|out-string).trim())" ; 
+                            #$pltXMO.Name = $ModuleName; # have to rmo using *basename*
+                            <# revised: you can target specific like-named mods, using the path, which will vary:
+                            gmo |?{$_.path -eq $psm1} | remove-module -WhatIf -verbose 
+                            #>
+                            $pltXMO.remove('Name') # 
+                            #$smsg = "remove-module w`n$(($pltXMO|out-string).trim())" ; 
+                            # get-module |where-object{$_.path -eq $psm1} | remove-module @pltXMO
+                            $smsg = "get-module |where-object{`$_.path -eq '$($psm1)'} |remove-module w`n$(($pltXMO|out-string).trim())" ; 
                             if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
                             else{ write-verbose "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; 
-                            remove-module @pltXMO ;
+                            #remove-module @pltXMO ;
+                            $tmpmodtarget = get-module |where-object{$_.path -eq $psm1} 
+                            if($tmpmodtarget){ $tmpmodtarget | remove-module @pltXMO }
+                            else {
+                                $smsg = "Unable to isolate:" ; 
+                                $smsg += "`nget-module |where-object{$_.path -eq $($psm1)}!" ; 
+                                if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level  WARN } #Error|Warn|Debug 
+                                else{ write-WARNING "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; 
+
+                            } ; 
+
+                            # here's where we should restore any missing $loadedInstalledMods, taken out with the build module by above rmo...
+                            # post confirm instlmods still loaded:
+                            $postpaths = (get-module |where-object { $_.path -match $rgxPSAllUsersScopeDyn -OR $_.path -match $rgxPSCurrUserScope -OR $_.path -match $rgxModsSystemScope}).path ; 
+                            $loadedInstalledMods.path |foreach-object{
+                                if($postpaths -contains  $_){
+                                    $smsg = "($($_):still loaded)" 
+                                    if($verbose){if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } 
+                                    else{ write-verbose "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; } ; 
+                                }else{
+                                    $smsg = "ipmo missing installedmod:$($_)" ; 
+                                    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN } 
+                                    else{ write-WARNING "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; 
+                                    import-module $_ -fo -verb ;
+                                } ;
+                            } ; 
+
 
                             if(-not $MinVersionIncrement){
                                 $smsg = "Calculating fingerprint"
@@ -444,6 +486,7 @@ function Step-ModuleVersionCalculated {
                                 #$Version.Build ++ ;
                                 #$Version.Revision = 0 ; 
                                 # drop through min patch rev above - no, it now uses $MinVersionIncrementBump
+                                $bumpVersionType = $MinVersionIncrementBump ; 
                             } else { 
                                 # KM's core logic code:
                                 $smsg = "Detecting new features" ; 
