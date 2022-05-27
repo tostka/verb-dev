@@ -286,7 +286,7 @@ function ConvertTo-ModuleDynamicTDO {
 
         if($updatedContent){
            $pltSCFE=[ordered]@{PassThru=$true ;Verbose=$($verbose) ;whatif= $($whatif) ; }
-            $bRet = Set-ContentFixEncoding -Value $updatedContent -Path $PsmNameTmp @pltSCFE ;
+            $bRet = Set-ContentFixEncoding -Value ($updatedContent | out-string) -Path $PsmNameTmp @pltSCFE ;
             if(-not $bRet -AND -not $whatif){throw "Set-ContentFixEncoding $($PsmNameTmp)!" } else {
                 $PassStatus += ";UPDATED:Set-ContentFixEncoding ";
             }  ;
@@ -469,7 +469,7 @@ function ConvertTo-ModuleDynamicTDO {
             $smsg= "Adding:$($ModFile)..." ;
             if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info }  #Error|Warn|Debug
             else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
-            $bRet = "#*======v _CommonCode v======" | Add-ContentFixEncoding @pltAdd ;
+            $bRet = "#*======v _CommonCode v======" | out-string | Add-ContentFixEncoding @pltAdd ;
             if(-not $bRet -AND -not $whatif){throw "Add-ContentFixEncoding $($pltAdd.Path)!" } ;
             $Content = Get-Content $ModFile ;
             if($Content| Where-Object{$_ -match $rgxSigStart -OR $_ -match $rgxSigEnd} ){
@@ -480,9 +480,9 @@ function ConvertTo-ModuleDynamicTDO {
                 } ;
                 exit ;
             } ;
-            $bRet = $Content | Add-ContentFixEncoding @pltAdd ;
+            $bRet = $Content | out-string | Add-ContentFixEncoding @pltAdd ;
             if(-not $bRet -AND -not $whatif){throw "Add-ContentFixEncoding $($pltAdd.Path)!" } ;
-            $bRet = "#*======^ END _CommonCode ^======" | Add-ContentFixEncoding @pltAdd ;
+            $bRet = "#*======^ END _CommonCode ^======" | out-string | Add-ContentFixEncoding @pltAdd ;
             if(-not $bRet -AND -not $whatif){throw "Add-ContentFixEncoding $($pltAdd.Path)!" } ;
             $PassStatus += ";Add-Content:UPDATED";
         } else {
@@ -523,14 +523,14 @@ Export-ModuleMember -Function `$(`$Public.Basename) -join ',') -Alias *
         $smsg= "Adding:FooterBlock..." ;
         if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info }  #Error|Warn|Debug
         else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
-        $bRet = $FooterBlock | Add-ContentFixEncoding @pltAdd ;
+        $bRet = $FooterBlock | out-string | Add-ContentFixEncoding @pltAdd ;
         if(-not $bRet -AND -not $whatif){throw "Add-ContentFixEncoding $($pltAdd.Path)!" } ;
         $PassStatus += ";Add-Content:UPDATED";
     } else {
         $smsg= "NoAliasExport specified:Skipping FooterBlock add" ;
         if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info }  #Error|Warn|Debug
         else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
-        $bRet = "#*======^ END FUNCTIONS ^======" | Add-ContentFixEncoding @pltAdd ;
+        $bRet = "#*======^ END FUNCTIONS ^======" | out-string | Add-ContentFixEncoding @pltAdd ;
         if(-not $bRet -AND -not $whatif){throw "Add-ContentFixEncoding $($pltAdd.Path)!" } ;
         $PassStatus += ";Add-Content:UPDATED";
     } ;
@@ -546,15 +546,15 @@ Export-ModuleMember -Function `$(`$Public.Basename) -join ',') -Alias *
     # switch back to manual local updates
     $pltSCFE=[ordered]@{Path = $tf ; PassThru=$true ;Verbose=$($verbose) ;whatif= $($whatif) ; }
     if($psd1ExpMatch = Get-ChildItem $tf | select-string -Pattern $rgxFuncs2Export ){
-        <##>
+        <#
         (Get-Content $tf) | Foreach-Object {
             $_ -replace $rgxFuncs2Export , ("FunctionsToExport = " + "@('" + $($ExportFunctions -join "','") + "')")
-        } | Set-ContentFixEncoding @pltSCFE ;
+        } | out-string | Set-ContentFixEncoding @pltSCFE ;
         #>
         # 2-step it, we're getting only $value[-1] through the pipeline
         $newContent = (Get-Content $tf) | Foreach-Object {
             $_ -replace $rgxFuncs2Export , ("FunctionsToExport = " + "@('" + $($ExportFunctions -join "','") + "')")
-        }# this writes to $PsdNameTmp
+        } | out-string ; # this writes to $PsdNameTmp
         $bRet = Set-ContentFixEncoding @pltSCFE -Value $newContent ;
         if(-not $bRet -AND -not $whatif){throw "Set-ContentFixEncoding $($tf)!" } ;
         $PassStatus += ";Set-Content:UPDATED";

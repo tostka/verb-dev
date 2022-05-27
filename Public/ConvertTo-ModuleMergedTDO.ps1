@@ -18,6 +18,7 @@ function ConvertTo-ModuleMergedTDO {
     Tags        : Powershell,Module,Development
     AddedTwitter:
     REVISIONS
+    * 4:38 PM 5/27/2022 update all Set-ContentFixEncoding & Add-ContentFixEncoding -values to pre |out-string to collapse arrays into single writes
     * 8:34 AM 5/16/2022 sub backupfile -> backup-FileTDO ; typo: used Aliases for Alias
     * 3:07 PM 5/13/2022ren Merge-Module -> ConvertTo-ModuleMergedTDOTDO() (use std verb; adopt keyword to unique my work from 3rd-party funcs); added Merge-Module to Aliases; 
     * 4:08 PM 5/12/2022 got through a full non -Dyn pass, to publish and ipmo -for. Still need to port over latest merge-module.ps1 chgs -> unmerge-module.ps1. ; updated CBH expl ; cleanedup, duped over minor items from unmerge-module()
@@ -290,7 +291,9 @@ function ConvertTo-ModuleMergedTDO {
 
         if($updatedContent){
             $pltSCFE=[ordered]@{PassThru=$true ;Verbose=$($verbose) ;whatif= $($whatif) ; } 
-            $bRet = Set-ContentFixEncoding -Value $updatedContent -Path $PsmNameTmp @pltSCFE ; 
+            #$bRet = Set-ContentFixEncoding -Value $updatedContent -Path $PsmNameTmp @pltSCFE ; 
+            # we're getting 4 writes in set-cfe, for each block added to updatedcontent, lets try |out-string before passing, to see if they fold into one write
+            $bRet = Set-ContentFixEncoding -Value ($updatedContent| out-string) -Path $PsmNameTmp @pltSCFE ; 
             if(-not $bRet -AND -not $whatif){throw "Set-ContentFixEncoding $($PsmNameTmp)!" } else {
                 $PassStatus += ";UPDATED:Set-ContentFixEncoding ";
             }  ;
@@ -434,7 +437,9 @@ function ConvertTo-ModuleMergedTDO {
                 # add demarc comments - this is AST parsed, so it prob doesn't include delimiters
                 $sBnrSStart = "`n#*------v $($ScriptFile.name) v------" ;
                 $sBnrSEnd = "$($sBnrSStart.replace('-v','-^').replace('v-','^-'))" ;
-                $bRet = "$($sBnrSStart)`n$($ParsedContent.EndBlock.Extent.Text)`n$($sBnrSEnd)" | Add-ContentFixEncoding @pltAdd ;
+                #$bRet = "$($sBnrSStart)`n$($ParsedContent.EndBlock.Extent.Text)`n$($sBnrSEnd)" | Add-ContentFixEncoding @pltAdd ;
+                # add | out-string to collapse object arrays
+                $bRet = "$($sBnrSStart)`n$($ParsedContent.EndBlock.Extent.Text)`n$($sBnrSEnd)" | out-string | Add-ContentFixEncoding @pltAdd ;
                 if(-not $bRet -AND -not $whatif){throw "Add-ContentFixEncoding $($pltAdd.Path)!" } ;
 
                 $AST = [System.Management.Automation.Language.Parser]::ParseFile($ScriptFile, [ref]$null, [ref]$Null ) ;
@@ -475,7 +480,8 @@ function ConvertTo-ModuleMergedTDO {
                     } ;
                     exit ;
                 } ;
-                $bRet = $Content | Add-ContentFixEncoding @pltAdd ;
+                # add | out-string to collapse object arrays
+                $bRet = $Content | out-string | Add-ContentFixEncoding @pltAdd ;
                 if(-not $bRet -AND -not $whatif){throw "Add-ContentFixEncoding $($pltAdd.Path)!" } ;
                 $PassStatus += ";Add-Content:UPDATED";
                 # by contrast, this is NON-AST parsed - it's appending the entire raw file content. Shouldn't need delimiters - they'd already be in source .psm1
@@ -512,7 +518,8 @@ function ConvertTo-ModuleMergedTDO {
             $smsg= "Adding:$($ModFile)..." ;
             if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info }  #Error|Warn|Debug
             else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
-            $bRet = "#*======v _CommonCode v======" | Add-ContentFixEncoding @pltAdd ;
+            # add | out-string to collapse object arrays
+            $bRet = "#*======v _CommonCode v======" | out-string | Add-ContentFixEncoding @pltAdd ;
             if(-not $bRet -AND -not $whatif){throw "Add-ContentFixEncoding $($pltAdd.Path)!" } ;
             $Content = Get-Content $ModFile ;
             if($Content| Where-Object{$_ -match $rgxSigStart -OR $_ -match $rgxSigEnd} ){
@@ -523,9 +530,9 @@ function ConvertTo-ModuleMergedTDO {
                 } ;
                 exit ;
             } ;
-            $bRet =$Content | Add-ContentFixEncoding @pltAdd ;
+            $bRet =$Content | out-string | Add-ContentFixEncoding @pltAdd ;
             if(-not $bRet -AND -not $whatif){throw "Add-ContentFixEncoding $($pltAdd.Path)!" } ;
-            $bRet ="#*======^ END _CommonCode ^======" | Add-ContentFixEncoding @pltAdd ;
+            $bRet ="#*======^ END _CommonCode ^======" | out-string | Add-ContentFixEncoding @pltAdd ;
             if(-not $bRet -AND -not $whatif){throw "Add-ContentFixEncoding $($pltAdd.Path)!" } ;
             $PassStatus += ";Add-Content:UPDATED";
         } else {
@@ -564,14 +571,14 @@ Export-ModuleMember -Function $(($ExportFunctions) -join ',') -Alias *
         $smsg= "Adding:FooterBlock..." ;
         if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info }  #Error|Warn|Debug
         else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
-        $bRet = $FooterBlock | Add-ContentFixEncoding @pltAdd ;
+        $bRet = $FooterBlock | out-string | Add-ContentFixEncoding @pltAdd ;
         if(-not $bRet -AND -not $whatif){throw "Add-ContentFixEncoding $($pltAdd.Path)!" } ;
         $PassStatus += ";Add-Content:UPDATED";
     } else {
         $smsg= "NoAliasExport specified:Skipping FooterBlock add" ;
         if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info }  #Error|Warn|Debug
         else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
-        $bRet = "#*======^ END FUNCTIONS ^======" | Add-ContentFixEncoding @pltAdd ;
+        $bRet = "#*======^ END FUNCTIONS ^======" | out-string | Add-ContentFixEncoding @pltAdd ;
         if(-not $bRet -AND -not $whatif){throw "Add-ContentFixEncoding $($pltAdd.Path)!" } ;
         $PassStatus += ";Add-Content:UPDATED";
     } ;
@@ -590,9 +597,10 @@ Export-ModuleMember -Function $(($ExportFunctions) -join ',') -Alias *
     $pltSCFE=[ordered]@{Path = $tf ; PassThru=$true ;Verbose=$($verbose) ;whatif= $($whatif) ; } 
     if($psd1ExpMatch = Get-ChildItem $tf | select-string -Pattern $rgxFuncs2Export ){
         # 2-step it, we're getting only $value[-1] through the pipeline
+        # add | out-string to collapse object arrays
         $newContent = (Get-Content $tf) | Foreach-Object {
             $_ -replace $rgxFuncs2Export , ("FunctionsToExport = " + "@('" + $($ExportFunctions -join "','") + "')")
-        } ; 
+        } | out-string ; 
         # this writes to $PsdNameTmp
         $bRet = Set-ContentFixEncoding @pltSCFE -Value $newContent ; 
         if(-not $bRet -AND -not $whatif){throw "Set-ContentFixEncoding $($tf)!" } ;

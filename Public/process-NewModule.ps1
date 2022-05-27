@@ -15,6 +15,7 @@ function process-NewModule {
     Github      : https://github.com/tostka/verb-dev
     Tags        : Powershell,Module,Build,Development
     REVISIONS
+    * 4:34 PM 5/27/2022: update all Set-ContentFixEncoding & Add-ContentFixEncoding -values to pre |out-string to collapse arrays into single writes
     * 2:38 PM 5/24/2022: Time to resave process-NewModuleHybrid.ps1 => C:\sc\verb-dev\Public\process-NewModule.ps1
     * 2:54 PM 5/23/2022 add: verbose to pltUMD splat for update-metadata (psd1 enforce curr modvers); added missing testscript-targeting remove-UnneededFileVariants @pltRGens ;  
         got through full dbg/publish/install pass on vio merged, wo issues. Appears functional. 
@@ -746,9 +747,10 @@ $(if($Merge){'MERGE parm specified as well:`n-Merge Public|Internal|Classes incl
             } | Set-ContentFixEncoding @pltSCFE ;
             #>
             # 2-step it, we're getting only $value[-1] through the pipeline
+            # 4:31 PM 5/27/2022: and |out-string value before feeding into SCFE or ACFE
             $newContent = (Get-Content $tf) | Foreach-Object {
                 $_ -replace $rgxTestScriptNOGuid, "$($psd1guid)"
-            } ;
+            } | out-string ;
             $bRet = Set-ContentFixEncoding @pltSCFE -Value $newContent ; 
             if(-not $bRet -AND -not $whatif){throw "Set-ContentFixEncoding $($tf)!" } ;
         } elseif($psd1ExpMatch = gci $tf |select-string -Pattern $rgxTestScriptGuid ){
@@ -767,9 +769,10 @@ $(if($Merge){'MERGE parm specified as well:`n-Merge Public|Internal|Classes incl
                     $_ -replace $testGuid, "$($psd1guid)"
                 } | Set-ContentFixEncoding @pltSCFE ;
                 #>
+                # add | out-string to collapse object arrays
                 $newContent = (Get-Content $tf) | Foreach-Object {
                     $_ -replace $testGuid, "$($psd1guid)"
-                } ;
+                } | out-string ;
                 $bRet = Set-ContentFixEncoding @pltSCFE -Value $newContent ; 
                 if(-not $bRet -AND -not $whatif){throw "Set-ContentFixEncoding $($tf)!" } ;
             } ;
@@ -831,9 +834,10 @@ $(if($Merge){'MERGE parm specified as well:`n-Merge Public|Internal|Classes incl
         } | Set-ContentFixEncoding @pltSCFE ;
         #>
         # 2-step it, we're getting only $value[-1] through the pipeline
+        # add | out-string to collapse object arrays
         $newContent =  (Get-Content $tf) | Foreach-Object {
             $_ -replace $psm1Profile.matches[0].captures.groups[0].value.tostring(), "Version     : $($psd1Vers)"
-        } ;
+        } | out-string  ;
         $bRet = Set-ContentFixEncoding @pltSCFE -Value $newContent ; 
         if(-not $bRet -AND -not $whatif){throw "Set-ContentFixEncoding $($tf)!" } ;
     } else {
