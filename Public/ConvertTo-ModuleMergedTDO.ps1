@@ -18,6 +18,7 @@ function ConvertTo-ModuleMergedTDO {
     Tags        : Powershell,Module,Development
     AddedTwitter:
     REVISIONS
+    * 5:16 PM 5/31/2022 add: -RequiredVersion; # 4:48 PM 5/31/2022 getting mismatch/revert in revision to prior spec, confirm/force set it here, call confirm-ModulePsd1Version()/confirm-ModulePsm1Version() (which handle _TMP versions, that stock tools *won't*)
     * 4:38 PM 5/27/2022 update all Set-ContentFixEncoding & Add-ContentFixEncoding -values to pre |out-string to collapse arrays into single writes
     * 8:34 AM 5/16/2022 sub backupfile -> backup-FileTDO ; typo: used Aliases for Alias
     * 3:07 PM 5/13/2022ren Merge-Module -> ConvertTo-ModuleMergedTDOTDO() (use std verb; adopt keyword to unique my work from 3rd-party funcs); added Merge-Module to Aliases; 
@@ -57,6 +58,8 @@ function ConvertTo-ModuleMergedTDO {
     Directory containing .ps1 function files to be combined [-ModuleSourcePath c:\path-to\module\Public]
     .PARAMETER ModuleDestinationPath
     Final monolithic module .psm1 file name to be populated [-ModuleDestinationPath c:\path-to\module\module.psm1]
+    .PARAMETER RequiredVersion
+    Optional Explicit 3-digit RequiredVersion specification (as contrasts with using current Manifest .psd1 ModuleVersion value)[-Version 2.0.3]
     .PARAMETER NoAliasExport
     Flag that skips auto-inclusion of 'Export-ModuleMember -Alias * ' in merged file [-NoAliasExport]
     .PARAMETER ShowDebug
@@ -98,6 +101,8 @@ function ConvertTo-ModuleMergedTDO {
         [array] $ModuleSourcePath,
         [Parameter(Mandatory = $True, HelpMessage = "Directory path in which the final .psm1 file should be constructed [-ModuleDestinationPath c:\path-to\module\module.psm1]")]
         [string] $ModuleDestinationPath,
+        [Parameter(HelpMessage="Optional Explicit 3-digit RequiredVersion specification (as contrasts with using current Manifest .psd1 ModuleVersion value)[-Version 2.0.3]")]
+        [version]$RequiredVersion,
         [Parameter(Mandatory = $False, HelpMessage = "Logging spec object (output from start-log())[-LogSpec `$LogSpec]")]
         $LogSpec,
         [Parameter(HelpMessage = "Flag that skips auto-inclusion of 'Export-ModuleMember -Alias * ' in merged file [-NoAliasExport]")]
@@ -609,6 +614,46 @@ Export-ModuleMember -Function $(($ExportFunctions) -join ',') -Alias *
         $smsg = "UNABLE TO Regex out $($rgxFuncs2Export) from $($tf)`nFunctionsToExport CAN'T BE UPDATED!" ;
         if($verbose){ if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN } #Error|Warn|Debug
         else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; } ;
+    } ;
+
+    # 4:48 PM 5/31/2022 getting mismatch/revert in revision to prior spec, confirm/force set it here:
+    # $bRet = confirm-ModulePsd1Version -Path 'C:\sc\verb-IO\verb-IO\verb-IO.psd1_TMP' -RequiredVersion '2.0.3' -whatif  -verbose
+    # [Parameter(HelpMessage="Optional Explicit 3-digit RequiredVersion specification (as contrasts with using current Manifest .psd1 ModuleVersion value)[-Version 2.0.3]")]
+    #        [version]$RequiredVersion,
+    $pltCMPV=[ordered]@{
+        Path = $PsdNameTmp ;
+        RequiredVersion = $RequiredVersion ;
+        whatif = $($whatif) ;
+        verbose = $($verbose) ;
+    } ;
+    $smsg = "confirm-ModulePsd1Version w`n$(($pltCMPV|out-string).trim())" ;
+    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug
+    else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+    $bRet = confirm-ModulePsd1Version @pltCMPV ;
+    if ($bRet.valid -AND $bRet.Version){
+        $smsg = "confirm-ModulePsd1Version:FAIL! Aborting!" ;
+        if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info }
+        else{ write-verbose "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+        Break ;
+    } ;
+    
+    # do the psm1 too
+    #$bRet = confirm-ModulePsm1Version -Path 'C:\sc\verb-IO\verb-IO\verb-io.psm1_TMP' -RequiredVersion '2.0.3' -whatif:$($whatif) -verbose:$($verbose) ;
+    $pltCMPMV=[ordered]@{
+        Path = $PsmNameTmp ; ;
+        RequiredVersion = $RequiredVersion ;
+        whatif = $($whatif) ;
+        verbose = $($verbose) ;
+    } ;
+    $smsg = "confirm-ModulePsm1Version w`n$(($pltCMPMV|out-string).trim())" ;
+    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug
+    else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+    $bRet = confirm-ModulePsm1Version @pltCMPMV ;
+    if ($bRet.valid -AND $bRet.Version){
+        $smsg = "confirm-ModulePsm1Version:FAIL! Aborting!" ;
+        if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info }
+        else{ write-verbose "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+        Break ;
     } ;
 
     # 3:20 PM 5/11/2022 move psd1_tmp|psm1_tmp testing to func: 
