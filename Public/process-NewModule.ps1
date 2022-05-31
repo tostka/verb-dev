@@ -15,6 +15,7 @@ function process-NewModule {
     Github      : https://github.com/tostka/verb-dev
     Tags        : Powershell,Module,Build,Development
     REVISIONS
+    * 9:00 AM 5/31/2022 recoding for version enforcement (seeing final un-incremented): added -Version; cbh example tweaks ; subbed all Exit->Break; subbed write-warnings to 7pswlw ; twinned $psd1UpdatedVers into the nobuildversion section.
     * 4:34 PM 5/27/2022: update all Set-ContentFixEncoding & Add-ContentFixEncoding -values to pre |out-string to collapse arrays into single writes
     * 2:38 PM 5/24/2022: Time to resave process-NewModuleHybrid.ps1 => C:\sc\verb-dev\Public\process-NewModule.ps1
     * 2:54 PM 5/23/2022 add: verbose to pltUMD splat for update-metadata (psd1 enforce curr modvers); added missing testscript-targeting remove-UnneededFileVariants @pltRGens ;  
@@ -86,6 +87,8 @@ function process-NewModule {
     Flag that indicates Pester test script should be run, at end of processing [-RunTest]
     .PARAMETER NoBuildInfo
     Skip BuildInfo use (workaround for hangs in that module)[-NoBuildInfo]
+    .PARAMETER Version
+    Optional Explicit Version specification (as contrasts with using current Manifest .psd1 ModuleVersion value)
     .PARAMETER ShowDebug
     Parameter to display Debugging messages [-ShowDebug switch]
     .PARAMETER Republish
@@ -93,21 +96,21 @@ function process-NewModule {
     .PARAMETER Whatif
     Parameter to run a Test no-change pass [-Whatif switch]
     .EXAMPLE
-    processbulk-NewModule.ps1 -mod verb-text,verb-io -verbose
+    PS> processbulk-NewModule.ps1 -mod verb-text,verb-io -verbose
     Example using the separate processbulk-NewModule.ps1 pre-procesesor to feed an array of mods through bulk processing, uses BuildEnvironment Step-ModuleVersion to increment the psd1 version, and specs -merge & -RunTest processing
     .EXAMPLE
-    processbulk-NewModule.ps1 -mod -Dynamic verb-io -verbose
+    PS> processbulk-NewModule.ps1 -mod -Dynamic verb-io -verbose
     Example using the separate processbulk-NewModule.ps1 pre-procesesor to drive a Dyanmic include .psm1 build to feed one mod through bulk processing, uses BuildEnvironment Step-ModuleVersion to increment the psd1 version, and specs -merge & -RunTest processing
     .EXAMPLE
-    process-NewModule.ps1 -ModuleName "verb-AAD" -ModDirPath "C:\sc\verb-AAD" -Repository $localPSRepo  -Merge -showdebug -whatif ;
+    PS> process-NewModule.ps1 -ModuleName "verb-AAD" -ModDirPath "C:\sc\verb-AAD" -Repository $localPSRepo  -Merge -showdebug -whatif ;
     Full Merge Build/Rebuild from components & Publish/Install/Test specified module, with debug messages, and whatif pass.
     .EXAMPLE
-    process-NewModule.ps1 -ModuleName "verb-AAD" -ModDirPath "C:\sc\verb-AAD" -Repository $localPSRepo  -showdebug -whatif ;
+    PS> process-NewModule.ps1 -ModuleName "verb-AAD" -ModDirPath "C:\sc\verb-AAD" -Repository $localPSRepo  -showdebug -whatif ;
     Non-Merge pass: Re-sign specified module & Publish/Install/Test specified module, with debug messages, and whatif pass.
     .EXAMPLE
     # pre-remove installed module
     # re-increment the psd1 file ModuleVersion (unique new val req'd to publish)
-    process-NewModule.ps1 -ModuleName "verb-AAD" -ModDirPath "C:\sc\verb-AAD" -Repository $localPSRepo -Merge -Republish -showdebug -whatif ;
+    PS> process-NewModule.ps1 -ModuleName "verb-AAD" -ModDirPath "C:\sc\verb-AAD" -Repository $localPSRepo -Merge -Republish -showdebug -whatif ;
     Merge & Republish pass: Only Publish/Install/Test specified module, with debug messages, and whatif pass.
     .LINK
     #>
@@ -116,12 +119,16 @@ function process-NewModule {
     #Requires -Modules BuildHelpers,verb-IO, verb-logging, verb-Mods, verb-Text
     [CmdletBinding()]
     PARAM(
-        [Parameter(Position=0,Mandatory=$True,ValueFromPipeline=$true,ValueFromPipelineByPropertyName=$true,HelpMessage="ModuleName[-ModuleName verb-AAD]")]
-        [ValidateNotNullOrEmpty()]$ModuleName,
-        [Parameter(Position=0,Mandatory=$True,ValueFromPipeline=$true,ValueFromPipelineByPropertyName=$true,HelpMessage="ModDirPath[-ModDirPath C:\sc\verb-ADMS]")]
-        [ValidateNotNullOrEmpty()]$ModDirPath,
+        [Parameter(Position=0,Mandatory=$True,ValueFromPipeline=$true,HelpMessage="ModuleName[-ModuleName verb-AAD]")]
+        [ValidateNotNullOrEmpty()]
+        [string]$ModuleName,
+        [Parameter(Mandatory=$True,HelpMessage="ModDirPath[-ModDirPath C:\sc\verb-ADMS]")]
+        [ValidateNotNullOrEmpty()]
+        [ValidateScript({Test-Path $_ -PathType 'Container'})]
+        [system.io.fileinfo]$ModDirPath,
         [Parameter(Position=0,Mandatory=$True,ValueFromPipeline=$true,ValueFromPipelineByPropertyName=$true,HelpMessage="Target local Repo[-Repository lyncRepo]")]
-        [ValidateNotNullOrEmpty()]$Repository,
+        [ValidateNotNullOrEmpty()]
+        [string]$Repository,
         [Parameter(HelpMessage="Flag that indicates Module should be Merged into a monoolithic .psm1 [-Merge]")]
         [switch] $Merge,
         [Parameter(HelpMessage="Flag that indicates Module should be republished into local Repo (skips ConvertTo-ModuleDynamicTDO & Sign-file steps) [-Republish]")]
@@ -130,6 +137,8 @@ function process-NewModule {
         [switch] $RunTest,
         [Parameter(HelpMessage="Skip BuildInfo use (workaround for hangs in that module)[-NoBuildInfo]")]
         [switch] $NoBuildInfo,
+        [Parameter(HelpMessage="Optional Explicit 3-digit Version specification (as contrasts with using current Manifest .psd1 ModuleVersion value)[-Version 2.0.3]")]
+        [version]$Version,
         [Parameter(HelpMessage="Debugging Flag [-showDebug]")]
         [switch] $showDebug,
         [Parameter(HelpMessage="Whatif Flag  [-whatIf]")]
@@ -256,7 +265,7 @@ function process-NewModule {
                         if ($showdebug) { Write-Verbose -verbose "Post $sLoad" };
                     } else {
                         Write-Warning ((Get-Date).ToString("HH:mm:ss") + ":MISSING:" + $sLoad + " EXITING...") ;
-                        exit;
+                        Break;
                     } ;
                 } ;
             } ;
@@ -275,7 +284,7 @@ function process-NewModule {
                 }
             } else {
                 Write-Warning ((Get-Date).ToString("HH:mm:ss") + ":MISSING:" + $sLoad + " EXITING...") ;
-                exit;
+                Break;
             } ;
         } else {
             write-verbose -verbose:$true  "(confirmed $tModName loaded: $tModCmdlet present)"
@@ -301,21 +310,25 @@ function process-NewModule {
     if("$env:userdomain\$env:username" -match $rgxAcctWAdmn){
         # proper SID acct (shouldn't be exec'd SID)
     } elseif("$env:userdomain\$env:username" -match $rgxAcctWUID){
-        write-warning "$((get-date).ToString('HH:mm:ss')):RUNNING AS *UID* - $($env:userdomain)\$($env:username) - MUST BE RUN *SID*! EXITING!" ;
-        EXIT ;
+        $smsg = "RUNNING AS *UID* - $($env:userdomain)\$($env:username) - MUST BE RUN *SID*! EXITING!" ;
+        if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN }  #Error|Warn|Debug
+        else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+        Break ;
     } ;
 
 
     if($Merge -AND $Republish){
-        write-host -foregroundcolor RED "$((get-date).ToString('HH:mm:ss')):*WARNING!*:-Merge *AND* -Republish specified! Please use one or the other, but *not* BOTH!" ;
-        Exit ;
+        $smsg = "*WARNING!*:-Merge *AND* -Republish specified! Please use one or the other, but *not* BOTH!" ;
+        if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN }  #Error|Warn|Debug
+        else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+        Break ;
     } ;
 
     if($env:USERDOMAIN -EQ $DomainWork){
         if("$($env:USERDOMAIN)\$($env:USERNAME)" -notmatch $rgxAcctWAdmn ){
             write-host -foregroundcolor RED "$((get-date).ToString('HH:mm:ss')):*WARNING*! THIS SCRIPT MUST BE RUN AS SID AT WORK`nREQUIRES *ADMIN* REPO PUBLISHING PERMS, `nWHICH UID LACKS ($($env:USERDOMAIN)\$($env:USERNAME))" ;
             #popd ;
-            EXIT ;
+            Break ;
         } ;
     } ;
 
@@ -435,7 +448,8 @@ function process-NewModule {
 
             } else {
                 $smsg = "Unable to resolve manifest .psd1 path for module dir:$($modroot)" ;
-                write-warning $smsg ;
+                if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN }  #Error|Warn|Debug
+                else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
                 throw $smsg
                 break ;
             } ;
@@ -453,10 +467,28 @@ function process-NewModule {
             }
         } CATCH {
             $PassStatus += ";ERROR";
-            write-warning  "$(get-date -format 'HH:mm:ss'): Failed processing $($_.Exception.ItemName). `nError Message: $($_.Exception.Message)`nError Details: $($_)" ;
-            Exit ;
+            $smsg= "Failed processing $($_.Exception.ItemName). `nError Message: $($_.Exception.Message)`nError Details: $($_)" ;
+            if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN }  #Error|Warn|Debug
+            else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+            Break ;
         } ;
-        $psd1Vers = $psd1Profile.Version.tostring() ;
+        if($Version.tostring() -AND  $psd1Profile){
+            if($psd1Profile.Version.tostring() -eq $Version.tostring()){
+                $psd1UpdatedVers = $psd1Vers = $psd1Profile.Version.tostring() ;
+            } else {
+                $PassStatus += ";ERROR";
+                $smsg= "Version mismatch between PSD1:$($ModPsdPath):$($psd1Profile.Version.tostring())`nand explicit `$Version specified:$($Version.tostring())" ;
+                if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN }  #Error|Warn|Debug
+                else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                Break ;
+            } ; 
+        } else {
+            $smsg = "(no explicit -Version:deferring to psd1.version)" ; 
+            if($verbose){if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } 
+            else{ write-verbose "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; } ; 
+            $psd1UpdatedVers = $psd1Vers = $psd1Profile.Version.tostring() ;
+        } ;
+
     } else {
         # stock buildhelper e-varis - I don't even see it in *use*
         write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):(executing:Get-BuildEnvironment -Path $($ModDirPath) `n(use -NoBuildInfo if hangs))" ;
@@ -506,8 +538,26 @@ function process-NewModule {
         $psd1UpdatedVers = (Import-PowerShellDataFile -Path $ModPsdPath).ModuleVersion.tostring() ;
     } CATCH {
         $PassStatus += ";ERROR";
-        write-warning  "$(get-date -format 'HH:mm:ss'): Failed processing $($_.Exception.ItemName). `nError Message: $($_.Exception.Message)`nError Details: $($_)" ;
-        Exit ;
+        $smsg = "Failed processing $($_.Exception.ItemName). `nError Message: $($_.Exception.Message)`nError Details: $($_)" ;
+        if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN }  #Error|Warn|Debug
+        else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+        Break ;
+    } ;
+    if($Version.tostring() -AND $psd1UpdatedVers){
+        if($psd1UpdatedVers.Version.tostring() -eq $Version.tostring()){
+            $psd1Vers = $psd1UpdatedVers.Version.tostring() ;
+        } else {
+            $PassStatus += ";ERROR";
+            $smsg= "Version mismatch between PSD1:$($ModPsdPath):$($psd1UpdatedVers.Version.tostring())`nand explicit `$Version specified:$($Version.tostring())" ;
+            if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN }  #Error|Warn|Debug
+            else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+            Break ;
+        } ; 
+    } else {
+        $smsg = "(no explicit -Version:deferring to psd1.version)" ; 
+        if($verbose){if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } 
+        else{ write-verbose "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; } ; 
+        $psd1Vers = $psd1UpdatedVers.Version.tostring() ;
     } ;
 
     if(!$Republish){
@@ -573,8 +623,8 @@ $(if($Merge){'MERGE parm specified as well:`n-Merge Public|Internal|Classes incl
                     
                 } else {
                     $smsg= "(no backup .psm1 to revert from)" ;
-                    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN } #Error|Warn|Debug
-                    else{ write-WARNING $smsg } ;
+                    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN }  #Error|Warn|Debug
+                    else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;                    
                 } ;
                 if($PsdNameBu){
                     $smsg= "Restoring PSD1 from backup:" ;
@@ -721,8 +771,10 @@ $(if($Merge){'MERGE parm specified as well:`n-Merge Public|Internal|Classes incl
         }
     } CATCH {
         $PassStatus += ";ERROR";
-        write-warning  "$(get-date -format 'HH:mm:ss'): Failed processing $($_.Exception.ItemName). `nError Message: $($_.Exception.Message)`nError Details: $($_)" ;
-        Exit ;
+        $smsg = "Failed processing $($_.Exception.ItemName). `nError Message: $($_.Exception.Message)`nError Details: $($_)" ;
+        if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN }  #Error|Warn|Debug
+        else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+        Break ;
     } ;
 
     $psd1Vers = $psd1Profile.Version.tostring() ;
@@ -811,7 +863,9 @@ $(if($Merge){'MERGE parm specified as well:`n-Merge Public|Internal|Classes incl
             $psd1Vers = (Import-PowerShellDataFile -path $ModPsdPath).ModuleVersion.tostring() ;
         } CATCH {
             $PassStatus += ";ERROR";
-            write-warning  "$(get-date -format 'HH:mm:ss'): Failed processing $($_.Exception.ItemName). `nError Message: $($_.Exception.Message)`nError Details: $($_)" ;
+            $smsg = "Failed processing $($_.Exception.ItemName). `nError Message: $($_.Exception.Message)`nError Details: $($_)" ;
+            if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN }  #Error|Warn|Debug
+            else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
             bREAK ;
         } ;
     } ; 
@@ -889,8 +943,10 @@ $(if($Merge){'MERGE parm specified as well:`n-Merge Public|Internal|Classes incl
             sign-file @pltSignFile ;
         } CATCH {
             $PassStatus += ";ERROR";
-            write-warning  "$(get-date -format 'HH:mm:ss'): Failed processing $($_.Exception.ItemName). `nError Message: $($_.Exception.Message)`nError Details: $($_)" ;
-            Exit ;
+            $smsg = "Failed processing $($_.Exception.ItemName). `nError Message: $($_.Exception.Message)`nError Details: $($_)" ;
+            if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN }  #Error|Warn|Debug
+            else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+            Break ;
         } ;
     } else {
         $smsg= "(no matching signable files)" ;
@@ -946,7 +1002,7 @@ $(if($Merge){'MERGE parm specified as well:`n-Merge Public|Internal|Classes incl
         $searchPath = join-path -path $modpath -ChildPath "$($ModuleName)\*.*" ;
         # 2:25 PM 4/21/2021 adding -GracefulFail to get past locked verb-dev cmdlets
         $bRet = remove-ItemRetry -Path $searchPath -Recurse -showdebug:$($showdebug) -whatif:$($whatif) -GracefulFail ;
-        if (!$bRet) {throw "FAILURE" ; EXIT ; } ;
+        if (!$bRet) {throw "FAILURE" ; Break ; } ;
     } ;
     #>
     $pltUMF=[ordered]@{
@@ -967,7 +1023,8 @@ $(if($Merge){'MERGE parm specified as well:`n-Merge Public|Internal|Classes incl
          # or, work with raw ;-delim'd string:
         #if($sret.indexof('uninstall-module:ERROR')){
             $smsg = "Uninstall-ModuleForce:uninstall-module:ERRO!"  ;
-            write-warning $smsg ; 
+            if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN }  #Error|Warn|Debug
+            else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
             throw $smsg ;
         } ; 
     } else { 
@@ -975,7 +1032,6 @@ $(if($Merge){'MERGE parm specified as well:`n-Merge Public|Internal|Classes incl
         if($verbose){if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
         else{ write-verbose "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; } ; 
     } ; 
-   
 
     $smsg= "Copying module to profile (net of .git & .vscode dirs, and backed up content)..." ;
     if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info }  #Error|Warn|Debug
@@ -1036,7 +1092,7 @@ $(if($Merge){'MERGE parm specified as well:`n-Merge Public|Internal|Classes incl
                 $smsg= "Unable to exec cmd!" ;
                 if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Error }  #Error|Warn|Debug
                 else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
-                Exit ;
+                Break ;
             } ;
         }  ;
     } Until ($Exit -eq $Retries) ;
@@ -1055,9 +1111,11 @@ $(if($Merge){'MERGE parm specified as well:`n-Merge Public|Internal|Classes incl
         TRY {
             Remove-Item @pltRItm ;
         } CATCH {
-            Write-Warning "$(get-date -format 'HH:mm:ss'): Failed processing $($_.Exception.ItemName). `nError Message: $($_.Exception.Message)`nError Details: $($_)" ;
+            $smsg = "Failed processing $($_.Exception.ItemName). `nError Message: $($_.Exception.Message)`nError Details: $($_)" ;
+            if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN }  #Error|Warn|Debug
+            else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
             $PassStatus += ";ERROR";
-            Exit #STOP(debug)|EXIT(close)|Continue(move on in loop cycle) ;
+            Break #STOP(debug)|EXIT(close)|Continue(move on in loop cycle) ;
         } ;
     } ;
 
@@ -1090,7 +1148,7 @@ $(if($Merge){'MERGE parm specified as well:`n-Merge Public|Internal|Classes incl
                 $smsg= "Failed processing $($ErrorTrapped.Exception.ItemName). `nError Message: $($ErrorTrapped.Exception.Message)`nError Details: $($ErrorTrapped)" ;
                 if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Error } #Error|Warn
                 else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
-                Exit ;
+                Break ;
             } ;
 
             if($tRepo){
@@ -1125,7 +1183,7 @@ $($tExistingPkg.fullname)!
                         $bRet=Read-Host "Enter YYY to continue. Anything else will exit"
                         if ($bRet.ToUpper() -eq "YYY") {
                             $bRet = remove-ItemRetry -Path $tExistingPkg.fullname -showdebug:$($showdebug) -whatif:$($whatif) -GracefulFail  ;
-                            if (!$bRet) {throw "FAILURE" ; EXIT ; } ;
+                            if (!$bRet) {throw "FAILURE" ; Break ; } ;
                         } else {
                             $blkMsg=@"
 "Alternatively, you need to specify a *new* .psd1 file version...
@@ -1146,7 +1204,7 @@ And then re-run process-NewModule.
                             #$editor = "notepad2.exe" ;
                             $editorArgs = "$($ModPsdPath)" ;
                             Invoke-Command -ScriptBlock { & $editor $editorArgs } ;
-                            Exit ;
+                            Break ;
                         } ;
 
                     } ;
@@ -1179,7 +1237,7 @@ And then re-run process-NewModule.
                 if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Error } #Error|Warn
                 else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
                 } ;
-                Exit ;
+                Break ;
             } ;
 
             $smsg= "Waiting for:find-module -name $($ModuleName) -Repository $Repository ..." ;
@@ -1208,7 +1266,7 @@ And then re-run process-NewModule.
                 } ;
 
                 $bRet = remove-ItemRetry -Path $tFiles -Recurse -showdebug:$($showdebug) -whatif:$($whatif) -GracefulFail ;
-                if (!$bRet) {throw "FAILURE" ; EXIT ; } ;
+                if (!$bRet) {throw "FAILURE" ; Break ; } ;
 
                 # ADD -AllowClobber, to permit install command overlap (otherwise it aborts the install-module attempt)
                 # add RequiredVersion to fix: Unable to install, multiple modules matched 'VERB-dev'. Please specify an exact -Name and -RequiredVersion.
@@ -1233,7 +1291,7 @@ And then re-run process-NewModule.
                     $smsg= "Failed processing $($ErrorTrapped.Exception.ItemName). `nError Message: $($ErrorTrapped.Exception.Message)`nError Details: $($ErrorTrapped)" ;
                     if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Error } #Error|Warn
                     else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
-                    Exit ;
+                    Break ;
                 } ;
 
                 # test import-module with ea, force (hard reload curr version) & verbose output
@@ -1255,7 +1313,7 @@ And then re-run process-NewModule.
                     $smsg= "Failed processing $($ErrorTrapped.Exception.ItemName). `nError Message: $($ErrorTrapped.Exception.Message)`nError Details: $($ErrorTrapped)" ;
                     if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Error } #Error|Warn
                     else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
-                    Exit ;
+                    Break ;
                 } ;
 
                 # finally, lets grab the .nukpg that was created on the repo, and cached it in the sc dir (for direct copying to stock other repos, home etc)
@@ -1288,9 +1346,11 @@ And then re-run process-NewModule.
                         TRY {
                             New-Item @pltNItm ;
                         } CATCH {
-                            Write-Warning "$(get-date -format 'HH:mm:ss'): Failed processing $($_.Exception.ItemName). `nError Message: $($_.Exception.Message)`nError Details: $($_)" ;
+                            $smsg = "Failed processing $($_.Exception.ItemName). `nError Message: $($_.Exception.Message)`nError Details: $($_)" ;
+                            if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN }  #Error|Warn|Debug
+                            else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
                             $PassStatus += ";ERROR";
-                            Exit #STOP(debug)|EXIT(close)|Continue(move on in loop cycle) ;
+                            Break #STOP(debug)|EXIT(close)|Continue(move on in loop cycle) ;
                         } ;
                     } ;
                     write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):Copy-Item w`n$(($pltCItm|out-string).trim())" ;
@@ -1298,9 +1358,11 @@ And then re-run process-NewModule.
                     TRY {
                         copy-Item @pltCItm ;
                     } CATCH {
-                        Write-Warning "$(get-date -format 'HH:mm:ss'): Failed processing $($_.Exception.ItemName). `nError Message: $($_.Exception.Message)`nError Details: $($_)" ;
+                        $smsg = "Failed processing $($_.Exception.ItemName). `nError Message: $($_.Exception.Message)`nError Details: $($_)" ;
+                        if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN }  #Error|Warn|Debug
+                        else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
                         $PassStatus += ";ERROR";
-                        Exit #STOP(debug)|EXIT(close)|Continue(move on in loop cycle) ;
+                        Break #STOP(debug)|EXIT(close)|Continue(move on in loop cycle) ;
                     } ;
 
                 } else {
