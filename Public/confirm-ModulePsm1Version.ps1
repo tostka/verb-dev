@@ -15,6 +15,7 @@ function confirm-ModulePsm1Version {
     Github      : https://github.com/tostka/verb-dev
     Tags        : Powershell,ISE,development,debugging,Pester
     REVISIONS
+    * 12:06 PM 6/1/2022 updated CBH example; rem'd unused hash properties on report
     * 4:57 PM 5/31/2022 init
     .DESCRIPTION
    confirm-ModulePsm1Version - Enforce expected Module Build Version in Module .psm1 [modname]\[modname]\[modname].psm1 file
@@ -25,13 +26,24 @@ function confirm-ModulePsm1Version {
     .PARAMETER whatIf
     Whatif Flag  [-whatIf]
     .EXAMPLE
-    PS> $bRet = confirm-ModulePsm1Version -Path 'C:\sc\verb-IO\verb-IO\verb-io.psm1_TMP' -RequiredVersion '2.0.3' -whatif:$($whatif) -verbose:$($verbose) ;
+    PS> $pltCMPMV=[ordered]@{ Path = 'C:\sc\verb-IO\verb-IO\verb-io.psm1_TMP' ; ; RequiredVersion = '2.0.3' ; whatif = $($whatif) ; verbose = $($verbose) ; } ;
+    PS> $smsg = "confirm-ModulePsm1Version w`n$(($pltCMPMV|out-string).trim())" ;
+    PS> if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug
+    PS> else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+    PS> $bRet = confirm-ModulePsm1Version @pltCMPMV ;
     PS> if ($bRet.valid -AND $bRet.Version){
+    PS>     $smsg = "(confirm-ModulePsm1Version:Success)" ;
+    PS>     if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info }
+    PS>     else{ write-verbose "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+    PS>     objReport.Manifest = $ModPsm1 ;
+    PS>     $objReport.Version = $RequiredVersion ;
+    PS> } else {
     PS>     $smsg = "confirm-ModulePsm1Version:FAIL! Aborting!" ;
     PS>     if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info }
     PS>     else{ write-verbose "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
     PS>     Break ;
-    PS> } ;
+    PS> } ;    
+    Splatted call demo, confirming psm1 specified has Version properly set to '2.0.3', or the existing Version will be updated to comply.
     .LINK
     https://github.com/tostka/verb-dev
     #>
@@ -87,8 +99,8 @@ function confirm-ModulePsm1Version {
 
         foreach($File in $Path){
             $objReport=[ordered]@{
-                Manifest=$null ;
-                Module = $null ;
+                #Manifest=$null ;
+                #Module = $null ;
                 #Guid = $null ;
                 Version = $null ;
                 Valid = $false ;
