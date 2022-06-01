@@ -15,6 +15,7 @@ function confirm-ModuleTestPs1Guid {
     Github      : https://github.com/tostka/verb-dev
     Tags        : Powershell,ISE,development,debugging,Pester
     REVISIONS
+    * 12:06 PM 6/1/2022 updated CBH example; rem'd unused hash properties on report
     * 4:03 PM 5/31/2022 init
     .DESCRIPTION
     confirm-ModuleTestPs1Guid - Enforce expected Module Build Guid in Pester [modname]\Tests\[modname].tests.ps1 file
@@ -25,13 +26,23 @@ function confirm-ModuleTestPs1Guid {
     .PARAMETER whatIf
     Whatif Flag  [-whatIf]
     .EXAMPLE
-    PS> $bRet = confirm-ModuleTestPs1Guid -Path 'C:\sc\verb-IO\Tests\verb-IO.tests.ps1' -RequiredGuid '12cb1eb4-ac9c-405e-8711-e80c914a9b32' -whatif:$($whatif) -verbose:$($verbose) ;
-    PS> if ($bRet.valid -AND $bRet.Test){
+    PS> $pltCMTPG=[ordered]@{ Path = 'C:\sc\verb-IO\Tests\verb-IO.tests.ps1' ; RequiredGuid = '12cb1eb4-ac9c-405e-8711-e80c914a9b32' ; whatif = $($whatif) ; verbose = $($verbose) ; } ;
+    PS> $smsg = "confirm-ModuleTestPs1Guid w`n$(($pltCMTPG|out-string).trim())" ;
+    PS> if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug
+    PS> else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+    PS> $bRet = confirm-ModuleTestPs1Guid @pltCMTPG ;
+    PS> if ($bRet.valid -AND $bRet.GUID){
+    PS>     $smsg = "(confirm-ModuleTestPs1Guid:Success)" ;
+    PS>     if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info }
+    PS>     else{ write-verbose "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+    PS>     objReport.Guid = $psd1guid ;
+    PS> } else {
     PS>     $smsg = "confirm-ModuleTestPs1Guid:FAIL! Aborting!" ;
     PS>     if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info }
     PS>     else{ write-verbose "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
     PS>     Break ;
-    PS> } ;
+    PS> } ;    
+    Splatted call demo, confirming psm1 specified has Version properly set to '2.0.3', or the existing Version will be updated to comply.
     .LINK
     https://github.com/tostka/verb-dev
     #>
@@ -87,8 +98,8 @@ function confirm-ModuleTestPs1Guid {
 
         foreach($File in $Path){
             $objReport=[ordered]@{
-                Manifest=$null ;
-                Module = $null ;
+                #Manifest=$null ;
+                #Module = $null ;
                 Guid = $null ;
                 #Version = $null ; 
                 Valid = $false ;

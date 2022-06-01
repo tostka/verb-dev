@@ -5,40 +5,79 @@
       <T>System.Management.Automation.Breakpoint</T>
       <T>System.Object</T>
     </TN>
-    <ToString>Line breakpoint on 'C:\sc\verb-dev\Public\confirm-ModuleTestPs1Guid.ps1:56'</ToString>
+    <ToString>Line breakpoint on 'C:\sc\verb-dev\Public\confirm-ModuleTestPs1Guid.ps1:159'</ToString>
     <Props>
       <I32 N="Column">0</I32>
-      <I32 N="Line">56</I32>
+      <I32 N="Line">159</I32>
       <Nil N="Action" />
       <B N="Enabled">true</B>
-      <I32 N="HitCount">5</I32>
-      <I32 N="Id">342</I32>
+      <I32 N="HitCount">3</I32>
+      <I32 N="Id">1977</I32>
       <S N="Script">C:\sc\verb-dev\Public\confirm-ModuleTestPs1Guid.ps1</S>
     </Props>
   </Obj>
   <Obj RefId="1">
     <TNRef RefId="0" />
-    <ToString>Line breakpoint on 'C:\sc\verb-dev\Public\confirm-ModuleTestPs1Guid.ps1:89'</ToString>
+    <ToString>Line breakpoint on 'C:\sc\verb-dev\Public\confirm-ModuleTestPs1Guid.ps1:122'</ToString>
     <Props>
       <I32 N="Column">0</I32>
-      <I32 N="Line">89</I32>
+      <I32 N="Line">122</I32>
       <Nil N="Action" />
       <B N="Enabled">true</B>
-      <I32 N="HitCount">5</I32>
-      <I32 N="Id">343</I32>
+      <I32 N="HitCount">2</I32>
+      <I32 N="Id">1978</I32>
       <S N="Script">C:\sc\verb-dev\Public\confirm-ModuleTestPs1Guid.ps1</S>
     </Props>
   </Obj>
   <Obj RefId="2">
     <TNRef RefId="0" />
-    <ToString>Line breakpoint on 'C:\sc\verb-dev\Public\confirm-ModuleTestPs1Guid.ps1:148'</ToString>
+    <ToString>Line breakpoint on 'C:\sc\verb-dev\Public\confirm-ModuleTestPs1Guid.ps1:143'</ToString>
     <Props>
       <I32 N="Column">0</I32>
-      <I32 N="Line">148</I32>
+      <I32 N="Line">143</I32>
       <Nil N="Action" />
       <B N="Enabled">true</B>
       <I32 N="HitCount">0</I32>
-      <I32 N="Id">352</I32>
+      <I32 N="Id">1979</I32>
+      <S N="Script">C:\sc\verb-dev\Public\confirm-ModuleTestPs1Guid.ps1</S>
+    </Props>
+  </Obj>
+  <Obj RefId="3">
+    <TNRef RefId="0" />
+    <ToString>Line breakpoint on 'C:\sc\verb-dev\Public\confirm-ModuleTestPs1Guid.ps1:100'</ToString>
+    <Props>
+      <I32 N="Column">0</I32>
+      <I32 N="Line">100</I32>
+      <Nil N="Action" />
+      <B N="Enabled">true</B>
+      <I32 N="HitCount">3</I32>
+      <I32 N="Id">1980</I32>
+      <S N="Script">C:\sc\verb-dev\Public\confirm-ModuleTestPs1Guid.ps1</S>
+    </Props>
+  </Obj>
+  <Obj RefId="4">
+    <TNRef RefId="0" />
+    <ToString>Line breakpoint on 'C:\sc\verb-dev\Public\confirm-ModuleTestPs1Guid.ps1:67'</ToString>
+    <Props>
+      <I32 N="Column">0</I32>
+      <I32 N="Line">67</I32>
+      <Nil N="Action" />
+      <B N="Enabled">true</B>
+      <I32 N="HitCount">3</I32>
+      <I32 N="Id">1981</I32>
+      <S N="Script">C:\sc\verb-dev\Public\confirm-ModuleTestPs1Guid.ps1</S>
+    </Props>
+  </Obj>
+  <Obj RefId="5">
+    <TNRef RefId="0" />
+    <ToString>Line breakpoint on 'C:\sc\verb-dev\Public\confirm-ModuleTestPs1Guid.ps1:109'</ToString>
+    <Props>
+      <I32 N="Column">0</I32>
+      <I32 N="Line">109</I32>
+      <Nil N="Action" />
+      <B N="Enabled">true</B>
+      <I32 N="HitCount">3</I32>
+      <I32 N="Id">1982</I32>
       <S N="Script">C:\sc\verb-dev\Public\confirm-ModuleTestPs1Guid.ps1</S>
     </Props>
   </Obj>
