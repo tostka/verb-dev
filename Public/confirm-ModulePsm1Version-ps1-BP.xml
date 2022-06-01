@@ -5,57 +5,109 @@
       <T>System.Management.Automation.Breakpoint</T>
       <T>System.Object</T>
     </TN>
-    <ToString>Line breakpoint on 'C:\sc\verb-dev\Public\confirm-ModulePsm1Version.ps1:54'</ToString>
+    <ToString>Line breakpoint on 'C:\sc\verb-dev\Public\confirm-ModulePsm1Version.ps1:110'</ToString>
     <Props>
       <I32 N="Column">0</I32>
-      <I32 N="Line">54</I32>
+      <I32 N="Line">110</I32>
       <Nil N="Action" />
       <B N="Enabled">true</B>
-      <I32 N="HitCount">1</I32>
-      <I32 N="Id">1460</I32>
+      <I32 N="HitCount">6</I32>
+      <I32 N="Id">1904</I32>
       <S N="Script">C:\sc\verb-dev\Public\confirm-ModulePsm1Version.ps1</S>
     </Props>
   </Obj>
   <Obj RefId="1">
     <TNRef RefId="0" />
-    <ToString>Line breakpoint on 'C:\sc\verb-dev\Public\confirm-ModulePsm1Version.ps1:89'</ToString>
+    <ToString>Line breakpoint on 'C:\sc\verb-dev\Public\confirm-ModulePsm1Version.ps1:114'</ToString>
     <Props>
       <I32 N="Column">0</I32>
-      <I32 N="Line">89</I32>
+      <I32 N="Line">114</I32>
       <Nil N="Action" />
       <B N="Enabled">true</B>
-      <I32 N="HitCount">1</I32>
-      <I32 N="Id">1461</I32>
+      <I32 N="HitCount">5</I32>
+      <I32 N="Id">1905</I32>
       <S N="Script">C:\sc\verb-dev\Public\confirm-ModulePsm1Version.ps1</S>
     </Props>
   </Obj>
   <Obj RefId="2">
     <TNRef RefId="0" />
-    <ToString>Line breakpoint on 'C:\sc\verb-dev\Public\confirm-ModulePsm1Version.ps1:98'</ToString>
+    <ToString>Line breakpoint on 'C:\sc\verb-dev\Public\confirm-ModulePsm1Version.ps1:136'</ToString>
     <Props>
       <I32 N="Column">0</I32>
-      <I32 N="Line">98</I32>
+      <I32 N="Line">136</I32>
       <Nil N="Action" />
       <B N="Enabled">true</B>
       <I32 N="HitCount">0</I32>
-      <I32 N="Id">1462</I32>
+      <I32 N="Id">1906</I32>
       <S N="Script">C:\sc\verb-dev\Public\confirm-ModulePsm1Version.ps1</S>
     </Props>
   </Obj>
   <Obj RefId="3">
     <TNRef RefId="0" />
-    <ToString>Line breakpoint on 'C:\sc\verb-dev\Public\confirm-ModulePsm1Version.ps1:102'</ToString>
+    <ToString>Line breakpoint on 'C:\sc\verb-dev\Public\confirm-ModulePsm1Version.ps1:125'</ToString>
     <Props>
       <I32 N="Column">0</I32>
-      <I32 N="Line">102</I32>
+      <I32 N="Line">125</I32>
       <Nil N="Action" />
       <B N="Enabled">true</B>
       <I32 N="HitCount">0</I32>
-      <I32 N="Id">1463</I32>
+      <I32 N="Id">1907</I32>
       <S N="Script">C:\sc\verb-dev\Public\confirm-ModulePsm1Version.ps1</S>
     </Props>
   </Obj>
   <Obj RefId="4">
+    <TNRef RefId="0" />
+    <ToString>Line breakpoint on 'C:\sc\verb-dev\Public\confirm-ModulePsm1Version.ps1:169'</ToString>
+    <Props>
+      <I32 N="Column">0</I32>
+      <I32 N="Line">169</I32>
+      <Nil N="Action" />
+      <B N="Enabled">true</B>
+      <I32 N="HitCount">6</I32>
+      <I32 N="Id">1908</I32>
+      <S N="Script">C:\sc\verb-dev\Public\confirm-ModulePsm1Version.ps1</S>
+    </Props>
+  </Obj>
+  <Obj RefId="5">
+    <TNRef RefId="0" />
+    <ToString>Line breakpoint on 'C:\sc\verb-dev\Public\confirm-ModulePsm1Version.ps1:66'</ToString>
+    <Props>
+      <I32 N="Column">0</I32>
+      <I32 N="Line">66</I32>
+      <Nil N="Action" />
+      <B N="Enabled">true</B>
+      <I32 N="HitCount">6</I32>
+      <I32 N="Id">1909</I32>
+      <S N="Script">C:\sc\verb-dev\Public\confirm-ModulePsm1Version.ps1</S>
+    </Props>
+  </Obj>
+  <Obj RefId="6">
+    <TNRef RefId="0" />
+    <ToString>Line breakpoint on 'C:\sc\verb-dev\Public\confirm-ModulePsm1Version.ps1:101'</ToString>
+    <Props>
+      <I32 N="Column">0</I32>
+      <I32 N="Line">101</I32>
+      <Nil N="Action" />
+      <B N="Enabled">true</B>
+      <I32 N="HitCount">6</I32>
+      <I32 N="Id">1910</I32>
+      <S N="Script">C:\sc\verb-dev\Public\confirm-ModulePsm1Version.ps1</S>
+    </Props>
+  </Obj>
+  <Obj RefId="7">
+    <TNRef RefId="0" />
+    <ToString>Line breakpoint on 'C:\sc\verb-dev\Public\confirm-ModulePsm1Version.ps1:122'</ToString>
+    <Props>
+      <I32 N="Column">0</I32>
+      <I32 N="Line">122</I32>
+      <Nil N="Action" />
+      <B N="Enabled">true</B>
+      <I32 N="HitCount">0</I32>
+      <I32 N="Id">3374</I32>
+      <S N="Script">C:\sc\verb-dev\Public\confirm-ModulePsm1Version.ps1</S>
+    </Props>
+  </Obj>
+  <Obj RefId="8">
     <TNRef RefId="0" />
     <ToString>Line breakpoint on 'C:\sc\verb-dev\Public\confirm-ModulePsm1Version.ps1:113'</ToString>
     <Props>
@@ -64,33 +116,7 @@
       <Nil N="Action" />
       <B N="Enabled">true</B>
       <I32 N="HitCount">0</I32>
-      <I32 N="Id">1465</I32>
-      <S N="Script">C:\sc\verb-dev\Public\confirm-ModulePsm1Version.ps1</S>
-    </Props>
-  </Obj>
-  <Obj RefId="5">
-    <TNRef RefId="0" />
-    <ToString>Line breakpoint on 'C:\sc\verb-dev\Public\confirm-ModulePsm1Version.ps1:124'</ToString>
-    <Props>
-      <I32 N="Column">0</I32>
-      <I32 N="Line">124</I32>
-      <Nil N="Action" />
-      <B N="Enabled">true</B>
-      <I32 N="HitCount">0</I32>
-      <I32 N="Id">1466</I32>
-      <S N="Script">C:\sc\verb-dev\Public\confirm-ModulePsm1Version.ps1</S>
-    </Props>
-  </Obj>
-  <Obj RefId="6">
-    <TNRef RefId="0" />
-    <ToString>Line breakpoint on 'C:\sc\verb-dev\Public\confirm-ModulePsm1Version.ps1:157'</ToString>
-    <Props>
-      <I32 N="Column">0</I32>
-      <I32 N="Line">157</I32>
-      <Nil N="Action" />
-      <B N="Enabled">true</B>
-      <I32 N="HitCount">0</I32>
-      <I32 N="Id">1467</I32>
+      <I32 N="Id">3375</I32>
       <S N="Script">C:\sc\verb-dev\Public\confirm-ModulePsm1Version.ps1</S>
     </Props>
   </Obj>
