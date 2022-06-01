@@ -18,6 +18,7 @@ function ConvertTo-ModuleMergedTDO {
     Tags        : Powershell,Module,Development
     AddedTwitter:
     REVISIONS
+    * 5:18 PM 6/1/2022 splice in support for confirm-ModuleBuildSync ; 
     * 5:16 PM 5/31/2022 add: -RequiredVersion; # 4:48 PM 5/31/2022 getting mismatch/revert in revision to prior spec, confirm/force set it here, call confirm-ModulePsd1Version()/confirm-ModulePsm1Version() (which handle _TMP versions, that stock tools *won't*)
     * 4:38 PM 5/27/2022 update all Set-ContentFixEncoding & Add-ContentFixEncoding -values to pre |out-string to collapse arrays into single writes
     * 8:34 AM 5/16/2022 sub backupfile -> backup-FileTDO ; typo: used Aliases for Alias
@@ -617,6 +618,8 @@ Export-ModuleMember -Function $(($ExportFunctions) -join ',') -Alias *
     } ;
 
     # 4:48 PM 5/31/2022 getting mismatch/revert in revision to prior spec, confirm/force set it here:
+    # 2:16 PM 6/1/2022 shift to confirm-ModuleBuildSync() wrapper
+    <# -----------
     # $bRet = confirm-ModulePsd1Version -Path 'C:\sc\verb-IO\verb-IO\verb-IO.psd1_TMP' -RequiredVersion '2.0.3' -whatif  -verbose
     # [Parameter(HelpMessage="Optional Explicit 3-digit RequiredVersion specification (as contrasts with using current Manifest .psd1 ModuleVersion value)[-Version 2.0.3]")]
     #        [version]$RequiredVersion,
@@ -631,6 +634,10 @@ Export-ModuleMember -Function $(($ExportFunctions) -join ',') -Alias *
     else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
     $bRet = confirm-ModulePsd1Version @pltCMPV ;
     if ($bRet.valid -AND $bRet.Version){
+        $smsg = "(confirm-ModulePsd1Version:Success)" ;
+        if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info }
+        else{ write-verbose "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+    } else { 
         $smsg = "confirm-ModulePsd1Version:FAIL! Aborting!" ;
         if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info }
         else{ write-verbose "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
@@ -650,11 +657,40 @@ Export-ModuleMember -Function $(($ExportFunctions) -join ',') -Alias *
     else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
     $bRet = confirm-ModulePsm1Version @pltCMPMV ;
     if ($bRet.valid -AND $bRet.Version){
+        $smsg = "(confirm-ModulePsm1Version:Success)" ;
+        if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info }
+        else{ write-verbose "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+    } else { 
         $smsg = "confirm-ModulePsm1Version:FAIL! Aborting!" ;
+        if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN }
+        else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+        Break ;
+    } ;
+    # -----------
+    #>
+    # shift to wrapper confirm-ModuleBuildSync() -NoTest, as only process-NewModule needs that step
+    # $bRet = confirm-ModuleBuildSync -ModPsdPath 'C:\sc\verb-IO\verb-IO\verb-IO.psd1_TMP' -RequiredVersion '2.0.3' -whatif -verbose
+    $pltCMBS=[ordered]@{
+        ModPsdPath = $PsdNameTmp ;
+        RequiredVersion = $RequiredVersion ;
+        NoTest = $true ; 
+        whatif = $($whatif) ;
+        verbose = $($verbose) ;
+    } ;
+    $smsg = "confirm-ModuleBuildSync w`n$(($pltCMBS|out-string).trim())" ;
+    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug
+    else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+    $bRet = confirm-ModuleBuildSync @pltCMBS ;
+    if($bRet.Manifest -AND $bRet.Module -AND $bRet.Pester -AND $bRet.Guid -AND $bRet.Version -AND $bRet.Valid){
+        $smsg = "(confirm-ModuleBuildSync:Success)" ;
+        if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info }
+        else{ write-verbose "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+    } else { 
+        $smsg = "confirm-ModuleBuildSync:FAIL! Aborting!" ;
         if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info }
         else{ write-verbose "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
         Break ;
-    } ;
+    } ;    
 
     # 3:20 PM 5/11/2022 move psd1_tmp|psm1_tmp testing to func: 
     # whatif = $($whatif) 
