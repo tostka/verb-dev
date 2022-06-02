@@ -923,7 +923,7 @@ $(if($Merge){'MERGE parm specified as well:`n-Merge Public|Internal|Classes incl
     $smsg = "confirm-ModuleBuildSync w`n$(($pltCMBS|out-string).trim())" ;
     if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug
     else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
-    $bRet = confirm-ModuleBuildSync @pltCMPV ;
+    $bRet = confirm-ModuleBuildSync @pltCMBS ;
     if($bRet.Manifest -AND $bRet.Module -AND $bRet.Pester -AND $bRet.Guid -AND $bRet.Version -AND $bRet.Valid){
         $smsg = "(confirm-ModuleBuildSync:Success)" ;
         if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info }
