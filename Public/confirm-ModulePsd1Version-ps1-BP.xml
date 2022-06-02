@@ -11,8 +11,8 @@
       <I32 N="Line">110</I32>
       <Nil N="Action" />
       <B N="Enabled">true</B>
-      <I32 N="HitCount">7</I32>
-      <I32 N="Id">1665</I32>
+      <I32 N="HitCount">0</I32>
+      <I32 N="Id">220</I32>
       <S N="Script">C:\sc\verb-dev\Public\confirm-ModulePsd1Version.ps1</S>
     </Props>
   </Obj>
@@ -24,8 +24,8 @@
       <I32 N="Line">64</I32>
       <Nil N="Action" />
       <B N="Enabled">true</B>
-      <I32 N="HitCount">6</I32>
-      <I32 N="Id">1666</I32>
+      <I32 N="HitCount">0</I32>
+      <I32 N="Id">221</I32>
       <S N="Script">C:\sc\verb-dev\Public\confirm-ModulePsd1Version.ps1</S>
     </Props>
   </Obj>
@@ -37,8 +37,8 @@
       <I32 N="Line">98</I32>
       <Nil N="Action" />
       <B N="Enabled">true</B>
-      <I32 N="HitCount">7</I32>
-      <I32 N="Id">1667</I32>
+      <I32 N="HitCount">0</I32>
+      <I32 N="Id">222</I32>
       <S N="Script">C:\sc\verb-dev\Public\confirm-ModulePsd1Version.ps1</S>
     </Props>
   </Obj>

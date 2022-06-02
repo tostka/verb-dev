@@ -11,8 +11,8 @@
       <I32 N="Line">110</I32>
       <Nil N="Action" />
       <B N="Enabled">true</B>
-      <I32 N="HitCount">6</I32>
-      <I32 N="Id">1904</I32>
+      <I32 N="HitCount">0</I32>
+      <I32 N="Id">223</I32>
       <S N="Script">C:\sc\verb-dev\Public\confirm-ModulePsm1Version.ps1</S>
     </Props>
   </Obj>
@@ -24,8 +24,8 @@
       <I32 N="Line">114</I32>
       <Nil N="Action" />
       <B N="Enabled">true</B>
-      <I32 N="HitCount">5</I32>
-      <I32 N="Id">1905</I32>
+      <I32 N="HitCount">0</I32>
+      <I32 N="Id">224</I32>
       <S N="Script">C:\sc\verb-dev\Public\confirm-ModulePsm1Version.ps1</S>
     </Props>
   </Obj>
@@ -38,7 +38,7 @@
       <Nil N="Action" />
       <B N="Enabled">true</B>
       <I32 N="HitCount">0</I32>
-      <I32 N="Id">1906</I32>
+      <I32 N="Id">225</I32>
       <S N="Script">C:\sc\verb-dev\Public\confirm-ModulePsm1Version.ps1</S>
     </Props>
   </Obj>
@@ -51,7 +51,7 @@
       <Nil N="Action" />
       <B N="Enabled">true</B>
       <I32 N="HitCount">0</I32>
-      <I32 N="Id">1907</I32>
+      <I32 N="Id">226</I32>
       <S N="Script">C:\sc\verb-dev\Public\confirm-ModulePsm1Version.ps1</S>
     </Props>
   </Obj>
@@ -63,8 +63,8 @@
       <I32 N="Line">169</I32>
       <Nil N="Action" />
       <B N="Enabled">true</B>
-      <I32 N="HitCount">6</I32>
-      <I32 N="Id">1908</I32>
+      <I32 N="HitCount">0</I32>
+      <I32 N="Id">227</I32>
       <S N="Script">C:\sc\verb-dev\Public\confirm-ModulePsm1Version.ps1</S>
     </Props>
   </Obj>
@@ -76,8 +76,8 @@
       <I32 N="Line">66</I32>
       <Nil N="Action" />
       <B N="Enabled">true</B>
-      <I32 N="HitCount">6</I32>
-      <I32 N="Id">1909</I32>
+      <I32 N="HitCount">0</I32>
+      <I32 N="Id">228</I32>
       <S N="Script">C:\sc\verb-dev\Public\confirm-ModulePsm1Version.ps1</S>
     </Props>
   </Obj>
@@ -89,8 +89,8 @@
       <I32 N="Line">101</I32>
       <Nil N="Action" />
       <B N="Enabled">true</B>
-      <I32 N="HitCount">6</I32>
-      <I32 N="Id">1910</I32>
+      <I32 N="HitCount">0</I32>
+      <I32 N="Id">229</I32>
       <S N="Script">C:\sc\verb-dev\Public\confirm-ModulePsm1Version.ps1</S>
     </Props>
   </Obj>
@@ -103,7 +103,7 @@
       <Nil N="Action" />
       <B N="Enabled">true</B>
       <I32 N="HitCount">0</I32>
-      <I32 N="Id">3374</I32>
+      <I32 N="Id">230</I32>
       <S N="Script">C:\sc\verb-dev\Public\confirm-ModulePsm1Version.ps1</S>
     </Props>
   </Obj>
@@ -116,7 +116,7 @@
       <Nil N="Action" />
       <B N="Enabled">true</B>
       <I32 N="HitCount">0</I32>
-      <I32 N="Id">3375</I32>
+      <I32 N="Id">231</I32>
       <S N="Script">C:\sc\verb-dev\Public\confirm-ModulePsm1Version.ps1</S>
     </Props>
   </Obj>

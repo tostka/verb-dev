@@ -5,15 +5,15 @@
       <T>System.Management.Automation.Breakpoint</T>
       <T>System.Object</T>
     </TN>
-    <ToString>Line breakpoint on 'C:\sc\verb-dev\Public\export-ISEOpenFiles.ps1:35'</ToString>
+    <ToString>Line breakpoint on 'C:\sc\verb-dev\Public\import-ISEBreakPoints.ps1:59'</ToString>
     <Props>
       <I32 N="Column">0</I32>
-      <I32 N="Line">35</I32>
+      <I32 N="Line">59</I32>
       <Nil N="Action" />
       <B N="Enabled">true</B>
       <I32 N="HitCount">0</I32>
-      <I32 N="Id">294</I32>
-      <S N="Script">C:\sc\verb-dev\Public\export-ISEOpenFiles.ps1</S>
+      <I32 N="Id">628</I32>
+      <S N="Script">C:\sc\verb-dev\Public\import-ISEBreakPoints.ps1</S>
     </Props>
   </Obj>
 </Objs>

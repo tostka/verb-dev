@@ -11,8 +11,8 @@
       <I32 N="Line">159</I32>
       <Nil N="Action" />
       <B N="Enabled">true</B>
-      <I32 N="HitCount">3</I32>
-      <I32 N="Id">1977</I32>
+      <I32 N="HitCount">0</I32>
+      <I32 N="Id">214</I32>
       <S N="Script">C:\sc\verb-dev\Public\confirm-ModuleTestPs1Guid.ps1</S>
     </Props>
   </Obj>
@@ -24,8 +24,8 @@
       <I32 N="Line">122</I32>
       <Nil N="Action" />
       <B N="Enabled">true</B>
-      <I32 N="HitCount">2</I32>
-      <I32 N="Id">1978</I32>
+      <I32 N="HitCount">0</I32>
+      <I32 N="Id">215</I32>
       <S N="Script">C:\sc\verb-dev\Public\confirm-ModuleTestPs1Guid.ps1</S>
     </Props>
   </Obj>
@@ -38,7 +38,7 @@
       <Nil N="Action" />
       <B N="Enabled">true</B>
       <I32 N="HitCount">0</I32>
-      <I32 N="Id">1979</I32>
+      <I32 N="Id">216</I32>
       <S N="Script">C:\sc\verb-dev\Public\confirm-ModuleTestPs1Guid.ps1</S>
     </Props>
   </Obj>
@@ -50,8 +50,8 @@
       <I32 N="Line">100</I32>
       <Nil N="Action" />
       <B N="Enabled">true</B>
-      <I32 N="HitCount">3</I32>
-      <I32 N="Id">1980</I32>
+      <I32 N="HitCount">0</I32>
+      <I32 N="Id">217</I32>
       <S N="Script">C:\sc\verb-dev\Public\confirm-ModuleTestPs1Guid.ps1</S>
     </Props>
   </Obj>
@@ -63,8 +63,8 @@
       <I32 N="Line">67</I32>
       <Nil N="Action" />
       <B N="Enabled">true</B>
-      <I32 N="HitCount">3</I32>
-      <I32 N="Id">1981</I32>
+      <I32 N="HitCount">0</I32>
+      <I32 N="Id">218</I32>
       <S N="Script">C:\sc\verb-dev\Public\confirm-ModuleTestPs1Guid.ps1</S>
     </Props>
   </Obj>
@@ -76,8 +76,8 @@
       <I32 N="Line">109</I32>
       <Nil N="Action" />
       <B N="Enabled">true</B>
-      <I32 N="HitCount">3</I32>
-      <I32 N="Id">1982</I32>
+      <I32 N="HitCount">0</I32>
+      <I32 N="Id">219</I32>
       <S N="Script">C:\sc\verb-dev\Public\confirm-ModuleTestPs1Guid.ps1</S>
     </Props>
   </Obj>

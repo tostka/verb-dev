@@ -1,0 +1,162 @@
+﻿<Objs Version="1.1.0.1" xmlns="http://schemas.microsoft.com/powershell/2004/04">
+  <Obj RefId="0">
+    <TN RefId="0">
+      <T>System.Management.Automation.LineBreakpoint</T>
+      <T>System.Management.Automation.Breakpoint</T>
+      <T>System.Object</T>
+    </TN>
+    <ToString>Line breakpoint on 'C:\sc\verb-dev\Public\Test-ModuleTMPFiles.ps1:69'</ToString>
+    <Props>
+      <I32 N="Column">0</I32>
+      <I32 N="Line">69</I32>
+      <Nil N="Action" />
+      <B N="Enabled">true</B>
+      <I32 N="HitCount">0</I32>
+      <I32 N="Id">35</I32>
+      <S N="Script">C:\sc\verb-dev\Public\Test-ModuleTMPFiles.ps1</S>
+    </Props>
+  </Obj>
+  <Obj RefId="1">
+    <TNRef RefId="0" />
+    <ToString>Line breakpoint on 'C:\sc\verb-dev\Public\Test-ModuleTMPFiles.ps1:73'</ToString>
+    <Props>
+      <I32 N="Column">0</I32>
+      <I32 N="Line">73</I32>
+      <Nil N="Action" />
+      <B N="Enabled">true</B>
+      <I32 N="HitCount">0</I32>
+      <I32 N="Id">36</I32>
+      <S N="Script">C:\sc\verb-dev\Public\Test-ModuleTMPFiles.ps1</S>
+    </Props>
+  </Obj>
+  <Obj RefId="2">
+    <TNRef RefId="0" />
+    <ToString>Line breakpoint on 'C:\sc\verb-dev\Public\Test-ModuleTMPFiles.ps1:131'</ToString>
+    <Props>
+      <I32 N="Column">0</I32>
+      <I32 N="Line">131</I32>
+      <Nil N="Action" />
+      <B N="Enabled">true</B>
+      <I32 N="HitCount">0</I32>
+      <I32 N="Id">37</I32>
+      <S N="Script">C:\sc\verb-dev\Public\Test-ModuleTMPFiles.ps1</S>
+    </Props>
+  </Obj>
+  <Obj RefId="3">
+    <TNRef RefId="0" />
+    <ToString>Line breakpoint on 'C:\sc\verb-dev\Public\Test-ModuleTMPFiles.ps1:96'</ToString>
+    <Props>
+      <I32 N="Column">0</I32>
+      <I32 N="Line">96</I32>
+      <Nil N="Action" />
+      <B N="Enabled">true</B>
+      <I32 N="HitCount">0</I32>
+      <I32 N="Id">38</I32>
+      <S N="Script">C:\sc\verb-dev\Public\Test-ModuleTMPFiles.ps1</S>
+    </Props>
+  </Obj>
+  <Obj RefId="4">
+    <TNRef RefId="0" />
+    <ToString>Line breakpoint on 'C:\sc\verb-dev\Public\Test-ModuleTMPFiles.ps1:114'</ToString>
+    <Props>
+      <I32 N="Column">0</I32>
+      <I32 N="Line">114</I32>
+      <Nil N="Action" />
+      <B N="Enabled">true</B>
+      <I32 N="HitCount">0</I32>
+      <I32 N="Id">39</I32>
+      <S N="Script">C:\sc\verb-dev\Public\Test-ModuleTMPFiles.ps1</S>
+    </Props>
+  </Obj>
+  <Obj RefId="5">
+    <TNRef RefId="0" />
+    <ToString>Line breakpoint on 'C:\sc\verb-dev\Public\Test-ModuleTMPFiles.ps1:133'</ToString>
+    <Props>
+      <I32 N="Column">0</I32>
+      <I32 N="Line">133</I32>
+      <Nil N="Action" />
+      <B N="Enabled">true</B>
+      <I32 N="HitCount">0</I32>
+      <I32 N="Id">40</I32>
+      <S N="Script">C:\sc\verb-dev\Public\Test-ModuleTMPFiles.ps1</S>
+    </Props>
+  </Obj>
+  <Obj RefId="6">
+    <TNRef RefId="0" />
+    <ToString>Line breakpoint on 'C:\sc\verb-dev\Public\Test-ModuleTMPFiles.ps1:221'</ToString>
+    <Props>
+      <I32 N="Column">0</I32>
+      <I32 N="Line">221</I32>
+      <Nil N="Action" />
+      <B N="Enabled">true</B>
+      <I32 N="HitCount">0</I32>
+      <I32 N="Id">41</I32>
+      <S N="Script">C:\sc\verb-dev\Public\Test-ModuleTMPFiles.ps1</S>
+    </Props>
+  </Obj>
+  <Obj RefId="7">
+    <TNRef RefId="0" />
+    <ToString>Line breakpoint on 'C:\sc\verb-dev\Public\Test-ModuleTMPFiles.ps1:164'</ToString>
+    <Props>
+      <I32 N="Column">0</I32>
+      <I32 N="Line">164</I32>
+      <Nil N="Action" />
+      <B N="Enabled">true</B>
+      <I32 N="HitCount">0</I32>
+      <I32 N="Id">42</I32>
+      <S N="Script">C:\sc\verb-dev\Public\Test-ModuleTMPFiles.ps1</S>
+    </Props>
+  </Obj>
+  <Obj RefId="8">
+    <TNRef RefId="0" />
+    <ToString>Line breakpoint on 'C:\sc\verb-dev\Public\Test-ModuleTMPFiles.ps1:167'</ToString>
+    <Props>
+      <I32 N="Column">0</I32>
+      <I32 N="Line">167</I32>
+      <Nil N="Action" />
+      <B N="Enabled">true</B>
+      <I32 N="HitCount">0</I32>
+      <I32 N="Id">43</I32>
+      <S N="Script">C:\sc\verb-dev\Public\Test-ModuleTMPFiles.ps1</S>
+    </Props>
+  </Obj>
+  <Obj RefId="9">
+    <TNRef RefId="0" />
+    <ToString>Line breakpoint on 'C:\sc\verb-dev\Public\Test-ModuleTMPFiles.ps1:177'</ToString>
+    <Props>
+      <I32 N="Column">0</I32>
+      <I32 N="Line">177</I32>
+      <Nil N="Action" />
+      <B N="Enabled">true</B>
+      <I32 N="HitCount">0</I32>
+      <I32 N="Id">44</I32>
+      <S N="Script">C:\sc\verb-dev\Public\Test-ModuleTMPFiles.ps1</S>
+    </Props>
+  </Obj>
+  <Obj RefId="10">
+    <TNRef RefId="0" />
+    <ToString>Line breakpoint on 'C:\sc\verb-dev\Public\Test-ModuleTMPFiles.ps1:219'</ToString>
+    <Props>
+      <I32 N="Column">0</I32>
+      <I32 N="Line">219</I32>
+      <Nil N="Action" />
+      <B N="Enabled">true</B>
+      <I32 N="HitCount">0</I32>
+      <I32 N="Id">45</I32>
+      <S N="Script">C:\sc\verb-dev\Public\Test-ModuleTMPFiles.ps1</S>
+    </Props>
+  </Obj>
+  <Obj RefId="11">
+    <TNRef RefId="0" />
+    <ToString>Line breakpoint on 'C:\sc\verb-dev\Public\Test-ModuleTMPFiles.ps1:227'</ToString>
+    <Props>
+      <I32 N="Column">0</I32>
+      <I32 N="Line">227</I32>
+      <Nil N="Action" />
+      <B N="Enabled">true</B>
+      <I32 N="HitCount">0</I32>
+      <I32 N="Id">46</I32>
+      <S N="Script">C:\sc\verb-dev\Public\Test-ModuleTMPFiles.ps1</S>
+    </Props>
+  </Obj>
+</Objs>
