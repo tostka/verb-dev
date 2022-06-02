@@ -15,6 +15,7 @@ Function save-ISEConsoleColors {
     Github      : https://github.com/tostka
     Tags        : Powershell,ExchangeOnline,Exchange,RemotePowershell,Connection,MFA
     REVISIONS   :
+    * 12:46 PM 6/2/2022 typo: remove spurious }
     * 1:25 PM 3/5/2021 init ; added support for both ISE & powershell console
     .DESCRIPTION
     save-ISEConsoleColors - Save $psise.options | Select ConsolePane*,Font* to prompted csv file
@@ -31,21 +32,20 @@ Function save-ISEConsoleColors {
     #[Alias('dxo')]
     Param() 
     $verbose = ($VerbosePreference -eq "Continue") ; 
-        switch($host.name){
-            "Windows PowerShell ISE Host" {
-                ##$psISE.Options.RestoreDefaultTokenColors()
-                $sFileTag=Read-Host "Enter 'Name' for saved color scheme" ;
-                $ofile = "$(split-path $profile)\IseColors-$($sFileTag).csv" ; 
-                write-host -fore green "Saving current Colors & Fonts to file: $($ofile)" ; 
-                $psise.options | Select ConsolePane*,Font* | Export-CSV "$($ofile)" ;
-            } 
-            "ConsoleHost" {
-                #[console]::ResetColor()  # reset console colorscheme to default
-                throw "This command is intended to backup ISE (`$psie.options object). PS `$host is not supported" ; 
-            }
-            default {
-                write-warning "Unrecognized `$Host.name:$($Host.name), skipping save-ISEConsoleColors" ; 
-            } ; 
+    switch($host.name){
+        "Windows PowerShell ISE Host" {
+            ##$psISE.Options.RestoreDefaultTokenColors()
+            $sFileTag=Read-Host "Enter 'Name' for saved color scheme" ;
+            $ofile = "$(split-path $profile)\IseColors-$($sFileTag).csv" ; 
+            write-host -fore green "Saving current Colors & Fonts to file: $($ofile)" ; 
+            $psise.options | Select ConsolePane*,Font* | Export-CSV "$($ofile)" ;
+        } 
+        "ConsoleHost" {
+            #[console]::ResetColor()  # reset console colorscheme to default
+            throw "This command is intended to backup ISE (`$psie.options object). PS `$host is not supported" ; 
+        }
+        default {
+            write-warning "Unrecognized `$Host.name:$($Host.name), skipping save-ISEConsoleColors" ; 
         } ; 
     } ; 
 }

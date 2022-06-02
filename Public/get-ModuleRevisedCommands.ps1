@@ -15,7 +15,7 @@ function get-ModuleRevisedCommands {
     Github      : https://github.com/tostka/verb-dev
     Tags        : Powershell,ISE,development,debugging
     REVISIONS
-    * 8:33 AM 6/2/2022 as ipmo w/in a module doesn't export the results to the 
+    * 12:17 PM 6/2/2022 #171 corrected typo in 'no matches' output ; as ipmo w/in a module doesn't export the results to the 
         environement, post-exec, ren import-ModuleRevised -> get-ModuleRevisedCommands, 
         and hard-code export list as sole function; set catch to continue; added 
         -ReturnList for external ipmo;  flipped pipeline array detect to test name 
@@ -168,9 +168,9 @@ function get-ModuleRevisedCommands {
                 write-verbose "(returning `$revisedcommands to pipeline)" ; 
                 $revisedcommands | write-output ; 
             } else {  
-                $smsg = "No Revised $($ModuleName): cmdlets detected (post $((get-date $cutDate.lastwritetime -format 'yyyyMMdd-HHmmtt')))" 
+                $smsg = "No Revised $($ModuleName) cmdlets detected (post $(get-date $cutDate -format 'yyyyMMdd-HHmmtt'))"
                 write-host $smsg ;
-                $false | write-output ; 
+                #$false | write-output ; # NO don't return $false, it just winds up in the array of functional ipmo-ables
             };
             write-host -foregroundcolor green $sBnrS.replace('-v','-^').replace('v-','^-') ;
         } ;  # loop-E $items in $NaME

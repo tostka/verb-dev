@@ -5,7 +5,7 @@
 .SYNOPSIS
 VERB-dev - Development PS Module-related generic functions
 .NOTES
-Version     : 1.5.6
+Version     : 1.5.8
 Author      : Todd Kadrie
 Website     :	https://www.toddomation.com
 Twitter     :	@tostka
@@ -1645,7 +1645,7 @@ function Initialize-ModuleFingerprint {
     https://powershellexplained.com/2017-10-14-Powershell-module-semantic-version/
     #>
     ##Requires -RunasAdministrator
-    # VALIDATORS: [ValidateNotNull()][ValidateNotNullOrEmpty()][ValidateLength(24,25)][ValidateLength(5)][ValidatePattern("(lyn|bcc|spb|adl)ms6(4|5)(0|1).(china|global)\.ad\.toro\.com")][ValidateSet("USEA","GBMK","AUSYD")][ValidateScript({Test-Path $_ -PathType 'Container'})][ValidateScript({Test-Path $_})][ValidateRange(21,65)][ValidateCount(1,3)]
+    # VALIDATORS: [ValidateNotNull()][ValidateNotNullOrEmpty()][ValidateLength(24,25)][ValidateLength(5)][ValidatePattern("some\sregex\sexpr")][ValidateSet("USEA","GBMK","AUSYD")][ValidateScript({Test-Path $_ -PathType 'Container'})][ValidateScript({Test-Path $_})][ValidateRange(21,65)][ValidateCount(1,3)]
     [CmdletBinding()]
     ###[Alias('Alias','Alias2')]
     PARAM(
@@ -5215,7 +5215,12 @@ function Step-ModuleVersionCalculated {
     AddedWebsite: www.thesurlyadmin.com
     AddedTwitter: @thesurlyadm1n
     REVISIONS
-    * 9:24 AM 10/26/2021 shifted 'good' exit to within bumpvers test, and output $false otherwise ; updated mult #requires code to profile -version variants, and look for -gt 1; added verbose dump of Minor/Major changes in trailing outputs. 
+    * 9:42 AM 1/18/2022 added test for recursed nested #requires -module [modname] 
+        strings - this one's a brute to recover from, just like the version clash, both 
+        hard-break build and require reverting installed rev of module to get past. 
+        Everything works, bbuild, publish, install, except the trailing ipmo dies 
+        *hard* ; updated $rgxRequreVersionLine prefix (\s|^) to suppress returns of double-#'d rem'd requires lines.
+    * 2:09 PM 10/26/2021 requires vers code: only run if $PsFilesWVers populated ; shifted 'good' exit to within bumpvers test, and output $false otherwise ; updated mult #requires code to profile -version variants, and look for -gt 1; added verbose dump of Minor/Major changes in trailing outputs. 
     * 3:46 PM 10/25/2021 fingerprint code was dropping matches into pipeline, and blowing up returned bumprev string (ingested the outputs) ; added .psm1 test for multi '#requires -version' (crashes all ipmos) ; add verbose support into all the splats
     * 2:19 PM 10/16/2021 actually implemented the new -Silent param ; updated ModuleName locater; 
     * 6:11 PM 10/15/2021 rem'd # raa, replaced psd1/psm1-location code with Get-PSModuleFile(), which is a variant of BuildHelpers get-psModuleManifest. 
@@ -5332,7 +5337,14 @@ function Step-ModuleVersionCalculated {
             elseif(-not $Silent){ write-host -foregroundcolor yellow "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
         } ; 
         
-        $rgxRequreVersionLine = '#requires\s+-version\s' 
+        #$rgxRequreVersionLine = '#requires\s+-version\s' ;
+        # add filter for BOL or \s lead, drop the ##-rem'd lines
+        $rgxRequreVersionLine = '(\s|^)#requires\s+-version\s' ;
+        # also should check for nested recursion - ensure the Module isn't in any #requires\s-module
+        # '((\s)*)#Requires\s+-Modules\s+.*,((\s)*)verb-exo' ; # module name
+        # $Path will be c:\sc\verb-exo ; split-path c:\sc\verb-exo -leaf gets you the modulename back
+        $ModName = split-path -Path $path -leaf ; 
+        $rgxRequireModNested = "(\s|^)#Requires\s+-Modules\s+.*,((\s)*)$($ModName)" ;  # added: either BOL or after a space
 
     } ;  # BEGIN-E
     PROCESS {
@@ -5420,20 +5432,22 @@ function Step-ModuleVersionCalculated {
         
             # check for incidental ipmo crasher: multiple #require -versions, pretest (everything to that point is fine, just won't ipmo, and catch returns zippo)
             # no, revise, it's multi-versions of -vers, not mult instances. Has to be a single version spec across entire .psm1 (and $moddir of source files)
-            $PsFilesWVers = gci $moddir -include *.ps*1 -recur | sls -Pattern $rgxRequreVersionLine ; 
-            $profilePsFilesVersions = $PsFilesWVers.line | %{$_.trim()} | group ;
-            if($profilePsFilesVersions.count -gt 1){
-                # $PsFilesWVers| ft -auto file*,line*
-                $smsg =  "MULTIPLE #requires -version strings matched in:`n$($psm1)`n(not-permited, wrecks ipmo) - psm1 and constitutent .ps1 files:`n$(($PsFilesWVers| ft -auto file*,line*|out-string).trim())" ; 
-                if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN } #Error|Warn|Debug 
-                else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
-                $bRet=Read-Host "Enter YYY to continue *anyway*. Anything else will exit" 
-                if ($bRet.ToUpper() -eq "YYY") {
-                        Write-host "Moving on"
-                } else {
-                        Throw $smsg ; 
-                } ;
-            } 
+            if($PsFilesWVers = gci $moddir -include *.ps*1 -recur | sls -Pattern $rgxRequreVersionLine){
+                # only run if $PsFilesWVers populated
+                $profilePsFilesVersions = $PsFilesWVers.line | %{$_.trim()} | group ;
+                if($profilePsFilesVersions.count -gt 1){
+                    # $PsFilesWVers| ft -auto file*,line*
+                    $smsg =  "MULTIPLE #requires -version strings matched in:`n$($psm1)`n(not-permited, wrecks ipmo) - psm1 and constitutent .ps1 files:`n$(($PsFilesWVers| ft -auto file*,line*|out-string).trim())" ; 
+                    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN } #Error|Warn|Debug 
+                    else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                    $bRet=Read-Host "Enter YYY to continue *anyway*. Anything else will exit" 
+                    if ($bRet.ToUpper() -eq "YYY") {
+                            Write-host "Moving on"
+                    } else {
+                            Throw $smsg ; 
+                    } ;
+                } 
+            } ; 
             <#if ((get-content $psm1 | sls -Pattern $rgxRequreVersionLine | measure).count -gt 1){
                 $MultReqVers = (get-content $pltXMO.name | sls -Pattern $rgxRequreVersionLine) ; 
                 $smsg =  "MULTIPLE #requires -version strings in:`n$($psm1)`n(not-permited, wrecks ipmo)`n$(($multreqvers | ft -auto Pattern,LineNumber,Line|out-string).trim())" ; 
@@ -5442,6 +5456,28 @@ function Step-ModuleVersionCalculated {
                 Throw $smsg ; 
             } ; 
             #>
+            # check for recursion call of the hosting module in subs: $rgxRequireModNested
+            if($PsFilesWNestedMod = gci $moddir -include *.ps*1 -recur | sls -Pattern $rgxRequireModNested){
+                # only run if $PsFilesWNestedMod populated, and unique single entry of matches, trimmed
+                $profilePsFilesRecursive = $PsFilesWNestedMod.line | %{$_.trim()} | group ;
+                if($profilePsFilesRecursive.count -gt 0){
+                    # $PsFilesWNestedMod| ft -auto file*,line*
+                    $smsg =  "RECURSIVE #requires strings matched in:"
+                    $smsg += "`n$($psm1)`n(not-permited, wrecks ipmo) - psm1 and constitutent .ps1 files:"
+                    $smsg += "`nEDIT OUT any #requires -Modules line spec'ing '$($ModName) !'"
+                    $smsg += "`nOR THIS MODULE BUILD WILL CRASH AND REQUIRE REVISION ROLLBACK!" 
+                    $smsg += "`n$(($PsFilesWNestedMod| ft -auto file*,line*|out-string).trim())" ; 
+                    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN } #Error|Warn|Debug 
+                    else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                    $bRet=Read-Host "Enter YYY to continue *anyway*. Anything else will exit" 
+                    if ($bRet.ToUpper() -eq "YYY") {
+                            Write-host "Moving on"
+                    } else {
+                            Throw $smsg ; 
+                    } ;
+                } 
+            } ; 
+
 
             $pltXMO=@{Name=$null ; force=$true ; ErrorAction='STOP'; Verbose = $($VerbosePreference -eq 'Continue') } ;
             $pltXpsd1M=[ordered]@{path=$psd1M ; ErrorAction='STOP'; Verbose = $($VerbosePreference -eq 'Continue') } ; 
@@ -5716,29 +5752,3 @@ which was applied via the BuildHelper:Step-ModulerVersion cmdlet (above)
 
 Export-ModuleMember -Function build-VSCConfig,check-PsLocalRepoRegistration,convert-CommandLine2VSCDebugJson,export-ISEBreakPoints,Get-CommentBlocks,get-FunctionBlock,get-FunctionBlocks,get-ProjectNameTDO,Get-PSModuleFile,get-ScriptProfileAST,get-VersionInfo,import-ISEBreakPoints,import-ISEConsoleColors,Initialize-ModuleFingerprint,Get-PSModuleFile,Merge-Module,Merge-ModulePs1,new-CBH,New-GitHubGist,parseHelp,process-NewModule,restore-ISEConsoleColors,save-ISEConsoleColors,shift-ISEBreakPoints,Split-CommandLine,Step-ModuleVersionCalculated,Get-PSModuleFile -Alias *
 
-
-# SIG # Begin signature block
-# MIIELgYJKoZIhvcNAQcCoIIEHzCCBBsCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
-# gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUS3JpIZMSpwLx4WddMyHq2+yr
-# wYGgggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
-# MCwxKjAoBgNVBAMTIVBvd2VyU2hlbGwgTG9jYWwgQ2VydGlmaWNhdGUgUm9vdDAe
-# Fw0xNDEyMjkxNzA3MzNaFw0zOTEyMzEyMzU5NTlaMBUxEzARBgNVBAMTClRvZGRT
-# ZWxmSUkwgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBALqRVt7uNweTkZZ+16QG
-# a+NnFYNRPPa8Bnm071ohGe27jNWKPVUbDfd0OY2sqCBQCEFVb5pqcIECRRnlhN5H
-# +EEJmm2x9AU0uS7IHxHeUo8fkW4vm49adkat5gAoOZOwbuNntBOAJy9LCyNs4F1I
-# KKphP3TyDwe8XqsEVwB2m9FPAgMBAAGjdjB0MBMGA1UdJQQMMAoGCCsGAQUFBwMD
-# MF0GA1UdAQRWMFSAEL95r+Rh65kgqZl+tgchMuKhLjAsMSowKAYDVQQDEyFQb3dl
-# clNoZWxsIExvY2FsIENlcnRpZmljYXRlIFJvb3SCEGwiXbeZNci7Rxiz/r43gVsw
-# CQYFKw4DAh0FAAOBgQB6ECSnXHUs7/bCr6Z556K6IDJNWsccjcV89fHA/zKMX0w0
-# 6NefCtxas/QHUA9mS87HRHLzKjFqweA3BnQ5lr5mPDlho8U90Nvtpj58G9I5SPUg
-# CspNr5jEHOL5EdJFBIv3zI2jQ8TPbFGC0Cz72+4oYzSxWpftNX41MmEsZkMaADGC
-# AWAwggFcAgEBMEAwLDEqMCgGA1UEAxMhUG93ZXJTaGVsbCBMb2NhbCBDZXJ0aWZp
-# Y2F0ZSBSb290AhBaydK0VS5IhU1Hy6E1KUTpMAkGBSsOAwIaBQCgeDAYBgorBgEE
-# AYI3AgEMMQowCKACgAChAoAAMBkGCSqGSIb3DQEJAzEMBgorBgEEAYI3AgEEMBwG
-# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBRnbhOv
-# hLubJW9dqssOwmJEngAyxDANBgkqhkiG9w0BAQEFAASBgHI1EkiwuMXgogHIwFVq
-# sHO6FFBz41QeXiXaU25pOH9KKvz+yKyYCz/l0n/1rDMZGW02AJ+Ca2yqu6VEScmn
-# mGctHYXETS+iC+GTYsOzoU4H8b87t7JifvfLwJqf47J3w4UuCmgfvTGuV5Pmzp+K
-# ycLuj9koco0k0M3gdE+rVSEF
-# SIG # End signature block
