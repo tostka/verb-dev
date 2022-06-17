@@ -2,25 +2,28 @@
 function backup-ModuleBuild {
     <#
     .SYNOPSIS
-    backup-ModuleBuild - Backup current Module source fingerprint, Manifest (.psd1) & Module (.psm1) files to deep (c:\scBlind\[modulename]) backup, then creates a summary bufiles-yyyyMMdd-HHmmtt.xml file for the backup, in the deep backup directory.
+    backup-ModuleBuild.ps1 - Backup current Module source fingerprint, Manifest (.psd1) & Module (.psm1) files to deep (c:\scBlind\[modulename]) backup, then creates a summary bufiles-yyyyMMdd-HHmmtt.xml file for the backup, in the deep backup directory.
     .NOTES
     Version     : 1.0.0
     Author      : Todd Kadrie
-    Website     : http://www.toddomation.com
-    Twitter     : @tostka / http://twitter.com/tostka
+    Website     :	http://www.toddomation.com
+    Twitter     :	@tostka / http://twitter.com/tostka
     CreatedDate : 2022-05-25
     FileName    : backup-ModuleBuild
     License     : MIT License
     Copyright   : (c) 2022 Todd Kadrie
     Github      : https://github.com/tostka/verb-dev
     Tags        : Powershell,ISE,development,debugging
+    AddedCredit : REFERENCE
+    AddedWebsite:	URL
+    AddedTwitter:	URL
     REVISIONS
     * 10:35 AM 5/26/2022 minor cleanup
     * 12:11 PM 5/25/2022 init
     .DESCRIPTION
-    backup-ModuleBuild - Backup current Module source fingerprint, Manifest (.psd1) & Module (.psm1) files to deep (c:\scBlind\[modulename]) backup, then creates a summary bufiles-yyyyMMdd-HHmmtt.xml file for the backup, in the deep backup directory.
+    backup-ModuleBuild.ps1 - Backup current Module source fingerprint, Manifest (.psd1) & Module (.psm1) files to deep (c:\scBlind\[modulename]) backup, then creates a summary bufiles-yyyyMMdd-HHmmtt.xml file for the backup, in the deep backup directory.
 
-    ```text
+    ``text
     C:\SC\VERB-IO
     ├───Internal
     │       [Internal 'non'-exported cmdlet files].ps1 
@@ -32,6 +35,7 @@ function backup-ModuleBuild {
         │   verb-IO.psd1 # module Manifest psd1
         │   verb-IO.psm1 # module .psm1 file
     ```
+
     .PARAMETER Name
     Module Name to have revised Public source directory import-module'd[-PARAM SAMPLEINPUT]
     .PARAMETER backupRoot
@@ -45,7 +49,7 @@ function backup-ModuleBuild {
     Backup the verb-io module's current build with verbose output, and whatif pass
     .LINK
     https://github.com/tostka/verb-dev
-    #> 
+    #>
     # VALIDATORS: [ValidateNotNull()][ValidateNotNullOrEmpty()][ValidateLength(24,25)][ValidateLength(5)][ValidatePattern("some\sregex\sexpr")][ValidateSet("US","GB","AU")][ValidateScript({Test-Path $_ -PathType 'Container'})][ValidateScript({Test-Path $_})][ValidateRange(21,65)]#positiveInt:[ValidateRange(0,[int]::MaxValue)]#negativeInt:[ValidateRange([int]::MinValue,0)][ValidateCount(1,3)]
     [CmdletBinding()]
     #[Alias('iIseBpAll')]

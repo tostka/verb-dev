@@ -1,8 +1,8 @@
-﻿#*------v Function build-VSCConfig() v------
-function build-VSCConfig {
+﻿#*------v Function converto-VSCConfig() v------
+function converto-VSCConfig {
     <#
     .SYNOPSIS
-    build-VSCConfig - Process a sample ISE debugging command line, and convert it to a VSC launch.json 'configurations' entry
+    converto-VSCConfig - Process a sample ISE debugging command line, and convert it to a VSC launch.json 'configurations' entry
     .NOTES
     Version     : 1.1.0
     Author      : Todd Kadrie
@@ -17,12 +17,13 @@ function build-VSCConfig {
     AddedWebsite:
     AddedTwitter:
     REVISIONS
+    * 12:50 PM 6/17/2022 ren build-VSCConfig -> converto-VSCConfig, alias orig name
     * 7:50 AM 1/29/2020 added Cmdletbinding
     * 9:14 AM 12/30/2019 added CBH .INPUTS & .OUTPUTS, including specific material returned.
     * 5:51 PM 12/16/2019 added OneArgument param
     * 2:58 PM 12/15/2019 INIT
     .DESCRIPTION
-    build-VSCConfig - Process a sample ISE debugging command line, and convert it to a VSC launch.json 'configurations' entry
+    converto-VSCConfig - Process a sample ISE debugging command line, and convert it to a VSC launch.json 'configurations' entry
     .PARAMETER  CommandLine
     CommandLine to be converted into a launch.json configuration
     .PARAMETER OneArgument
@@ -36,11 +37,12 @@ function build-VSCConfig {
     .OUTPUTS
     Console dump & copy to clipboard, of model launch.json conversion of ISE Breakpoints xml file.
     .EXAMPLE
-    $bRet = build-VSCConfig -CommandLine $updatedContent -showdebug:$($showdebug) -verbose:$VerbosePreference -whatif:$($whatif) ;
+    $bRet = converto-VSCConfig -CommandLine $updatedContent -showdebug:$($showdebug) -verbose:$VerbosePreference -whatif:$($whatif) ;
     if (!$bRet) {Continue } ;
     .LINK
     #>
     [CmdletBinding()]
+    [Alias('build-VSCConfig')]
     PARAM(
         [Parameter(Position = 0, Mandatory = $True, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true, HelpMessage = "CommandLine to be written to specified file [-CommandLine script.ps1 arguments]")]
         [ValidateNotNullOrEmpty()]$CommandLine,
@@ -97,4 +99,4 @@ function build-VSCConfig {
     $cfg | C:\WINDOWS\System32\clip.exe ;
     $true | write-output ;
 
-}; #*------^ END Function build-VscConfig ^------
+}; #*------^ END Function converto-VSCConfig ^------
