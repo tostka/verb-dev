@@ -15,20 +15,29 @@ function import-ISEOpenFiles {
     Github      : https://github.com/tostka/verb-dev
     Tags        : Powershell,ISE,development,debugging
     REVISIONS
+    * 3:28 PM 6/23/2022 add -Tag param to permit running interger-suffixed variants (ie. mult ise sessions open & stored from same desktop). 
     * 9:19 AM 5/20/2022 add: iIseOpen alias (using these a lot lately; w freq crashouts of ise, and need to recover all files open & BPs to quickly get back to function)
     * 12:12 PM 5/11/2022 init
     .DESCRIPTION
     import-ISEOpenFiles - Import/Re-Open a list of all ISE tab files, from CU Documents\WindowsPowershell\Scripts\ISESavedSession.psXML file
     Quick bulk dump, when ISE ineveitbly stops properly echo'ing variable values to terminal (and need to close and re-open all open files)
+    .PARAMETER Tag
+    Optional Tag to apply to as filename suffix[-tag 'label']
     .EXAMPLE
-    import-ISEOpenFiles -verbose
+    PS> import-ISEOpenFiles -verbose
     Export all 'line'-type breakpoints on all current open ISE tabs, to a matching xml file, with verbose output, and whatif
+    .EXAMPLE
+    PS> import-ISEOpenFiles -Tag 2 -verbose  
+    Export with Tag '2' applied to filename (e.g. "ISESavedSession2.psXML")
     .LINK
     https://github.com/tostka/verb-dev
     #>
     [CmdletBinding()]
     [Alias('iIseOpen')]
-    PARAM() ;
+    PARAM(
+        [Parameter(Position=0,HelpMessage="Optional Tag to apply to filename[-Tag MFA]")]
+        [string]$Tag
+    ) ;
     BEGIN {
         ${CmdletName} = $PSCmdlet.MyInvocation.MyCommand.Name ;
         $verbose = $($VerbosePreference -eq "Continue")
@@ -39,7 +48,11 @@ function import-ISEOpenFiles {
         if ($psise){
             #$AllUsrsScripts = "$($env:ProgramFiles)\WindowsPowerShell\Scripts" ;
             $CUScripts = "$([Environment]::GetFolderPath('MyDocuments'))\WindowsPowershell\Scripts" ;
-            $txmlf = join-path -path $CUScripts -ChildPath 'ISESavedSession.psXML' ;
+            if($Tag){
+                $txmlf = join-path -path $CUScripts -ChildPath "ISESavedSession-$($Tag).psXML" ;
+            } else { 
+                $txmlf = join-path -path $CUScripts -ChildPath 'ISESavedSession.psXML' ;
+            } ; 
             #$allISEScripts = $psise.powershelltabs.files.fullpath ;
             $error.clear() ;
             TRY {
