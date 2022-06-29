@@ -18,6 +18,7 @@ function ConvertTo-ModuleDynamicTDO {
     Tags        : Powershell,Module,Development
     AddedTwitter:
     REVISIONS
+    * 2:08 PM 6/29/2022 # scrap the entire $psv2Publine etc block - it's causing corruption, and I won't need it post upgrade off of exop
     * 8:34 AM 5/16/2022 typo: used Aliases for Alias
     * 3:07 PM 5/13/2022ren unmerge-Module -> ConvertTo-ModuleDynamicTDO() (use std verb; adopt keyword to unique my work from 3rd-party funcs); added Unmerge-Module to Aliases; 
     * 4:06 PM 5/12/2022 merge over latest working updates to merge-module.ps1; *untested*
@@ -238,20 +239,25 @@ function ConvertTo-ModuleDynamicTDO {
     `$script:ModuleRoot = `$PSScriptRoot ;
     `$script:ModuleVersion = (Import-PowerShellDataFile -Path (get-childitem `$script:moduleroot\*.psd1).fullname).moduleversion ;
     `$runningInVsCode = `$env:TERM_PROGRAM -eq 'vscode' ;
-    $(
+
+"@ ;
+
+    # scrap the entire $psv2Publine etc block - it's causing corruption, and I won't need it post upgrade off of exop
+     <# lifted from 241-251above:
+     $(
     if($psv2PubLine){
         "$($psv2PubLine)"
     } else {
         "`$Psv2PublicExcl = @() ;"
     })
-    $(if($psv2PrivLine){
+    $(
+    if($psv2PrivLine){
         "$($psv2PrivLine)"
     } else {
         "`$Psv2PrivateExcl = @() ;"
-    })
-
-"@ ;
-
+    }
+    )
+     #>
             if($PostCBHBlock){
                 write-verbose "adding `$PostCBHBlock"
                 $updatedContent += $PostCBHBlock |out-string ;
