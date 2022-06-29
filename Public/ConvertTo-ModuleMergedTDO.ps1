@@ -18,6 +18,7 @@ function ConvertTo-ModuleMergedTDO {
     Tags        : Powershell,Module,Development
     AddedTwitter:
     REVISIONS
+    * 2:04 PM 6/29/2022 rem'd out/removed the $psv2PubLine, $psv2PrivLine dyn exclude material - won't be needed once exop upgraded past psv2
     * 5:18 PM 6/1/2022 splice in support for confirm-ModuleBuildSync ; 
     * 5:16 PM 5/31/2022 add: -RequiredVersion; # 4:48 PM 5/31/2022 getting mismatch/revert in revision to prior spec, confirm/force set it here, call confirm-ModulePsd1Version()/confirm-ModulePsm1Version() (which handle _TMP versions, that stock tools *won't*)
     * 4:38 PM 5/27/2022 update all Set-ContentFixEncoding & Add-ContentFixEncoding -values to pre |out-string to collapse arrays into single writes
@@ -274,21 +275,28 @@ function ConvertTo-ModuleMergedTDO {
     `$script:ModuleRoot = `$PSScriptRoot ;
     `$script:ModuleVersion = (Import-PowerShellDataFile -Path (get-childitem `$script:moduleroot\*.psd1).fullname).moduleversion ;
     `$runningInVsCode = `$env:TERM_PROGRAM -eq 'vscode' ;
-    $(
+
+#*======v FUNCTIONS v======
+
+"@ ;
+     
+     # scrap the entire $psv2Publine etc block - it's causing corruption, and I won't need it post upgrade off of exop
+     <# lifted from 277 - 288 above:
+     $(
     if($psv2PubLine){
         "$($psv2PubLine)"
     } else {
         "`$Psv2PublicExcl = @() ;"
     })
-    $(if($psv2PrivLine){
+    $(
+    if($psv2PrivLine){
         "$($psv2PrivLine)"
     } else {
         "`$Psv2PrivateExcl = @() ;"
     })
-
-#*======v FUNCTIONS v======
-
-"@ ;
+     #>
+     
+     
             write-verbose "adding `$PostCBHBlock"
             $updatedContent += $PostCBHBlock |out-string ;
 
