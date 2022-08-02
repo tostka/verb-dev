@@ -5,7 +5,7 @@
 .SYNOPSIS
 VERB-dev - Development PS Module-related generic functions
 .NOTES
-Version     : 1.5.13
+Version     : 1.5.14
 Author      : Todd Kadrie
 Website     :	https://www.toddomation.com
 Twitter     :	@tostka
@@ -8234,6 +8234,94 @@ function shift-ISEBreakPoints {
 #*------^ shift-ISEBreakPoints.ps1 ^------
 
 
+#*------v show-Verbs.ps1 v------
+Function show-Verbs {
+    <#
+    .SYNOPSIS
+    show-Verbs.ps1 - Test specified verb for presense in the PS get-verb list.
+    .NOTES
+    Version     : 1.0.0
+    Author      : Todd Kadrie
+    Website     : http://www.toddomation.com
+    Twitter     : @tostka / http://twitter.com/tostka
+    CreatedDate : 2021-01-20
+    FileName    : show-Verbs.ps1
+    License     : MIT License
+    Copyright   : (c) 2022 Todd Kadrie
+    Github      : https://github.com/tostka/verb-dev
+    Tags        : Powershell,development,verbs
+    AddedCredit : arsscriptum
+    AddedWebsite: https://github.com/arsscriptum/PowerShell.Module.Core/blob/master/src/Miscellaneous.ps1
+    AddedTwitter: 
+    REVISION
+    * 4:35 PM 7/20/2022 init; cached & subbed out redundant calls to get-verb; ; explict write-out v return ; fixed fails on single object counts; added pipeline support; 
+        flipped DarkRed outputs to foreground/background combos (visibility on any given bg color)
+    * 5/13/22 arsscriptum's posted copy (found in google search)
+    .DESCRIPTION
+    show-Verbs.ps1 - Test specified verb for presense in the PS get-verb list.
+    .PARAMETER Verb
+    Verb string to be tested[-verb report]
+    .INPUTS
+    Accepts piped input.
+    .OUTPUTS
+    Boolean
+    .EXAMPLE
+    'New' | show-Verbs ;
+    Test the string as a standard verb
+    .EXAMPLE
+    show-verbs ; 
+    Output formatted display of all standard verbs (as per get-verb)
+    .EXAMPLE
+    'show','new','delete','invoke' | show-verbs -verbose  ; 
+    Show specs on an array of verbs with verbose output and pipeline input
+    .EXAMPLE
+    gcm -mod verb-io | ? commandType -eq 'Function' | select -expand verb -unique | show-Verbs -verbo
+    Collect all unique verbs for functions in the verb-io module, and test against MS verb standard with verbose output
+    .LINK
+    https://github.com/tostka/verb-IO
+    #>
+    [CmdletBinding()]
+    #[Alias('test-verb')]
+    #[OutputType([boolean])]
+    PARAM(
+        [Parameter(Mandatory=$false,ValueFromPipeline = $true,HelpMessage="Verb string to be tested[-verb report]") ]
+        [Alias('Name' ,'v', 'n','like', 'match')]
+        [String[]]$Verb
+    )   
+    BEGIN {
+        $verbose = ($VerbosePreference -eq "Continue") ; 
+        $verbs = (get-verb) ; 
+        $Groups = ($verbs | Select Group -Unique).Group ; 
+    } ;
+    PROCESS {
+        foreach($item in $verb){
+            write-verbose "(checking: $($item))" ; 
+            #if ($PSBoundParameters.ContainsKey('Verb')) {
+            $Formatted = ($verbs | where Verb -match $item| sort -Property Verb)
+            if($Formatted){
+                $FormattedCount = $Formatted |  measure | select -expand count ;
+                Write-Host "Found $FormattedCount verbs" -f Black -b Gray -n ; 
+                $Formatted | write-output ;  
+            }else{
+                Write-Host "No verb found" -f DarkGray -b White; 
+            } ; 
+            return ; 
+        } ; 
+        $Groups.ForEach({
+                $g = $_
+                $VerbsCount = $verbs | where group -eq $g |  measure | select -expand count ; 
+                $Formatted = (($verbs | where Group -match $g | sort -Property Verb | Format-Wide  -Autosize | Out-String).trim()) ; 
+                Write-Host "Verbs in category " -f Black -b Gray -n ; 
+                Write-Host "$g ($VerbsCount) : " -f Yellow -b Gray  -n ; 
+                Write-Host "`n$Formatted" -f DarkYellow -b Black ; 
+            })
+    } ;  # PROC-E
+    END {} ; # END-E
+}
+
+#*------^ show-Verbs.ps1 ^------
+
+
 #*------v split-CommandLine.ps1 v------
 function Split-CommandLine {
     <#
@@ -9268,6 +9356,63 @@ Function Test-ModuleTMPFiles {
 #*------^ Test-ModuleTMPFiles.ps1 ^------
 
 
+#*------v test-VerbStandard.ps1 v------
+Function test-VerbStandard {
+    <#
+    .SYNOPSIS
+    test-VerbStandard.ps1 - Test specified verb for presense in the PS get-verb list.
+    .NOTES
+    Version     : 1.0.0
+    Author      : Todd Kadrie
+    Website     : http://www.toddomation.com
+    Twitter     : @tostka / http://twitter.com/tostka
+    CreatedDate : 2021-01-20
+    FileName    : test-VerbStandard.ps1
+    License     : MIT License
+    Copyright   : (c) 2022 Todd Kadrie
+    Github      : https://github.com/tostka/verb-dev
+    Tags        : Powershell,development,verbs
+    REVISION
+    * 3:00 PM 7/20/2022 init
+    .DESCRIPTION
+    test-VerbStandard.ps1 - Test specified verb for presense in the PS get-verb list.
+    .PARAMETER Verb
+    Verb string to be tested[-verb report]
+    .INPUTS
+    Accepts piped input.
+    .OUTPUTS
+    Boolean
+    .EXAMPLE
+    'New' | test-VerbStandard ;
+    Test the string as a standard verb
+    .EXAMPLE
+    gcm -mod verb-io | ? commandType -eq 'Function' | select -expand verb -unique | test-verbstandard -verbo
+    Collect all unique verbs for functions in the verb-io module, and test against MS verb standard
+    .LINK
+    https://github.com/tostka/verb-dev
+    #>
+    [CmdletBinding()]
+    [Alias('test-verb')]
+    [OutputType([boolean])]
+    PARAM (
+        [Parameter(Mandatory=$true,ValueFromPipeline=$true,HelpMessage="Verb string to be tested[-verb report]")]
+        [string] $Verb
+    ) ;
+    BEGIN {
+        $verbose = ($VerbosePreference -eq "Continue") ; 
+    } ;
+    PROCESS {
+        foreach($item in $verb){
+            write-verbose "(checking: $($item))" ; 
+            [boolean]((Get-Verb).Verb -match $item) | write-output ;
+        } ; 
+    } ;  # PROC-E
+    END {} ; # END-E
+}
+
+#*------^ test-VerbStandard.ps1 ^------
+
+
 #*------v Uninstall-ModuleForce.ps1 v------
 Function Uninstall-ModuleForce {
     <#
@@ -9423,7 +9568,7 @@ Function Uninstall-ModuleForce {
 
 #*======^ END FUNCTIONS ^======
 
-Export-ModuleMember -Function backup-ModuleBuild,check-PsLocalRepoRegistration,confirm-ModuleBuildSync,confirm-ModulePsd1Version,confirm-ModulePsm1Version,confirm-ModuleTestPs1Guid,convert-CommandLine2VSCDebugJson,convertFrom-EscapedPSText,converto-VSCConfig,convertTo-EscapedPSText,ConvertTo-ModuleDynamicTDO,ConvertTo-ModuleMergedTDO,convertTo-UnwrappedPS,convertTo-WrappedPS,export-ISEBreakPoints,export-ISEBreakPointsALL,export-ISEOpenFiles,get-AliasAssignsAST,get-CodeProfileAST,get-CodeRiskProfileAST,Get-CommentBlocks,get-FunctionBlock,get-FunctionBlocks,get-ModuleRevisedCommands,get-ProjectNameTDO,Get-PSModuleFile,get-VariableAssignsAST,get-VersionInfo,import-ISEBreakPoints,import-ISEBreakPointsALL,import-ISEConsoleColors,import-ISEOpenFiles,Initialize-ModuleFingerprint,Get-PSModuleFile,Initialize-PSModuleDirectories,new-CBH,New-GitHubGist,parseHelp,process-NewModule,restore-ISEConsoleColors,restore-ModuleBuild,save-ISEConsoleColors,shift-ISEBreakPoints,Split-CommandLine,Step-ModuleVersionCalculated,Get-PSModuleFile,Test-ModuleTMPFiles,Uninstall-ModuleForce -Alias *
+Export-ModuleMember -Function backup-ModuleBuild,check-PsLocalRepoRegistration,confirm-ModuleBuildSync,confirm-ModulePsd1Version,confirm-ModulePsm1Version,confirm-ModuleTestPs1Guid,convert-CommandLine2VSCDebugJson,convertFrom-EscapedPSText,converto-VSCConfig,convertTo-EscapedPSText,ConvertTo-ModuleDynamicTDO,ConvertTo-ModuleMergedTDO,convertTo-UnwrappedPS,convertTo-WrappedPS,export-ISEBreakPoints,export-ISEBreakPointsALL,export-ISEOpenFiles,get-AliasAssignsAST,get-CodeProfileAST,get-CodeRiskProfileAST,Get-CommentBlocks,get-FunctionBlock,get-FunctionBlocks,get-ModuleRevisedCommands,get-ProjectNameTDO,Get-PSModuleFile,get-VariableAssignsAST,get-VersionInfo,import-ISEBreakPoints,import-ISEBreakPointsALL,import-ISEConsoleColors,import-ISEOpenFiles,Initialize-ModuleFingerprint,Get-PSModuleFile,Initialize-PSModuleDirectories,new-CBH,New-GitHubGist,parseHelp,process-NewModule,restore-ISEConsoleColors,restore-ModuleBuild,save-ISEConsoleColors,shift-ISEBreakPoints,show-Verbs,Split-CommandLine,Step-ModuleVersionCalculated,Get-PSModuleFile,Test-ModuleTMPFiles,test-VerbStandard,Uninstall-ModuleForce -Alias *
 
 
 
@@ -9431,8 +9576,8 @@ Export-ModuleMember -Function backup-ModuleBuild,check-PsLocalRepoRegistration,c
 # SIG # Begin signature block
 # MIIELgYJKoZIhvcNAQcCoIIEHzCCBBsCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUiYrIYKYDeTwySPHDjKjPIb6B
-# JhKgggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUjt4tt87u2pIMW5VZlvY0ziBD
+# rf+gggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
 # MCwxKjAoBgNVBAMTIVBvd2VyU2hlbGwgTG9jYWwgQ2VydGlmaWNhdGUgUm9vdDAe
 # Fw0xNDEyMjkxNzA3MzNaFw0zOTEyMzEyMzU5NTlaMBUxEzARBgNVBAMTClRvZGRT
 # ZWxmSUkwgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBALqRVt7uNweTkZZ+16QG
@@ -9447,9 +9592,9 @@ Export-ModuleMember -Function backup-ModuleBuild,check-PsLocalRepoRegistration,c
 # AWAwggFcAgEBMEAwLDEqMCgGA1UEAxMhUG93ZXJTaGVsbCBMb2NhbCBDZXJ0aWZp
 # Y2F0ZSBSb290AhBaydK0VS5IhU1Hy6E1KUTpMAkGBSsOAwIaBQCgeDAYBgorBgEE
 # AYI3AgEMMQowCKACgAChAoAAMBkGCSqGSIb3DQEJAzEMBgorBgEEAYI3AgEEMBwG
-# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBQ18WDg
-# B7asCCaJMRF4Tl3CwDfYzzANBgkqhkiG9w0BAQEFAASBgH+mliUVcKJGr+ys/WKR
-# Ph/yiTJVxPyYPI5jlIYOP7nBEf4MZWjQ2cfWm4Sw5JBKmEiJwy5CgfvCt7VK0PtG
-# bDh4jhd8d1EdWVtcHobEYRUXN6n6AWhtvBsCJOjUxxpdOOQqWMYr+7zciLdEoopG
-# ZjAf4NKYqJxTmL1TptGPMB8+
+# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBTGcfxi
+# Cgz3fNluZNQryAbwUAdcLjANBgkqhkiG9w0BAQEFAASBgIF4kkZRgNRC9MoWdkg+
+# 82PSOHZjOmgpY+jcXlM8W+22RYXdlNzLdfQUwB3t5wWT8WxxrpCfFPnhQJ2+1/jP
+# d2Kd4WN2Mcu0/zp6Kis5dJSuB6rOrrvnAfYfsZgZu8vPGAyBtUmIC2n642AagaSA
+# 8j87UmBXRTVA77GLahG5DEVV
 # SIG # End signature block
