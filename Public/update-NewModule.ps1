@@ -1,34 +1,35 @@
-﻿#*------v process-NewModule.ps1 v------
-function process-NewModule {
+﻿#*------v update-NewModule.ps1 v------
+function update-NewModule {
     <#
     .SYNOPSIS
-    process-NewModule - Hybrid Monolithic/Dynam vers post-module conversion or component update: sign, publish to repo, and install back script
+    update-NewModule - Hybrid Monolithic/Dynam vers post-module conversion or component update: sign, publish to repo, and install back script
     .NOTES
     Version     : 1.1.0
     Author      : Todd Kadrie
     Website     :	http://www.toddomation.com
     Twitter     :	@tostka / http://twitter.com/tostka
     CreatedDate : 2020-02-24
-    FileName    : process-NewModule.ps1
+    FileName    : update-NewModule.ps1
     License     : MIT License
     Copyright   : (c) 2021 Todd Kadrie
     Github      : https://github.com/tostka/verb-dev
     Tags        : Powershell,Module,Build,Development
     REVISIONS
+    * 3:10 PM 9/7/2022 ren & alias orig name (verb compliance): process-NewModule -> update-NewModule
     * 11:55 AM 6/2/2022 finally got through full build on verb-io; typo: pltCMPV -> pltCMBS; 
-    * 3:42 PM 6/1/2022 add: -RequiredVersion picked up from psd1 post step ; defer into confirm-ModuleBuildSync ; echo process-newmodule splt before running; typo in $psd1vers ; cleaned old rems; 
+    * 3:42 PM 6/1/2022 add: -RequiredVersion picked up from psd1 post step ; defer into confirm-ModuleBuildSync ; echo update-NewModule splt before running; typo in $psd1vers ; cleaned old rems; 
     * 9:00 AM 5/31/2022 recoding for version enforcement (seeing final un-incremented): added -Version; cbh example tweaks ; subbed all Exit->Break; subbed write-warnings to 7pswlw ; twinned $psd1UpdatedVers into the nobuildversion section.
     * 4:34 PM 5/27/2022: update all Set-ContentFixEncoding & Add-ContentFixEncoding -values to pre |out-string to collapse arrays into single writes
-    * 2:38 PM 5/24/2022: Time to resave process-NewModuleHybrid.ps1 => C:\sc\verb-dev\Public\process-NewModule.ps1
+    * 2:38 PM 5/24/2022: Time to resave update-NewModuleHybrid.ps1 => C:\sc\verb-dev\Public\update-NewModule.ps1
     * 2:54 PM 5/23/2022 add: verbose to pltUMD splat for update-metadata (psd1 enforce curr modvers); added missing testscript-targeting remove-UnneededFileVariants @pltRGens ;  
         got through full dbg/publish/install pass on vio merged, wo issues. Appears functional. 
     * 4:01 PM 5/20/2022 WIP, left off, got through the psdUpdatedVers reset - works, just before the uninstall-moduleforce(), need to complete debugging on that balance of material. 
     still debugging: add: buffer and post build compare/restore the $psd1UpdatedVers, to the psd1Version (fix odd bug that's causing rebuild to have the pre-update moduleversion); 
         $rgxOldFingerprint (for identifying backup-fileTDO fingerprint files); revert|backup-file -> restore|backup-fileTDO; add restore-fileTDO fingerprint, and psm1/psd1 (using the new func)
     * 4:00 PM 5/13/2022 ren merge-module() refs -> ConvertTo-ModuleDynamicTDO() ; ren unmerge-module() refs -> ConvertTo-ModuleDynamicTDO
-    * 4:10 PM 5/12/2022 got through a full non -Dyn pass, to publish and ipmo -for. Need to dbg unmerged-module.psm1 interaction yet, but this *looks* like it could be ready to be the process-NewModule().
+    * 4:10 PM 5/12/2022 got through a full non -Dyn pass, to publish and ipmo -for. Need to dbg unmerged-module.psm1 interaction yet, but this *looks* like it could be ready to be the update-NewModule().
     * 8:45 AM 5/10/2022 attempt to merge over dotsource updates and logic, create a single hosting both flows
-    * 2:59 PM 5/9/2022 back-reved process-NewModuleHybridDotsourced updates in
+    * 2:59 PM 5/9/2022 back-reved update-NewModuleHybridDotsourced updates in
     * 8:47 PM 10/16/2021 rem'd out ReqMods code, was breaking exec from home
     * 1:17 PM 10/12/2021 revised post publish code, find-module was returning an array (bombming nupkg gci), so sort on version and take highest single.
     * 3:43 PM 10/7/2021 revised .nupkg caching code to use the returned (find-module).version string to find the repo .nupkg file, for caching (works around behavior where 4-digit semvars, with 4th digit(rev) 0, get only a 3-digit version string in the .nupkg file name)
@@ -67,7 +68,7 @@ function process-NewModule {
     * 9:29 AM 12/20/2019 fixed quote/dbl-quote issue in the profile copy code (was suppressing vari expansion)
     * 7:05 PM 12/19/2019 subbed in write-log support ; init, ran through Republish pass on verb-AAD
     .DESCRIPTION
-    process-NewModule - dyanmic include/dot-stourced post-module conversion or component update: sign - all files (this vers), publish to repo, and install back script
+    update-NewModule - dyanmic include/dot-stourced post-module conversion or component update: sign - all files (this vers), publish to repo, and install back script
     Note: -Merge drivese logic to build Monolithic .psm1 (-Merge), vs Dynamic-include .psm1 (-not -Merge)
     I've hit an insurmoutable bug in psv2, when using psGet to install psv3+ modules into older legacy machines. Verb-IO *won't* properly parse and load my ConvertFrom-SourceTable function at all. So we need the ability to conditionally load module functions, skipping psv2-incompatibles when running that rev
     Preqeq Installs:
@@ -104,15 +105,15 @@ function process-NewModule {
     PS> processbulk-NewModule.ps1 -mod -Dynamic verb-io -verbose
     Example using the separate processbulk-NewModule.ps1 pre-procesesor to drive a Dyanmic include .psm1 build to feed one mod through bulk processing, uses BuildEnvironment Step-ModuleVersion to increment the psd1 version, and specs -merge & -RunTest processing
     .EXAMPLE
-    PS> process-NewModule.ps1 -ModuleName "verb-AAD" -ModDirPath "C:\sc\verb-AAD" -Repository $localPSRepo  -Merge -showdebug -whatif ;
+    PS> update-NewModule -ModuleName "verb-AAD" -ModDirPath "C:\sc\verb-AAD" -Repository $localPSRepo  -Merge -showdebug -whatif ;
     Full Merge Build/Rebuild from components & Publish/Install/Test specified module, with debug messages, and whatif pass.
     .EXAMPLE
-    PS> process-NewModule.ps1 -ModuleName "verb-AAD" -ModDirPath "C:\sc\verb-AAD" -Repository $localPSRepo  -showdebug -whatif ;
+    PS> update-NewModule -ModuleName "verb-AAD" -ModDirPath "C:\sc\verb-AAD" -Repository $localPSRepo  -showdebug -whatif ;
     Non-Merge pass: Re-sign specified module & Publish/Install/Test specified module, with debug messages, and whatif pass.
     .EXAMPLE
     # pre-remove installed module
     # re-increment the psd1 file ModuleVersion (unique new val req'd to publish)
-    PS> process-NewModule.ps1 -ModuleName "verb-AAD" -ModDirPath "C:\sc\verb-AAD" -Repository $localPSRepo -Merge -Republish -showdebug -whatif ;
+    PS> update-NewModule -ModuleName "verb-AAD" -ModDirPath "C:\sc\verb-AAD" -Repository $localPSRepo -Merge -Republish -showdebug -whatif ;
     Merge & Republish pass: Only Publish/Install/Test specified module, with debug messages, and whatif pass.
     .LINK
     #>
@@ -120,6 +121,7 @@ function process-NewModule {
     ##Requires -Module verb-dev # added to verb-dev (recursive if present)
     #Requires -Modules BuildHelpers,verb-IO, verb-logging, verb-Mods, verb-Text
     [CmdletBinding()]
+    [Alias('process-NewModule')]
     PARAM(
         [Parameter(Position=0,Mandatory=$True,ValueFromPipeline=$true,HelpMessage="ModuleName[-ModuleName verb-AAD]")]
         [ValidateNotNullOrEmpty()]
@@ -912,7 +914,7 @@ $(if($Merge){'MERGE parm specified as well:`n-Merge Public|Internal|Classes incl
     } ;
     # -----------
     #>
-    # shift to wrapper confirm-ModuleBuildSync() -NoTest, as only process-NewModule needs that step
+    # shift to wrapper confirm-ModuleBuildSync() -NoTest, as only update-NewModule needs that step
     # $bRet = confirm-ModuleBuildSync -ModPsdPath 'C:\sc\verb-IO\verb-IO\verb-IO.psd1_TMP' -RequiredVersion '2.0.3' -whatif -verbose
     $pltCMBS=[ordered]@{
         ModPsdPath = $ModPsdPath ;
@@ -1227,7 +1229,7 @@ $($tExistingPkg.fullname)!
 ...in the source psd1:
 $($ModPsdPath)
 
-And then re-run process-NewModule.
+And then re-run update-NewModule.
 * NOW EXITING *
 "@ ;
                             $smsg= $blkMsg ;
@@ -1564,7 +1566,7 @@ $($logfile)
     } ;
 
     # this is where we should maintain accumulated old logs, post log close
-    # $logfile =  'C:\sc\verb-Auth\process-NewModule-verb-auth-LOG-BATCH-EXEC-20210917-1504PM-log.txt'
+    # $logfile =  'C:\sc\verb-Auth\update-NewModule-verb-auth-LOG-BATCH-EXEC-20210917-1504PM-log.txt'
 
     $pltRGens =[ordered]@{
         Path = $ModDirPath ;
@@ -1588,4 +1590,4 @@ $($logfile)
     #*======^ END SUB MAIN ^======
 }
 
-#*------^ process-NewModule.ps1 ^------
+#*------^ update-NewModule.ps1 ^------
