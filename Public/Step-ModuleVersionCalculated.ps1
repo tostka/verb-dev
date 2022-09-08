@@ -1,4 +1,4 @@
-#*------v Step-ModuleVersionCalculated.ps1 v------
+﻿#*------v Step-ModuleVersionCalculated.ps1 v------
 function Step-ModuleVersionCalculated {
     <#
     .SYNOPSIS

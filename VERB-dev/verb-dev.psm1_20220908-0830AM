@@ -5,7 +5,7 @@
 .SYNOPSIS
 VERB-dev - Development PS Module-related generic functions
 .NOTES
-Version     : 1.5.10
+Version     : 1.5.14
 Author      : Todd Kadrie
 Website     :	https://www.toddomation.com
 Twitter     :	@tostka
@@ -41,8 +41,6 @@ https://github.com/tostka/verb-dev
     $script:ModuleRoot = $PSScriptRoot ;
     $script:ModuleVersion = (Import-PowerShellDataFile -Path (get-childitem $script:moduleroot\*.psd1).fullname).moduleversion ;
     $runningInVsCode = $env:TERM_PROGRAM -eq 'vscode' ;
-    $Psv2PublicExcl = @() ;
-    $Psv2PrivateExcl = @() ;
 
 #*======v FUNCTIONS v======
 
@@ -53,25 +51,28 @@ https://github.com/tostka/verb-dev
 function backup-ModuleBuild {
     <#
     .SYNOPSIS
-    backup-ModuleBuild - Backup current Module source fingerprint, Manifest (.psd1) & Module (.psm1) files to deep (c:\scBlind\[modulename]) backup, then creates a summary bufiles-yyyyMMdd-HHmmtt.xml file for the backup, in the deep backup directory.
+    backup-ModuleBuild.ps1 - Backup current Module source fingerprint, Manifest (.psd1) & Module (.psm1) files to deep (c:\scBlind\[modulename]) backup, then creates a summary bufiles-yyyyMMdd-HHmmtt.xml file for the backup, in the deep backup directory.
     .NOTES
     Version     : 1.0.0
     Author      : Todd Kadrie
-    Website     : http://www.toddomation.com
-    Twitter     : @tostka / http://twitter.com/tostka
+    Website     :	http://www.toddomation.com
+    Twitter     :	@tostka / http://twitter.com/tostka
     CreatedDate : 2022-05-25
     FileName    : backup-ModuleBuild
     License     : MIT License
     Copyright   : (c) 2022 Todd Kadrie
     Github      : https://github.com/tostka/verb-dev
     Tags        : Powershell,ISE,development,debugging
+    AddedCredit : REFERENCE
+    AddedWebsite:	URL
+    AddedTwitter:	URL
     REVISIONS
     * 10:35 AM 5/26/2022 minor cleanup
     * 12:11 PM 5/25/2022 init
     .DESCRIPTION
-    backup-ModuleBuild - Backup current Module source fingerprint, Manifest (.psd1) & Module (.psm1) files to deep (c:\scBlind\[modulename]) backup, then creates a summary bufiles-yyyyMMdd-HHmmtt.xml file for the backup, in the deep backup directory.
+    backup-ModuleBuild.ps1 - Backup current Module source fingerprint, Manifest (.psd1) & Module (.psm1) files to deep (c:\scBlind\[modulename]) backup, then creates a summary bufiles-yyyyMMdd-HHmmtt.xml file for the backup, in the deep backup directory.
 
-    ```text
+    ``text
     C:\SC\VERB-IO
     ├───Internal
     │       [Internal 'non'-exported cmdlet files].ps1 
@@ -83,6 +84,7 @@ function backup-ModuleBuild {
         │   verb-IO.psd1 # module Manifest psd1
         │   verb-IO.psm1 # module .psm1 file
     ```
+
     .PARAMETER Name
     Module Name to have revised Public source directory import-module'd[-PARAM SAMPLEINPUT]
     .PARAMETER backupRoot
@@ -96,7 +98,7 @@ function backup-ModuleBuild {
     Backup the verb-io module's current build with verbose output, and whatif pass
     .LINK
     https://github.com/tostka/verb-dev
-    #> 
+    #>
     # VALIDATORS: [ValidateNotNull()][ValidateNotNullOrEmpty()][ValidateLength(24,25)][ValidateLength(5)][ValidatePattern("some\sregex\sexpr")][ValidateSet("US","GB","AU")][ValidateScript({Test-Path $_ -PathType 'Container'})][ValidateScript({Test-Path $_})][ValidateRange(21,65)]#positiveInt:[ValidateRange(0,[int]::MaxValue)]#negativeInt:[ValidateRange([int]::MinValue,0)][ValidateCount(1,3)]
     [CmdletBinding()]
     #[Alias('iIseBpAll')]
@@ -179,110 +181,6 @@ function backup-ModuleBuild {
 }
 
 #*------^ backup-ModuleBuild.ps1 ^------
-
-
-#*------v build-VSCConfig.ps1 v------
-function build-VSCConfig {
-    <#
-    .SYNOPSIS
-    build-VSCConfig - Process a sample ISE debugging command line, and convert it to a VSC launch.json 'configurations' entry
-    .NOTES
-    Version     : 1.1.0
-    Author      : Todd Kadrie
-    Website     : https://www.toddomation.com
-    Twitter     : @tostka / http://twitter.com/tostka
-    CreatedDate : 2:58 PM 12/15/2019
-    FileName    :
-    License     : MIT License
-    Copyright   : (c) 2019 Todd Kadrie
-    Github      : https://github.com/tostka
-    AddedCredit :
-    AddedWebsite:
-    AddedTwitter:
-    REVISIONS
-    * 7:50 AM 1/29/2020 added Cmdletbinding
-    * 9:14 AM 12/30/2019 added CBH .INPUTS & .OUTPUTS, including specific material returned.
-    * 5:51 PM 12/16/2019 added OneArgument param
-    * 2:58 PM 12/15/2019 INIT
-    .DESCRIPTION
-    build-VSCConfig - Process a sample ISE debugging command line, and convert it to a VSC launch.json 'configurations' entry
-    .PARAMETER  CommandLine
-    CommandLine to be converted into a launch.json configuration
-    .PARAMETER OneArgument
-    Flag to specify all arguments should be in a single unparsed entry[-OneArgument]
-    .PARAMETER ShowDebug
-    Parameter to display Debugging messages [-ShowDebug switch]
-    .PARAMETER Whatif
-    Parameter to run a Test no-change pass [-Whatif switch]
-    .INPUTS
-    None
-    .OUTPUTS
-    Console dump & copy to clipboard, of model launch.json conversion of ISE Breakpoints xml file.
-    .EXAMPLE
-    $bRet = build-VSCConfig -CommandLine $updatedContent -showdebug:$($showdebug) -verbose:$VerbosePreference -whatif:$($whatif) ;
-    if (!$bRet) {Continue } ;
-    .LINK
-    #>
-    [CmdletBinding()]
-    PARAM(
-        [Parameter(Position = 0, Mandatory = $True, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true, HelpMessage = "CommandLine to be written to specified file [-CommandLine script.ps1 arguments]")]
-        [ValidateNotNullOrEmpty()]$CommandLine,
-        [Parameter(HelpMessage = "Flag to specify all arguments should be in a single unparsed entry[-OneArgument]")]
-        [switch] $OneArgument = $true,
-        [Parameter(HelpMessage = "Debugging Flag [-showDebug]")]
-        [switch] $showDebug,
-        [Parameter(HelpMessage = "Whatif Flag  [-whatIf]")]
-        [switch] $whatIf
-    ) ;
-    
-    #$verbosePreference = "Continue" # opts: Stop(&Error)|Inquire(&Prompt)|Continue(Display)|SilentlyContinue(Suppress);
-    $Verbose = ($VerbosePreference -eq "Continue") ; 
-    #$CommandLine = Read-Host "Enter Command to be Parsed" ;
-    $parsedCmdLine = Split-CommandLine -CommandLine $CommandLine | Where-Object { $_.length -gt 1 }  ;
-    $ttl = ($parsedCmdLine | Measure-Object).count ;
-
-    $error.clear() ;
-    TRY {
-        # 1st elem is the script/exec name
-        $jsonRequest = [ordered]@{
-            type    = "PowerShell";
-            request = "launch";
-            name    = "PS $(split-path $parsedCmdLine[0] -Leaf)" ;
-            script  = (resolve-path -path $parsedCmdLine[0]).path;
-            args    = $() ;
-            cwd     = "`${workspaceRoot}";
-        } ;
-
-        if ($ttl -gt 1) {
-            if ($OneArgument) {
-                $jsonRequest.args = $parsedCmdLine[1..$($ttl)] -join " " ;
-            }
-            else {
-                # args are 2nd through last elem
-                $jsonRequest.args = $parsedCmdLine[1..$($ttl)]
-            } ;
-        } ;
-        if ($showDebug) {
-            Write-HostOverride -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):ConvertTo-Json w`n$(($jsonRequest|out-string).trim())`nargs:`n$(($jsonRequest.args|out-string).trim())" ;
-        } ;
-        $cfg = $jsonRequest | convertto-json ;
-    }
-    CATCH {
-        Write-Error "$(get-date -format 'HH:mm:ss'): Failed processing $($_.Exception.ItemName). `nError Message: $($_.Exception.Message)`nError Details: $($_)" ;
-        $false | Write-Output ;
-        CONTINUE #STOP(debug)|EXIT(close)|Continue(move on in loop cycle) ;
-    } ;
-    $cfgTempFile = [System.IO.Path]::GetTempFileName().replace('.tmp', '.json') ;
-    Set-FileContent -Text $cfg -Path $cfgTempFile -showDebug:$($showDebug) -whatIf:$($whatIf);
-    write-verbose -verbose:$true "Generated launch.json config entry for input:`n w`n$(($cfg|out-string).trim())" ;
-    write-verbose -verbose:$true "Generated launch.json config entry for input:`n w`n$((get-command $cfgTempFile |out-string).trim())" ;
-    write-verbose -verbose:$true "(copied to clipboard)" ;
-    $cfg | C:\WINDOWS\System32\clip.exe ;
-    $true | write-output ;
-
-}
-
-#*------^ build-VSCConfig.ps1 ^------
 
 
 #*------v check-PsLocalRepoRegistration.ps1 v------
@@ -1535,6 +1433,253 @@ function convert-CommandLine2VSCDebugJson {
 #*------^ convert-CommandLine2VSCDebugJson.ps1 ^------
 
 
+#*------v convertFrom-EscapedPSText.ps1 v------
+Function convertFrom-EscapedPSText {
+    <#
+    .SYNOPSIS
+    convertFrom-EscapedPSText - convert a previously backtick-escaped scriptblock of Powershell code text, to an un-escaped equivelent - specifically removing backtick-escape found on all special characters [$*\~;(%?.:@/]. 
+    .NOTES
+    Version     : 1.0.0
+    Author      : Todd Kadrie
+    Website     :	http://www.toddomation.com
+    Twitter     :	@tostka / http://twitter.com/tostka
+    CreatedDate : 2021-11-08
+    FileName    : convertFrom-EscapedPSText.ps1
+    License     : MIT License
+    Copyright   : (c) 2021 Todd Kadrie
+    Github      : https://github.com/tostka/verb-text
+    Tags        : Powershell,Text
+    AddedCredit : REFERENCE
+    AddedWebsite:	URL
+    AddedTwitter:	URL
+    REVISIONS
+    * 12:44 PM 6/17/2022 update CBH; move verb-text -> verb-dev
+    * 2:10 PM 3/1/2022 updated the ScriptBlock param to string-array [string[]], preserves the multi-line nature of original text (otherwise, ps coerces arrays into single-element strings)
+    * 11:09 AM 11/8/2021 init
+    .DESCRIPTION
+    convertFrom-EscapedPSText - convert a previously backtick-escaped scriptblock of Powershell code text, to an un-escaped equivelent - specifically removing backtick-escape found on all special characters [$*\~;(%?.:@/]. 
+    Intent is to run this *after* to running a -replace pass on a given piece of pre-escaped Powershell code as text (parsing & editing scripts with powershell itself), to ensure the special characters in the block are no longer treated as literal text. Prior to doing search and replace, one would typically have escaped the special characters by running convertTo-EscapedPSText() on the block. 
+    .PARAMETER  ScriptBlock
+    Semi-colon-delimited ScriptBlock of powershell to be wrapped at 
+    .EXAMPLE
+    PS>  # pre-escape PS special chars
+    PS>  $ScriptBlock = get-content c:\path-to\script.ps1 ; 
+    PS>  $ScriptBlock=convertTo-EscapedPSText -ScriptBlock $ScriptBlock ; 
+    PS>  $splitAt = ";" ; 
+    PS>  $replaceWith = ";$([Environment]::NewLine)" ; 
+    PS>  # ";`r`n"  ; 
+    PS>  $ScriptBlock = $ScriptBlock | Foreach-Object {$_ -replace $splitAt, $replaceWith } ; 
+    PS>  $ScriptBlock=convertFrom-EscapedPSText -ScriptBlock $ScriptBlock ; 
+    PS>  
+    Load a script file into a $ScriptBlock vari, escape special characters in the $Scriptblock, run a wrap on the text at semicolons (replace ';' with ';`n), then unescape the specialcharacters in the scriptblock, back to original functional state. 
+    .LINK
+    https://github.com/tostka/verb-Text
+    #>
+    [CmdletBinding()]
+    param(
+        [Parameter(Position=0,Mandatory=$false,HelpMessage="ScriptBlock
+    Semi-colon-delimited ScriptBlock of powershell to be wrapped at [-ScriptBlock 'c:\path-to\script.ps1']")]
+        [Alias('Code')]
+        [string[]]$ScriptBlock
+    )  ; 
+    if(-not $ScriptBlock){
+        $ScriptBlock= (get-clipboard) # .trim().replace("'",'').replace('"','') ;
+        if($ScriptBlock){
+            write-verbose "No -ScriptBlock specified, detected text on clipboard:`n$($ScriptBlock)" ;
+        } else {
+            write-warning "No -path specified, nothing suitable found on clipboard. EXITING!" ;
+            Break ;
+        } ;
+    } else {
+        write-verbose "ScriptBlock:$($ScriptBlock)" ;
+    } ;
+    # issue specific to PS, -replace isn't literal, see's $ as variable etc control char
+    # to escape them, have to dbl: $password.Replace('$', $$')
+    #$ScriptBlock = $ScriptBlock.Replace('$', '$$');
+    # rgx replace all special chars, to make them literals, before doing the replace (graveaccent escape ea matched char in the [$*\~;(%?.:@/] range)
+    $ScriptBlock = $scriptblock -replace "``([$*\~;(%?.:@/]+)",'$1'; 
+    $ScriptBlock | write-output ; 
+}
+
+#*------^ convertFrom-EscapedPSText.ps1 ^------
+
+
+#*------v converto-VSCConfig.ps1 v------
+function converto-VSCConfig {
+    <#
+    .SYNOPSIS
+    converto-VSCConfig - Process a sample ISE debugging command line, and convert it to a VSC launch.json 'configurations' entry
+    .NOTES
+    Version     : 1.1.0
+    Author      : Todd Kadrie
+    Website     : https://www.toddomation.com
+    Twitter     : @tostka / http://twitter.com/tostka
+    CreatedDate : 2:58 PM 12/15/2019
+    FileName    :
+    License     : MIT License
+    Copyright   : (c) 2019 Todd Kadrie
+    Github      : https://github.com/tostka
+    AddedCredit :
+    AddedWebsite:
+    AddedTwitter:
+    REVISIONS
+    * 12:50 PM 6/17/2022 ren build-VSCConfig -> converto-VSCConfig, alias orig name
+    * 7:50 AM 1/29/2020 added Cmdletbinding
+    * 9:14 AM 12/30/2019 added CBH .INPUTS & .OUTPUTS, including specific material returned.
+    * 5:51 PM 12/16/2019 added OneArgument param
+    * 2:58 PM 12/15/2019 INIT
+    .DESCRIPTION
+    converto-VSCConfig - Process a sample ISE debugging command line, and convert it to a VSC launch.json 'configurations' entry
+    .PARAMETER  CommandLine
+    CommandLine to be converted into a launch.json configuration
+    .PARAMETER OneArgument
+    Flag to specify all arguments should be in a single unparsed entry[-OneArgument]
+    .PARAMETER ShowDebug
+    Parameter to display Debugging messages [-ShowDebug switch]
+    .PARAMETER Whatif
+    Parameter to run a Test no-change pass [-Whatif switch]
+    .INPUTS
+    None
+    .OUTPUTS
+    Console dump & copy to clipboard, of model launch.json conversion of ISE Breakpoints xml file.
+    .EXAMPLE
+    $bRet = converto-VSCConfig -CommandLine $updatedContent -showdebug:$($showdebug) -verbose:$VerbosePreference -whatif:$($whatif) ;
+    if (!$bRet) {Continue } ;
+    .LINK
+    #>
+    [CmdletBinding()]
+    [Alias('build-VSCConfig')]
+    PARAM(
+        [Parameter(Position = 0, Mandatory = $True, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true, HelpMessage = "CommandLine to be written to specified file [-CommandLine script.ps1 arguments]")]
+        [ValidateNotNullOrEmpty()]$CommandLine,
+        [Parameter(HelpMessage = "Flag to specify all arguments should be in a single unparsed entry[-OneArgument]")]
+        [switch] $OneArgument = $true,
+        [Parameter(HelpMessage = "Debugging Flag [-showDebug]")]
+        [switch] $showDebug,
+        [Parameter(HelpMessage = "Whatif Flag  [-whatIf]")]
+        [switch] $whatIf
+    ) ;
+    
+    #$verbosePreference = "Continue" # opts: Stop(&Error)|Inquire(&Prompt)|Continue(Display)|SilentlyContinue(Suppress);
+    $Verbose = ($VerbosePreference -eq "Continue") ; 
+    #$CommandLine = Read-Host "Enter Command to be Parsed" ;
+    $parsedCmdLine = Split-CommandLine -CommandLine $CommandLine | Where-Object { $_.length -gt 1 }  ;
+    $ttl = ($parsedCmdLine | Measure-Object).count ;
+
+    $error.clear() ;
+    TRY {
+        # 1st elem is the script/exec name
+        $jsonRequest = [ordered]@{
+            type    = "PowerShell";
+            request = "launch";
+            name    = "PS $(split-path $parsedCmdLine[0] -Leaf)" ;
+            script  = (resolve-path -path $parsedCmdLine[0]).path;
+            args    = $() ;
+            cwd     = "`${workspaceRoot}";
+        } ;
+
+        if ($ttl -gt 1) {
+            if ($OneArgument) {
+                $jsonRequest.args = $parsedCmdLine[1..$($ttl)] -join " " ;
+            }
+            else {
+                # args are 2nd through last elem
+                $jsonRequest.args = $parsedCmdLine[1..$($ttl)]
+            } ;
+        } ;
+        if ($showDebug) {
+            Write-HostOverride -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):ConvertTo-Json w`n$(($jsonRequest|out-string).trim())`nargs:`n$(($jsonRequest.args|out-string).trim())" ;
+        } ;
+        $cfg = $jsonRequest | convertto-json ;
+    }
+    CATCH {
+        Write-Error "$(get-date -format 'HH:mm:ss'): Failed processing $($_.Exception.ItemName). `nError Message: $($_.Exception.Message)`nError Details: $($_)" ;
+        $false | Write-Output ;
+        CONTINUE #STOP(debug)|EXIT(close)|Continue(move on in loop cycle) ;
+    } ;
+    $cfgTempFile = [System.IO.Path]::GetTempFileName().replace('.tmp', '.json') ;
+    Set-FileContent -Text $cfg -Path $cfgTempFile -showDebug:$($showDebug) -whatIf:$($whatIf);
+    write-verbose -verbose:$true "Generated launch.json config entry for input:`n w`n$(($cfg|out-string).trim())" ;
+    write-verbose -verbose:$true "Generated launch.json config entry for input:`n w`n$((get-command $cfgTempFile |out-string).trim())" ;
+    write-verbose -verbose:$true "(copied to clipboard)" ;
+    $cfg | C:\WINDOWS\System32\clip.exe ;
+    $true | write-output ;
+
+}
+
+#*------^ converto-VSCConfig.ps1 ^------
+
+
+#*------v convertTo-EscapedPSText.ps1 v------
+Function convertTo-EscapedPSText {
+    <#
+    .SYNOPSIS
+    convertTo-EscapedPSText - convert a scriptblock of Powershell code text, to an esaped equivelent - specifically backtick-escape all special characters [$*\~;(%?.:@/]. 
+    .NOTES
+    Version     : 1.0.0
+    Author      : Todd Kadrie
+    Website     :	http://www.toddomation.com
+    Twitter     :	@tostka / http://twitter.com/tostka
+    CreatedDate : 2021-11-08
+    FileName    : convertTo-EscapedPSText.ps1
+    License     : MIT License
+    Copyright   : (c) 2021 Todd Kadrie
+    Github      : https://github.com/tostka/verb-text
+    Tags        : Powershell,Text
+    AddedCredit : REFERENCE
+    AddedWebsite:	URL
+    AddedTwitter:	URL
+    REVISIONS
+    * 12:44 PM 6/17/2022 update CBH; move verb-text -> verb-dev
+    * 2:10 PM 3/1/2022 updated the ScriptBlock param to string-array [string[]], preserves the multi-line nature of original text (otherwise, ps coerces arrays into single-element strings)
+    * 11:09 AM 11/8/2021 init
+    .DESCRIPTION
+    convertTo-EscapedPSText - convert a scriptblock of Powershell code text, to an esaped equivelent - specifically backtick-escape all special characters [$*\~;(%?.:@/]. 
+    Intent is to run this prior to running a -replace pass on a given piece of Powershell code, to ensure the special characters in the block are treated as literal text. Following search and replace, one would typically *un*-escape the special characters by running convertFrom-EscapedPSText() on the block. 
+    .PARAMETER  ScriptBlock
+    Semi-colon-delimited ScriptBlock of powershell to be wrapped at 
+    .EXAMPLE
+    PS>  # pre-escape PS special chars
+    PS>  $ScriptBlock = get-content c:\path-to\script.ps1 ; 
+    PS>  $ScriptBlock=convertTo-EscapedPSText -ScriptBlock $ScriptBlock ; 
+    PS>  $splitAt = ";" ; 
+    PS>  $replaceWith = ";$([Environment]::NewLine)" ; 
+    PS>  # ";`r`n"  ; 
+    PS>  $ScriptBlock = $ScriptBlock | Foreach-Object {$_ -replace $splitAt, $replaceWith } ; 
+    PS>  $ScriptBlock=convertFrom-EscapedPSText -ScriptBlock $ScriptBlock ; 
+    Load a script file into a $ScriptBlock vari, escape special characters in the $Scriptblock, run a wrap on the text at semicolons (replace ';' with ';`n), then unescape the specialcharacters in the scriptblock, back to original functional state. 
+    .LINK
+    https://github.com/tostka/verb-Text
+    #>
+    [CmdletBinding()]
+    param(
+        [Parameter(Position=0,Mandatory=$false,HelpMessage="ScriptBlock
+    Semi-colon-delimited ScriptBlock of powershell to be wrapped at [-ScriptBlock 'c:\path-to\script.ps1']")]
+        [Alias('Code')]
+        [string[]]$ScriptBlock
+    )  ; 
+    if(-not $ScriptBlock){
+        $ScriptBlock= (get-clipboard) # .trim().replace("'",'').replace('"','') ;
+        if($ScriptBlock){
+            write-verbose "No -ScriptBlock specified, detected text on clipboard:`n$($ScriptBlock)" ;
+        } else {
+            write-warning "No -path specified, nothing suitable found on clipboard. EXITING!" ;
+            Break ;
+        } ;
+    } else {
+        write-verbose "ScriptBlock:$($ScriptBlock)" ;
+    } ;
+    # issue specific to PS, -replace isn't literal, see's $ as variable etc control char
+    # to escape them, have to dbl: $password.Replace('$', $$')
+    #$ScriptBlock = $ScriptBlock.Replace('$', '$$');
+    # rgx replace all special chars, to make them literals, before doing the replace (graveaccent escape ea matched char in the [$*\~;(%?.:@/] range)
+    $ScriptBlock = $scriptblock -replace '([$*\~;(%?.:@/]+)','`$1' ;
+    $ScriptBlock | write-output ; 
+}
+
+#*------^ convertTo-EscapedPSText.ps1 ^------
+
+
 #*------v ConvertTo-ModuleDynamicTDO.ps1 v------
 function ConvertTo-ModuleDynamicTDO {
     <#
@@ -1555,6 +1700,7 @@ function ConvertTo-ModuleDynamicTDO {
     Tags        : Powershell,Module,Development
     AddedTwitter:
     REVISIONS
+    * 2:08 PM 6/29/2022 # scrap the entire $psv2Publine etc block - it's causing corruption, and I won't need it post upgrade off of exop
     * 8:34 AM 5/16/2022 typo: used Aliases for Alias
     * 3:07 PM 5/13/2022ren unmerge-Module -> ConvertTo-ModuleDynamicTDO() (use std verb; adopt keyword to unique my work from 3rd-party funcs); added Unmerge-Module to Aliases; 
     * 4:06 PM 5/12/2022 merge over latest working updates to merge-module.ps1; *untested*
@@ -1775,20 +1921,25 @@ function ConvertTo-ModuleDynamicTDO {
     `$script:ModuleRoot = `$PSScriptRoot ;
     `$script:ModuleVersion = (Import-PowerShellDataFile -Path (get-childitem `$script:moduleroot\*.psd1).fullname).moduleversion ;
     `$runningInVsCode = `$env:TERM_PROGRAM -eq 'vscode' ;
-    $(
+
+"@ ;
+
+    # scrap the entire $psv2Publine etc block - it's causing corruption, and I won't need it post upgrade off of exop
+     <# lifted from 241-251above:
+     $(
     if($psv2PubLine){
         "$($psv2PubLine)"
     } else {
         "`$Psv2PublicExcl = @() ;"
     })
-    $(if($psv2PrivLine){
+    $(
+    if($psv2PrivLine){
         "$($psv2PrivLine)"
     } else {
         "`$Psv2PrivateExcl = @() ;"
-    })
-
-"@ ;
-
+    }
+    )
+     #>
             if($PostCBHBlock){
                 write-verbose "adding `$PostCBHBlock"
                 $updatedContent += $PostCBHBlock |out-string ;
@@ -2191,6 +2342,7 @@ function ConvertTo-ModuleMergedTDO {
     Tags        : Powershell,Module,Development
     AddedTwitter:
     REVISIONS
+    * 2:04 PM 6/29/2022 rem'd out/removed the $psv2PubLine, $psv2PrivLine dyn exclude material - won't be needed once exop upgraded past psv2
     * 5:18 PM 6/1/2022 splice in support for confirm-ModuleBuildSync ; 
     * 5:16 PM 5/31/2022 add: -RequiredVersion; # 4:48 PM 5/31/2022 getting mismatch/revert in revision to prior spec, confirm/force set it here, call confirm-ModulePsd1Version()/confirm-ModulePsm1Version() (which handle _TMP versions, that stock tools *won't*)
     * 4:38 PM 5/27/2022 update all Set-ContentFixEncoding & Add-ContentFixEncoding -values to pre |out-string to collapse arrays into single writes
@@ -2447,21 +2599,28 @@ function ConvertTo-ModuleMergedTDO {
     `$script:ModuleRoot = `$PSScriptRoot ;
     `$script:ModuleVersion = (Import-PowerShellDataFile -Path (get-childitem `$script:moduleroot\*.psd1).fullname).moduleversion ;
     `$runningInVsCode = `$env:TERM_PROGRAM -eq 'vscode' ;
-    $(
+
+#*======v FUNCTIONS v======
+
+"@ ;
+     
+     # scrap the entire $psv2Publine etc block - it's causing corruption, and I won't need it post upgrade off of exop
+     <# lifted from 277 - 288 above:
+     $(
     if($psv2PubLine){
         "$($psv2PubLine)"
     } else {
         "`$Psv2PublicExcl = @() ;"
     })
-    $(if($psv2PrivLine){
+    $(
+    if($psv2PrivLine){
         "$($psv2PrivLine)"
     } else {
         "`$Psv2PrivateExcl = @() ;"
     })
-
-#*======v FUNCTIONS v======
-
-"@ ;
+     #>
+     
+     
             write-verbose "adding `$PostCBHBlock"
             $updatedContent += $PostCBHBlock |out-string ;
 
@@ -2942,6 +3101,162 @@ Export-ModuleMember -Function $(($ExportFunctions) -join ',') -Alias *
 #*------^ ConvertTo-ModuleMergedTDO.ps1 ^------
 
 
+#*------v convertTo-UnwrappedPS.ps1 v------
+Function convertTo-UnwrappedPS {
+    <#
+    .SYNOPSIS
+    convertTo-UnwrappedPS - Unwrap a a Powershell ScriptBlock at _preexisting_ semi-colon (;) delimiters (does not add semicolons or otherwise attempt to parse the scriptblock into definited lines; just adds CrLF's following the semicolons).
+    .NOTES
+    Version     : 1.0.0
+    Author      : Todd Kadrie
+    Website     :	http://www.toddomation.com
+    Twitter     :	@tostka / http://twitter.com/tostka
+    CreatedDate : 2021-11-08
+    FileName    : convertTo-UnwrappedPS.ps1
+    License     : MIT License
+    Copyright   : (c) 2020 Todd Kadrie
+    Github      : https://github.com/tostka/verb-text
+    Tags        : Powershell,Text
+    AddedCredit : REFERENCE
+    AddedWebsite:	URL
+    AddedTwitter:	URL
+    REVISIONS
+    * 12:44 PM 6/17/2022 update CBH; move verb-text -> verb-dev
+    * 9:38 AM 11/22/2021 ren unwrap-ps -> convertTo-UnwrappedPS 
+    * 11:09 AM 11/8/2021 init
+    .DESCRIPTION
+    convertTo-UnwrappedPS - Unwrap a a Powershell ScriptBlock at _preexisting_ semi-colon (;) delimiters (does not add semicolons or otherwise attempt to parse the scriptblock into definited lines; just adds CrLF's following the semicolons).
+    .PARAMETER  ScriptBlock
+    Semi-colon-delimited ScriptBlock of powershell to be wrapped at 
+    .EXAMPLE
+    PS>  $text=convertTo-UnwrappedPS -ScriptBlock "write-host 'yea';`ngci 'c:\somefile.txt';" ;
+    Unwrap the specified scriptblock at the semicolons. 
+    .LINK
+    https://github.com/tostka/verb-Text
+    #>
+    [CmdletBinding()]
+    [Alias('unwrap-PS')]
+    param(
+        [Parameter(Position=0,Mandatory=$false,HelpMessage="ScriptBlock
+    Semi-colon-delimited ScriptBlock of powershell to be unwrapped (sub-out ;`n with ;) [-ScriptBlock 'c:\path-to\script.ps1']")]
+        [Alias('Code')]
+        [string]$ScriptBlock
+    )  ; 
+    if(-not $ScriptBlock){
+        $ScriptBlock= (get-clipboard) # .trim().replace("'",'').replace('"','') ;
+        if($ScriptBlock){
+            write-verbose "No -ScriptBlock specified, detected text on clipboard:`n$($ScriptBlock)" ;
+        } else {
+            write-warning "No -path specified, nothing suitable found on clipboard. EXITING!" ;
+            Break ;
+        } ;
+    } else {
+        write-verbose "ScriptBlock:$($ScriptBlock)" ;
+    } ;
+    # issue specific to PS, -replace isn't literal, see's $ as variable etc control char
+    # to escape them, have to dbl: $password.Replace('$', $$')
+    #$ScriptBlock = $ScriptBlock.Replace('$', '$$');
+    # rgx replace all special chars, to make them literals, before doing any -replace (graveaccent escape ea)
+    #$ScriptBlock = $scriptblock -replace '([$*\~;(%?.:@/]+)','`$1' ;
+    $ScriptBlock=convertTo-EscapedPSText -ScriptBlock $ScriptBlock -Verbose:($PSBoundParameters['Verbose'] -eq $true) ; 
+    # functional AHK: StringReplace clipboard, clipboard, `;, `;`r`n, All
+    $splitAt = ";$([Environment]::NewLine)" ; 
+    
+    $replaceWith = ";" ; 
+    # ";`r`n"  ; 
+    $ScriptBlock = $ScriptBlock | Foreach-Object {
+            $_ -replace $splitAt, $replaceWith ;
+    } ; 
+    # then put the $'s back (stays dbld):
+    #$ScriptBlock = $ScriptBlock.Replace('$$', '$')
+    # reverse escapes - have to use dbl-quotes around escaped backtick (dbld), or it doesn't become a literal
+    #$ScriptBlock = $scriptblock -replace "``([$*\~;(%?.:@/]+)",'$1'; 
+    $ScriptBlock=convertFrom-EscapedPSText -ScriptBlock $ScriptBlock  -Verbose:($PSBoundParameters['Verbose'] -eq $true) ;  
+    $ScriptBlock | write-output ; 
+}
+
+#*------^ convertTo-UnwrappedPS.ps1 ^------
+
+
+#*------v convertTo-WrappedPS.ps1 v------
+Function convertTo-WrappedPS {
+    <#
+    .SYNOPSIS
+    convertTo-WrappedPS - Wrap a a Powershell ScriptBlock at _preexisting_ semi-colon (;) delimiters (does not add semicolons or otherwise attempt to parse the scriptblock into definited lines; just adds CrLF's following the semicolons).
+    .NOTES
+    Version     : 1.0.0
+    Author      : Todd Kadrie
+    Website     :	http://www.toddomation.com
+    Twitter     :	@tostka / http://twitter.com/tostka
+    CreatedDate : 2021-11-08
+    FileName    : convertTo-WrappedPS.ps1
+    License     : MIT License
+    Copyright   : (c) 2020 Todd Kadrie
+    Github      : https://github.com/tostka/verb-text
+    Tags        : Powershell,Text
+    AddedCredit : REFERENCE
+    AddedWebsite:	URL
+    AddedTwitter:	URL
+    REVISIONS
+    * 12:44 PM 6/17/2022 update CBH; move verb-text -> verb-dev
+    * 9:38 AM 11/22/2021 ren wrap-ps -> convertTo-WrappedPS with wrap-ps alias ; added pipeline support
+    * 11:09 AM 11/8/2021 init
+    .DESCRIPTION
+    convertTo-WrappedPS - Wrap a a Powershell ScriptBlock at _preexisting_ semi-colon (;) delimiters (does not add semicolons or otherwise attempt to parse the scriptblock into definited lines; just adds CrLF's following the semicolons)
+    .PARAMETER  ScriptBlock
+    Semi-colon-delimited ScriptBlock of powershell to be wrapped at 
+    .EXAMPLE
+    PS>  $text=convertTo-WrappedPS -ScriptBlock "write-host 'yea'; gci 'c:\somefile.txt';" ;
+    Wrap the specified scriptblock at the semicolons. 
+    .EXAMPLE
+    PS>  $text= "write-host 'yea'; gci 'c:\somefile.txt';" | convertTo-WrappedPS ;
+    Pipeline example
+    .LINK
+    https://github.com/tostka/verb-Text
+    #>
+    [CmdletBinding()]
+    [Alias('wrap-PS')]
+    PARAM(
+        [Parameter(Position=0,Mandatory=$false,ValueFromPipeline=$true,ValueFromPipelineByPropertyName=$true,HelpMessage="ScriptBlock
+    Semi-colon-delimited ScriptBlock of powershell to be wrapped at [-ScriptBlock 'c:\path-to\script.ps1']")]
+        [Alias('Code')]
+        [string]$ScriptBlock
+    )  ; 
+    if(-not $ScriptBlock){
+        $ScriptBlock= (get-clipboard) # .trim().replace("'",'').replace('"','') ;
+        if($ScriptBlock){
+            write-verbose "No -ScriptBlock specified, detected text on clipboard:`n$($ScriptBlock)" ;
+        } else {
+            write-warning "No -path specified, nothing suitable found on clipboard. EXITING!" ;
+            Break ;
+        } ;
+    } else {
+        write-verbose "ScriptBlock:$($ScriptBlock)" ;
+    } ;
+    # issue specific to PS, -replace isn't literal, see's $ as variable etc control char
+    # to escape them, have to dbl: $password.Replace('$', $$')
+    #$ScriptBlock = $ScriptBlock.Replace('$', '$$');
+    # rgx replace all special chars, to make them literals, before doing any -replace (graveaccent escape ea)
+    #$ScriptBlock = $scriptblock -replace '([$*\~;(%?.:@/]+)','`$1' ;
+    $ScriptBlock=convertTo-EscapedPSText -ScriptBlock $ScriptBlock -Verbose:($PSBoundParameters['Verbose'] -eq $true) ; 
+    # functional AHK: StringReplace clipboard, clipboard, `;, `;`r`n, All
+    $splitAt = ";" ; 
+    $replaceWith = ";$([Environment]::NewLine)" ; 
+    # ";`r`n"  ; 
+    $ScriptBlock = $ScriptBlock | Foreach-Object {
+            $_ -replace $splitAt, $replaceWith ;
+    } ; 
+    # then put the $'s back (stays dbld):
+    #$ScriptBlock = $ScriptBlock.Replace('$$', '$')
+    # reverse escapes - have to use dbl-quotes around escaped backtick (dbld), or it doesn't become a literal
+    #$ScriptBlock = $scriptblock -replace "``([$*\~;(%?.:@/]+)",'$1'; 
+    $ScriptBlock=convertFrom-EscapedPSText -ScriptBlock $ScriptBlock  -Verbose:($PSBoundParameters['Verbose'] -eq $true) ;  
+    $ScriptBlock | write-output ; 
+}
+
+#*------^ convertTo-WrappedPS.ps1 ^------
+
+
 #*------v export-ISEBreakPoints.ps1 v------
 function export-ISEBreakPoints {
     <#
@@ -3137,22 +3452,30 @@ function export-ISEOpenFiles {
     Github      : https://github.com/tostka/verb-dev
     Tags        : Powershell,ISE,development,debugging
     REVISIONS
+    * 3:28 PM 6/23/2022 add -Tag param to permit running interger-suffixed variants (ie. mult ise sessions open & stored from same desktop). 
     * 9:19 AM 5/20/2022 add: eIseOpen alias (using these a lot lately; w freq crashouts of ise, and need to recover all files open & BPs to quickly get back to function)
     * 12:12 PM 5/11/2022 init
     .DESCRIPTION
     export-ISEOpenFiles - Export a list of all currently open ISE tab files, to CU \WindowsPowershell\Scripts\ISESavedSession.psXML file
     Quick bulk dump, when ISE ineveitbly stops properly echo'ing variable values to terminal (and need to close and re-open all open files)
+    .PARAMETER Tag
+    Optional Tag to apply to as filename suffix[-tag 'label']
     .PARAMETER Whatif
     Parameter to run a Test no-change pass [-Whatif switch]
     .EXAMPLE
-    export-ISEOpenFiles -verbose -whatif
+    PS> export-ISEOpenFiles -verbose -whatif
     Export all 'line'-type breakpoints on all current open ISE tabs, to a matching xml file, with verbose output, and whatif
+    .EXAMPLE
+    PS> export-ISEOpenFiles -Tag 'mfa' -verbose -whatif
+    Export with Tag 'mfa' applied to filename (e.g. "ISESavedSession-MFA.psXML")
     .LINK
     https://github.com/tostka/verb-dev
     #>
     [CmdletBinding()]
     [Alias('eIseOpen')]
     PARAM(
+        [Parameter(Position=0,HelpMessage="Optional Tag to apply to filename[-Tag MFA]")]
+        [string]$Tag,
         [Parameter(HelpMessage="Whatif Flag  [-whatIf]")]
         [switch] $whatIf
     ) ;
@@ -3166,7 +3489,11 @@ function export-ISEOpenFiles {
         if ($psise){
             #$AllUsrsScripts = "$($env:ProgramFiles)\WindowsPowerShell\Scripts" ;
             $CUScripts = "$([Environment]::GetFolderPath('MyDocuments'))\WindowsPowershell\Scripts" ;
-            $txmlf = join-path -path $CUScripts -ChildPath 'ISESavedSession.psXML' ;
+            if($Tag){
+                $txmlf = join-path -path $CUScripts -ChildPath "ISESavedSession-$($Tag).psXML" ;
+            } else { 
+                $txmlf = join-path -path $CUScripts -ChildPath 'ISESavedSession.psXML' ;
+            } ; 
             $allISEScripts = $psise.powershelltabs.files.fullpath ;
             $smsg = "Exporting $(($allISEScripts|measure).count) Open Files list for ALL TABS of currently open ISE, to:`n"
             $smsg += "`n$($txmlf)" ;
@@ -4853,20 +5180,29 @@ function import-ISEOpenFiles {
     Github      : https://github.com/tostka/verb-dev
     Tags        : Powershell,ISE,development,debugging
     REVISIONS
+    * 3:28 PM 6/23/2022 add -Tag param to permit running interger-suffixed variants (ie. mult ise sessions open & stored from same desktop). 
     * 9:19 AM 5/20/2022 add: iIseOpen alias (using these a lot lately; w freq crashouts of ise, and need to recover all files open & BPs to quickly get back to function)
     * 12:12 PM 5/11/2022 init
     .DESCRIPTION
     import-ISEOpenFiles - Import/Re-Open a list of all ISE tab files, from CU Documents\WindowsPowershell\Scripts\ISESavedSession.psXML file
     Quick bulk dump, when ISE ineveitbly stops properly echo'ing variable values to terminal (and need to close and re-open all open files)
+    .PARAMETER Tag
+    Optional Tag to apply to as filename suffix[-tag 'label']
     .EXAMPLE
-    import-ISEOpenFiles -verbose
+    PS> import-ISEOpenFiles -verbose
     Export all 'line'-type breakpoints on all current open ISE tabs, to a matching xml file, with verbose output, and whatif
+    .EXAMPLE
+    PS> import-ISEOpenFiles -Tag 2 -verbose  
+    Export with Tag '2' applied to filename (e.g. "ISESavedSession2.psXML")
     .LINK
     https://github.com/tostka/verb-dev
     #>
     [CmdletBinding()]
     [Alias('iIseOpen')]
-    PARAM() ;
+    PARAM(
+        [Parameter(Position=0,HelpMessage="Optional Tag to apply to filename[-Tag MFA]")]
+        [string]$Tag
+    ) ;
     BEGIN {
         ${CmdletName} = $PSCmdlet.MyInvocation.MyCommand.Name ;
         $verbose = $($VerbosePreference -eq "Continue")
@@ -4877,7 +5213,11 @@ function import-ISEOpenFiles {
         if ($psise){
             #$AllUsrsScripts = "$($env:ProgramFiles)\WindowsPowerShell\Scripts" ;
             $CUScripts = "$([Environment]::GetFolderPath('MyDocuments'))\WindowsPowershell\Scripts" ;
-            $txmlf = join-path -path $CUScripts -ChildPath 'ISESavedSession.psXML' ;
+            if($Tag){
+                $txmlf = join-path -path $CUScripts -ChildPath "ISESavedSession-$($Tag).psXML" ;
+            } else { 
+                $txmlf = join-path -path $CUScripts -ChildPath 'ISESavedSession.psXML' ;
+            } ; 
             #$allISEScripts = $psise.powershelltabs.files.fullpath ;
             $error.clear() ;
             TRY {
@@ -7894,6 +8234,94 @@ function shift-ISEBreakPoints {
 #*------^ shift-ISEBreakPoints.ps1 ^------
 
 
+#*------v show-Verbs.ps1 v------
+Function show-Verbs {
+    <#
+    .SYNOPSIS
+    show-Verbs.ps1 - Test specified verb for presense in the PS get-verb list.
+    .NOTES
+    Version     : 1.0.0
+    Author      : Todd Kadrie
+    Website     : http://www.toddomation.com
+    Twitter     : @tostka / http://twitter.com/tostka
+    CreatedDate : 2021-01-20
+    FileName    : show-Verbs.ps1
+    License     : MIT License
+    Copyright   : (c) 2022 Todd Kadrie
+    Github      : https://github.com/tostka/verb-dev
+    Tags        : Powershell,development,verbs
+    AddedCredit : arsscriptum
+    AddedWebsite: https://github.com/arsscriptum/PowerShell.Module.Core/blob/master/src/Miscellaneous.ps1
+    AddedTwitter: 
+    REVISION
+    * 4:35 PM 7/20/2022 init; cached & subbed out redundant calls to get-verb; ; explict write-out v return ; fixed fails on single object counts; added pipeline support; 
+        flipped DarkRed outputs to foreground/background combos (visibility on any given bg color)
+    * 5/13/22 arsscriptum's posted copy (found in google search)
+    .DESCRIPTION
+    show-Verbs.ps1 - Test specified verb for presense in the PS get-verb list.
+    .PARAMETER Verb
+    Verb string to be tested[-verb report]
+    .INPUTS
+    Accepts piped input.
+    .OUTPUTS
+    Boolean
+    .EXAMPLE
+    'New' | show-Verbs ;
+    Test the string as a standard verb
+    .EXAMPLE
+    show-verbs ; 
+    Output formatted display of all standard verbs (as per get-verb)
+    .EXAMPLE
+    'show','new','delete','invoke' | show-verbs -verbose  ; 
+    Show specs on an array of verbs with verbose output and pipeline input
+    .EXAMPLE
+    gcm -mod verb-io | ? commandType -eq 'Function' | select -expand verb -unique | show-Verbs -verbo
+    Collect all unique verbs for functions in the verb-io module, and test against MS verb standard with verbose output
+    .LINK
+    https://github.com/tostka/verb-IO
+    #>
+    [CmdletBinding()]
+    #[Alias('test-verb')]
+    #[OutputType([boolean])]
+    PARAM(
+        [Parameter(Mandatory=$false,ValueFromPipeline = $true,HelpMessage="Verb string to be tested[-verb report]") ]
+        [Alias('Name' ,'v', 'n','like', 'match')]
+        [String[]]$Verb
+    )   
+    BEGIN {
+        $verbose = ($VerbosePreference -eq "Continue") ; 
+        $verbs = (get-verb) ; 
+        $Groups = ($verbs | Select Group -Unique).Group ; 
+    } ;
+    PROCESS {
+        foreach($item in $verb){
+            write-verbose "(checking: $($item))" ; 
+            #if ($PSBoundParameters.ContainsKey('Verb')) {
+            $Formatted = ($verbs | where Verb -match $item| sort -Property Verb)
+            if($Formatted){
+                $FormattedCount = $Formatted |  measure | select -expand count ;
+                Write-Host "Found $FormattedCount verbs" -f Black -b Gray -n ; 
+                $Formatted | write-output ;  
+            }else{
+                Write-Host "No verb found" -f DarkGray -b White; 
+            } ; 
+            return ; 
+        } ; 
+        $Groups.ForEach({
+                $g = $_
+                $VerbsCount = $verbs | where group -eq $g |  measure | select -expand count ; 
+                $Formatted = (($verbs | where Group -match $g | sort -Property Verb | Format-Wide  -Autosize | Out-String).trim()) ; 
+                Write-Host "Verbs in category " -f Black -b Gray -n ; 
+                Write-Host "$g ($VerbsCount) : " -f Yellow -b Gray  -n ; 
+                Write-Host "`n$Formatted" -f DarkYellow -b Black ; 
+            })
+    } ;  # PROC-E
+    END {} ; # END-E
+}
+
+#*------^ show-Verbs.ps1 ^------
+
+
 #*------v split-CommandLine.ps1 v------
 function Split-CommandLine {
     <#
@@ -8928,6 +9356,63 @@ Function Test-ModuleTMPFiles {
 #*------^ Test-ModuleTMPFiles.ps1 ^------
 
 
+#*------v test-VerbStandard.ps1 v------
+Function test-VerbStandard {
+    <#
+    .SYNOPSIS
+    test-VerbStandard.ps1 - Test specified verb for presense in the PS get-verb list.
+    .NOTES
+    Version     : 1.0.0
+    Author      : Todd Kadrie
+    Website     : http://www.toddomation.com
+    Twitter     : @tostka / http://twitter.com/tostka
+    CreatedDate : 2021-01-20
+    FileName    : test-VerbStandard.ps1
+    License     : MIT License
+    Copyright   : (c) 2022 Todd Kadrie
+    Github      : https://github.com/tostka/verb-dev
+    Tags        : Powershell,development,verbs
+    REVISION
+    * 3:00 PM 7/20/2022 init
+    .DESCRIPTION
+    test-VerbStandard.ps1 - Test specified verb for presense in the PS get-verb list.
+    .PARAMETER Verb
+    Verb string to be tested[-verb report]
+    .INPUTS
+    Accepts piped input.
+    .OUTPUTS
+    Boolean
+    .EXAMPLE
+    'New' | test-VerbStandard ;
+    Test the string as a standard verb
+    .EXAMPLE
+    gcm -mod verb-io | ? commandType -eq 'Function' | select -expand verb -unique | test-verbstandard -verbo
+    Collect all unique verbs for functions in the verb-io module, and test against MS verb standard
+    .LINK
+    https://github.com/tostka/verb-dev
+    #>
+    [CmdletBinding()]
+    [Alias('test-verb')]
+    [OutputType([boolean])]
+    PARAM (
+        [Parameter(Mandatory=$true,ValueFromPipeline=$true,HelpMessage="Verb string to be tested[-verb report]")]
+        [string] $Verb
+    ) ;
+    BEGIN {
+        $verbose = ($VerbosePreference -eq "Continue") ; 
+    } ;
+    PROCESS {
+        foreach($item in $verb){
+            write-verbose "(checking: $($item))" ; 
+            [boolean]((Get-Verb).Verb -match $item) | write-output ;
+        } ; 
+    } ;  # PROC-E
+    END {} ; # END-E
+}
+
+#*------^ test-VerbStandard.ps1 ^------
+
+
 #*------v Uninstall-ModuleForce.ps1 v------
 Function Uninstall-ModuleForce {
     <#
@@ -9083,7 +9568,7 @@ Function Uninstall-ModuleForce {
 
 #*======^ END FUNCTIONS ^======
 
-Export-ModuleMember -Function backup-ModuleBuild,build-VSCConfig,check-PsLocalRepoRegistration,confirm-ModuleBuildSync,confirm-ModulePsd1Version,confirm-ModulePsm1Version,confirm-ModuleTestPs1Guid,convert-CommandLine2VSCDebugJson,ConvertTo-ModuleDynamicTDO,ConvertTo-ModuleMergedTDO,export-ISEBreakPoints,export-ISEBreakPointsALL,export-ISEOpenFiles,get-AliasAssignsAST,get-CodeProfileAST,get-CodeRiskProfileAST,Get-CommentBlocks,get-FunctionBlock,get-FunctionBlocks,get-ModuleRevisedCommands,get-ProjectNameTDO,Get-PSModuleFile,get-VariableAssignsAST,get-VersionInfo,import-ISEBreakPoints,import-ISEBreakPointsALL,import-ISEConsoleColors,import-ISEOpenFiles,Initialize-ModuleFingerprint,Get-PSModuleFile,Initialize-PSModuleDirectories,new-CBH,New-GitHubGist,parseHelp,process-NewModule,restore-ISEConsoleColors,restore-ModuleBuild,save-ISEConsoleColors,shift-ISEBreakPoints,Split-CommandLine,Step-ModuleVersionCalculated,Get-PSModuleFile,Test-ModuleTMPFiles,Uninstall-ModuleForce -Alias *
+Export-ModuleMember -Function backup-ModuleBuild,check-PsLocalRepoRegistration,confirm-ModuleBuildSync,confirm-ModulePsd1Version,confirm-ModulePsm1Version,confirm-ModuleTestPs1Guid,convert-CommandLine2VSCDebugJson,convertFrom-EscapedPSText,converto-VSCConfig,convertTo-EscapedPSText,ConvertTo-ModuleDynamicTDO,ConvertTo-ModuleMergedTDO,convertTo-UnwrappedPS,convertTo-WrappedPS,export-ISEBreakPoints,export-ISEBreakPointsALL,export-ISEOpenFiles,get-AliasAssignsAST,get-CodeProfileAST,get-CodeRiskProfileAST,Get-CommentBlocks,get-FunctionBlock,get-FunctionBlocks,get-ModuleRevisedCommands,get-ProjectNameTDO,Get-PSModuleFile,get-VariableAssignsAST,get-VersionInfo,import-ISEBreakPoints,import-ISEBreakPointsALL,import-ISEConsoleColors,import-ISEOpenFiles,Initialize-ModuleFingerprint,Get-PSModuleFile,Initialize-PSModuleDirectories,new-CBH,New-GitHubGist,parseHelp,process-NewModule,restore-ISEConsoleColors,restore-ModuleBuild,save-ISEConsoleColors,shift-ISEBreakPoints,show-Verbs,Split-CommandLine,Step-ModuleVersionCalculated,Get-PSModuleFile,Test-ModuleTMPFiles,test-VerbStandard,Uninstall-ModuleForce -Alias *
 
 
 
@@ -9091,8 +9576,8 @@ Export-ModuleMember -Function backup-ModuleBuild,build-VSCConfig,check-PsLocalRe
 # SIG # Begin signature block
 # MIIELgYJKoZIhvcNAQcCoIIEHzCCBBsCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUVGjcBFcObo/8AZ+Yr5mgi1cz
-# JuOgggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUjt4tt87u2pIMW5VZlvY0ziBD
+# rf+gggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
 # MCwxKjAoBgNVBAMTIVBvd2VyU2hlbGwgTG9jYWwgQ2VydGlmaWNhdGUgUm9vdDAe
 # Fw0xNDEyMjkxNzA3MzNaFw0zOTEyMzEyMzU5NTlaMBUxEzARBgNVBAMTClRvZGRT
 # ZWxmSUkwgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBALqRVt7uNweTkZZ+16QG
@@ -9107,9 +9592,9 @@ Export-ModuleMember -Function backup-ModuleBuild,build-VSCConfig,check-PsLocalRe
 # AWAwggFcAgEBMEAwLDEqMCgGA1UEAxMhUG93ZXJTaGVsbCBMb2NhbCBDZXJ0aWZp
 # Y2F0ZSBSb290AhBaydK0VS5IhU1Hy6E1KUTpMAkGBSsOAwIaBQCgeDAYBgorBgEE
 # AYI3AgEMMQowCKACgAChAoAAMBkGCSqGSIb3DQEJAzEMBgorBgEEAYI3AgEEMBwG
-# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBQbPV+Q
-# g9KR8YO3nCG+pJIbduYtKTANBgkqhkiG9w0BAQEFAASBgJkpifubTih65xdutF39
-# Qv1vQLaE1N+GnoZ/wmRjNNwYtb+G+bTgOvAxCNxj/oYv+ys2jzosTjvdunyfh46l
-# caCwQC8rPlhgs78Ooou8lxcyvbRkbRuphwp3oxrDIfZed3ArFQHaKRP/XEuplNg2
-# VqAPrcnpOgiXf8R9IeLIjdW+
+# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBTGcfxi
+# Cgz3fNluZNQryAbwUAdcLjANBgkqhkiG9w0BAQEFAASBgIF4kkZRgNRC9MoWdkg+
+# 82PSOHZjOmgpY+jcXlM8W+22RYXdlNzLdfQUwB3t5wWT8WxxrpCfFPnhQJ2+1/jP
+# d2Kd4WN2Mcu0/zp6Kis5dJSuB6rOrrvnAfYfsZgZu8vPGAyBtUmIC2n642AagaSA
+# 8j87UmBXRTVA77GLahG5DEVV
 # SIG # End signature block

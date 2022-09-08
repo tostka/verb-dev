@@ -1,0 +1,1749 @@
+﻿**********************
+Windows PowerShell transcript start
+Start time: 20220908163841
+Username: TORO\kadriTSS
+RunAs User: TORO\kadriTSS
+Configuration Name: 
+Machine: LYN-8DCZ1G2 (Microsoft Windows NT 10.0.17134.0)
+Host Application: C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -noexit -command $Host.UI.RawUI.BackgroundColor='Black'; $Host.UI.RawUI.ForegroundColor='Gray';cd c:\usr\work\exch\scripts\;replace-PSTitleBarText -text 'PS ADMIN' -replace 'PS ADMIN-EMS' ; 
+Process ID: 24268
+PSVersion: 5.1.17134.858
+PSEdition: Desktop
+PSCompatibleVersions: 1.0, 2.0, 3.0, 4.0, 5.0, 5.1.17134.858
+Platform: Win32NT
+BuildVersion: 10.0.17134.858
+CLRVersion: 4.0.30319.42000
+WSManStackVersion: 3.0
+OS: Microsoft Windows NT 10.0.17134.0
+PSRemotingProtocolVersion: 2.3
+SerializationVersion: 1.1.0.1
+**********************
+Transcript started, output file is C:\sc\verb-dev\verb-dev\logs\VERB-dev-verb-mods-Transcript-BATCH-EXEC-20220908-1638PM-trans-log.txt
+16:38:41: INFO: #*======v VERB-dev.psm1:verb-mods v======
+16:38:41:(executing:Get-BuildEnvironment -Path c:\sc\verb-mods 
+(use -NoBuildInfo if hangs))
+16:38:44: INFO: NON-Republish pass detected:
+MERGE parm specified as well:`n-Merge Public|Internal|Classes include subdirs module content into updated .psm1
+-Sign updated files.
+-Uninstall/Remove existing profile module
+-Copy new module to profile
+-Confirm: Get-Module -ListAvailable
+-Check/Update existing Psd1 Version
+-Publish-Module
+-Remove existing installed profile module
+-Test Install-Module
+-Test Import-Module
+16:38:44: INFO: -Merge specified...
+16:38:44: INFO: ConvertTo-ModuleMergedTDO w
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+ModuleName                     verb-mods                                                                                                   
+ModuleSourcePath               {c:\sc\verb-mods\Public, c:\sc\verb-mods\Internal}                                                          
+ModuleDestinationPath          c:\sc\verb-mods\verb-mods                                                                                   
+RequiredVersion                1.2.2                                                                                                       
+LogSpec                        {logging, logfile, transcript}                                                                              
+NoAliasExport                                                                                                                              
+ErrorAction                    Stop                                                                                                        
+showdebug                      False                                                                                                       
+whatif                         False
+VERBOSE: $PSBoundParameters:
+Key                   Value                                             
+---                   -----                                             
+ModuleName            verb-mods                                         
+ModuleSourcePath      {c:\sc\verb-mods\Public, c:\sc\verb-mods\Internal}
+ModuleDestinationPath c:\sc\verb-mods\verb-mods                         
+RequiredVersion       1.2.2                                             
+LogSpec               {logging, logfile, transcript}                    
+NoAliasExport         False                                             
+ErrorAction           Stop                                              
+showDebug             False                                             
+whatIf                False
+16:38:44: INFO: ConvertTo-ModuleMergedTDO w
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+ModuleName                     verb-mods                                                                                                   
+ModuleSourcePath               {c:\sc\verb-mods\Public, c:\sc\verb-mods\Internal}                                                          
+ModuleDestinationPath          c:\sc\verb-mods\verb-mods                                                                                   
+RequiredVersion                1.2.2                                                                                                       
+LogSpec                        {logging, logfile, transcript}                                                                              
+NoAliasExport                                                                                                                              
+ErrorAction                    Stop                                                                                                        
+showdebug                      False                                                                                                       
+whatif                         False
+VERBOSE: (backup-FileTDO -path c:\sc\verb-mods\verb-mods\verb-mods.psm1)
+VERBOSE: (backup-FileTDO -path c:\sc\verb-mods\verb-mods\verb-mods.psd1)
+DEADWOOD REMOVAL:remove-UnneededFileVariants w
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+Path                           c:\sc\verb-mods\verb-mods                                                                                   
+Include                        verb-mods.psm1_*                                                                                            
+Pattern                        \.ps(m|d)1_\d{8}-\d{3,4}(A|P)M$                                                                             
+FilterOn                       CreationTime                                                                                                
+Keep                           2                                                                                                           
+KeepToday                      True                                                                                                        
+verbose                        True                                                                                                        
+whatif                         False
+16:38:44:gci w
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+path                           c:\sc\verb-mods\verb-mods\*                                                                                 
+include                        verb-mods.psm1_*                                                                                            
+ErrorAction                    Stop
+VERBOSE: $cuttime:09/08/2022 00:00:00
+VERBOSE: post-filtering on pattern:\.ps(m|d)1_\d{8}-\d{3,4}(A|P)M$
+(5 in set *before* filtering)
+(4 in set *after* filtering)
+VERBOSE: filtering on files prior to $cuttime:09/08/2022 00:00:00 AM, on CreationTime property
+(4 in set *before* filtering)
+(3 in set *after* filtering)
+VERBOSE: attempting to retain remaining 2 generations net of prior filtering
+(3 in set *before* filtering)
+(1 in set *after* filtering)
+(Note:net population is *below* target -Keep:2 spec - insufficient older files available)
+16:38:44:Reducing matched population from 5 to 1 files via:
+post-filtered files with regex pattern:\.ps(m|d)1_\d{8}-\d{3,4}(A|P)M$
+filtered files on CreationTime prior to 09/08/2022 00:00:00 AM
+16:38:44:Remove-Item w 
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+path                           C:\sc\verb-mods\verb-mods\verb-mods.psm1_20211103-1647PM                                                    
+ErrorAction                    STOP                                                                                                        
+whatif                         False
+16:38:44: INFO: (NON-dyn psm1 detected - purging existing non-CBH content...)
+VERBOSE: L16:38:45:(doesn't appear to be an inter meta-CBH block)
+VERBOSE: adding $PostCBHBlock
+VERBOSE: $PSBoundParameters:
+Key      Value                                                                                                                             
+---      -----                                                                                                                             
+Value    {# verb-mods.psm1...                                                                                                              
+Path     c:\sc\verb-mods\verb-mods\verb-mods.psm1_TMP                                                                                      
+PassThru True                                                                                                                              
+Verbose  True                                                                                                                              
+whatIf   False
+VERBOSE: 16:38:45:(Set-ContentFixEncoding:c:\sc\verb-mods\verb-mods\verb-mods.psm1_TMP)
+VERBOSE: 16:38:45:Set-Content w
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+PassThru                       True                                                                                                        
+Path                           c:\sc\verb-mods\verb-mods\verb-mods.psm1_TMP                                                                
+whatif                         False                                                                                                       
+encoding                       UTF8                                                                                                        
+ErrorAction                    STOP
+-Value[0,2]:
+# verb-mods.psm1
+  <#
+16:38:45: INFO: Initialize-PSModuleDirectories w
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+ModuleSourcePath               {c:\sc\verb-mods\Public, c:\sc\verb-mods\Internal}                                                          
+ModuleDestinationPath          c:\sc\verb-mods\verb-mods                                                                                   
+ErrorAction                    Stop                                                                                                        
+whatif                         False
+VERBOSE: $PSBoundParameters:
+Key                   Value                                             
+---                   -----                                             
+ModuleSourcePath      {c:\sc\verb-mods\Public, c:\sc\verb-mods\Internal}
+ModuleDestinationPath c:\sc\verb-mods\verb-mods                         
+ErrorAction           Stop                                              
+whatIf                False
+VERBOSE: (non-pipeline - param - input)
+16:38:45: INFO: 
+#*------v (1/2):C:\sc\verb-mods\Public v------
+16:38:45: INFO: Processing 15 $ComponentScripts files through Remove-AuthenticodeSignature...
+16:38:45: INFO: Remove-AuthenticodeSignature w
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+Path                           {C:\sc\verb-mods\Public\check-ReqMods.ps1, C:\sc\verb-mods\Public\Disconnect-PssBroken.ps1, C:\sc\verb-mo...
+whatif                         False                                                                                                       
+verbose                        True
+VERBOSE: 16:38:45:((1/15):C:\sc\verb-mods\Public\check-ReqMods.ps1:has no existing Authenticode signature)
+VERBOSE: 16:38:45:((2/15):C:\sc\verb-mods\Public\Disconnect-PssBroken.ps1:has no existing Authenticode signature)
+VERBOSE: 16:38:45:((3/15):C:\sc\verb-mods\Public\find-profileScripts.ps1:has no existing Authenticode signature)
+VERBOSE: 16:38:45:((4/15):C:\sc\verb-mods\Public\Get-ModulePublishedVersion.ps1:has no existing Authenticode signature)
+VERBOSE: 16:38:45:((5/15):C:\sc\verb-mods\Public\get-RepoModulesHighestVersion.ps1:has no existing Authenticode signature)
+VERBOSE: 16:38:45:((6/15):C:\sc\verb-mods\Public\Install-ModulesTin.ps1:has no existing Authenticode signature)
+VERBOSE: 16:38:45:((7/15):C:\sc\verb-mods\Public\load-Module.ps1:has no existing Authenticode signature)
+VERBOSE: 16:38:45:((8/15):C:\sc\verb-mods\Public\load-ModuleFT.ps1:has no existing Authenticode signature)
+VERBOSE: 16:38:45:((9/15):C:\sc\verb-mods\Public\mount-module.ps1:has no existing Authenticode signature)
+VERBOSE: 16:38:45:((10/15):C:\sc\verb-mods\Public\register-localPSRepository.ps1:has no existing Authenticode signature)
+VERBOSE: 16:38:45:((11/15):C:\sc\verb-mods\Public\revert-ModuleInstalledRevision.ps1:has no existing Authenticode signature)
+VERBOSE: 16:38:45:((12/15):C:\sc\verb-mods\Public\test-UnReleasedModuleContent.ps1:has no existing Authenticode signature)
+VERBOSE: 16:38:45:((13/15):C:\sc\verb-mods\Public\Uninstall-AllModules.ps1:has no existing Authenticode signature)
+VERBOSE: 16:38:45:((14/15):C:\sc\verb-mods\Public\uninstall-ModulesObsolete.ps1:has no existing Authenticode signature)
+VERBOSE: 16:38:45:((15/15):C:\sc\verb-mods\Public\update-PSPowerShellGetLegacy.ps1:has no existing Authenticode signature)
+16:38:45: INFO: Processing (1/15):C:\sc\verb-mods\Public\check-ReqMods.ps1...
+VERBOSE: $PSBoundParameters:
+Key      Value                                                                                                                             
+---      -----                                                                                                                             
+Path     {c:\sc\verb-mods\verb-mods\verb-mods.psm1_TMP}                                                                                    
+PassThru True                                                                                                                              
+Verbose  True                                                                                                                              
+whatIf   False                                                                                                                             
+Value    ...
+VERBOSE: 16:38:45:(Add-ContentFixEncoding:)
+VERBOSE: 16:38:45:Set-Content w
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+encoding                       UTF8                                                                                                        
+Path                           c:\sc\verb-mods\verb-mods\verb-mods.psm1_TMP                                                                
+whatif                         False                                                                                                       
+PassThru                       True                                                                                                        
+ErrorAction                    STOP
+-Value[0,2]:
+#*------v check-ReqMods.ps1 v------
+function check-ReqMods {
+16:38:45: INFO: Processing (2/15):C:\sc\verb-mods\Public\Disconnect-PssBroken.ps1...
+VERBOSE: $PSBoundParameters:
+Key      Value                                                                                                                             
+---      -----                                                                                                                             
+Path     {c:\sc\verb-mods\verb-mods\verb-mods.psm1_TMP}                                                                                    
+PassThru True                                                                                                                              
+Verbose  True                                                                                                                              
+whatIf   False                                                                                                                             
+Value    ...
+VERBOSE: 16:38:45:(Add-ContentFixEncoding:)
+VERBOSE: 16:38:45:Set-Content w
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+encoding                       UTF8                                                                                                        
+Path                           c:\sc\verb-mods\verb-mods\verb-mods.psm1_TMP                                                                
+whatif                         False                                                                                                       
+PassThru                       True                                                                                                        
+ErrorAction                    STOP
+-Value[0,2]:
+#*------v Disconnect-PssBroken.ps1 v------
+Function Disconnect-PssBroken {
+16:38:45: INFO: Processing (3/15):C:\sc\verb-mods\Public\find-profileScripts.ps1...
+VERBOSE: $PSBoundParameters:
+Key      Value                                                                                                                             
+---      -----                                                                                                                             
+Path     {c:\sc\verb-mods\verb-mods\verb-mods.psm1_TMP}                                                                                    
+PassThru True                                                                                                                              
+Verbose  True                                                                                                                              
+whatIf   False                                                                                                                             
+Value    ...
+VERBOSE: 16:38:45:(Add-ContentFixEncoding:)
+VERBOSE: 16:38:45:Set-Content w
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+encoding                       UTF8                                                                                                        
+Path                           c:\sc\verb-mods\verb-mods\verb-mods.psm1_TMP                                                                
+whatif                         False                                                                                                       
+PassThru                       True                                                                                                        
+ErrorAction                    STOP
+-Value[0,2]:
+#*------v find-profileScripts.ps1 v------
+function find-profileScripts {
+16:38:45: INFO: Processing (4/15):C:\sc\verb-mods\Public\Get-ModulePublishedVersion.ps1...
+VERBOSE: $PSBoundParameters:
+Key      Value                                                                                                                             
+---      -----                                                                                                                             
+Path     {c:\sc\verb-mods\verb-mods\verb-mods.psm1_TMP}                                                                                    
+PassThru True                                                                                                                              
+Verbose  True                                                                                                                              
+whatIf   False                                                                                                                             
+Value    ...
+VERBOSE: 16:38:45:(Add-ContentFixEncoding:)
+VERBOSE: 16:38:45:Set-Content w
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+encoding                       UTF8                                                                                                        
+Path                           c:\sc\verb-mods\verb-mods\verb-mods.psm1_TMP                                                                
+whatif                         False                                                                                                       
+PassThru                       True                                                                                                        
+ErrorAction                    STOP
+-Value[0,2]:
+#*------v Get-ModulePublishedVersion.ps1 v------
+function Get-ModulePublishedVersion {
+16:38:46: INFO: Processing (5/15):C:\sc\verb-mods\Public\get-RepoModulesHighestVersion.ps1...
+VERBOSE: $PSBoundParameters:
+Key      Value                                                                                                                             
+---      -----                                                                                                                             
+Path     {c:\sc\verb-mods\verb-mods\verb-mods.psm1_TMP}                                                                                    
+PassThru True                                                                                                                              
+Verbose  True                                                                                                                              
+whatIf   False                                                                                                                             
+Value    ...
+VERBOSE: 16:38:46:(Add-ContentFixEncoding:)
+VERBOSE: 16:38:46:Set-Content w
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+encoding                       UTF8                                                                                                        
+Path                           c:\sc\verb-mods\verb-mods\verb-mods.psm1_TMP                                                                
+whatif                         False                                                                                                       
+PassThru                       True                                                                                                        
+ErrorAction                    STOP
+-Value[0,2]:
+#*------v get-RepoModulesHighestVersion.ps1 v------
+function get-RepoModulesHighestVersion {
+16:38:48: INFO: Processing (6/15):C:\sc\verb-mods\Public\Install-ModulesTin.ps1...
+VERBOSE: $PSBoundParameters:
+Key      Value                                                                                                                             
+---      -----                                                                                                                             
+Path     {c:\sc\verb-mods\verb-mods\verb-mods.psm1_TMP}                                                                                    
+PassThru True                                                                                                                              
+Verbose  True                                                                                                                              
+whatIf   False                                                                                                                             
+Value    ...
+VERBOSE: 16:38:48:(Add-ContentFixEncoding:)
+VERBOSE: 16:38:48:Set-Content w
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+encoding                       UTF8                                                                                                        
+Path                           c:\sc\verb-mods\verb-mods\verb-mods.psm1_TMP                                                                
+whatif                         False                                                                                                       
+PassThru                       True                                                                                                        
+ErrorAction                    STOP
+-Value[0,2]:
+#*------v Install-ModulesTin.ps1 v------
+function Install-ModulesTin {
+16:38:51: INFO: Processing (7/15):C:\sc\verb-mods\Public\load-Module.ps1...
+VERBOSE: $PSBoundParameters:
+Key      Value                                                                                                                             
+---      -----                                                                                                                             
+Path     {c:\sc\verb-mods\verb-mods\verb-mods.psm1_TMP}                                                                                    
+PassThru True                                                                                                                              
+Verbose  True                                                                                                                              
+whatIf   False                                                                                                                             
+Value    ...
+VERBOSE: 16:38:51:(Add-ContentFixEncoding:)
+VERBOSE: 16:38:51:Set-Content w
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+encoding                       UTF8                                                                                                        
+Path                           c:\sc\verb-mods\verb-mods\verb-mods.psm1_TMP                                                                
+whatif                         False                                                                                                       
+PassThru                       True                                                                                                        
+ErrorAction                    STOP
+-Value[0,2]:
+#*------v load-Module.ps1 v------
+function load-Module {
+16:38:51: INFO: Processing (8/15):C:\sc\verb-mods\Public\load-ModuleFT.ps1...
+VERBOSE: $PSBoundParameters:
+Key      Value                                                                                                                             
+---      -----                                                                                                                             
+Path     {c:\sc\verb-mods\verb-mods\verb-mods.psm1_TMP}                                                                                    
+PassThru True                                                                                                                              
+Verbose  True                                                                                                                              
+whatIf   False                                                                                                                             
+Value    ...
+VERBOSE: 16:38:51:(Add-ContentFixEncoding:)
+VERBOSE: 16:38:51:Set-Content w
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+encoding                       UTF8                                                                                                        
+Path                           c:\sc\verb-mods\verb-mods\verb-mods.psm1_TMP                                                                
+whatif                         False                                                                                                       
+PassThru                       True                                                                                                        
+ErrorAction                    STOP
+-Value[0,2]:
+#*------v load-ModuleFT.ps1 v------
+function load-ModuleFT {
+16:38:53: INFO: Processing (9/15):C:\sc\verb-mods\Public\mount-module.ps1...
+VERBOSE: $PSBoundParameters:
+Key      Value                                                                                                                             
+---      -----                                                                                                                             
+Path     {c:\sc\verb-mods\verb-mods\verb-mods.psm1_TMP}                                                                                    
+PassThru True                                                                                                                              
+Verbose  True                                                                                                                              
+whatIf   False                                                                                                                             
+Value    ...
+VERBOSE: 16:38:53:(Add-ContentFixEncoding:)
+VERBOSE: 16:38:53:Set-Content w
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+encoding                       UTF8                                                                                                        
+Path                           c:\sc\verb-mods\verb-mods\verb-mods.psm1_TMP                                                                
+whatif                         False                                                                                                       
+PassThru                       True                                                                                                        
+ErrorAction                    STOP
+-Value[0,2]:
+#*------v mount-module.ps1 v------
+function mount-Module {
+16:38:54: INFO: Processing (10/15):C:\sc\verb-mods\Public\register-localPSRepository.ps1...
+VERBOSE: $PSBoundParameters:
+Key      Value                                                                                                                             
+---      -----                                                                                                                             
+Path     {c:\sc\verb-mods\verb-mods\verb-mods.psm1_TMP}                                                                                    
+PassThru True                                                                                                                              
+Verbose  True                                                                                                                              
+whatIf   False                                                                                                                             
+Value    ...
+VERBOSE: 16:38:54:(Add-ContentFixEncoding:)
+VERBOSE: 16:38:54:Set-Content w
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+encoding                       UTF8                                                                                                        
+Path                           c:\sc\verb-mods\verb-mods\verb-mods.psm1_TMP                                                                
+whatif                         False                                                                                                       
+PassThru                       True                                                                                                        
+ErrorAction                    STOP
+-Value[0,2]:
+#*------v register-localPSRepository.ps1 v------
+function register-localPSRepository {
+16:38:55: INFO: Processing (11/15):C:\sc\verb-mods\Public\revert-ModuleInstalledRevision.ps1...
+VERBOSE: $PSBoundParameters:
+Key      Value                                                                                                                             
+---      -----                                                                                                                             
+Path     {c:\sc\verb-mods\verb-mods\verb-mods.psm1_TMP}                                                                                    
+PassThru True                                                                                                                              
+Verbose  True                                                                                                                              
+whatIf   False                                                                                                                             
+Value    ...
+VERBOSE: 16:38:55:(Add-ContentFixEncoding:)
+VERBOSE: 16:38:55:Set-Content w
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+encoding                       UTF8                                                                                                        
+Path                           c:\sc\verb-mods\verb-mods\verb-mods.psm1_TMP                                                                
+whatif                         False                                                                                                       
+PassThru                       True                                                                                                        
+ErrorAction                    STOP
+-Value[0,2]:
+#*------v revert-ModuleInstalledRevision.ps1 v------
+function revert-moduleInstalledRevision {
+16:38:56: INFO: Processing (12/15):C:\sc\verb-mods\Public\test-UnReleasedModuleContent.ps1...
+VERBOSE: $PSBoundParameters:
+Key      Value                                                                                                                             
+---      -----                                                                                                                             
+Path     {c:\sc\verb-mods\verb-mods\verb-mods.psm1_TMP}                                                                                    
+PassThru True                                                                                                                              
+Verbose  True                                                                                                                              
+whatIf   False                                                                                                                             
+Value    ...
+VERBOSE: 16:38:56:(Add-ContentFixEncoding:)
+VERBOSE: 16:38:56:Set-Content w
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+encoding                       UTF8                                                                                                        
+Path                           c:\sc\verb-mods\verb-mods\verb-mods.psm1_TMP                                                                
+whatif                         False                                                                                                       
+PassThru                       True                                                                                                        
+ErrorAction                    STOP
+-Value[0,2]:
+#*------v test-UnReleasedModuleContent.ps1 v------
+function test-UnReleasedModuleContent {
+16:38:56: INFO: Processing (13/15):C:\sc\verb-mods\Public\Uninstall-AllModules.ps1...
+VERBOSE: $PSBoundParameters:
+Key      Value                                                                                                                             
+---      -----                                                                                                                             
+Path     {c:\sc\verb-mods\verb-mods\verb-mods.psm1_TMP}                                                                                    
+PassThru True                                                                                                                              
+Verbose  True                                                                                                                              
+whatIf   False                                                                                                                             
+Value    ...
+VERBOSE: 16:38:56:(Add-ContentFixEncoding:)
+VERBOSE: 16:38:56:Set-Content w
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+encoding                       UTF8                                                                                                        
+Path                           c:\sc\verb-mods\verb-mods\verb-mods.psm1_TMP                                                                
+whatif                         False                                                                                                       
+PassThru                       True                                                                                                        
+ErrorAction                    STOP
+-Value[0,2]:
+#*------v Uninstall-AllModules.ps1 v------
+function Uninstall-AllModules {
+16:38:56: INFO: Processing (14/15):C:\sc\verb-mods\Public\uninstall-ModulesObsolete.ps1...
+VERBOSE: $PSBoundParameters:
+Key      Value                                                                                                                             
+---      -----                                                                                                                             
+Path     {c:\sc\verb-mods\verb-mods\verb-mods.psm1_TMP}                                                                                    
+PassThru True                                                                                                                              
+Verbose  True                                                                                                                              
+whatIf   False                                                                                                                             
+Value    ...
+VERBOSE: 16:38:56:(Add-ContentFixEncoding:)
+VERBOSE: 16:38:57:Set-Content w
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+encoding                       UTF8                                                                                                        
+Path                           c:\sc\verb-mods\verb-mods\verb-mods.psm1_TMP                                                                
+whatif                         False                                                                                                       
+PassThru                       True                                                                                                        
+ErrorAction                    STOP
+-Value[0,2]:
+#*------v uninstall-ModulesObsolete.ps1 v------
+function uninstall-ModulesObsolete {
+16:38:59: INFO: Processing (15/15):C:\sc\verb-mods\Public\update-PSPowerShellGetLegacy.ps1...
+VERBOSE: $PSBoundParameters:
+Key      Value                                                                                                                             
+---      -----                                                                                                                             
+Path     {c:\sc\verb-mods\verb-mods\verb-mods.psm1_TMP}                                                                                    
+PassThru True                                                                                                                              
+Verbose  True                                                                                                                              
+whatIf   False                                                                                                                             
+Value    ...
+VERBOSE: 16:38:59:(Add-ContentFixEncoding:)
+VERBOSE: 16:38:59:Set-Content w
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+encoding                       UTF8                                                                                                        
+Path                           c:\sc\verb-mods\verb-mods\verb-mods.psm1_TMP                                                                
+whatif                         False                                                                                                       
+PassThru                       True                                                                                                        
+ErrorAction                    STOP
+-Value[0,2]:
+#*------v update-PSPowerShellGetLegacy.ps1 v------
+Function update-PSPowerShellGetLegacy {
+16:39:00: INFO: 
+#*------^ (1/2):C:\sc\verb-mods\Public ^------
+16:39:00: INFO: 
+#*------v (2/2):C:\sc\verb-mods\Internal v------
+16:39:00: INFO: Processing 0 $ComponentScripts files through Remove-AuthenticodeSignature...
+16:39:00: INFO: Remove-AuthenticodeSignature w
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+Path                                                                                                                                       
+whatif                         False                                                                                                       
+verbose                        True
+16:39:00: INFO: 
+#*------^ (2/2):C:\sc\verb-mods\Internal ^------
+VERBOSE: (no Public\_CommonCode.ps1)
+16:39:01: INFO: (Updating Psm1 Export-ModuleMember -Function to reflect Public modules)
+16:39:01: INFO: Adding:FooterBlock...
+VERBOSE: $PSBoundParameters:
+Key      Value                                                                                                                             
+---      -----                                                                                                                             
+Path     {c:\sc\verb-mods\verb-mods\verb-mods.psm1_TMP}                                                                                    
+PassThru True                                                                                                                              
+Verbose  True                                                                                                                              
+whatIf   False                                                                                                                             
+Value    ...
+VERBOSE: 16:39:01:(Add-ContentFixEncoding:)
+VERBOSE: 16:39:01:Set-Content w
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+encoding                       UTF8                                                                                                        
+Path                           c:\sc\verb-mods\verb-mods\verb-mods.psm1_TMP                                                                
+whatif                         False                                                                                                       
+PassThru                       True                                                                                                        
+ErrorAction                    STOP
+-Value[0,2]:
+#*======^ END FUNCTIONS ^======
+Export-ModuleMember -Function check-ReqMods,Disconnect-PssBroken,find-profileScripts,Get-ModulePublishedVersion,get-RepoModulesHighestVersion,test-IsUncPath,Install-ModulesTin,load-Module,load-ModuleFT,mount-Module,register-localPSRepository,revert-moduleInstalledRevision,test-UnReleasedModuleContent,Uninstall-AllModules,uninstall-ModulesObsolete,update-PSPowerShellGetLegacy -Alias *
+16:39:01: INFO: Updating the Psd1 FunctionsToExport to match
+VERBOSE: $PSBoundParameters:
+Key      Value                                                                                                                             
+---      -----                                                                                                                             
+Path     c:\sc\verb-mods\verb-mods\verb-mods.psd1_TMP                                                                                      
+PassThru True                                                                                                                              
+Verbose  True                                                                                                                              
+whatIf   False                                                                                                                             
+Value    {#...
+VERBOSE: 16:39:01:(Set-ContentFixEncoding:c:\sc\verb-mods\verb-mods\verb-mods.psd1_TMP)
+VERBOSE: 16:39:01:Set-Content w
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+PassThru                       True                                                                                                        
+Path                           c:\sc\verb-mods\verb-mods\verb-mods.psd1_TMP                                                                
+whatif                         False                                                                                                       
+encoding                       UTF8                                                                                                        
+ErrorAction                    STOP
+-Value[0,2]:
+#
+# Module manifest for module 'verb-Mods'
+16:39:01: INFO: confirm-ModuleBuildSync w
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+ModPsdPath                     c:\sc\verb-mods\verb-mods\verb-mods.psd1_TMP                                                                
+RequiredVersion                1.2.2                                                                                                       
+NoTest                         True                                                                                                        
+whatif                         False                                                                                                       
+verbose                        True
+VERBOSE: $PSBoundParameters:
+Key             Value                                         
+---             -----                                         
+ModPsdPath      {c:\sc\verb-mods\verb-mods\verb-mods.psd1_TMP}
+RequiredVersion 1.2.2                                         
+NoTest          True                                          
+whatIf          False                                         
+Verbose         True
+16:39:01: INFO: #*======v confirm-ModuleBuildSync:  v======
+VERBOSE: (non-pipeline - param - input)
+16:39:01: INFO: (test-path confirms $ModPsm1 & $ModTestPs1)
+16:39:01: INFO: Import-PowerShellDataFile w
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+Path                           c:\sc\verb-mods\verb-mods\verb-mods.psd1_TMP                                                                
+ErrorAction                    Stop                                                                                                        
+verbose                        True
+16:39:01: INFO: (resolved Module attributes:
+$ModuleName:	verb-mods
+$ModRoot:	c:\sc\verb-mods
+$ModPsd1:	c:\sc\verb-mods\verb-mods\verb-mods.psd1_TMP
+$ModPsm1:	c:\sc\verb-mods\verb-mods\verb-mods.psm1_TMP
+$ModTestPs1:	c:\sc\verb-mods\Tests\verb-mods.tests.ps1
+$psd1Vers:	1.2.1
+$psd1guid:	6dd1ddc7-85d7-48d9-b82e-3eefb6763afb)
+16:39:01: INFO: confirm-ModulePsd1Version w
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+Path                           c:\sc\verb-mods\verb-mods\verb-mods.psd1_TMP                                                                
+RequiredVersion                1.2.2                                                                                                       
+whatif                         False                                                                                                       
+verbose                        True
+VERBOSE: $PSBoundParameters:
+Key             Value                                         
+---             -----                                         
+Path            {c:\sc\verb-mods\verb-mods\verb-mods.psd1_TMP}
+RequiredVersion 1.2.2                                         
+whatIf          False                                         
+Verbose         True
+16:39:01: INFO: #*======v confirm-ModulePsd1Version: c:\sc\verb-mods\verb-mods\verb-mods.psd1_TMP v======
+VERBOSE: (non-pipeline - param - input)
+16:39:01: WARNING: In:c:\sc\verb-mods\verb-mods\verb-mods.psd1_TMP
+Version present:(1.2.1)
+*does not* properly match:1.2.2
+FORCING MATCHING UPDATE!
+VERBOSE: $PSBoundParameters:
+Key      Value                                                                                                                             
+---      -----                                                                                                                             
+Path     c:\sc\verb-mods\verb-mods\verb-mods.psd1_TMP                                                                                      
+PassThru True                                                                                                                              
+Verbose  True                                                                                                                              
+whatIf   False                                                                                                                             
+Value    {#...
+VERBOSE: 16:39:02:(Set-ContentFixEncoding:c:\sc\verb-mods\verb-mods\verb-mods.psd1_TMP)
+VERBOSE: 16:39:02:Set-Content w
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+PassThru                       True                                                                                                        
+Path                           c:\sc\verb-mods\verb-mods\verb-mods.psd1_TMP                                                                
+whatif                         False                                                                                                       
+encoding                       UTF8                                                                                                        
+ErrorAction                    STOP
+-Value[0,2]:
+#
+# Module manifest for module 'verb-Mods'
+16:39:02: INFO: $objReport
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+Version                        1.2.2                                                                                                       
+Valid                          False
+16:39:02: INFO: (SET:$objReport.Valid = $true ;)
+16:39:02: INFO: (PIPELINE:New-Object PSObject -Property $objReport | write-output)
+$objReport
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+Version                        1.2.2                                                                                                       
+Valid                          True
+16:39:02: INFO: #*======^ confirm-ModulePsd1Version: c:\sc\verb-mods\verb-mods\verb-mods.psd1_TMP ^======
+16:39:02: INFO: (confirm-ModulePsd1Version:Success)
+16:39:02: INFO: confirm-ModulePsm1Version w
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+Path                           c:\sc\verb-mods\verb-mods\verb-mods.psm1_TMP                                                                
+RequiredVersion                1.2.2                                                                                                       
+whatif                         False                                                                                                       
+verbose                        True
+VERBOSE: $PSBoundParameters:
+Key             Value                                         
+---             -----                                         
+Path            {c:\sc\verb-mods\verb-mods\verb-mods.psm1_TMP}
+RequiredVersion 1.2.2                                         
+whatIf          False                                         
+Verbose         True
+16:39:02: INFO: #*======v confirm-ModulePsm1Version: c:\sc\verb-mods\verb-mods\verb-mods.psm1_TMP v======
+VERBOSE: (non-pipeline - param - input)
+16:39:02: WARNING: In:c:\sc\verb-mods\verb-mods\verb-mods.psm1_TMP
+Version present:(1.2.1)
+*does not* properly match:1.2.2
+FORCING MATCHING UPDATE!
+VERBOSE: $PSBoundParameters:
+Key      Value                                                                                                                             
+---      -----                                                                                                                             
+Path     c:\sc\verb-mods\verb-mods\verb-mods.psm1_TMP                                                                                      
+PassThru True                                                                                                                              
+Verbose  True                                                                                                                              
+whatIf   False                                                                                                                             
+Value    {# verb-mods.psm1...
+VERBOSE: 16:39:06:(Set-ContentFixEncoding:c:\sc\verb-mods\verb-mods\verb-mods.psm1_TMP)
+VERBOSE: 16:39:06:Set-Content w
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+PassThru                       True                                                                                                        
+Path                           c:\sc\verb-mods\verb-mods\verb-mods.psm1_TMP                                                                
+whatif                         False                                                                                                       
+encoding                       UTF8                                                                                                        
+ErrorAction                    STOP
+-Value[0,2]:
+# verb-mods.psm1
+  <#
+16:39:06: INFO: $objReport
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+Version                        1.2.2                                                                                                       
+Valid                          False
+16:39:06: INFO: (SET:$objReport.Valid = $true ;)
+16:39:06: INFO: (PIPELINE:New-Object PSObject -Property $objReport | write-output)
+$objReport
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+Version                        1.2.2                                                                                                       
+Valid                          True
+16:39:06: INFO: #*======^ confirm-ModulePsm1Version: c:\sc\verb-mods\verb-mods\verb-mods.psm1_TMP ^======
+16:39:06: INFO: (confirm-ModulePsm1Version:Success)
+16:39:06: INFO: (-NoTest: skipping confirm-ModuleTestPs1Guid)
+16:39:07: INFO: $objReport
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+Manifest                       c:\sc\verb-mods\verb-mods\verb-mods.psd1_TMP                                                                
+Module                         c:\sc\verb-mods\verb-mods\verb-mods.psm1_TMP                                                                
+Pester                         (SKIPPED)                                                                                                   
+Guid                           (SKIPPED)                                                                                                   
+Version                        1.2.2                                                                                                       
+Valid                          False
+16:39:07: INFO: (SET:$objReport.Valid = $true ;)
+16:39:07: INFO: (PIPELINE:New-Object PSObject -Property $objReport | write-output)
+$objReport
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+Manifest                       c:\sc\verb-mods\verb-mods\verb-mods.psd1_TMP                                                                
+Module                         c:\sc\verb-mods\verb-mods\verb-mods.psm1_TMP                                                                
+Pester                         (SKIPPED)                                                                                                   
+Guid                           (SKIPPED)                                                                                                   
+Version                        1.2.2                                                                                                       
+Valid                          True
+16:39:07: INFO: #*======^ confirm-ModuleBuildSync:  ^======
+16:39:07: INFO: (confirm-ModuleBuildSync:Success)
+16:39:07: INFO: Test-ModuleTMPFiles w
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+ModuleNamePSM1Path             c:\sc\verb-mods\verb-mods\verb-mods.psm1_TMP                                                                
+verbose                        True
+VERBOSE: $PSBoundParameters:
+Key                Value                                         
+---                -----                                         
+ModuleNamePSM1Path {c:\sc\verb-mods\verb-mods\verb-mods.psm1_TMP}
+Verbose            True
+16:39:07: INFO: #*======v Test-ModuleTMPFiles: c:\sc\verb-mods\verb-mods\verb-mods.psm1_TMP v======
+VERBOSE: (non-pipeline - param - input)
+16:39:07: INFO: 
+Psm1:c:\sc\verb-mods\verb-mods\verb-mods.psm1_TMP
+Psd1:c:\sc\verb-mods\verb-mods\verb-mods.psd1_TMP
+16:39:07: INFO: Creating Testable c:\sc\verb-mods\verb-mods\1bb1fff3-492c-4700-9e43-65ad6c1731ab.psd1
+ to validate c:\sc\verb-mods\verb-mods\verb-mods.psd1_TMP will Test-ModuleManifest
+VERBOSE: Performing the operation "Copy File" on target "Item: C:\sc\verb-mods\verb-mods\verb-mods.psd1_TMP Destination: C:\sc\verb-mods\verb-mods\1bb1fff3-492c-4700-9e43-65ad6c1731ab.psd1".
+16:39:07: INFO: Test-ModuleManifest w
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+verbose                        True                                                                                                        
+Path                           c:\sc\verb-mods\verb-mods\1bb1fff3-492c-4700-9e43-65ad6c1731ab.psd1                                         
+ErrorVariable                  vManiErr                                                                                                    
+ErrorAction                    STOP
+VERBOSE: Loading module from path 'C:\sc\verb-mods\verb-mods\verb-Mods.psm1'.
+16:39:07: INFO: Test-ModuleManifest:PASSED
+16:39:07: INFO: Creating Testable c:\sc\verb-mods\verb-mods\1bb1fff3-492c-4700-9e43-65ad6c1731ab.psm1
+ to validate c:\sc\verb-mods\verb-mods\verb-mods.psm1_TMP will Import-Module
+VERBOSE: Performing the operation "Copy File" on target "Item: C:\sc\verb-mods\verb-mods\verb-mods.psm1_TMP Destination: C:\sc\verb-mods\verb-mods\1bb1fff3-492c-4700-9e43-65ad6c1731ab.psm1".
+16:39:07: INFO: n import-module w
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+Name                           c:\sc\verb-mods\verb-mods\1bb1fff3-492c-4700-9e43-65ad6c1731ab.psm1                                         
+Force                          True                                                                                                        
+verbose                        True                                                                                                        
+ErrorAction                    STOP                                                                                                        
+ErrorVariable                  vIpMoErr                                                                                                    
+PassThru                       True
+VERBOSE: Loading module from path 'C:\sc\verb-mods\verb-mods\1bb1fff3-492c-4700-9e43-65ad6c1731ab.psm1'.
+WARNING: The names of some imported commands from the module '1bb1fff3-492c-4700-9e43-65ad6c1731ab' include unapproved verbs that might make them less discoverable. To find the commands with unapproved verbs, run the Import-Module command again with the Verbose parameter. For a list of approved verbs, type Get-Verb.
+VERBOSE: The 'check-ReqMods' command in the 1bb1fff3-492c-4700-9e43-65ad6c1731ab' module was imported, but because its name does not include an approved verb, it might be difficult to find. For a list of approved verbs, type Get-Verb.
+VERBOSE: Importing function 'check-ReqMods'.
+VERBOSE: Importing function 'Disconnect-PssBroken'.
+VERBOSE: Importing function 'find-profileScripts'.
+VERBOSE: Importing function 'Get-ModulePublishedVersion'.
+VERBOSE: Importing function 'get-RepoModulesHighestVersion'.
+VERBOSE: Importing function 'Install-ModulesTin'.
+VERBOSE: The 'load-Module' command in the 1bb1fff3-492c-4700-9e43-65ad6c1731ab' module was imported, but because its name does not include an approved verb, it might be difficult to find. The suggested alternative verbs are "Import".
+VERBOSE: Importing function 'load-Module'.
+VERBOSE: The 'load-ModuleFT' command in the 1bb1fff3-492c-4700-9e43-65ad6c1731ab' module was imported, but because its name does not include an approved verb, it might be difficult to find. The suggested alternative verbs are "Import".
+VERBOSE: Importing function 'load-ModuleFT'.
+VERBOSE: Importing function 'mount-Module'.
+VERBOSE: Importing function 'register-localPSRepository'.
+VERBOSE: The 'revert-moduleInstalledRevision' command in the 1bb1fff3-492c-4700-9e43-65ad6c1731ab' module was imported, but because its name does not include an approved verb, it might be difficult to find. The suggested alternative verbs are "Unpublish".
+VERBOSE: Importing function 'revert-moduleInstalledRevision'.
+VERBOSE: Importing function 'test-UnReleasedModuleContent'.
+VERBOSE: Importing function 'Uninstall-AllModules'.
+VERBOSE: Importing function 'uninstall-ModulesObsolete'.
+VERBOSE: Importing function 'update-PSPowerShellGetLegacy'.
+16:39:07: INFO: Ipmo: PASSED
+16:39:08: INFO: (remove-module -name c:\sc\verb-mods\verb-mods\1bb1fff3-492c-4700-9e43-65ad6c1731ab.psm1 -force)
+16:39:08: INFO: (remove-item -path c:\sc\verb-mods\verb-mods\1bb1fff3-492c-4700-9e43-65ad6c1731ab.psm1 -ErrorAction SilentlyContinue ;
+16:39:08: INFO: (remove-item -path c:\sc\verb-mods\verb-mods\1bb1fff3-492c-4700-9e43-65ad6c1731ab.psd1 -ErrorAction SilentlyContinue ;
+16:39:08: INFO: $objReport
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+Manifest                       1bb1fff3-492c-4700-9e43-65ad6c1731ab                                                                        
+Module                         1bb1fff3-492c-4700-9e43-65ad6c1731ab                                                                        
+Valid                          False
+16:39:08: INFO: (SET:$objReport.Valid = $true ;)
+16:39:08: INFO: (PIPELINE:New-Object PSObject -Property $objReport | write-output)
+$objReport
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+Manifest                       1bb1fff3-492c-4700-9e43-65ad6c1731ab                                                                        
+Module                         1bb1fff3-492c-4700-9e43-65ad6c1731ab                                                                        
+Valid                          True
+16:39:08: INFO: #*======^ Test-ModuleTMPFiles: c:\sc\verb-mods\verb-mods\verb-mods.psm1_TMP ^======
+16:39:08: INFO: Processing error free: Overwriting temp .psm1 with temp copy
+copy-item w
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+Destination                    c:\sc\verb-mods\verb-mods\verb-mods.psm1                                                                    
+Path                           c:\sc\verb-mods\verb-mods\verb-mods.psm1_TMP                                                                
+whatif                         False                                                                                                       
+ErrorAction                    STOP
+16:39:08: INFO: Processing error free: Overwriting temp .psd1 with temp copy
+copy-item w
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+Destination                    c:\sc\verb-mods\verb-mods\verb-mods.psd1                                                                    
+Path                           c:\sc\verb-mods\verb-mods\verb-mods.psd1_TMP                                                                
+whatif                         False                                                                                                       
+ErrorAction                    STOP
+16:39:08: INFO: #*======^ ConvertTo-ModuleMergedTDO: ^======
+VERBOSE: Loading module from path 'C:\sc\verb-mods\verb-mods\verb-Mods.psm1'.
+16:39:08: INFO: (Test-ModuleManifest:PASSED)
+16:39:08: INFO: Checking sync of Psd1 module guid to the Pester Test Script: c:\sc\verb-mods\Tests\verb-mods.tests.ps1
+16:39:08: INFO: confirm-ModuleBuildSync w
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+ModPsdPath                     C:\sc\verb-mods\verb-mods\verb-mods.psd1                                                                    
+RequiredVersion                1.2.2                                                                                                       
+whatif                         False                                                                                                       
+verbose                        True
+VERBOSE: $PSBoundParameters:
+Key             Value                                     
+---             -----                                     
+ModPsdPath      {C:\sc\verb-mods\verb-mods\verb-mods.psd1}
+RequiredVersion 1.2.2                                     
+whatIf          False                                     
+Verbose         True
+16:39:08: INFO: #*======v confirm-ModuleBuildSync:  v======
+VERBOSE: (non-pipeline - param - input)
+16:39:08: INFO: (test-path confirms $ModPsm1 & $ModTestPs1)
+16:39:08: INFO: Import-PowerShellDataFile w
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+Path                           C:\sc\verb-mods\verb-mods\verb-mods.psd1                                                                    
+ErrorAction                    Stop                                                                                                        
+verbose                        True
+16:39:08: INFO: (resolved Module attributes:
+$ModuleName:	verb-mods
+$ModRoot:	c:\sc\verb-mods
+$ModPsd1:	C:\sc\verb-mods\verb-mods\verb-mods.psd1
+$ModPsm1:	C:\sc\verb-mods\verb-mods\verb-mods.psm1
+$ModTestPs1:	c:\sc\verb-mods\Tests\verb-mods.tests.ps1
+$psd1Vers:	1.2.2
+$psd1guid:	6dd1ddc7-85d7-48d9-b82e-3eefb6763afb)
+16:39:08: INFO: confirm-ModulePsd1Version w
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+Path                           C:\sc\verb-mods\verb-mods\verb-mods.psd1                                                                    
+RequiredVersion                1.2.2                                                                                                       
+whatif                         False                                                                                                       
+verbose                        True
+VERBOSE: $PSBoundParameters:
+Key             Value                                     
+---             -----                                     
+Path            {C:\sc\verb-mods\verb-mods\verb-mods.psd1}
+RequiredVersion 1.2.2                                     
+whatIf          False                                     
+Verbose         True
+16:39:08: INFO: #*======v confirm-ModulePsd1Version: C:\sc\verb-mods\verb-mods\verb-mods.psd1 v======
+VERBOSE: (non-pipeline - param - input)
+16:39:08: INFO: (Version already updated to match)
+16:39:08: INFO: $objReport
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+Version                        1.2.2                                                                                                       
+Valid                          False
+16:39:08: INFO: (SET:$objReport.Valid = $true ;)
+16:39:08: INFO: (PIPELINE:New-Object PSObject -Property $objReport | write-output)
+$objReport
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+Version                        1.2.2                                                                                                       
+Valid                          True
+16:39:08: INFO: #*======^ confirm-ModulePsd1Version: C:\sc\verb-mods\verb-mods\verb-mods.psd1 ^======
+16:39:08: INFO: (confirm-ModulePsd1Version:Success)
+16:39:08: INFO: confirm-ModulePsm1Version w
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+Path                           C:\sc\verb-mods\verb-mods\verb-mods.psm1                                                                    
+RequiredVersion                1.2.2                                                                                                       
+whatif                         False                                                                                                       
+verbose                        True
+VERBOSE: $PSBoundParameters:
+Key             Value                                     
+---             -----                                     
+Path            {C:\sc\verb-mods\verb-mods\verb-mods.psm1}
+RequiredVersion 1.2.2                                     
+whatIf          False                                     
+Verbose         True
+16:39:08: INFO: #*======v confirm-ModulePsm1Version: C:\sc\verb-mods\verb-mods\verb-mods.psm1 v======
+VERBOSE: (non-pipeline - param - input)
+16:39:08: INFO: (Version already updated to match)
+16:39:08: INFO: $objReport
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+Version                        1.2.2                                                                                                       
+Valid                          False
+16:39:08: INFO: (SET:$objReport.Valid = $true ;)
+16:39:09: INFO: (PIPELINE:New-Object PSObject -Property $objReport | write-output)
+$objReport
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+Version                        1.2.2                                                                                                       
+Valid                          True
+16:39:09: INFO: #*======^ confirm-ModulePsm1Version: C:\sc\verb-mods\verb-mods\verb-mods.psm1 ^======
+16:39:09: INFO: (confirm-ModulePsm1Version:Success)
+16:39:09: INFO: Checking sync of Psd1 module guid to the Pester Test Script: c:\sc\verb-mods\Tests\verb-mods.tests.ps1
+16:39:09: INFO: confirm-ModuleTestPs1Guid w
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+Path                           c:\sc\verb-mods\Tests\verb-mods.tests.ps1                                                                   
+RequiredGuid                   6dd1ddc7-85d7-48d9-b82e-3eefb6763afb                                                                        
+whatif                         False                                                                                                       
+verbose                        True
+VERBOSE: $PSBoundParameters:
+Key          Value                                      
+---          -----                                      
+Path         {c:\sc\verb-mods\Tests\verb-mods.tests.ps1}
+RequiredGuid 6dd1ddc7-85d7-48d9-b82e-3eefb6763afb       
+whatIf       False                                      
+Verbose      True
+16:39:09: INFO: #*======v confirm-ModuleTestPs1Guid: c:\sc\verb-mods\Tests\verb-mods.tests.ps1 v======
+VERBOSE: (non-pipeline - param - input)
+16:39:09: INFO: (Guid  already updated to match)
+16:39:09: INFO: $objReport
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+Guid                           6dd1ddc7-85d7-48d9-b82e-3eefb6763afb                                                                        
+Valid                          False
+16:39:09: INFO: (SET:$objReport.Valid = $true ;)
+16:39:09: INFO: (PIPELINE:New-Object PSObject -Property $objReport | write-output)
+$objReport
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+Guid                           6dd1ddc7-85d7-48d9-b82e-3eefb6763afb                                                                        
+Valid                          True
+16:39:09: INFO: #*======^ confirm-ModuleTestPs1Guid: c:\sc\verb-mods\Tests\verb-mods.tests.ps1 ^======
+16:39:09: INFO: (confirm-ModuleTestPs1Guid:Success)
+16:39:09: INFO: $objReport
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+Manifest                       C:\sc\verb-mods\verb-mods\verb-mods.psd1                                                                    
+Module                         C:\sc\verb-mods\verb-mods\verb-mods.psm1                                                                    
+Pester                         c:\sc\verb-mods\Tests\verb-mods.tests.ps1                                                                   
+Guid                           6dd1ddc7-85d7-48d9-b82e-3eefb6763afb                                                                        
+Version                        1.2.2                                                                                                       
+Valid                          False
+16:39:09: INFO: (SET:$objReport.Valid = $true ;)
+16:39:09: INFO: (PIPELINE:New-Object PSObject -Property $objReport | write-output)
+$objReport
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+Manifest                       C:\sc\verb-mods\verb-mods\verb-mods.psd1                                                                    
+Module                         C:\sc\verb-mods\verb-mods\verb-mods.psm1                                                                    
+Pester                         c:\sc\verb-mods\Tests\verb-mods.tests.ps1                                                                   
+Guid                           6dd1ddc7-85d7-48d9-b82e-3eefb6763afb                                                                        
+Version                        1.2.2                                                                                                       
+Valid                          True
+16:39:09: INFO: #*======^ confirm-ModuleBuildSync:  ^======
+16:39:09: INFO: (confirm-ModuleBuildSync:Success)
+VERBOSE: Get-ChildItem c:\sc\verb-mods\* -recur | where-object {.name -match $rgxGuidModFiles}
+16:39:09: INFO: Signing appropriate files...
+VERBOSE: (MONOLITH module:collecting non-include sign files)
+16:39:09: INFO: Sign-file w
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+file                           {C:\sc\verb-mods\rebuild-module.ps1, C:\sc\verb-mods\requirements.psd1, C:\sc\verb-mods\Tests\PPoShScript...
+ErrorAction                    Stop                                                                                                        
+showdebug                      False                                                                                                       
+whatif                         False
+
+
+    Directory: C:\sc\verb-mods
+
+
+SignerCertificate                         Status                                           Path
+-----------------                         ------                                           ----
+5F8F454A477F2C4539296F5E4EEE71FBB94CF5E5  Valid                                            rebuild-module.ps1
+5F8F454A477F2C4539296F5E4EEE71FBB94CF5E5  Valid                                            requirements.psd1
+
+
+    Directory: C:\sc\verb-mods\Tests
+
+
+SignerCertificate                         Status                                           Path
+-----------------                         ------                                           ----
+5F8F454A477F2C4539296F5E4EEE71FBB94CF5E5  Valid                                            PPoShScriptingStyle.psd1
+5F8F454A477F2C4539296F5E4EEE71FBB94CF5E5  Valid                                            ToddomationScriptingStyle-medium.psd1
+5F8F454A477F2C4539296F5E4EEE71FBB94CF5E5  Valid                                            verb-Mods.tests.ps1
+
+
+    Directory: C:\sc\verb-mods\verb-Mods
+
+
+SignerCertificate                         Status                                           Path
+-----------------                         ------                                           ----
+5F8F454A477F2C4539296F5E4EEE71FBB94CF5E5  Valid                                            verb-Mods.psd1
+5F8F454A477F2C4539296F5E4EEE71FBB94CF5E5  Valid                                            verb-Mods.psm1
+16:39:12: INFO: Removing existing profile verb-mods content...
+16:39:12: INFO: Uninstall-ModuleForce w
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+ModuleName                     verb-mods                                                                                                   
+Verbose                        True                                                                                                        
+whatif                         False
+VERBOSE: $PSBoundParameters:
+Key        Value      
+---        -----      
+ModuleName {verb-mods}
+Verbose    True       
+whatIf     False
+VERBOSE: (non-pipeline - param - input)
+16:39:29: INFO: 
+#*------v Uninstall PSGet Mod:verb-Mods:v1.2.1 v------
+16:39:29: INFO: Uninstall-Script w
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+Force                          True                                                                                                        
+Whatif                         False                                                                                                       
+Verbose                        True
+VERBOSE: Populating RepositorySourceLocation property for module verb-Mods.
+VERBOSE: Loading module from path 'C:\Users\kadritss\Documents\WindowsPowerShell\Modules\verb-Mods\1.2.1\verb-Mods.psm1'.
+VERBOSE: Performing the operation "Uninstall-Module" on target "Version '1.2.1' of module 'verb-Mods'".
+VERBOSE: Successfully uninstalled the module 'verb-Mods' from module base 'C:\Users\kadritss\Documents\WindowsPowerShell\Modules\verb-Mods\1.2.1'.
+16:40:55: INFO: 
+#*------^ Uninstall PSGet Mod:verb-Mods:v1.2.1 ^------
+16:40:55: INFO: (Processing $env:PSModulePath paths, for surviving locked copies of verb-mods to *manually* purge...)
+16:40:55: INFO: Checking: verb-mods below: C:\Users\kadritss\Documents\WindowsPowerShell\Modules...
+16:40:55:-GracefulFail specified, using EA:'Continue'
+16:40:55:No existing Match:test-path -path C:\Users\kadritss\Documents\WindowsPowerShell\Modules\verb-mods\*.*
+16:40:55: INFO: Checking: verb-mods below: C:\ProgramData\Boxstarter...
+16:40:55:-GracefulFail specified, using EA:'Continue'
+16:40:55:No existing Match:test-path -path C:\ProgramData\Boxstarter\verb-mods\*.*
+16:40:55: INFO: Checking: verb-mods below: C:\Program Files\WindowsPowerShell\Modules...
+16:40:55:-GracefulFail specified, using EA:'Continue'
+16:40:55:No existing Match:test-path -path C:\Program Files\WindowsPowerShell\Modules\verb-mods\*.*
+16:40:55: INFO: Checking: verb-mods below: C:\Windows\system32\WindowsPowerShell\v1.0\Modules...
+16:40:55:-GracefulFail specified, using EA:'Continue'
+16:40:55:No existing Match:test-path -path C:\Windows\system32\WindowsPowerShell\v1.0\Modules\verb-mods\*.*
+16:40:55: INFO: Checking: verb-mods below: C:\Program Files\Microsoft Message Analyzer\PowerShell\...
+16:40:55:-GracefulFail specified, using EA:'Continue'
+16:40:55:No existing Match:test-path -path C:\Program Files\Microsoft Message Analyzer\PowerShell\verb-mods\*.*
+16:40:55: INFO: (no $sRet returned on call)
+16:40:55: INFO: Copying module to profile (net of .git & .vscode dirs, and backed up content)...
+16:40:57:Creating Remove-Item w 
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+path                           {C:\Users\kadritss\Documents\WindowsPowerShell\Modules\verb-mods\fingerprint, C:\Users\kadritss\Documents...
+whatif                         False
+VERBOSE: Loading module from path 'C:\Users\kadritss\Documents\WindowsPowerShell\Modules\verb-mods\verb-Mods\verb-Mods.psm1'.
+16:40:58: INFO: (Profiling Repo: get-PSRepository -name lyncRepo...)
+16:40:59: INFO: 
+Publish-Module w
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+Name                           verb-mods                                                                                                   
+Repository                     lyncRepo                                                                                                    
+RequiredVersion                1.2.2                                                                                                       
+Verbose                        True                                                                                                        
+ErrorAction                    Stop                                                                                                        
+whatif                         False
+VERBOSE: Suppressed Verbose Repository details, Name = 'lyncRepo', Location = '\\lynmsv10\lync_fs\scripts\sc'; IsTrusted = 'True'; IsRegistered = 'True'.
+VERBOSE: Repository details, Name = 'lyncRepo', Location = '\\lynmsv10\lync_fs\scripts\sc'; IsTrusted = 'True'; IsRegistered = 'True'.
+VERBOSE: Repository details, Name = 'lyncRepo', Location = '\\lynmsv10\lync_fs\scripts\sc'; IsTrusted = 'True'; IsRegistered = 'True'.
+VERBOSE: Publish Location:'\\lynmsv10\lync_fs\scripts\sc'.
+VERBOSE: Module 'verb-Mods' was found in 'C:\Users\kadritss\Documents\WindowsPowerShell\Modules\verb-mods\verb-Mods'.
+VERBOSE: Loading module from path 'C:\Users\kadritss\AppData\Local\Temp\578466\verb-Mods\verb-Mods.psm1'.
+VERBOSE: Suppressed Verbose Repository details, Name = 'lyncRepo', Location = '\\lynmsv10\lync_fs\scripts\sc'; IsTrusted = 'True'; IsRegistered = 'True'.
+VERBOSE: Repository details, Name = 'lyncRepo', Location = '\\lynmsv10\lync_fs\scripts\sc'; IsTrusted = 'True'; IsRegistered = 'True'.
+VERBOSE: Using the provider 'PowerShellGet' for searching packages.
+VERBOSE: Using the specified source names : 'lyncRepo'.
+VERBOSE: Getting the provider object for the PackageManagement Provider 'NuGet'.
+VERBOSE: The specified Location is '\\lynmsv10\lync_fs\scripts\sc' and PackageManagementProvider is 'NuGet'.
+VERBOSE: Total package yield:'0' for the specified package 'verb-Mods'.
+VERBOSE: Suppressed Verbose Repository details, Name = 'lyncRepo', Location = '\\lynmsv10\lync_fs\scripts\sc'; IsTrusted = 'True'; IsRegistered = 'True'.
+VERBOSE: Repository details, Name = 'lyncRepo', Location = '\\lynmsv10\lync_fs\scripts\sc'; IsTrusted = 'True'; IsRegistered = 'True'.
+VERBOSE: Using the provider 'PowerShellGet' for searching packages.
+VERBOSE: Using the specified source names : 'lyncRepo'.
+VERBOSE: Getting the provider object for the PackageManagement Provider 'NuGet'.
+VERBOSE: The specified Location is '\\lynmsv10\lync_fs\scripts\sc' and PackageManagementProvider is 'NuGet'.
+VERBOSE: Total package yield:'1' for the specified package 'verb-Mods'.
+VERBOSE: Performing the operation "Publish-Module" on target "Version '1.2.2' of module 'verb-Mods'".
+VERBOSE: Calling Publish-PSArtifactUtility
+VERBOSE: Calling New-NuspecFile
+VERBOSE: Calling New-NugetPackage
+VERBOSE: Calling C:\Chocolatey\bin\NuGet.exe pack "C:\Users\kadritss\AppData\Local\Temp\578466\verb-Mods\verb-Mods.nuspec" -outputdirectory "C:\Users\kadritss\AppData\Local\Temp\578466\verb-Mods" -noninteractive
+VERBOSE: C:\Chocolatey\bin\NuGet.exe output:
+VERBOSE: 	Attempting to build package from 'verb-Mods.nuspec'.
+VERBOSE: 	Successfully created package 'C:\Users\kadritss\AppData\Local\Temp\578466\verb-Mods\verb-Mods.1.2.2.nupkg'.
+VERBOSE:
+VERBOSE: finished running C:\Chocolatey\bin\NuGet.exe with exit code 0
+VERBOSE: Created Nuget Package C:\Users\kadritss\AppData\Local\Temp\578466\verb-Mods\verb-Mods.1.2.2.nupkg
+VERBOSE: Successfully created nuget package at C:\Users\kadritss\AppData\Local\Temp\578466\verb-Mods\verb-Mods.1.2.2.nupkg
+VERBOSE: Calling Publish-NugetPackage -NupkgPath C:\Users\kadritss\AppData\Local\Temp\578466\verb-Mods\verb-Mods.1.2.2.nupkg -Destination \\lynmsv10\lync_fs\scripts\sc -NugetExePath C:\Chocolatey\bin\NuGet.exe -UseDotnetCli:False
+VERBOSE: Pushing verb-Mods.1.2.2.nupkg to '\\lynmsv10\lync_fs\scripts\sc'...
+Your package was pushed.
+VERBOSE: Successfully published module 'verb-Mods' to the module publish location '\\lynmsv10\lync_fs\scripts\sc'. Please allow few minutes for 'verb-Mods' to show up in the search results.
+16:41:19: INFO: Waiting for:find-module -name verb-mods -Repository lyncRepo ...
+.
+16:41:21:-GracefulFail specified, using EA:'Continue'
+16:41:21:remove-item w
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+Path                           {C:\Users\kadritss\Documents\WindowsPowerShell\Modules\verb-mods\Docs\Quick-Start-Installation-and-Exampl...
+Recurse                        True                                                                                                        
+ErrorAction                    Continue                                                                                                    
+whatif                         False
+16:41:21: INFO: Install-Module w
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+Name                           verb-mods                                                                                                   
+Repository                     lyncRepo                                                                                                    
+RequiredVersion                1.2.2                                                                                                       
+scope                          CurrentUser                                                                                                 
+force                          True                                                                                                        
+AllowClobber                   True                                                                                                        
+ErrorAction                    Stop                                                                                                        
+whatif                         False
+16:41:35: INFO: Testing Module:Import-Module w
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+Name                           verb-mods                                                                                                   
+ErrorAction                    Stop                                                                                                        
+force                          True                                                                                                        
+verbose                        True
+VERBOSE: Loading module from path 'C:\Users\kadritss\Documents\WindowsPowerShell\Modules\verb-mods\1.2.2\verb-mods.psd1'.
+VERBOSE: Populating RepositorySourceLocation property for module verb-mods.
+VERBOSE: Loading module from path 'C:\Users\kadritss\Documents\WindowsPowerShell\Modules\verb-mods\1.2.2\verb-Mods.psm1'.
+WARNING: The names of some imported commands from the module 'verb-mods' include unapproved verbs that might make them less discoverable. To find the commands with unapproved verbs, run the Import-Module command again with the Verbose parameter. For a list of approved verbs, type Get-Verb.
+VERBOSE: The 'check-ReqMods' command in the verb-mods' module was imported, but because its name does not include an approved verb, it might be difficult to find. For a list of approved verbs, type Get-Verb.
+VERBOSE: Importing function 'check-ReqMods'.
+VERBOSE: Importing function 'Disconnect-PssBroken'.
+VERBOSE: Importing function 'find-profileScripts'.
+VERBOSE: Importing function 'Get-ModulePublishedVersion'.
+VERBOSE: Importing function 'get-RepoModulesHighestVersion'.
+VERBOSE: Importing function 'Install-ModulesTin'.
+VERBOSE: The 'load-Module' command in the verb-mods' module was imported, but because its name does not include an approved verb, it might be difficult to find. The suggested alternative verbs are "Import".
+VERBOSE: Importing function 'load-Module'.
+VERBOSE: The 'load-ModuleFT' command in the verb-mods' module was imported, but because its name does not include an approved verb, it might be difficult to find. The suggested alternative verbs are "Import".
+VERBOSE: Importing function 'load-ModuleFT'.
+VERBOSE: Importing function 'mount-Module'.
+VERBOSE: Importing function 'register-localPSRepository'.
+VERBOSE: The 'revert-moduleInstalledRevision' command in the verb-mods' module was imported, but because its name does not include an approved verb, it might be difficult to find. The suggested alternative verbs are "Unpublish".
+VERBOSE: Importing function 'revert-moduleInstalledRevision'.
+VERBOSE: Importing function 'test-UnReleasedModuleContent'.
+VERBOSE: Importing function 'Uninstall-AllModules'.
+VERBOSE: Importing function 'uninstall-ModulesObsolete'.
+VERBOSE: Importing function 'update-PSPowerShellGetLegacy'.
+16:41:35: INFO: Retrieving matching Repo .nupkg file:
+gci \\lynmsv10\lync_fs\scripts\sc\verb-mods.1.2.2.nupkgl..
+16:41:35: INFO: Proper updated .nupkg file found:verb-mods.1.2.2.nupkg, copying to local Pkg directory.
+16:41:35:Copy-Item w
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+path                           \\lynmsv10\lync_fs\scripts\sc\verb-mods.1.2.2.nupkg                                                         
+destination                    c:\sc\verb-mods\Package                                                                                     
+whatif                         False
+16:41:36: INFO: remove-UnneededFileVariants w
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+Path                           c:\sc\verb-mods\Package                                                                                     
+Include                        verb-mods*.nupkg                                                                                            
+Pattern                                                                                                                                    
+FilterOn                       CreationTime                                                                                                
+Keep                           2                                                                                                           
+KeepToday                      True                                                                                                        
+verbose                        True                                                                                                        
+whatif                         False
+16:41:36:gci w
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+path                           c:\sc\verb-mods\Package\*                                                                                   
+include                        verb-mods*.nupkg                                                                                            
+ErrorAction                    Stop
+VERBOSE: $cuttime:09/08/2022 00:00:00
+VERBOSE: filtering on files prior to $cuttime:09/08/2022 00:00:00 AM, on CreationTime property
+(4 in set *before* filtering)
+(3 in set *after* filtering)
+VERBOSE: attempting to retain remaining 2 generations net of prior filtering
+(3 in set *before* filtering)
+(1 in set *after* filtering)
+(Note:net population is *below* target -Keep:2 spec - insufficient older files available)
+16:41:37:Reducing matched population from 4 to 1 files via:
+filtered files on CreationTime prior to 09/08/2022 00:00:00 AM
+16:41:37:Remove-Item w 
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+path                           C:\sc\verb-mods\Package\verb-mods.1.1.0.nupkg                                                               
+ErrorAction                    STOP                                                                                                        
+whatif                         False
+True
+16:41:37: INFO: remove-UnneededFileVariants w
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+Path                           c:\sc\verb-mods\Tests                                                                                       
+Include                        ScriptAnalyzer-Results-*.xml                                                                                
+Pattern                                                                                                                                    
+FilterOn                       CreationTime                                                                                                
+Keep                           4                                                                                                           
+KeepToday                      True                                                                                                        
+verbose                        True                                                                                                        
+whatif                         False
+16:41:37:gci w
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+path                           c:\sc\verb-mods\Tests\*                                                                                     
+include                        ScriptAnalyzer-Results-*.xml                                                                                
+ErrorAction                    Stop
+VERBOSE: $cuttime:09/08/2022 00:00:00
+VERBOSE: filtering on files prior to $cuttime:09/08/2022 00:00:00 AM, on CreationTime property
+(18 in set *before* filtering)
+(18 in set *after* filtering)
+VERBOSE: attempting to retain remaining 4 generations net of prior filtering
+(18 in set *before* filtering)
+(14 in set *after* filtering)
+16:41:38:Reducing matched population from 18 to 14 files via:
+filtered files on CreationTime prior to 09/08/2022 00:00:00 AM
+16:41:38:Remove-Item w 
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+path                           {C:\sc\verb-mods\Tests\ScriptAnalyzer-Results-20211007-2017PM.xml, C:\sc\verb-mods\Tests\ScriptAnalyzer-R...
+ErrorAction                    STOP                                                                                                        
+whatif                         False
+True
+16:41:38: INFO: -RunTest specified: Running Pester Test script:
+c:\sc\verb-mods\Tests\verb-mods.tests.ps1
+16:41:38:
+#*------v RUNNING c:\sc\verb-mods\Tests\verb-mods.tests.ps1: v------
+WARNING: The names of some imported commands from the module 'verb-mods' include unapproved verbs that might make them less discoverable. To find the commands with unapproved verbs, run the Import-Module command again with the Verbose parameter. For a list of approved verbs, type Get-Verb.
+
+Describing Module Information
+
+  Context Manifest Testing
+    [+] Valid Module Manifest
+ 58ms
+    [+] Valid Manifest Name
+ 47ms
+    [+] Generic Version Check
+ 25ms
+    [+] Valid Author
+ 19ms
+    [+] Valid Company Name
+ 18ms
+PS>TerminatingError(): "Expected a value, but got $null or empty."
+>> TerminatingError(): "Expected a value, but got $null or empty."
+>> TerminatingError(): "Expected a value, but got $null or empty."
+    [-] Valid License
+ 26ms
+      Expected a value, but got $null or empty.
+      155:             $ModuleInformation.LicenseURI | Should not BeNullOrEmpty
+      at <ScriptBlock>, C:\sc\verb-mods\Tests\verb-Mods.tests.ps1: line 155
+    [+] Valid Manifest Description
+ 26ms
+    [+] Valid Manifest Root Module
+ 22ms
+    [+] Valid Manifest GUID
+ 30ms
+    [+] Required Modules
+ 15ms
+
+  Context Exported Functions
+    [+] Proper Number of Functions Exported
+ 99ms
+    [+] Exports All Public Functions
+ 211ms
+    [+] Compare Missing Functions
+ 11ms
+
+Describing Help
+
+  Context Function - check-ReqMods
+    [+] Synopsis
+ 220ms
+    [+] Description
+ 188ms
+    [+] Examples
+ 282ms
+
+Describing Help
+
+  Context Function - Disconnect-PssBroken
+    [+] Synopsis
+ 239ms
+    [+] Description
+ 253ms
+    [+] Examples
+ 218ms
+
+Describing Help
+
+  Context Function - find-profileScripts
+    [+] Synopsis
+ 259ms
+    [+] Description
+ 165ms
+    [+] Examples
+ 238ms
+
+Describing Help
+
+  Context Function - Get-ModulePublishedVersion
+    [+] Synopsis
+ 267ms
+PS>TerminatingError(): "Expected a value, but got $null or empty."
+>> TerminatingError(): "Expected a value, but got $null or empty."
+>> TerminatingError(): "Expected a value, but got $null or empty."
+    [-] Description
+ 262ms
+      Expected a value, but got $null or empty.
+      252:                 Get-Help $_ | Select-Object -ExpandProperty Description | should not benullorempty
+      at <ScriptBlock>, C:\sc\verb-mods\Tests\verb-Mods.tests.ps1: line 252
+PS>TerminatingError(): "Expected $true, but got $false."
+>> TerminatingError(): "Expected $true, but got $false."
+>> TerminatingError(): "Expected $true, but got $false."
+    [-] Examples
+ 253ms
+      Expected $true, but got $false.
+      256:                 $Examples.Count -gt 0 | Should be $true
+      at <ScriptBlock>, C:\sc\verb-mods\Tests\verb-Mods.tests.ps1: line 256
+
+Describing Help
+
+  Context Function - get-RepoModulesHighestVersion
+    [+] Synopsis
+ 332ms
+    [+] Description
+ 237ms
+    [+] Examples
+ 334ms
+
+Describing Help
+
+  Context Function - Install-ModulesTin
+    [+] Synopsis
+ 178ms
+    [+] Description
+ 188ms
+    [+] Examples
+ 258ms
+
+Describing Help
+
+  Context Function - load-Module
+    [+] Synopsis
+ 157ms
+    [+] Description
+ 189ms
+    [+] Examples
+ 165ms
+
+Describing Help
+
+  Context Function - load-ModuleFT
+    [+] Synopsis
+ 171ms
+PS>TerminatingError(): "Expected a value, but got $null or empty."
+>> TerminatingError(): "Expected a value, but got $null or empty."
+>> TerminatingError(): "Expected a value, but got $null or empty."
+    [-] Description
+ 160ms
+      Expected a value, but got $null or empty.
+      252:                 Get-Help $_ | Select-Object -ExpandProperty Description | should not benullorempty
+      at <ScriptBlock>, C:\sc\verb-mods\Tests\verb-Mods.tests.ps1: line 252
+PS>TerminatingError(): "Expected $true, but got $false."
+>> TerminatingError(): "Expected $true, but got $false."
+>> TerminatingError(): "Expected $true, but got $false."
+    [-] Examples
+ 143ms
+      Expected $true, but got $false.
+      256:                 $Examples.Count -gt 0 | Should be $true
+      at <ScriptBlock>, C:\sc\verb-mods\Tests\verb-Mods.tests.ps1: line 256
+
+Describing Help
+
+  Context Function - mount-Module
+    [+] Synopsis
+ 108ms
+    [+] Description
+ 97ms
+    [+] Examples
+ 104ms
+
+Describing Help
+
+  Context Function - register-localPSRepository
+    [+] Synopsis
+ 90ms
+    [+] Description
+ 152ms
+    [+] Examples
+ 194ms
+
+Describing Help
+
+  Context Function - revert-moduleInstalledRevision
+    [+] Synopsis
+ 131ms
+    [+] Description
+ 113ms
+    [+] Examples
+ 101ms
+
+Describing Help
+
+  Context Function - test-UnReleasedModuleContent
+    [+] Synopsis
+ 99ms
+    [+] Description
+ 206ms
+    [+] Examples
+ 194ms
+
+Describing Help
+
+  Context Function - Uninstall-AllModules
+    [+] Synopsis
+ 182ms
+    [+] Description
+ 125ms
+    [+] Examples
+ 162ms
+
+Describing Help
+
+  Context Function - uninstall-ModulesObsolete
+    [+] Synopsis
+ 151ms
+    [+] Description
+ 117ms
+    [+] Examples
+ 235ms
+
+Describing Help
+
+  Context Function - update-PSPowerShellGetLegacy
+    [+] Synopsis
+ 208ms
+    [+] Description
+ 198ms
+    [+] Examples
+ 213ms
+
+Describing General - Testing all scripts and modules against the Script Analyzer Rules
+
+  Context Checking files to test exist and Invoke-ScriptAnalyzer cmdLet is available
+    [+] Checking files exist to test.
+ 18ms
+    [+] Checking Invoke-ScriptAnalyzer exists.
+ 19ms
+
+Describing Testing against PSScriptAnalyzer rules
+
+  Context PSSA Standard Rules
+    [+] Should pass PSAlignAssignmentStatement
+ 40ms
+    [!] Should pass PSAvoidUsingCmdletAliases
+, is skipped
+ 0ms
+    [+] Should pass PSAvoidAssignmentToAutomaticVariable
+ 17ms
+PS>TerminatingError(): "Expected 0, but got 10."
+>> TerminatingError(): "Expected 0, but got 10."
+>> TerminatingError(): "Expected 0, but got 10."
+    [-] Should pass PSAvoidDefaultValueSwitchParameter
+ 33ms
+      Expected 0, but got 10.
+      319:                 ($Failures | Measure-Object).Count | Should Be 0
+      at <ScriptBlock>, C:\sc\verb-mods\Tests\verb-Mods.tests.ps1: line 319
+    [+] Should pass PSAvoidDefaultValueForMandatoryParameter
+ 16ms
+    [+] Should pass PSAvoidUsingEmptyCatchBlock
+ 16ms
+    [+] Should pass PSAvoidGlobalAliases
+ 33ms
+    [+] Should pass PSAvoidGlobalFunctions
+ 34ms
+    [!] Should pass PSAvoidGlobalVars
+, is skipped
+ 0ms
+    [+] Should pass PSAvoidInvokingEmptyMembers
+ 26ms
+    [+] Should pass PSAvoidLongLines
+ 19ms
+    [+] Should pass PSAvoidNullOrEmptyHelpMessageAttribute
+ 20ms
+    [+] Should pass PSAvoidOverwritingBuiltInCmdlets
+ 21ms
+    [+] Should pass PSAvoidUsingPositionalParameters
+ 25ms
+    [+] Should pass PSReservedCmdletChar
+ 23ms
+    [+] Should pass PSReservedParams
+ 29ms
+    [+] Should pass PSAvoidShouldContinueWithoutForce
+ 31ms
+    [+] Should pass PSAvoidTrailingWhitespace
+ 40ms
+    [+] Should pass PSAvoidUsingUsernameAndPasswordParams
+ 19ms
+    [+] Should pass PSAvoidUsingComputerNameHardcoded
+ 17ms
+    [+] Should pass PSAvoidUsingConvertToSecureStringWithPlainText
+ 25ms
+    [+] Should pass PSAvoidUsingDeprecatedManifestFields
+ 27ms
+    [+] Should pass PSAvoidUsingDoubleQuotesForConstantString
+ 103ms
+PS>TerminatingError(): "Expected 0, but got 1."
+>> TerminatingError(): "Expected 0, but got 1."
+>> TerminatingError(): "Expected 0, but got 1."
+    [-] Should pass PSAvoidUsingInvokeExpression
+ 31ms
+      Expected 0, but got 1.
+      319:                 ($Failures | Measure-Object).Count | Should Be 0
+      at <ScriptBlock>, C:\sc\verb-mods\Tests\verb-Mods.tests.ps1: line 319
+    [+] Should pass PSAvoidUsingPlainTextForPassword
+ 27ms
+    [+] Should pass PSAvoidUsingWMICmdlet
+ 26ms
+    [!] Should pass PSAvoidUsingWriteHost
+, is skipped
+ 0ms
+    [+] Should pass PSUseCompatibleCommands
+ 42ms
+    [+] Should pass PSUseCompatibleSyntax
+ 28ms
+    [+] Should pass PSUseCompatibleTypes
+ 24ms
+    [+] Should pass PSMisleadingBacktick
+ 23ms
+    [+] Should pass PSMissingModuleManifestField
+ 21ms
+PS>TerminatingError(): "Expected 0, but got 12."
+>> TerminatingError(): "Expected 0, but got 12."
+>> TerminatingError(): "Expected 0, but got 12."
+    [-] Should pass PSPlaceCloseBrace
+ 30ms
+      Expected 0, but got 12.
+      319:                 ($Failures | Measure-Object).Count | Should Be 0
+      at <ScriptBlock>, C:\sc\verb-mods\Tests\verb-Mods.tests.ps1: line 319
+PS>TerminatingError(): "Expected 0, but got 1."
+>> TerminatingError(): "Expected 0, but got 1."
+>> TerminatingError(): "Expected 0, but got 1."
+    [-] Should pass PSPlaceOpenBrace
+ 39ms
+      Expected 0, but got 1.
+      319:                 ($Failures | Measure-Object).Count | Should Be 0
+      at <ScriptBlock>, C:\sc\verb-mods\Tests\verb-Mods.tests.ps1: line 319
+    [+] Should pass PSPossibleIncorrectComparisonWithNull
+ 25ms
+    [+] Should pass PSPossibleIncorrectUsageOfAssignmentOperator
+ 28ms
+    [+] Should pass PSPossibleIncorrectUsageOfRedirectionOperator
+ 30ms
+    [!] Should pass PSProvideCommentHelp
+, is skipped
+ 0ms
+    [+] Should pass PSReviewUnusedParameter
+ 31ms
+    [!] Should pass PSUseApprovedVerbs
+, is skipped
+ 0ms
+    [+] Should pass PSUseBOMForUnicodeEncodedFile
+ 26ms
+    [!] Should pass PSUseCmdletCorrectly
+, is skipped
+ 0ms
+    [+] Should pass PSUseCompatibleCmdlets
+ 33ms
+    [+] Should pass PSUseConsistentIndentation
+ 31ms
+    [!] Should pass PSUseConsistentWhitespace
+, is skipped
+ 0ms
+    [+] Should pass PSUseCorrectCasing
+ 20ms
+    [!] Should pass PSUseDeclaredVarsMoreThanAssignments
+, is skipped
+ 0ms
+    [+] Should pass PSUseLiteralInitializerForHashtable
+ 23ms
+    [+] Should pass PSUseOutputTypeCorrectly
+ 22ms
+    [+] Should pass PSUseProcessBlockForPipelineCommand
+ 26ms
+    [+] Should pass PSUsePSCredentialType
+ 25ms
+    [+] Should pass PSShouldProcess
+ 25ms
+PS>TerminatingError(): "Expected 0, but got 2."
+>> TerminatingError(): "Expected 0, but got 2."
+>> TerminatingError(): "Expected 0, but got 2."
+    [-] Should pass PSUseShouldProcessForStateChangingFunctions
+ 38ms
+      Expected 0, but got 2.
+      319:                 ($Failures | Measure-Object).Count | Should Be 0
+      at <ScriptBlock>, C:\sc\verb-mods\Tests\verb-Mods.tests.ps1: line 319
+PS>TerminatingError(): "Expected 0, but got 6."
+>> TerminatingError(): "Expected 0, but got 6."
+>> TerminatingError(): "Expected 0, but got 6."
+    [-] Should pass PSUseSingularNouns
+ 44ms
+      Expected 0, but got 6.
+      319:                 ($Failures | Measure-Object).Count | Should Be 0
+      at <ScriptBlock>, C:\sc\verb-mods\Tests\verb-Mods.tests.ps1: line 319
+PS>TerminatingError(): "Expected 0, but got 18."
+>> TerminatingError(): "Expected 0, but got 18."
+>> TerminatingError(): "Expected 0, but got 18."
+    [-] Should pass PSUseSupportsShouldProcess
+ 36ms
+      Expected 0, but got 18.
+      319:                 ($Failures | Measure-Object).Count | Should Be 0
+      at <ScriptBlock>, C:\sc\verb-mods\Tests\verb-Mods.tests.ps1: line 319
+    [+] Should pass PSUseToExportFieldsInManifest
+ 24ms
+    [+] Should pass PSUseUsingScopeModifierInNewRunspaces
+ 22ms
+    [+] Should pass PSUseUTF8EncodingForHelpFile
+ 16ms
+    [+] Should pass PSDSCDscExamplesPresent
+ 16ms
+    [+] Should pass PSDSCDscTestsPresent
+ 26ms
+    [+] Should pass PSDSCReturnCorrectTypesForDSCFunctions
+ 33ms
+    [+] Should pass PSDSCUseIdenticalMandatoryParametersForDSC
+ 27ms
+    [+] Should pass PSDSCUseIdenticalParametersForDSC
+ 28ms
+    [+] Should pass PSDSCStandardDSCFunctionsInResource
+ 23ms
+    [+] Should pass PSDSCUseVerboseMessageInDSCResource
+ 24ms
+16:42:18:
+#*------^ RUNNING c:\sc\verb-mods\Tests\verb-mods.tests.ps1: ^------
+16:42:19: INFO: 
+---------------------------------------------------------------------------------
+Processing completed: verb-mods :: c:\sc\verb-mods
+- Script is currently installed (from PsRep: with scope:CurrentUser, under TORO\kadriTSS profile
+
+- To update other scopes/accounts on same machine, or install on other machines:
+    1. Uninstall current module copies:
+
+        Uninstall-Module -Name verb-mods) -AllVersion -whatif ;
+
+    2. Install the current version (or higher) from the Repo:lyncRepo:
+
+        install-Module -name verb-mods -Repository lyncRepo -MinimumVersion 1.2.2 -scope currentuser -whatif ;
+
+    3. Reimport the module with -force, to ensure the current installed verison is loaded:
+
+        import-Module -name verb-mods -force -verbose ;
+
+#-=-Stacked list: Unwrap to create a 1-liner for the above: CURRENTUSER =-=-=-=-=-=-=
+$whatif=$false ; $tMod = 'verb-mods' ; $tVer = '1.2.2' ;  $tScop = 'CurrentUser' ;
+TRY {
+Remove-Module -Name $tmod -ea 0 ;
+Uninstall-Module -Name $tmod -AllVersion -whatif:$($whatif) ;
+install-Module -name $tmod -Repository 'lyncRepo' -MinimumVersion $tVer -scope $tScop -AllowClobber -whatif:$($whatif) ;
+import-Module -name $tmod -force -verbose ;
+} CATCH {
+Write-Warning "Failed processing $($_.Exception.ItemName). 
+Error Message: $($_.Exception.Message)
+Error Details: $($_)" ; Break ;
+} ;
+#-=-=-=-=-=-=-=-=
+#-=-Stacked list: Unwrap to create a 1-liner for the above: ALLUSERS =-=-=-=-=-=-=
+$whatif=$false ; $tMod = 'verb-mods' ; $tVer = '1.2.2' ;  $tScop = 'AllUsers' ;
+TRY {
+Remove-Module -Name $tmod -ea 0 ;
+Uninstall-Module -Name $tmod -AllVersion -whatif:$($whatif) ;
+install-Module -name $tmod -Repository 'lyncRepo' -MinimumVersion $tVer -scope $tScop -AllowClobber -whatif:$($whatif) ;
+import-Module -name $tmod -force -verbose ;
+} CATCH {
+Write-Warning "Failed processing $($_.Exception.ItemName). 
+Error Message: $($_.Exception.Message)
+Error Details: $($_)" ; Break ;
+} ;
+#-=-=-=-=-=-=-=-=
+
+- You may also want to run the configured Pester Tests of the new script:
+
+        . c:\sc\verb-mods\Tests\verb-mods.tests.ps1
+
+Full Processing Details can be found in:
+
+C:\sc\verb-dev\verb-dev\logs\VERB-dev-verb-mods-LOG-BATCH-EXEC-20220908-1638PM-log.txt
+
+---------------------------------------------------------------------------------
+16:42:19: INFO: 
+(Processing log can be found at:c:\sc\verb-mods\C:\sc\verb-dev\verb-dev\logs\VERB-dev-verb-mods-LOG-BATCH-EXEC-20220908-1638PM-log.txt)
+16:42:19: INFO: remove-UnneededFileVariants w
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+Path                           c:\sc\verb-mods                                                                                             
+Include                        VERB-dev-verb-mods-LOG-BATCH-*-log.txt                                                                      
+Pattern                                                                                                                                    
+FilterOn                       CreationTime                                                                                                
+Keep                           2                                                                                                           
+KeepToday                      True                                                                                                        
+verbose                        True                                                                                                        
+whatif                         False
+16:42:19:gci w
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+path                           c:\sc\verb-mods\*                                                                                           
+include                        VERB-dev-verb-mods-LOG-BATCH-*-log.txt                                                                      
+ErrorAction                    Stop
+VERBOSE: $cuttime:09/08/2022 00:00:00
+VERBOSE: filtering on files prior to $cuttime:09/08/2022 00:00:00 AM, on CreationTime property
+(1 in set *before* filtering)
+(0 in set *after* filtering)
+VERBOSE: attempting to retain remaining 2 generations net of prior filtering
+(0 in set *before* filtering)
+(0 in set *after* filtering)
+(Note:net population is *below* target -Keep:2 spec - insufficient older files available)
+16:42:19:Reducing matched population from 1 to 0 files via:
+filtered files on CreationTime prior to 09/08/2022 00:00:00 AM
+16:42:19:There are *no* files to be removed, as per the specified inputs. ($population:0)
+16:42:19: INFO: #*======^ VERB-dev.psm1:verb-mods ^======
+write-host 16:42:19:
+#*------^ (1/1):PROC:verb-mods: ^------
+16:42:19:
+#*======^ RUNNING processbulk-NewModule.ps1 ^======
+
+
+
+▒
+▒
+▒
+░
+░
+
+LYN-8DCZ1G2
+ ▓▒▓
+TORO\kadriTSS
+ ▓▒▓
+Thu 09/08/2022 16:42
+ [00:05:38]
+
+▒
+▒
+▒
+▒
+▒
+
+[PS]
+:
+C:\U\W\P\SCRIPTS
+
+$
+
+
+
