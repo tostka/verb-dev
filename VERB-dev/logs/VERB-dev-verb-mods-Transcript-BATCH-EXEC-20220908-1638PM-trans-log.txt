@@ -1747,3 +1747,1337 @@ $
 
 
 
+PS>.\processbulk-NewModule.ps1 -mod verb-Text -verb
+VERBOSE: $PSBoundParameters:
+Key     Value      
+---     -----      
+Modules {verb-Text}
+Verbose True
+16:47:05:
+#*======v RUNNING processbulk-NewModule.ps1 v======
+16:47:05:
+#*------v (1/1):PROC:verb-Text: v------
+==(1/31):ipmo'ing C:\sc\verb-Text\public\compare-CodeRevision.ps1
+VERBOSE: Loading module from path 'C:\sc\verb-Text\public\compare-CodeRevision.ps1'.
+VERBOSE: Dot-sourcing the script file 'C:\sc\verb-Text\public\compare-CodeRevision.ps1'.
+==(2/31):ipmo'ing C:\sc\verb-Text\public\convert-CaesarCipher.ps1
+VERBOSE: Loading module from path 'C:\sc\verb-Text\public\convert-CaesarCipher.ps1'.
+VERBOSE: Dot-sourcing the script file 'C:\sc\verb-Text\public\convert-CaesarCipher.ps1'.
+==(3/31):ipmo'ing C:\sc\verb-Text\public\convertFrom-Base64String.ps1
+VERBOSE: Loading module from path 'C:\sc\verb-Text\public\convertFrom-Base64String.ps1'.
+VERBOSE: Dot-sourcing the script file 'C:\sc\verb-Text\public\convertFrom-Base64String.ps1'.
+==(4/31):ipmo'ing C:\sc\verb-Text\public\convertFrom-Html.ps1
+VERBOSE: Loading module from path 'C:\sc\verb-Text\public\convertFrom-Html.ps1'.
+VERBOSE: Dot-sourcing the script file 'C:\sc\verb-Text\public\convertFrom-Html.ps1'.
+==(5/31):ipmo'ing C:\sc\verb-Text\public\Convert-invertCase.ps1
+VERBOSE: Loading module from path 'C:\sc\verb-Text\public\Convert-invertCase.ps1'.
+VERBOSE: Dot-sourcing the script file 'C:\sc\verb-Text\public\Convert-invertCase.ps1'.
+==(6/31):ipmo'ing C:\sc\verb-Text\public\convert-Rot13.ps1
+VERBOSE: Loading module from path 'C:\sc\verb-Text\public\convert-Rot13.ps1'.
+VERBOSE: Dot-sourcing the script file 'C:\sc\verb-Text\public\convert-Rot13.ps1'.
+==(7/31):ipmo'ing C:\sc\verb-Text\public\convert-Rot47.ps1
+VERBOSE: Loading module from path 'C:\sc\verb-Text\public\convert-Rot47.ps1'.
+VERBOSE: Dot-sourcing the script file 'C:\sc\verb-Text\public\convert-Rot47.ps1'.
+==(8/31):ipmo'ing C:\sc\verb-Text\public\convertTo-Base64String.ps1
+VERBOSE: Loading module from path 'C:\sc\verb-Text\public\convertTo-Base64String.ps1'.
+VERBOSE: Dot-sourcing the script file 'C:\sc\verb-Text\public\convertTo-Base64String.ps1'.
+==(9/31):ipmo'ing C:\sc\verb-Text\public\ConvertTo-CamelCase.ps1
+VERBOSE: Loading module from path 'C:\sc\verb-Text\public\ConvertTo-CamelCase.ps1'.
+VERBOSE: Dot-sourcing the script file 'C:\sc\verb-Text\public\ConvertTo-CamelCase.ps1'.
+==(10/31):ipmo'ing C:\sc\verb-Text\public\ConvertTo-L33t.ps1
+VERBOSE: Loading module from path 'C:\sc\verb-Text\public\ConvertTo-L33t.ps1'.
+VERBOSE: Dot-sourcing the script file 'C:\sc\verb-Text\public\ConvertTo-L33t.ps1'.
+==(11/31):ipmo'ing C:\sc\verb-Text\public\ConvertTo-lowerCamelCase.ps1
+VERBOSE: Loading module from path 'C:\sc\verb-Text\public\ConvertTo-lowerCamelCase.ps1'.
+VERBOSE: Dot-sourcing the script file 'C:\sc\verb-Text\public\ConvertTo-lowerCamelCase.ps1'.
+==(12/31):ipmo'ing C:\sc\verb-Text\public\convertTo-PSHelpExample.ps1
+VERBOSE: Loading module from path 'C:\sc\verb-Text\public\convertTo-PSHelpExample.ps1'.
+VERBOSE: Dot-sourcing the script file 'C:\sc\verb-Text\public\convertTo-PSHelpExample.ps1'.
+==(13/31):ipmo'ing C:\sc\verb-Text\public\convertTo-QuotedList.ps1
+VERBOSE: Loading module from path 'C:\sc\verb-Text\public\convertTo-QuotedList.ps1'.
+VERBOSE: Dot-sourcing the script file 'C:\sc\verb-Text\public\convertTo-QuotedList.ps1'.
+==(14/31):ipmo'ing C:\sc\verb-Text\public\ConvertTo-SCase.ps1
+VERBOSE: Loading module from path 'C:\sc\verb-Text\public\ConvertTo-SCase.ps1'.
+VERBOSE: Dot-sourcing the script file 'C:\sc\verb-Text\public\ConvertTo-SCase.ps1'.
+==(15/31):ipmo'ing C:\sc\verb-Text\public\ConvertTo-SNAKE_CASE.ps1
+VERBOSE: Loading module from path 'C:\sc\verb-Text\public\ConvertTo-SNAKE_CASE.ps1'.
+VERBOSE: Dot-sourcing the script file 'C:\sc\verb-Text\public\ConvertTo-SNAKE_CASE.ps1'.
+==(16/31):ipmo'ing C:\sc\verb-Text\public\ConvertTo-StringQuoted.ps1
+VERBOSE: Loading module from path 'C:\sc\verb-Text\public\ConvertTo-StringQuoted.ps1'.
+VERBOSE: Dot-sourcing the script file 'C:\sc\verb-Text\public\ConvertTo-StringQuoted.ps1'.
+==(17/31):ipmo'ing C:\sc\verb-Text\public\convertTo-StringReverse.ps1
+VERBOSE: Loading module from path 'C:\sc\verb-Text\public\convertTo-StringReverse.ps1'.
+VERBOSE: Dot-sourcing the script file 'C:\sc\verb-Text\public\convertTo-StringReverse.ps1'.
+==(18/31):ipmo'ing C:\sc\verb-Text\public\convertTo-StUdlycaPs.ps1
+VERBOSE: Loading module from path 'C:\sc\verb-Text\public\convertTo-StUdlycaPs.ps1'.
+VERBOSE: Dot-sourcing the script file 'C:\sc\verb-Text\public\convertTo-StUdlycaPs.ps1'.
+==(19/31):ipmo'ing C:\sc\verb-Text\public\convertTo-TitleCase.ps1
+VERBOSE: Loading module from path 'C:\sc\verb-Text\public\convertTo-TitleCase.ps1'.
+VERBOSE: Dot-sourcing the script file 'C:\sc\verb-Text\public\convertTo-TitleCase.ps1'.
+==(20/31):ipmo'ing C:\sc\verb-Text\public\convertTo-UnWrappedText.ps1
+VERBOSE: Loading module from path 'C:\sc\verb-Text\public\convertTo-UnWrappedText.ps1'.
+VERBOSE: Dot-sourcing the script file 'C:\sc\verb-Text\public\convertTo-UnWrappedText.ps1'.
+==(21/31):ipmo'ing C:\sc\verb-Text\public\convertTo-WordsReverse.ps1
+VERBOSE: Loading module from path 'C:\sc\verb-Text\public\convertTo-WordsReverse.ps1'.
+VERBOSE: Dot-sourcing the script file 'C:\sc\verb-Text\public\convertTo-WordsReverse.ps1'.
+==(22/31):ipmo'ing C:\sc\verb-Text\public\convertTo-WrappedText.ps1
+VERBOSE: Loading module from path 'C:\sc\verb-Text\public\convertTo-WrappedText.ps1'.
+VERBOSE: Dot-sourcing the script file 'C:\sc\verb-Text\public\convertTo-WrappedText.ps1'.
+==(23/31):ipmo'ing C:\sc\verb-Text\public\create-AcronymFromCaps.ps1
+VERBOSE: Loading module from path 'C:\sc\verb-Text\public\create-AcronymFromCaps.ps1'.
+VERBOSE: Dot-sourcing the script file 'C:\sc\verb-Text\public\create-AcronymFromCaps.ps1'.
+==(24/31):ipmo'ing C:\sc\verb-Text\public\get-StringHash.ps1
+VERBOSE: Loading module from path 'C:\sc\verb-Text\public\get-StringHash.ps1'.
+VERBOSE: Dot-sourcing the script file 'C:\sc\verb-Text\public\get-StringHash.ps1'.
+==(25/31):ipmo'ing C:\sc\verb-Text\public\Remove-StringDiacritic.ps1
+VERBOSE: Loading module from path 'C:\sc\verb-Text\public\Remove-StringDiacritic.ps1'.
+VERBOSE: Dot-sourcing the script file 'C:\sc\verb-Text\public\Remove-StringDiacritic.ps1'.
+==(26/31):ipmo'ing C:\sc\verb-Text\public\Remove-StringLatinCharacters.ps1
+VERBOSE: Loading module from path 'C:\sc\verb-Text\public\Remove-StringLatinCharacters.ps1'.
+VERBOSE: Dot-sourcing the script file 'C:\sc\verb-Text\public\Remove-StringLatinCharacters.ps1'.
+==(27/31):ipmo'ing C:\sc\verb-Text\public\test-IsGuid.ps1
+VERBOSE: Loading module from path 'C:\sc\verb-Text\public\test-IsGuid.ps1'.
+VERBOSE: Dot-sourcing the script file 'C:\sc\verb-Text\public\test-IsGuid.ps1'.
+==(28/31):ipmo'ing C:\sc\verb-Text\public\test-IsNumeric.ps1
+VERBOSE: Loading module from path 'C:\sc\verb-Text\public\test-IsNumeric.ps1'.
+VERBOSE: Dot-sourcing the script file 'C:\sc\verb-Text\public\test-IsNumeric.ps1'.
+==(29/31):ipmo'ing C:\sc\verb-Text\public\test-IsRegexPattern.ps1
+VERBOSE: Loading module from path 'C:\sc\verb-Text\public\test-IsRegexPattern.ps1'.
+VERBOSE: Dot-sourcing the script file 'C:\sc\verb-Text\public\test-IsRegexPattern.ps1'.
+==(30/31):ipmo'ing C:\sc\verb-Text\public\test-IsRegexValid.ps1
+VERBOSE: Loading module from path 'C:\sc\verb-Text\public\test-IsRegexValid.ps1'.
+VERBOSE: Dot-sourcing the script file 'C:\sc\verb-Text\public\test-IsRegexValid.ps1'.
+==(31/31):ipmo'ing C:\sc\verb-Text\public\test-IsUri.ps1
+VERBOSE: Loading module from path 'C:\sc\verb-Text\public\test-IsUri.ps1'.
+VERBOSE: Dot-sourcing the script file 'C:\sc\verb-Text\public\test-IsUri.ps1'.
+16:47:08:(executing:Set-BuildEnvironment -Path c:\sc\verb-Text -Force 
+(use -NoBuildInfo if hangs))
+==16:47:09:Processing verb-Text:
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+BHProjectName                  verb-Text                                                                                                   
+BHModulePath                   C:\sc\verb-Text\verb-Text                                                                                   
+BHPSModulePath                 C:\sc\verb-Text\verb-Text                                                                                   
+BHBuildOutput                  C:\sc\verb-Text\BuildOutput                                                                                 
+BHProjectPath                  C:\sc\verb-Text                                                                                             
+BHPSModuleManifest             C:\sc\verb-Text\verb-Text\verb-Text.psd1                                                                    
+BHBuildSystem                  Unknown                                                                                                     
+BHCommitMessage                vtext v4.3.0...                                                                                             
+BHBranchName                   master                                                                                                      
+BHCommitHash                   e842eedbb111f8530c22769220a7892573612d0e                                                                    
+BHBuildNumber                  0
+VERBOSE: Loading module from path 'C:\sc\verb-Text\verb-Text\verb-Text.psm1'.
+16:47:09:Step-ModuleVersionCalculated w
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+Path                           c:\sc\verb-Text                                                                                             
+Verbose                        True
+16:47:09:#*======v RUNNING :Step-ModuleVersionCalculated:c:\sc\verb-Text v======
+16:47:09:profiling existing content...
+VERBOSE: 16:47:09:#*======v RUNNING :Get-PSModuleFile:.psd1:C:\sc\verb-Text v======
+VERBOSE: 16:47:09:#*======^ RUNNING :Get-PSModuleFile:.psd1:C:\sc\verb-Text ^======
+VERBOSE: 16:47:09:#*======v RUNNING :Get-PSModuleFile:.psm1:C:\sc\verb-Text v======
+VERBOSE: 16:47:09:#*======^ RUNNING :Get-PSModuleFile:.psm1:C:\sc\verb-Text ^======
+VERBOSE: 16:47:09:Import-PowerShellDataFile w
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+path                           C:\sc\verb-Text\verb-Text\verb-Text.psd1                                                                    
+ErrorAction                    STOP                                                                                                        
+Verbose                        True
+VERBOSE: 16:47:09:test-ModuleManifest w
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+path                           C:\sc\verb-Text\verb-Text\verb-Text.psd1                                                                    
+ErrorAction                    STOP                                                                                                        
+Verbose                        True
+VERBOSE: Loading module from path 'C:\sc\verb-Text\verb-Text\verb-Text.psm1'.
+16:47:09:(Test-ModuleManifest:PASSED)
+16:47:09:Module:psd1M:calculating *FINGERPRINT* change Version Step
+VERBOSE: 16:47:09:import-module w
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+Verbose                        True                                                                                                        
+Name                           C:\sc\verb-Text\verb-Text\verb-Text.psm1                                                                    
+force                          True                                                                                                        
+ErrorAction                    STOP
+VERBOSE: Loading module from path 'C:\sc\verb-Text\verb-Text\verb-Text.psm1'.
+VERBOSE: Importing function 'compare-CodeRevision'.
+VERBOSE: Importing function 'convert-CaesarCipher'.
+VERBOSE: Importing function 'Convert-invertCase'.
+VERBOSE: Importing function 'convert-Rot13'.
+VERBOSE: Importing function 'convert-Rot47'.
+VERBOSE: Importing function 'convertFrom-Base64String'.
+VERBOSE: Importing function 'convertFrom-Html'.
+VERBOSE: Importing function 'convertTo-Base64String'.
+VERBOSE: Importing function 'ConvertTo-CamelCase'.
+VERBOSE: Importing function 'ConvertTo-L33t'.
+VERBOSE: Importing function 'ConvertTo-lowerCamelCase'.
+VERBOSE: Importing function 'convertTo-PSHelpExample'.
+VERBOSE: Importing function 'convertTo-QuotedList'.
+VERBOSE: Importing function 'ConvertTo-SCase'.
+VERBOSE: Importing function 'ConvertTo-SNAKE_CASE'.
+VERBOSE: Importing function 'ConvertTo-StringQuoted'.
+VERBOSE: Importing function 'convertTo-StringReverse'.
+VERBOSE: Importing function 'convertTo-StUdlycaPs'.
+VERBOSE: Importing function 'convertTo-TitleCase'.
+VERBOSE: Importing function 'convertTo-UnWrappedText'.
+VERBOSE: Importing function 'convertTo-WordsReverse'.
+VERBOSE: Importing function 'convertTo-WrappedText'.
+WARNING: The names of some imported commands from the module 'verb-Text' include unapproved verbs that might make them less discoverable. To find the commands with unapproved verbs, run the Import-Module command again with the Verbose parameter. For a list of approved verbs, type Get-Verb.
+VERBOSE: The 'create-AcronymFromCaps' command in the verb-Text' module was imported, but because its name does not include an approved verb, it might be difficult to find. The suggested alternative verbs are "New".
+VERBOSE: Importing function 'create-AcronymFromCaps'.
+VERBOSE: Importing function 'get-StringHash'.
+VERBOSE: Importing function 'Remove-StringDiacritic'.
+VERBOSE: Importing function 'Remove-StringLatinCharacters'.
+VERBOSE: Importing function 'Test-IsGuid'.
+VERBOSE: Importing function 'test-IsNumeric'.
+VERBOSE: Importing function 'test-IsRegexPattern'.
+VERBOSE: Importing function 'test-IsRegexValid'.
+VERBOSE: Importing function 'test-IsUri'.
+VERBOSE: Importing alias 'convertTo-CrAzYCaPS'.
+VERBOSE: Importing alias 'convertTo-PascalCase'.
+VERBOSE: Importing alias 'convertTo-ProperCase'.
+VERBOSE: Importing alias 'convertTo-SentanceCase'.
+VERBOSE: Importing alias 'convertTo-StUdlycaSe'.
+VERBOSE: Importing alias 'convertTo-UpperCamelCase'.
+VERBOSE: Importing alias 'IsNumeric'.
+VERBOSE: Importing alias 'quote-list'.
+VERBOSE: Importing alias 'quote-string'.
+VERBOSE: Importing alias 'test-URI'.
+VERBOSE: Importing alias 'unwrap-text'.
+VERBOSE: Importing alias 'Unwrap-TextN'.
+VERBOSE: Importing alias 'wrap-text'.
+16:47:12:get-command verb-Text -gt AST 80% match:
+VERBOSE: 16:47:13:get-module |where-object{$_.path -eq 'C:\sc\verb-Text\verb-Text\verb-Text.psm1'} |remove-module w
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+Verbose                        True                                                                                                        
+force                          True                                                                                                        
+ErrorAction                    STOP
+VERBOSE: Performing the operation "Remove-Module" on target "verb-Text (Path: 'C:\sc\verb-Text\verb-Text\verb-Text.psm1')".
+VERBOSE: Removing the imported "test-IsUri" function.
+VERBOSE: Removing the imported "test-IsRegexValid" function.
+VERBOSE: Removing the imported "test-IsRegexPattern" function.
+VERBOSE: Removing the imported "test-IsNumeric" function.
+VERBOSE: Removing the imported "Test-IsGuid" function.
+VERBOSE: Removing the imported "Remove-StringLatinCharacters" function.
+VERBOSE: Removing the imported "Remove-StringDiacritic" function.
+VERBOSE: Removing the imported "get-StringHash" function.
+VERBOSE: Removing the imported "create-AcronymFromCaps" function.
+VERBOSE: Removing the imported "convertTo-WrappedText" function.
+VERBOSE: Removing the imported "convertTo-WordsReverse" function.
+VERBOSE: Removing the imported "convertTo-UnWrappedText" function.
+VERBOSE: Removing the imported "convertTo-TitleCase" function.
+VERBOSE: Removing the imported "convertTo-StUdlycaPs" function.
+VERBOSE: Removing the imported "convertTo-StringReverse" function.
+VERBOSE: Removing the imported "ConvertTo-StringQuoted" function.
+VERBOSE: Removing the imported "ConvertTo-SNAKE_CASE" function.
+VERBOSE: Removing the imported "ConvertTo-SCase" function.
+VERBOSE: Removing the imported "convertTo-QuotedList" function.
+VERBOSE: Removing the imported "convertTo-PSHelpExample" function.
+VERBOSE: Removing the imported "ConvertTo-lowerCamelCase" function.
+VERBOSE: Removing the imported "ConvertTo-L33t" function.
+VERBOSE: Removing the imported "ConvertTo-CamelCase" function.
+VERBOSE: Removing the imported "convertTo-Base64String" function.
+VERBOSE: Removing the imported "convertFrom-Html" function.
+VERBOSE: Removing the imported "convertFrom-Base64String" function.
+VERBOSE: Removing the imported "convert-Rot47" function.
+VERBOSE: Removing the imported "convert-Rot13" function.
+VERBOSE: Removing the imported "Convert-invertCase" function.
+VERBOSE: Removing the imported "convert-CaesarCipher" function.
+VERBOSE: Removing the imported "compare-CodeRevision" function.
+VERBOSE: Removing the imported "wrap-text" alias.
+VERBOSE: Removing the imported "Unwrap-TextN" alias.
+VERBOSE: Removing the imported "unwrap-text" alias.
+VERBOSE: Removing the imported "test-URI" alias.
+VERBOSE: Removing the imported "quote-string" alias.
+VERBOSE: Removing the imported "quote-list" alias.
+VERBOSE: Removing the imported "IsNumeric" alias.
+VERBOSE: Removing the imported "convertTo-UpperCamelCase" alias.
+VERBOSE: Removing the imported "convertTo-StUdlycaSe" alias.
+VERBOSE: Removing the imported "convertTo-SentanceCase" alias.
+VERBOSE: Removing the imported "convertTo-ProperCase" alias.
+VERBOSE: Removing the imported "convertTo-PascalCase" alias.
+VERBOSE: Removing the imported "convertTo-CrAzYCaPS" alias.
+VERBOSE: 16:47:14:(C:\Users\kadritss\Documents\WindowsPowerShell\Modules\BuildHelpers\2.0.16\BuildHelpers.psm1:still loaded)
+VERBOSE: 16:47:14:(C:\Windows\System32\WindowsPowerShell\v1.0\Modules\PSDesiredStateConfiguration\DSCResources\GroupSet\GroupSet.Schema.psm1:still loaded)
+VERBOSE: 16:47:14:(C:\Windows\system32\WindowsPowerShell\v1.0\Modules\Microsoft.PowerShell.Host\Microsoft.PowerShell.Host.psd1:still loaded)
+VERBOSE: 16:47:14:(C:\Windows\system32\WindowsPowerShell\v1.0\Modules\Microsoft.PowerShell.Management\Microsoft.PowerShell.Management.psd1:still loaded)
+VERBOSE: 16:47:14:(C:\Windows\system32\WindowsPowerShell\v1.0\Modules\Microsoft.PowerShell.Security\Microsoft.PowerShell.Security.psd1:still loaded)
+VERBOSE: 16:47:14:(C:\Windows\system32\WindowsPowerShell\v1.0\Modules\Microsoft.PowerShell.Utility\Microsoft.PowerShell.Utility.psd1:still loaded)
+VERBOSE: 16:47:14:(C:\Windows\system32\WindowsPowerShell\v1.0\Modules\Microsoft.WSMan.Management\Microsoft.WSMan.Management.psd1:still loaded)
+VERBOSE: 16:47:14:(C:\Program Files\WindowsPowerShell\Modules\PackageManagement\1.4.8\PackageManagement.psm1:still loaded)
+VERBOSE: 16:47:14:(C:\Program Files\WindowsPowerShell\Modules\Pester\4.9.0\Pester.psm1:still loaded)
+VERBOSE: 16:47:14:(C:\Windows\system32\WindowsPowerShell\v1.0\Modules\pki\pki.psd1:still loaded)
+VERBOSE: 16:47:14:(C:\Program Files\WindowsPowerShell\Modules\PowerShellGet\2.2.5\PSModule.psm1:still loaded)
+VERBOSE: 16:47:14:(C:\Windows\System32\WindowsPowerShell\v1.0\Modules\PSDesiredStateConfiguration\DSCResources\ProcessSet\ProcessSet.Schema.psm1:still loaded)
+VERBOSE: 16:47:14:(C:\Windows\system32\WindowsPowerShell\v1.0\Modules\PSDesiredStateConfiguration\PSDesiredStateConfiguration.psd1:still loaded)
+VERBOSE: 16:47:14:(C:\Program Files\WindowsPowerShell\Modules\PSReadline\2.1.0\PSReadLine.psm1:still loaded)
+VERBOSE: 16:47:14:(C:\Program Files\WindowsPowerShell\Modules\PSScriptAnalyzer\1.19.1\PSScriptAnalyzer.psm1:still loaded)
+VERBOSE: 16:47:14:(C:\Windows\System32\WindowsPowerShell\v1.0\Modules\PSDesiredStateConfiguration\DSCResources\ServiceSet\ServiceSet.Schema.psm1:still loaded)
+VERBOSE: 16:47:14:(C:\Windows\system32\WindowsPowerShell\v1.0\Modules\SmbShare\SmbShare.psd1:still loaded)
+VERBOSE: 16:47:14:(C:\Users\kadritss\Documents\WindowsPowerShell\Modules\verb-Auth\1.1.0\verb-Auth.psm1:still loaded)
+VERBOSE: 16:47:14:(C:\Users\kadritss\Documents\WindowsPowerShell\Modules\verb-IO\4.0.0\verb-IO.psm1:still loaded)
+VERBOSE: 16:47:14:(C:\Users\kadritss\Documents\WindowsPowerShell\Modules\verb-logging\1.1.2\verb-logging.psm1:still loaded)
+VERBOSE: 16:47:14:(C:\Users\kadritss\Documents\WindowsPowerShell\Modules\verb-Mods\1.2.2\verb-Mods.psm1:still loaded)
+VERBOSE: 16:47:14:(C:\Users\kadritss\Documents\WindowsPowerShell\Modules\verb-Text\4.3.0\verb-Text.psm1:still loaded)
+VERBOSE: 16:47:14:(C:\Windows\System32\WindowsPowerShell\v1.0\Modules\PSDesiredStateConfiguration\DSCResources\WindowsFeatureSet\WindowsFeatureSet.Schema.psm1:still loaded)
+VERBOSE: 16:47:14:(C:\Windows\System32\WindowsPowerShell\v1.0\Modules\PSDesiredStateConfiguration\DSCResources\WindowsOptionalFeatureSet\WindowsOptionalFeatureSet.Schema.psm1:still loaded)
+VERBOSE: 16:47:14:(=cmd:convertTo-CrAzYCaPS...)
+VERBOSE: 16:47:14:(---param:string...)
+VERBOSE: 16:47:14:(---param:Verbose...)
+VERBOSE: 16:47:14:(---param:Debug...)
+VERBOSE: 16:47:14:(---param:ErrorAction...)
+VERBOSE: 16:47:14:(---param:WarningAction...)
+VERBOSE: 16:47:14:(---param:InformationAction...)
+VERBOSE: 16:47:14:(---param:ErrorVariable...)
+VERBOSE: 16:47:14:(---param:WarningVariable...)
+VERBOSE: 16:47:14:(---param:InformationVariable...)
+VERBOSE: 16:47:14:(---param:OutVariable...)
+VERBOSE: 16:47:14:(---param:OutBuffer...)
+VERBOSE: 16:47:14:(---param:PipelineVariable...)
+VERBOSE: 16:47:14:(=cmd:convertTo-PascalCase...)
+VERBOSE: 16:47:14:(---param:string...)
+VERBOSE: 16:47:14:(---param:AlphaNumeric...)
+VERBOSE: 16:47:14:(---param:useLower...)
+VERBOSE: 16:47:14:(---param:Verbose...)
+VERBOSE: 16:47:14:(---param:Debug...)
+VERBOSE: 16:47:14:(---param:ErrorAction...)
+VERBOSE: 16:47:14:(---param:WarningAction...)
+VERBOSE: 16:47:14:(---param:InformationAction...)
+VERBOSE: 16:47:14:(---param:ErrorVariable...)
+VERBOSE: 16:47:14:(---param:WarningVariable...)
+VERBOSE: 16:47:14:(---param:InformationVariable...)
+VERBOSE: 16:47:14:(---param:OutVariable...)
+VERBOSE: 16:47:14:(---param:OutBuffer...)
+VERBOSE: 16:47:14:(---param:PipelineVariable...)
+VERBOSE: 16:47:14:(=cmd:convertTo-ProperCase...)
+VERBOSE: 16:47:14:(---param:string...)
+VERBOSE: 16:47:14:(---param:Verbose...)
+VERBOSE: 16:47:14:(---param:Debug...)
+VERBOSE: 16:47:14:(---param:ErrorAction...)
+VERBOSE: 16:47:14:(---param:WarningAction...)
+VERBOSE: 16:47:14:(---param:InformationAction...)
+VERBOSE: 16:47:14:(---param:ErrorVariable...)
+VERBOSE: 16:47:14:(---param:WarningVariable...)
+VERBOSE: 16:47:14:(---param:InformationVariable...)
+VERBOSE: 16:47:14:(---param:OutVariable...)
+VERBOSE: 16:47:14:(---param:OutBuffer...)
+VERBOSE: 16:47:14:(---param:PipelineVariable...)
+VERBOSE: 16:47:14:(=cmd:convertTo-SentanceCase...)
+VERBOSE: 16:47:14:(---param:string...)
+VERBOSE: 16:47:14:(---param:Verbose...)
+VERBOSE: 16:47:14:(---param:Debug...)
+VERBOSE: 16:47:14:(---param:ErrorAction...)
+VERBOSE: 16:47:14:(---param:WarningAction...)
+VERBOSE: 16:47:14:(---param:InformationAction...)
+VERBOSE: 16:47:14:(---param:ErrorVariable...)
+VERBOSE: 16:47:14:(---param:WarningVariable...)
+VERBOSE: 16:47:14:(---param:InformationVariable...)
+VERBOSE: 16:47:14:(---param:OutVariable...)
+VERBOSE: 16:47:14:(---param:OutBuffer...)
+VERBOSE: 16:47:14:(---param:PipelineVariable...)
+VERBOSE: 16:47:14:(=cmd:convertTo-StUdlycaSe...)
+VERBOSE: 16:47:14:(---param:string...)
+VERBOSE: 16:47:14:(---param:Verbose...)
+VERBOSE: 16:47:14:(---param:Debug...)
+VERBOSE: 16:47:14:(---param:ErrorAction...)
+VERBOSE: 16:47:14:(---param:WarningAction...)
+VERBOSE: 16:47:14:(---param:InformationAction...)
+VERBOSE: 16:47:14:(---param:ErrorVariable...)
+VERBOSE: 16:47:14:(---param:WarningVariable...)
+VERBOSE: 16:47:14:(---param:InformationVariable...)
+VERBOSE: 16:47:14:(---param:OutVariable...)
+VERBOSE: 16:47:14:(---param:OutBuffer...)
+VERBOSE: 16:47:14:(---param:PipelineVariable...)
+VERBOSE: 16:47:14:(=cmd:convertTo-UpperCamelCase...)
+VERBOSE: 16:47:14:(---param:string...)
+VERBOSE: 16:47:14:(---param:AlphaNumeric...)
+VERBOSE: 16:47:14:(---param:useLower...)
+VERBOSE: 16:47:14:(---param:Verbose...)
+VERBOSE: 16:47:14:(---param:Debug...)
+VERBOSE: 16:47:14:(---param:ErrorAction...)
+VERBOSE: 16:47:14:(---param:WarningAction...)
+VERBOSE: 16:47:14:(---param:InformationAction...)
+VERBOSE: 16:47:14:(---param:ErrorVariable...)
+VERBOSE: 16:47:14:(---param:WarningVariable...)
+VERBOSE: 16:47:14:(---param:InformationVariable...)
+VERBOSE: 16:47:14:(---param:OutVariable...)
+VERBOSE: 16:47:14:(---param:OutBuffer...)
+VERBOSE: 16:47:14:(---param:PipelineVariable...)
+VERBOSE: 16:47:14:(=cmd:quote-list...)
+VERBOSE: 16:47:14:(---param:List...)
+VERBOSE: 16:47:14:(---param:Verbose...)
+VERBOSE: 16:47:14:(---param:Debug...)
+VERBOSE: 16:47:14:(---param:ErrorAction...)
+VERBOSE: 16:47:14:(---param:WarningAction...)
+VERBOSE: 16:47:14:(---param:InformationAction...)
+VERBOSE: 16:47:14:(---param:ErrorVariable...)
+VERBOSE: 16:47:14:(---param:WarningVariable...)
+VERBOSE: 16:47:14:(---param:InformationVariable...)
+VERBOSE: 16:47:14:(---param:OutVariable...)
+VERBOSE: 16:47:14:(---param:OutBuffer...)
+VERBOSE: 16:47:14:(---param:PipelineVariable...)
+VERBOSE: 16:47:14:(=cmd:quote-string...)
+VERBOSE: 16:47:14:(---param:String...)
+VERBOSE: 16:47:14:(---param:Verbose...)
+VERBOSE: 16:47:14:(---param:Debug...)
+VERBOSE: 16:47:14:(---param:ErrorAction...)
+VERBOSE: 16:47:14:(---param:WarningAction...)
+VERBOSE: 16:47:14:(---param:InformationAction...)
+VERBOSE: 16:47:14:(---param:ErrorVariable...)
+VERBOSE: 16:47:14:(---param:WarningVariable...)
+VERBOSE: 16:47:14:(---param:InformationVariable...)
+VERBOSE: 16:47:14:(---param:OutVariable...)
+VERBOSE: 16:47:14:(---param:OutBuffer...)
+VERBOSE: 16:47:14:(---param:PipelineVariable...)
+VERBOSE: 16:47:14:(=cmd:test-URI...)
+VERBOSE: 16:47:14:(---param:String...)
+VERBOSE: 16:47:14:(---param:PermitHttp...)
+VERBOSE: 16:47:14:(---param:Verbose...)
+VERBOSE: 16:47:14:(---param:Debug...)
+VERBOSE: 16:47:14:(---param:ErrorAction...)
+VERBOSE: 16:47:14:(---param:WarningAction...)
+VERBOSE: 16:47:14:(---param:InformationAction...)
+VERBOSE: 16:47:14:(---param:ErrorVariable...)
+VERBOSE: 16:47:14:(---param:WarningVariable...)
+VERBOSE: 16:47:14:(---param:InformationVariable...)
+VERBOSE: 16:47:14:(---param:OutVariable...)
+VERBOSE: 16:47:14:(---param:OutBuffer...)
+VERBOSE: 16:47:14:(---param:PipelineVariable...)
+VERBOSE: 16:47:14:(=cmd:unwrap-text...)
+VERBOSE: 16:47:14:(---param:Text...)
+VERBOSE: 16:47:14:(---param:Verbose...)
+VERBOSE: 16:47:14:(---param:Debug...)
+VERBOSE: 16:47:14:(---param:ErrorAction...)
+VERBOSE: 16:47:15:(---param:WarningAction...)
+VERBOSE: 16:47:15:(---param:InformationAction...)
+VERBOSE: 16:47:15:(---param:ErrorVariable...)
+VERBOSE: 16:47:15:(---param:WarningVariable...)
+VERBOSE: 16:47:15:(---param:InformationVariable...)
+VERBOSE: 16:47:15:(---param:OutVariable...)
+VERBOSE: 16:47:15:(---param:OutBuffer...)
+VERBOSE: 16:47:15:(---param:PipelineVariable...)
+VERBOSE: 16:47:15:(=cmd:Unwrap-TextN...)
+VERBOSE: 16:47:15:(---param:Text...)
+VERBOSE: 16:47:15:(---param:Verbose...)
+VERBOSE: 16:47:15:(---param:Debug...)
+VERBOSE: 16:47:15:(---param:ErrorAction...)
+VERBOSE: 16:47:15:(---param:WarningAction...)
+VERBOSE: 16:47:15:(---param:InformationAction...)
+VERBOSE: 16:47:15:(---param:ErrorVariable...)
+VERBOSE: 16:47:15:(---param:WarningVariable...)
+VERBOSE: 16:47:15:(---param:InformationVariable...)
+VERBOSE: 16:47:15:(---param:OutVariable...)
+VERBOSE: 16:47:15:(---param:OutBuffer...)
+VERBOSE: 16:47:15:(---param:PipelineVariable...)
+VERBOSE: 16:47:15:(=cmd:wrap-text...)
+VERBOSE: 16:47:15:(---param:Text...)
+VERBOSE: 16:47:15:(---param:Characters...)
+VERBOSE: 16:47:15:(---param:Verbose...)
+VERBOSE: 16:47:15:(---param:Debug...)
+VERBOSE: 16:47:15:(---param:ErrorAction...)
+VERBOSE: 16:47:15:(---param:WarningAction...)
+VERBOSE: 16:47:15:(---param:InformationAction...)
+VERBOSE: 16:47:15:(---param:ErrorVariable...)
+VERBOSE: 16:47:15:(---param:WarningVariable...)
+VERBOSE: 16:47:15:(---param:InformationVariable...)
+VERBOSE: 16:47:15:(---param:OutVariable...)
+VERBOSE: 16:47:15:(---param:OutBuffer...)
+VERBOSE: 16:47:15:(---param:PipelineVariable...)
+VERBOSE: 16:47:15:(=cmd:compare-CodeRevision...)
+VERBOSE: 16:47:15:(---param:Reference...)
+VERBOSE: 16:47:15:(---param:Difference...)
+VERBOSE: 16:47:15:(---param:NoLineNumbers...)
+VERBOSE: 16:47:15:(---param:Verbose...)
+VERBOSE: 16:47:15:(---param:Debug...)
+VERBOSE: 16:47:15:(---param:ErrorAction...)
+VERBOSE: 16:47:15:(---param:WarningAction...)
+VERBOSE: 16:47:15:(---param:InformationAction...)
+VERBOSE: 16:47:15:(---param:ErrorVariable...)
+VERBOSE: 16:47:15:(---param:WarningVariable...)
+VERBOSE: 16:47:15:(---param:InformationVariable...)
+VERBOSE: 16:47:15:(---param:OutVariable...)
+VERBOSE: 16:47:15:(---param:OutBuffer...)
+VERBOSE: 16:47:15:(---param:PipelineVariable...)
+VERBOSE: 16:47:15:(=cmd:convert-CaesarCipher...)
+VERBOSE: 16:47:15:(---param:string...)
+VERBOSE: 16:47:15:(---param:key...)
+VERBOSE: 16:47:15:(---param:Decode...)
+VERBOSE: 16:47:15:(---param:Verbose...)
+VERBOSE: 16:47:15:(---param:Debug...)
+VERBOSE: 16:47:15:(---param:ErrorAction...)
+VERBOSE: 16:47:15:(---param:WarningAction...)
+VERBOSE: 16:47:15:(---param:InformationAction...)
+VERBOSE: 16:47:15:(---param:ErrorVariable...)
+VERBOSE: 16:47:15:(---param:WarningVariable...)
+VERBOSE: 16:47:15:(---param:InformationVariable...)
+VERBOSE: 16:47:15:(---param:OutVariable...)
+VERBOSE: 16:47:15:(---param:OutBuffer...)
+VERBOSE: 16:47:15:(---param:PipelineVariable...)
+VERBOSE: 16:47:15:(=cmd:convertFrom-Base64String...)
+VERBOSE: 16:47:15:(---param:string...)
+VERBOSE: 16:47:15:(---param:SourceFile...)
+VERBOSE: 16:47:15:(---param:TargetFile...)
+VERBOSE: 16:47:15:(---param:Verbose...)
+VERBOSE: 16:47:15:(---param:Debug...)
+VERBOSE: 16:47:15:(---param:ErrorAction...)
+VERBOSE: 16:47:15:(---param:WarningAction...)
+VERBOSE: 16:47:15:(---param:InformationAction...)
+VERBOSE: 16:47:15:(---param:ErrorVariable...)
+VERBOSE: 16:47:15:(---param:WarningVariable...)
+VERBOSE: 16:47:15:(---param:InformationVariable...)
+VERBOSE: 16:47:15:(---param:OutVariable...)
+VERBOSE: 16:47:15:(---param:OutBuffer...)
+VERBOSE: 16:47:15:(---param:PipelineVariable...)
+VERBOSE: 16:47:15:(=cmd:convertFrom-Html...)
+VERBOSE: 16:47:15:(---param:string...)
+VERBOSE: 16:47:15:(---param:File...)
+VERBOSE: 16:47:15:(---param:Verbose...)
+VERBOSE: 16:47:15:(---param:Debug...)
+VERBOSE: 16:47:15:(---param:ErrorAction...)
+VERBOSE: 16:47:15:(---param:WarningAction...)
+VERBOSE: 16:47:15:(---param:InformationAction...)
+VERBOSE: 16:47:15:(---param:ErrorVariable...)
+VERBOSE: 16:47:15:(---param:WarningVariable...)
+VERBOSE: 16:47:15:(---param:InformationVariable...)
+VERBOSE: 16:47:15:(---param:OutVariable...)
+VERBOSE: 16:47:15:(---param:OutBuffer...)
+VERBOSE: 16:47:15:(---param:PipelineVariable...)
+VERBOSE: 16:47:15:(=cmd:Convert-invertCase...)
+VERBOSE: 16:47:15:(---param:string...)
+VERBOSE: 16:47:15:(---param:Verbose...)
+VERBOSE: 16:47:15:(---param:Debug...)
+VERBOSE: 16:47:15:(---param:ErrorAction...)
+VERBOSE: 16:47:15:(---param:WarningAction...)
+VERBOSE: 16:47:15:(---param:InformationAction...)
+VERBOSE: 16:47:15:(---param:ErrorVariable...)
+VERBOSE: 16:47:15:(---param:WarningVariable...)
+VERBOSE: 16:47:15:(---param:InformationVariable...)
+VERBOSE: 16:47:15:(---param:OutVariable...)
+VERBOSE: 16:47:15:(---param:OutBuffer...)
+VERBOSE: 16:47:15:(---param:PipelineVariable...)
+VERBOSE: 16:47:15:(=cmd:convert-Rot13...)
+VERBOSE: 16:47:15:(---param:string...)
+VERBOSE: 16:47:15:(---param:Verbose...)
+VERBOSE: 16:47:15:(---param:Debug...)
+VERBOSE: 16:47:15:(---param:ErrorAction...)
+VERBOSE: 16:47:15:(---param:WarningAction...)
+VERBOSE: 16:47:15:(---param:InformationAction...)
+VERBOSE: 16:47:15:(---param:ErrorVariable...)
+VERBOSE: 16:47:15:(---param:WarningVariable...)
+VERBOSE: 16:47:15:(---param:InformationVariable...)
+VERBOSE: 16:47:15:(---param:OutVariable...)
+VERBOSE: 16:47:15:(---param:OutBuffer...)
+VERBOSE: 16:47:15:(---param:PipelineVariable...)
+VERBOSE: 16:47:15:(=cmd:convert-Rot47...)
+VERBOSE: 16:47:15:(---param:string...)
+VERBOSE: 16:47:15:(---param:Verbose...)
+VERBOSE: 16:47:15:(---param:Debug...)
+VERBOSE: 16:47:15:(---param:ErrorAction...)
+VERBOSE: 16:47:15:(---param:WarningAction...)
+VERBOSE: 16:47:15:(---param:InformationAction...)
+VERBOSE: 16:47:15:(---param:ErrorVariable...)
+VERBOSE: 16:47:15:(---param:WarningVariable...)
+VERBOSE: 16:47:15:(---param:InformationVariable...)
+VERBOSE: 16:47:15:(---param:OutVariable...)
+VERBOSE: 16:47:16:(---param:OutBuffer...)
+VERBOSE: 16:47:16:(---param:PipelineVariable...)
+VERBOSE: 16:47:16:(=cmd:convertTo-Base64String...)
+VERBOSE: 16:47:16:(---param:string...)
+VERBOSE: 16:47:16:(---param:SourceFile...)
+VERBOSE: 16:47:16:(---param:TargetFile...)
+VERBOSE: 16:47:16:(---param:Verbose...)
+VERBOSE: 16:47:16:(---param:Debug...)
+VERBOSE: 16:47:16:(---param:ErrorAction...)
+VERBOSE: 16:47:16:(---param:WarningAction...)
+VERBOSE: 16:47:16:(---param:InformationAction...)
+VERBOSE: 16:47:16:(---param:ErrorVariable...)
+VERBOSE: 16:47:16:(---param:WarningVariable...)
+VERBOSE: 16:47:16:(---param:InformationVariable...)
+VERBOSE: 16:47:16:(---param:OutVariable...)
+VERBOSE: 16:47:16:(---param:OutBuffer...)
+VERBOSE: 16:47:16:(---param:PipelineVariable...)
+VERBOSE: 16:47:16:(=cmd:ConvertTo-CamelCase...)
+VERBOSE: 16:47:16:(---param:string...)
+VERBOSE: 16:47:16:(---param:AlphaNumeric...)
+VERBOSE: 16:47:16:(---param:Verbose...)
+VERBOSE: 16:47:16:(---param:Debug...)
+VERBOSE: 16:47:16:(---param:ErrorAction...)
+VERBOSE: 16:47:16:(---param:WarningAction...)
+VERBOSE: 16:47:16:(---param:InformationAction...)
+VERBOSE: 16:47:16:(---param:ErrorVariable...)
+VERBOSE: 16:47:16:(---param:WarningVariable...)
+VERBOSE: 16:47:16:(---param:InformationVariable...)
+VERBOSE: 16:47:16:(---param:OutVariable...)
+VERBOSE: 16:47:16:(---param:OutBuffer...)
+VERBOSE: 16:47:16:(---param:PipelineVariable...)
+VERBOSE: 16:47:16:(=cmd:ConvertTo-L33t...)
+VERBOSE: 16:47:16:(---param:string...)
+VERBOSE: 16:47:16:(---param:VowelsOnly...)
+VERBOSE: 16:47:16:(---param:Verbose...)
+VERBOSE: 16:47:16:(---param:Debug...)
+VERBOSE: 16:47:16:(---param:ErrorAction...)
+VERBOSE: 16:47:16:(---param:WarningAction...)
+VERBOSE: 16:47:16:(---param:InformationAction...)
+VERBOSE: 16:47:16:(---param:ErrorVariable...)
+VERBOSE: 16:47:16:(---param:WarningVariable...)
+VERBOSE: 16:47:16:(---param:InformationVariable...)
+VERBOSE: 16:47:16:(---param:OutVariable...)
+VERBOSE: 16:47:16:(---param:OutBuffer...)
+VERBOSE: 16:47:16:(---param:PipelineVariable...)
+VERBOSE: 16:47:16:(=cmd:ConvertTo-lowerCamelCase...)
+VERBOSE: 16:47:16:(---param:string...)
+VERBOSE: 16:47:16:(---param:AlphaNumeric...)
+VERBOSE: 16:47:16:(---param:Verbose...)
+VERBOSE: 16:47:16:(---param:Debug...)
+VERBOSE: 16:47:16:(---param:ErrorAction...)
+VERBOSE: 16:47:16:(---param:WarningAction...)
+VERBOSE: 16:47:16:(---param:InformationAction...)
+VERBOSE: 16:47:16:(---param:ErrorVariable...)
+VERBOSE: 16:47:16:(---param:WarningVariable...)
+VERBOSE: 16:47:16:(---param:InformationVariable...)
+VERBOSE: 16:47:16:(---param:OutVariable...)
+VERBOSE: 16:47:16:(---param:OutBuffer...)
+VERBOSE: 16:47:16:(---param:PipelineVariable...)
+VERBOSE: 16:47:16:(=cmd:convertTo-PSHelpExample...)
+VERBOSE: 16:47:16:(---param:ScriptBlock...)
+VERBOSE: 16:47:16:(---param:Wrap...)
+VERBOSE: 16:47:16:(---param:NoPad...)
+VERBOSE: 16:47:16:(---param:Verbose...)
+VERBOSE: 16:47:16:(---param:Debug...)
+VERBOSE: 16:47:16:(---param:ErrorAction...)
+VERBOSE: 16:47:16:(---param:WarningAction...)
+VERBOSE: 16:47:16:(---param:InformationAction...)
+VERBOSE: 16:47:16:(---param:ErrorVariable...)
+VERBOSE: 16:47:16:(---param:WarningVariable...)
+VERBOSE: 16:47:16:(---param:InformationVariable...)
+VERBOSE: 16:47:16:(---param:OutVariable...)
+VERBOSE: 16:47:16:(---param:OutBuffer...)
+VERBOSE: 16:47:16:(---param:PipelineVariable...)
+VERBOSE: 16:47:16:(=cmd:convertTo-QuotedList...)
+VERBOSE: 16:47:16:(---param:List...)
+VERBOSE: 16:47:16:(---param:Verbose...)
+VERBOSE: 16:47:16:(---param:Debug...)
+VERBOSE: 16:47:16:(---param:ErrorAction...)
+VERBOSE: 16:47:16:(---param:WarningAction...)
+VERBOSE: 16:47:16:(---param:InformationAction...)
+VERBOSE: 16:47:16:(---param:ErrorVariable...)
+VERBOSE: 16:47:16:(---param:WarningVariable...)
+VERBOSE: 16:47:16:(---param:InformationVariable...)
+VERBOSE: 16:47:16:(---param:OutVariable...)
+VERBOSE: 16:47:16:(---param:OutBuffer...)
+VERBOSE: 16:47:16:(---param:PipelineVariable...)
+VERBOSE: 16:47:16:(=cmd:ConvertTo-SCase...)
+VERBOSE: 16:47:16:(---param:string...)
+VERBOSE: 16:47:16:(---param:Verbose...)
+VERBOSE: 16:47:16:(---param:Debug...)
+VERBOSE: 16:47:16:(---param:ErrorAction...)
+VERBOSE: 16:47:16:(---param:WarningAction...)
+VERBOSE: 16:47:16:(---param:InformationAction...)
+VERBOSE: 16:47:16:(---param:ErrorVariable...)
+VERBOSE: 16:47:16:(---param:WarningVariable...)
+VERBOSE: 16:47:16:(---param:InformationVariable...)
+VERBOSE: 16:47:16:(---param:OutVariable...)
+VERBOSE: 16:47:16:(---param:OutBuffer...)
+VERBOSE: 16:47:16:(---param:PipelineVariable...)
+VERBOSE: 16:47:16:(=cmd:ConvertTo-SNAKE_CASE...)
+VERBOSE: 16:47:16:(---param:string...)
+VERBOSE: 16:47:16:(---param:AlphaNumeric...)
+VERBOSE: 16:47:16:(---param:useLower...)
+VERBOSE: 16:47:16:(---param:Verbose...)
+VERBOSE: 16:47:16:(---param:Debug...)
+VERBOSE: 16:47:16:(---param:ErrorAction...)
+VERBOSE: 16:47:16:(---param:WarningAction...)
+VERBOSE: 16:47:16:(---param:InformationAction...)
+VERBOSE: 16:47:16:(---param:ErrorVariable...)
+VERBOSE: 16:47:16:(---param:WarningVariable...)
+VERBOSE: 16:47:16:(---param:InformationVariable...)
+VERBOSE: 16:47:16:(---param:OutVariable...)
+VERBOSE: 16:47:16:(---param:OutBuffer...)
+VERBOSE: 16:47:16:(---param:PipelineVariable...)
+VERBOSE: 16:47:16:(=cmd:ConvertTo-StringQuoted...)
+VERBOSE: 16:47:16:(---param:String...)
+VERBOSE: 16:47:16:(---param:Verbose...)
+VERBOSE: 16:47:16:(---param:Debug...)
+VERBOSE: 16:47:16:(---param:ErrorAction...)
+VERBOSE: 16:47:16:(---param:WarningAction...)
+VERBOSE: 16:47:16:(---param:InformationAction...)
+VERBOSE: 16:47:16:(---param:ErrorVariable...)
+VERBOSE: 16:47:16:(---param:WarningVariable...)
+VERBOSE: 16:47:16:(---param:InformationVariable...)
+VERBOSE: 16:47:16:(---param:OutVariable...)
+VERBOSE: 16:47:16:(---param:OutBuffer...)
+VERBOSE: 16:47:16:(---param:PipelineVariable...)
+VERBOSE: 16:47:16:(=cmd:convertTo-StringReverse...)
+VERBOSE: 16:47:16:(---param:string...)
+VERBOSE: 16:47:16:(---param:Verbose...)
+VERBOSE: 16:47:16:(---param:Debug...)
+VERBOSE: 16:47:16:(---param:ErrorAction...)
+VERBOSE: 16:47:16:(---param:WarningAction...)
+VERBOSE: 16:47:16:(---param:InformationAction...)
+VERBOSE: 16:47:16:(---param:ErrorVariable...)
+VERBOSE: 16:47:16:(---param:WarningVariable...)
+VERBOSE: 16:47:16:(---param:InformationVariable...)
+VERBOSE: 16:47:16:(---param:OutVariable...)
+VERBOSE: 16:47:16:(---param:OutBuffer...)
+VERBOSE: 16:47:16:(---param:PipelineVariable...)
+VERBOSE: 16:47:16:(=cmd:convertTo-StUdlycaPs...)
+VERBOSE: 16:47:16:(---param:string...)
+VERBOSE: 16:47:16:(---param:Verbose...)
+VERBOSE: 16:47:16:(---param:Debug...)
+VERBOSE: 16:47:16:(---param:ErrorAction...)
+VERBOSE: 16:47:16:(---param:WarningAction...)
+VERBOSE: 16:47:16:(---param:InformationAction...)
+VERBOSE: 16:47:16:(---param:ErrorVariable...)
+VERBOSE: 16:47:16:(---param:WarningVariable...)
+VERBOSE: 16:47:16:(---param:InformationVariable...)
+VERBOSE: 16:47:16:(---param:OutVariable...)
+VERBOSE: 16:47:16:(---param:OutBuffer...)
+VERBOSE: 16:47:16:(---param:PipelineVariable...)
+VERBOSE: 16:47:16:(=cmd:convertTo-TitleCase...)
+VERBOSE: 16:47:16:(---param:string...)
+VERBOSE: 16:47:16:(---param:Verbose...)
+VERBOSE: 16:47:16:(---param:Debug...)
+VERBOSE: 16:47:16:(---param:ErrorAction...)
+VERBOSE: 16:47:16:(---param:WarningAction...)
+VERBOSE: 16:47:16:(---param:InformationAction...)
+VERBOSE: 16:47:16:(---param:ErrorVariable...)
+VERBOSE: 16:47:16:(---param:WarningVariable...)
+VERBOSE: 16:47:16:(---param:InformationVariable...)
+VERBOSE: 16:47:16:(---param:OutVariable...)
+VERBOSE: 16:47:16:(---param:OutBuffer...)
+VERBOSE: 16:47:16:(---param:PipelineVariable...)
+VERBOSE: 16:47:16:(=cmd:convertTo-UnWrappedText...)
+VERBOSE: 16:47:16:(---param:Text...)
+VERBOSE: 16:47:16:(---param:Verbose...)
+VERBOSE: 16:47:16:(---param:Debug...)
+VERBOSE: 16:47:16:(---param:ErrorAction...)
+VERBOSE: 16:47:16:(---param:WarningAction...)
+VERBOSE: 16:47:16:(---param:InformationAction...)
+VERBOSE: 16:47:16:(---param:ErrorVariable...)
+VERBOSE: 16:47:16:(---param:WarningVariable...)
+VERBOSE: 16:47:16:(---param:InformationVariable...)
+VERBOSE: 16:47:16:(---param:OutVariable...)
+VERBOSE: 16:47:16:(---param:OutBuffer...)
+VERBOSE: 16:47:16:(---param:PipelineVariable...)
+VERBOSE: 16:47:16:(=cmd:convertTo-WordsReverse...)
+VERBOSE: 16:47:16:(---param:lines...)
+VERBOSE: 16:47:16:(---param:TextOnly...)
+VERBOSE: 16:47:16:(---param:Verbose...)
+VERBOSE: 16:47:16:(---param:Debug...)
+VERBOSE: 16:47:16:(---param:ErrorAction...)
+VERBOSE: 16:47:16:(---param:WarningAction...)
+VERBOSE: 16:47:16:(---param:InformationAction...)
+VERBOSE: 16:47:16:(---param:ErrorVariable...)
+VERBOSE: 16:47:16:(---param:WarningVariable...)
+VERBOSE: 16:47:16:(---param:InformationVariable...)
+VERBOSE: 16:47:16:(---param:OutVariable...)
+VERBOSE: 16:47:16:(---param:OutBuffer...)
+VERBOSE: 16:47:16:(---param:PipelineVariable...)
+VERBOSE: 16:47:16:(=cmd:convertTo-WrappedText...)
+VERBOSE: 16:47:16:(---param:Text...)
+VERBOSE: 16:47:16:(---param:Characters...)
+VERBOSE: 16:47:16:(---param:Verbose...)
+VERBOSE: 16:47:16:(---param:Debug...)
+VERBOSE: 16:47:16:(---param:ErrorAction...)
+VERBOSE: 16:47:16:(---param:WarningAction...)
+VERBOSE: 16:47:16:(---param:InformationAction...)
+VERBOSE: 16:47:16:(---param:ErrorVariable...)
+VERBOSE: 16:47:16:(---param:WarningVariable...)
+VERBOSE: 16:47:16:(---param:InformationVariable...)
+VERBOSE: 16:47:17:(---param:OutVariable...)
+VERBOSE: 16:47:17:(---param:OutBuffer...)
+VERBOSE: 16:47:17:(---param:PipelineVariable...)
+VERBOSE: 16:47:17:(=cmd:create-AcronymFromCaps...)
+VERBOSE: 16:47:17:(---param:String...)
+VERBOSE: 16:47:17:(---param:doEXOSubstitution...)
+VERBOSE: 16:47:17:(---param:Verbose...)
+VERBOSE: 16:47:17:(---param:Debug...)
+VERBOSE: 16:47:17:(---param:ErrorAction...)
+VERBOSE: 16:47:17:(---param:WarningAction...)
+VERBOSE: 16:47:17:(---param:InformationAction...)
+VERBOSE: 16:47:17:(---param:ErrorVariable...)
+VERBOSE: 16:47:17:(---param:WarningVariable...)
+VERBOSE: 16:47:17:(---param:InformationVariable...)
+VERBOSE: 16:47:17:(---param:OutVariable...)
+VERBOSE: 16:47:17:(---param:OutBuffer...)
+VERBOSE: 16:47:17:(---param:PipelineVariable...)
+VERBOSE: 16:47:17:(=cmd:get-StringHash...)
+VERBOSE: 16:47:17:(---param:String...)
+VERBOSE: 16:47:17:(---param:Algorithm...)
+VERBOSE: 16:47:17:(---param:Verbose...)
+VERBOSE: 16:47:17:(---param:Debug...)
+VERBOSE: 16:47:17:(---param:ErrorAction...)
+VERBOSE: 16:47:17:(---param:WarningAction...)
+VERBOSE: 16:47:17:(---param:InformationAction...)
+VERBOSE: 16:47:17:(---param:ErrorVariable...)
+VERBOSE: 16:47:17:(---param:WarningVariable...)
+VERBOSE: 16:47:17:(---param:InformationVariable...)
+VERBOSE: 16:47:17:(---param:OutVariable...)
+VERBOSE: 16:47:17:(---param:OutBuffer...)
+VERBOSE: 16:47:17:(---param:PipelineVariable...)
+VERBOSE: 16:47:17:(=cmd:Remove-StringDiacritic...)
+VERBOSE: 16:47:17:(---param:String...)
+VERBOSE: 16:47:17:(---param:NormalizationForm...)
+VERBOSE: 16:47:17:(---param:Verbose...)
+VERBOSE: 16:47:17:(---param:Debug...)
+VERBOSE: 16:47:17:(---param:ErrorAction...)
+VERBOSE: 16:47:17:(---param:WarningAction...)
+VERBOSE: 16:47:17:(---param:InformationAction...)
+VERBOSE: 16:47:17:(---param:ErrorVariable...)
+VERBOSE: 16:47:17:(---param:WarningVariable...)
+VERBOSE: 16:47:17:(---param:InformationVariable...)
+VERBOSE: 16:47:17:(---param:OutVariable...)
+VERBOSE: 16:47:17:(---param:OutBuffer...)
+VERBOSE: 16:47:17:(---param:PipelineVariable...)
+VERBOSE: 16:47:17:(=cmd:Remove-StringLatinCharacters...)
+VERBOSE: 16:47:17:(---param:String...)
+VERBOSE: 16:47:17:(---param:Verbose...)
+VERBOSE: 16:47:17:(---param:Debug...)
+VERBOSE: 16:47:17:(---param:ErrorAction...)
+VERBOSE: 16:47:17:(---param:WarningAction...)
+VERBOSE: 16:47:17:(---param:InformationAction...)
+VERBOSE: 16:47:17:(---param:ErrorVariable...)
+VERBOSE: 16:47:17:(---param:WarningVariable...)
+VERBOSE: 16:47:17:(---param:InformationVariable...)
+VERBOSE: 16:47:17:(---param:OutVariable...)
+VERBOSE: 16:47:17:(---param:OutBuffer...)
+VERBOSE: 16:47:17:(---param:PipelineVariable...)
+VERBOSE: 16:47:17:(=cmd:Test-IsGuid...)
+VERBOSE: 16:47:17:(---param:String...)
+VERBOSE: 16:47:17:(---param:Verbose...)
+VERBOSE: 16:47:17:(---param:Debug...)
+VERBOSE: 16:47:17:(---param:ErrorAction...)
+VERBOSE: 16:47:17:(---param:WarningAction...)
+VERBOSE: 16:47:17:(---param:InformationAction...)
+VERBOSE: 16:47:17:(---param:ErrorVariable...)
+VERBOSE: 16:47:17:(---param:WarningVariable...)
+VERBOSE: 16:47:17:(---param:InformationVariable...)
+VERBOSE: 16:47:17:(---param:OutVariable...)
+VERBOSE: 16:47:17:(---param:OutBuffer...)
+VERBOSE: 16:47:17:(---param:PipelineVariable...)
+VERBOSE: 16:47:17:(=cmd:test-IsNumeric...)
+VERBOSE: 16:47:17:(---param:value...)
+VERBOSE: 16:47:17:(---param:Verbose...)
+VERBOSE: 16:47:17:(---param:Debug...)
+VERBOSE: 16:47:17:(---param:ErrorAction...)
+VERBOSE: 16:47:17:(---param:WarningAction...)
+VERBOSE: 16:47:17:(---param:InformationAction...)
+VERBOSE: 16:47:17:(---param:ErrorVariable...)
+VERBOSE: 16:47:17:(---param:WarningVariable...)
+VERBOSE: 16:47:17:(---param:InformationVariable...)
+VERBOSE: 16:47:17:(---param:OutVariable...)
+VERBOSE: 16:47:17:(---param:OutBuffer...)
+VERBOSE: 16:47:17:(---param:PipelineVariable...)
+VERBOSE: 16:47:17:(=cmd:test-IsRegexPattern...)
+VERBOSE: 16:47:17:(---param:string...)
+VERBOSE: 16:47:17:(---param:Threshold...)
+VERBOSE: 16:47:17:(---param:ReturnScore...)
+VERBOSE: 16:47:17:(---param:Verbose...)
+VERBOSE: 16:47:17:(---param:Debug...)
+VERBOSE: 16:47:17:(---param:ErrorAction...)
+VERBOSE: 16:47:17:(---param:WarningAction...)
+VERBOSE: 16:47:17:(---param:InformationAction...)
+VERBOSE: 16:47:17:(---param:ErrorVariable...)
+VERBOSE: 16:47:17:(---param:WarningVariable...)
+VERBOSE: 16:47:17:(---param:InformationVariable...)
+VERBOSE: 16:47:17:(---param:OutVariable...)
+VERBOSE: 16:47:17:(---param:OutBuffer...)
+VERBOSE: 16:47:17:(---param:PipelineVariable...)
+VERBOSE: 16:47:17:(=cmd:test-IsRegexValid...)
+VERBOSE: 16:47:17:(---param:pattern...)
+VERBOSE: 16:47:17:(---param:Verbose...)
+VERBOSE: 16:47:17:(---param:Debug...)
+VERBOSE: 16:47:17:(---param:ErrorAction...)
+VERBOSE: 16:47:17:(---param:WarningAction...)
+VERBOSE: 16:47:17:(---param:InformationAction...)
+VERBOSE: 16:47:17:(---param:ErrorVariable...)
+VERBOSE: 16:47:17:(---param:WarningVariable...)
+VERBOSE: 16:47:17:(---param:InformationVariable...)
+VERBOSE: 16:47:17:(---param:OutVariable...)
+VERBOSE: 16:47:17:(---param:OutBuffer...)
+VERBOSE: 16:47:17:(---param:PipelineVariable...)
+VERBOSE: 16:47:17:(=cmd:test-IsUri...)
+VERBOSE: 16:47:17:(---param:String...)
+VERBOSE: 16:47:17:(---param:PermitHttp...)
+VERBOSE: 16:47:17:(---param:Verbose...)
+VERBOSE: 16:47:17:(---param:Debug...)
+VERBOSE: 16:47:17:(---param:ErrorAction...)
+VERBOSE: 16:47:17:(---param:WarningAction...)
+VERBOSE: 16:47:17:(---param:InformationAction...)
+VERBOSE: 16:47:17:(---param:ErrorVariable...)
+VERBOSE: 16:47:17:(---param:WarningVariable...)
+VERBOSE: 16:47:17:(---param:InformationVariable...)
+VERBOSE: 16:47:17:(---param:OutVariable...)
+VERBOSE: 16:47:17:(---param:OutBuffer...)
+VERBOSE: 16:47:17:(---param:PipelineVariable...)
+16:47:17:Detecting new features
+16:47:18:Detecting breaking changes
+VERBOSE: (backup-FileTDO -path C:\sc\verb-Text\fingerprint)
+16:47:20:Writing fingerprint: Out-File w
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+Encoding                       utf8                                                                                                        
+FilePath                       C:\sc\verb-Text\fingerprint                                                                                 
+whatif                         False                                                                                                       
+Verbose                        True
+VERBOSE: Performing the operation "Output to File" on target "C:\sc\verb-Text\fingerprint".
+16:47:20:
+
+Fingerprint analysis recommends ModuleVersion Step:Major. 
+
+This can be implemented with the following command:
+
+Step-ModuleVersion -Path C:\sc\verb-Text\verb-Text\verb-Text.psd1 -By Major
+
+(the above will use the BuildHelpers module to update the revision stored in the Manifest .psd1 file for the module).
+VERBOSE: 16:47:20:Minor/New-Feature Chgs:
+convertFrom-Base64String:SourceFile
+
+  convertFrom-Base64String:TargetFile
+
+  convertTo-Base64String:SourceFile
+
+  convertTo-Base64String:TargetFile
+
+  Test-IsGuid:String
+
+  Test-IsGuid:Verbose
+
+  Test-IsGuid:vb
+
+  Test-IsGuid:Debug
+
+  Test-IsGuid:db
+
+  Test-IsGuid:ErrorAction
+
+  Test-IsGuid:ea
+
+  Test-IsGuid:WarningAction
+
+  Test-IsGuid:wa
+
+  Test-IsGuid:InformationAction
+
+  Test-IsGuid:infa
+
+  Test-IsGuid:ErrorVariable
+
+  Test-IsGuid:ev
+
+  Test-IsGuid:WarningVariable
+
+  Test-IsGuid:wv
+
+  Test-IsGuid:InformationVariable
+
+  Test-IsGuid:iv
+
+  Test-IsGuid:OutVariable
+
+  Test-IsGuid:ov
+
+  Test-IsGuid:OutBuffer
+
+  Test-IsGuid:ob
+
+  Test-IsGuid:PipelineVariable
+
+  Test-IsGuid:pv
+
+  test-IsUri:String
+
+  test-IsUri:UriString
+
+  test-IsUri:PermitHttp
+
+  test-IsUri:Verbose
+
+  test-IsUri:vb
+
+  test-IsUri:Debug
+
+  test-IsUri:db
+
+  test-IsUri:ErrorAction
+
+  test-IsUri:ea
+
+  test-IsUri:WarningAction
+
+  test-IsUri:wa
+
+  test-IsUri:InformationAction
+
+  test-IsUri:infa
+
+  test-IsUri:ErrorVariable
+
+  test-IsUri:ev
+
+  test-IsUri:WarningVariable
+
+  test-IsUri:wv
+
+  test-IsUri:InformationVariable
+
+  test-IsUri:iv
+
+  test-IsUri:OutVariable
+
+  test-IsUri:ov
+
+  test-IsUri:OutBuffer
+
+  test-IsUri:ob
+
+  test-IsUri:PipelineVariable
+
+  test-IsUri:pv
+
+Major/Removal/Breaking Chgs:
+unwrap-PS:ScriptBlock
+
+  unwrap-PS:Code
+
+  unwrap-PS:Verbose
+
+  unwrap-PS:vb
+
+  unwrap-PS:Debug
+
+  unwrap-PS:db
+
+  unwrap-PS:ErrorAction
+
+  unwrap-PS:ea
+
+  unwrap-PS:WarningAction
+
+  unwrap-PS:wa
+
+  unwrap-PS:InformationAction
+
+  unwrap-PS:infa
+
+  unwrap-PS:ErrorVariable
+
+  unwrap-PS:ev
+
+  unwrap-PS:WarningVariable
+
+  unwrap-PS:wv
+
+  unwrap-PS:InformationVariable
+
+  unwrap-PS:iv
+
+  unwrap-PS:OutVariable
+
+  unwrap-PS:ov
+
+  unwrap-PS:OutBuffer
+
+  unwrap-PS:ob
+
+  unwrap-PS:PipelineVariable
+
+  unwrap-PS:pv
+
+  wrap-PS:ScriptBlock
+
+  wrap-PS:Code
+
+  wrap-PS:Verbose
+
+  wrap-PS:vb
+
+  wrap-PS:Debug
+
+  wrap-PS:db
+
+  wrap-PS:ErrorAction
+
+  wrap-PS:ea
+
+  wrap-PS:WarningAction
+
+  wrap-PS:wa
+
+  wrap-PS:InformationAction
+
+  wrap-PS:infa
+
+  wrap-PS:ErrorVariable
+
+  wrap-PS:ev
+
+  wrap-PS:WarningVariable
+
+  wrap-PS:wv
+
+  wrap-PS:InformationVariable
+
+  wrap-PS:iv
+
+  wrap-PS:OutVariable
+
+  wrap-PS:ov
+
+  wrap-PS:OutBuffer
+
+  wrap-PS:ob
+
+  wrap-PS:PipelineVariable
+
+  wrap-PS:pv
+
+  convertFrom-EscapedPSText:ScriptBlock
+
+  convertFrom-EscapedPSText:Code
+
+  convertFrom-EscapedPSText:Verbose
+
+  convertFrom-EscapedPSText:vb
+
+  convertFrom-EscapedPSText:Debug
+
+  convertFrom-EscapedPSText:db
+
+  convertFrom-EscapedPSText:ErrorAction
+
+  convertFrom-EscapedPSText:ea
+
+  convertFrom-EscapedPSText:WarningAction
+
+  convertFrom-EscapedPSText:wa
+
+  convertFrom-EscapedPSText:InformationAction
+
+  convertFrom-EscapedPSText:infa
+
+  convertFrom-EscapedPSText:ErrorVariable
+
+  convertFrom-EscapedPSText:ev
+
+  convertFrom-EscapedPSText:WarningVariable
+
+  convertFrom-EscapedPSText:wv
+
+  convertFrom-EscapedPSText:InformationVariable
+
+  convertFrom-EscapedPSText:iv
+
+  convertFrom-EscapedPSText:OutVariable
+
+  convertFrom-EscapedPSText:ov
+
+  convertFrom-EscapedPSText:OutBuffer
+
+  convertFrom-EscapedPSText:ob
+
+  convertFrom-EscapedPSText:PipelineVariable
+
+  convertFrom-EscapedPSText:pv
+
+  convertTo-Base64String:path
+
+  convertTo-EscapedPSText:ScriptBlock
+
+  convertTo-EscapedPSText:Code
+
+  convertTo-EscapedPSText:Verbose
+
+  convertTo-EscapedPSText:vb
+
+  convertTo-EscapedPSText:Debug
+
+  convertTo-EscapedPSText:db
+
+  convertTo-EscapedPSText:ErrorAction
+
+  convertTo-EscapedPSText:ea
+
+  convertTo-EscapedPSText:WarningAction
+
+  convertTo-EscapedPSText:wa
+
+  convertTo-EscapedPSText:InformationAction
+
+  convertTo-EscapedPSText:infa
+
+  convertTo-EscapedPSText:ErrorVariable
+
+  convertTo-EscapedPSText:ev
+
+  convertTo-EscapedPSText:WarningVariable
+
+  convertTo-EscapedPSText:wv
+
+  convertTo-EscapedPSText:InformationVariable
+
+  convertTo-EscapedPSText:iv
+
+  convertTo-EscapedPSText:OutVariable
+
+  convertTo-EscapedPSText:ov
+
+  convertTo-EscapedPSText:OutBuffer
+
+  convertTo-EscapedPSText:ob
+
+  convertTo-EscapedPSText:PipelineVariable
+
+  convertTo-EscapedPSText:pv
+
+  convertTo-UnwrappedPS:ScriptBlock
+
+  convertTo-UnwrappedPS:Code
+
+  convertTo-UnwrappedPS:Verbose
+
+  convertTo-UnwrappedPS:vb
+
+  convertTo-UnwrappedPS:Debug
+
+  convertTo-UnwrappedPS:db
+
+  convertTo-UnwrappedPS:ErrorAction
+
+  convertTo-UnwrappedPS:ea
+
+  convertTo-UnwrappedPS:WarningAction
+
+  convertTo-UnwrappedPS:wa
+
+  convertTo-UnwrappedPS:InformationAction
+
+  convertTo-UnwrappedPS:infa
+
+  convertTo-UnwrappedPS:ErrorVariable
+
+  convertTo-UnwrappedPS:ev
+
+  convertTo-UnwrappedPS:WarningVariable
+
+  convertTo-UnwrappedPS:wv
+
+  convertTo-UnwrappedPS:InformationVariable
+
+  convertTo-UnwrappedPS:iv
+
+  convertTo-UnwrappedPS:OutVariable
+
+  convertTo-UnwrappedPS:ov
+
+  convertTo-UnwrappedPS:OutBuffer
+
+  convertTo-UnwrappedPS:ob
+
+  convertTo-UnwrappedPS:PipelineVariable
+
+  convertTo-UnwrappedPS:pv
+
+  convertTo-WrappedPS:ScriptBlock
+
+  convertTo-WrappedPS:Code
+
+  convertTo-WrappedPS:Verbose
+
+  convertTo-WrappedPS:vb
+
+  convertTo-WrappedPS:Debug
+
+  convertTo-WrappedPS:db
+
+  convertTo-WrappedPS:ErrorAction
+
+  convertTo-WrappedPS:ea
+
+  convertTo-WrappedPS:WarningAction
+
+  convertTo-WrappedPS:wa
+
+  convertTo-WrappedPS:InformationAction
+
+  convertTo-WrappedPS:infa
+
+  convertTo-WrappedPS:ErrorVariable
+
+  convertTo-WrappedPS:ev
+
+  convertTo-WrappedPS:WarningVariable
+
+  convertTo-WrappedPS:wv
+
+  convertTo-WrappedPS:InformationVariable
+
+  convertTo-WrappedPS:iv
+
+  convertTo-WrappedPS:OutVariable
+
+  convertTo-WrappedPS:ov
+
+  convertTo-WrappedPS:OutBuffer
+
+  convertTo-WrappedPS:ob
+
+  convertTo-WrappedPS:PipelineVariable
+
+  convertTo-WrappedPS:pv
+16:47:21:-applyChange *not* specified, returning 'bumpVersionType' specification to pipeline:
+16:47:21:#*======^ RUNNING :Step-ModuleVersionCalculated:c:\sc\verb-Text ^======
+16:47:21:----PsdVers incremented from 4.3.0 to 5.0.0
+16:47:21:process-NewModule w
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+ModuleName                     verb-Text                                                                                                   
+ModDirPath                     c:\sc\verb-Text                                                                                             
+RequiredVersion                5.0.0                                                                                                       
+Repository                     lyncRepo                                                                                                    
+Merge                          True                                                                                                        
+RunTest                        True                                                                                                        
+showdebug                      False                                                                                                       
+whatif                         False                                                                                                       
+verbose                        True
+VERBOSE: (running verb-dev:process-NewModule)
+VERBOSE: $PSBoundParameters:
+Key             Value          
+---             -----          
+ModuleName      verb-Text      
+ModDirPath      c:\sc\verb-Text
+RequiredVersion 5.0.0          
+Repository      lyncRepo       
+Merge           True           
+RunTest         True           
+showDebug       False          
+whatIf          False          
+Verbose         True
+16:47:55:( processing $tModName:verb-logging	$tModFile:C:\sc\verb-logging\verb-logging\verb-logging.psm1	$tModCmdlet:write-log )
+VERBOSE: (confirmed verb-logging loaded: write-log present)
+16:47:55:( processing $tModName:verb-IO	$tModFile:C:\sc\verb-IO\verb-IO\verb-IO.psm1	$tModCmdlet:Add-PSTitleBar )
+VERBOSE: (confirmed verb-IO loaded: Add-PSTitleBar present)
+16:47:56:( processing $tModName:verb-Mods	$tModFile:C:\sc\verb-Mods\verb-Mods\verb-Mods.psm1	$tModCmdlet:check-ReqMods )
+VERBOSE: (confirmed verb-Mods loaded: check-ReqMods present)
+16:47:56:( processing $tModName:verb-Text	$tModFile:C:\sc\verb-Text\verb-Text\verb-Text.psm1	$tModCmdlet:Remove-StringDiacritic )
+VERBOSE: (confirmed verb-Text loaded: Remove-StringDiacritic present)
+VERBOSE: start-Log w
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+Path                           C:\sc\verb-dev\verb-dev\VERB-dev.psm1                                                                       
+NoTimeStamp                    False                                                                                                       
+Tag                            verb-Text                                                                                                   
+showdebug                      False                                                                                                       
+Verbose                        True                                                                                                        
+whatif                         False
+VERBOSE: Name                           Value                                                                                                       
+----                           -----                                                                                                       
+logging                        True                                                                                                        
+logfile                        C:\sc\verb-dev\verb-dev\logs\VERB-dev-verb-Text-LOG-BATCH-EXEC-20220908-1647PM-log.txt                      
+transcript                     C:\sc\verb-dev\verb-dev\logs\VERB-dev-verb-Text-Transcript-BATCH-EXEC-20220908-1647PM-trans-log.txt
+**********************
+Windows PowerShell transcript end
+End time: 20220908164757
+**********************

@@ -1,0 +1,24 @@
+﻿**********************
+Windows PowerShell transcript start
+Start time: 20220908164757
+Username: TORO\kadriTSS
+RunAs User: TORO\kadriTSS
+Configuration Name: 
+Machine: LYN-8DCZ1G2 (Microsoft Windows NT 10.0.17134.0)
+Host Application: C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -noexit -command $Host.UI.RawUI.BackgroundColor='Black'; $Host.UI.RawUI.ForegroundColor='Gray';cd c:\usr\work\exch\scripts\;replace-PSTitleBarText -text 'PS ADMIN' -replace 'PS ADMIN-EMS' ; 
+Process ID: 24268
+PSVersion: 5.1.17134.858
+PSEdition: Desktop
+PSCompatibleVersions: 1.0, 2.0, 3.0, 4.0, 5.0, 5.1.17134.858
+Platform: Win32NT
+BuildVersion: 10.0.17134.858
+CLRVersion: 4.0.30319.42000
+WSManStackVersion: 3.0
+OS: Microsoft Windows NT 10.0.17134.0
+PSRemotingProtocolVersion: 2.3
+SerializationVersion: 1.1.0.1
+**********************
+Transcript started, output file is C:\sc\verb-dev\verb-dev\logs\VERB-dev-verb-Text-Transcript-BATCH-EXEC-20220908-1647PM-trans-log.txt
+16:47:57: INFO: #*======v VERB-dev.psm1:verb-Text v======
+16:47:57:(executing:Get-BuildEnvironment -Path c:\sc\verb-Text 
+(use -NoBuildInfo if hangs))
