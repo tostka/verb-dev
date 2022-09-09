@@ -22,3 +22,2507 @@ Transcript started, output file is C:\sc\verb-dev\verb-dev\logs\VERB-dev-verb-Te
 16:47:57: INFO: #*======v VERB-dev.psm1:verb-Text v======
 16:47:57:(executing:Get-BuildEnvironment -Path c:\sc\verb-Text 
 (use -NoBuildInfo if hangs))
+16:47:58: INFO: NON-Republish pass detected:
+MERGE parm specified as well:`n-Merge Public|Internal|Classes include subdirs module content into updated .psm1
+-Sign updated files.
+-Uninstall/Remove existing profile module
+-Copy new module to profile
+-Confirm: Get-Module -ListAvailable
+-Check/Update existing Psd1 Version
+-Publish-Module
+-Remove existing installed profile module
+-Test Install-Module
+-Test Import-Module
+16:47:58: INFO: -Merge specified...
+16:47:58: INFO: ConvertTo-ModuleMergedTDO w
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+ModuleName                     verb-Text                                                                                                   
+ModuleSourcePath               {c:\sc\verb-Text\Public, c:\sc\verb-Text\Internal}                                                          
+ModuleDestinationPath          c:\sc\verb-Text\verb-Text                                                                                   
+RequiredVersion                5.0.0                                                                                                       
+LogSpec                        {logging, logfile, transcript}                                                                              
+NoAliasExport                                                                                                                              
+ErrorAction                    Stop                                                                                                        
+showdebug                      False                                                                                                       
+whatif                         False
+VERBOSE: $PSBoundParameters:
+Key                   Value                                             
+---                   -----                                             
+ModuleName            verb-Text                                         
+ModuleSourcePath      {c:\sc\verb-Text\Public, c:\sc\verb-Text\Internal}
+ModuleDestinationPath c:\sc\verb-Text\verb-Text                         
+RequiredVersion       5.0.0                                             
+LogSpec               {logging, logfile, transcript}                    
+NoAliasExport         False                                             
+ErrorAction           Stop                                              
+showDebug             False                                             
+whatIf                False
+16:47:58: INFO: ConvertTo-ModuleMergedTDO w
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+ModuleName                     verb-Text                                                                                                   
+ModuleSourcePath               {c:\sc\verb-Text\Public, c:\sc\verb-Text\Internal}                                                          
+ModuleDestinationPath          c:\sc\verb-Text\verb-Text                                                                                   
+RequiredVersion                5.0.0                                                                                                       
+LogSpec                        {logging, logfile, transcript}                                                                              
+NoAliasExport                                                                                                                              
+ErrorAction                    Stop                                                                                                        
+showdebug                      False                                                                                                       
+whatif                         False
+VERBOSE: (backup-FileTDO -path c:\sc\verb-Text\verb-Text\verb-Text.psm1)
+VERBOSE: (backup-FileTDO -path c:\sc\verb-Text\verb-Text\verb-Text.psd1)
+DEADWOOD REMOVAL:remove-UnneededFileVariants w
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+Path                           c:\sc\verb-Text\verb-Text                                                                                   
+Include                        verb-Text.psm1_*                                                                                            
+Pattern                        \.ps(m|d)1_\d{8}-\d{3,4}(A|P)M$                                                                             
+FilterOn                       CreationTime                                                                                                
+Keep                           2                                                                                                           
+KeepToday                      True                                                                                                        
+verbose                        True                                                                                                        
+whatif                         False
+16:47:58:gci w
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+path                           c:\sc\verb-Text\verb-Text\*                                                                                 
+include                        verb-Text.psm1_*                                                                                            
+ErrorAction                    Stop
+VERBOSE: $cuttime:09/08/2022 00:00:00
+VERBOSE: post-filtering on pattern:\.ps(m|d)1_\d{8}-\d{3,4}(A|P)M$
+(5 in set *before* filtering)
+(4 in set *after* filtering)
+VERBOSE: filtering on files prior to $cuttime:09/08/2022 00:00:00 AM, on CreationTime property
+(4 in set *before* filtering)
+(3 in set *after* filtering)
+VERBOSE: attempting to retain remaining 2 generations net of prior filtering
+(3 in set *before* filtering)
+(1 in set *after* filtering)
+(Note:net population is *below* target -Keep:2 spec - insufficient older files available)
+16:47:58:Reducing matched population from 5 to 1 files via:
+post-filtered files with regex pattern:\.ps(m|d)1_\d{8}-\d{3,4}(A|P)M$
+filtered files on CreationTime prior to 09/08/2022 00:00:00 AM
+16:47:58:Remove-Item w 
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+path                           C:\sc\verb-Text\verb-Text\verb-Text.psm1_20220111-1103AM                                                    
+ErrorAction                    STOP                                                                                                        
+whatif                         False
+16:47:59: INFO: (NON-dyn psm1 detected - purging existing non-CBH content...)
+VERBOSE: L16:47:59:(doesn't appear to be an inter meta-CBH block)
+VERBOSE: adding $PostCBHBlock
+VERBOSE: $PSBoundParameters:
+Key      Value                                                                                                                             
+---      -----                                                                                                                             
+Value    {# verb-Text.psm1...                                                                                                              
+Path     c:\sc\verb-Text\verb-Text\verb-Text.psm1_TMP                                                                                      
+PassThru True                                                                                                                              
+Verbose  True                                                                                                                              
+whatIf   False
+VERBOSE: 16:47:59:(Set-ContentFixEncoding:c:\sc\verb-Text\verb-Text\verb-Text.psm1_TMP)
+VERBOSE: 16:47:59:Set-Content w
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+PassThru                       True                                                                                                        
+Path                           c:\sc\verb-Text\verb-Text\verb-Text.psm1_TMP                                                                
+whatif                         False                                                                                                       
+encoding                       UTF8                                                                                                        
+ErrorAction                    STOP
+-Value[0,2]:
+# verb-Text.psm1
+  <#
+16:47:59: INFO: Initialize-PSModuleDirectories w
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+ModuleSourcePath               {c:\sc\verb-Text\Public, c:\sc\verb-Text\Internal}                                                          
+ModuleDestinationPath          c:\sc\verb-Text\verb-Text                                                                                   
+ErrorAction                    Stop                                                                                                        
+whatif                         False
+VERBOSE: $PSBoundParameters:
+Key                   Value                                             
+---                   -----                                             
+ModuleSourcePath      {c:\sc\verb-Text\Public, c:\sc\verb-Text\Internal}
+ModuleDestinationPath c:\sc\verb-Text\verb-Text                         
+ErrorAction           Stop                                              
+whatIf                False
+VERBOSE: (non-pipeline - param - input)
+16:47:59: INFO: 
+#*------v (1/2):C:\sc\verb-Text\Public v------
+16:47:59: INFO: Processing 31 $ComponentScripts files through Remove-AuthenticodeSignature...
+16:47:59: INFO: Remove-AuthenticodeSignature w
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+Path                           {C:\sc\verb-Text\Public\compare-CodeRevision.ps1, C:\sc\verb-Text\Public\convert-CaesarCipher.ps1, C:\sc\...
+whatif                         False                                                                                                       
+verbose                        True
+VERBOSE: 16:47:59:((1/31):C:\sc\verb-Text\Public\compare-CodeRevision.ps1:has no existing Authenticode signature)
+VERBOSE: 16:47:59:((2/31):C:\sc\verb-Text\Public\convert-CaesarCipher.ps1:has no existing Authenticode signature)
+VERBOSE: 16:47:59:((3/31):C:\sc\verb-Text\Public\convertFrom-Base64String.ps1:has no existing Authenticode signature)
+VERBOSE: 16:47:59:((4/31):C:\sc\verb-Text\Public\convertFrom-Html.ps1:has no existing Authenticode signature)
+VERBOSE: 16:47:59:((5/31):C:\sc\verb-Text\Public\Convert-invertCase.ps1:has no existing Authenticode signature)
+VERBOSE: 16:47:59:((6/31):C:\sc\verb-Text\Public\convert-Rot13.ps1:has no existing Authenticode signature)
+VERBOSE: 16:47:59:((7/31):C:\sc\verb-Text\Public\convert-Rot47.ps1:has no existing Authenticode signature)
+VERBOSE: 16:47:59:((8/31):C:\sc\verb-Text\Public\convertTo-Base64String.ps1:has no existing Authenticode signature)
+VERBOSE: 16:47:59:((9/31):C:\sc\verb-Text\Public\ConvertTo-CamelCase.ps1:has no existing Authenticode signature)
+VERBOSE: 16:47:59:((10/31):C:\sc\verb-Text\Public\ConvertTo-L33t.ps1:has no existing Authenticode signature)
+VERBOSE: 16:47:59:((11/31):C:\sc\verb-Text\Public\ConvertTo-lowerCamelCase.ps1:has no existing Authenticode signature)
+VERBOSE: 16:47:59:((12/31):C:\sc\verb-Text\Public\convertTo-PSHelpExample.ps1:has no existing Authenticode signature)
+VERBOSE: 16:47:59:((13/31):C:\sc\verb-Text\Public\convertTo-QuotedList.ps1:has no existing Authenticode signature)
+VERBOSE: 16:47:59:((14/31):C:\sc\verb-Text\Public\ConvertTo-SCase.ps1:has no existing Authenticode signature)
+VERBOSE: 16:47:59:((15/31):C:\sc\verb-Text\Public\ConvertTo-SNAKE_CASE.ps1:has no existing Authenticode signature)
+VERBOSE: 16:47:59:((16/31):C:\sc\verb-Text\Public\ConvertTo-StringQuoted.ps1:has no existing Authenticode signature)
+VERBOSE: 16:47:59:((17/31):C:\sc\verb-Text\Public\convertTo-StringReverse.ps1:has no existing Authenticode signature)
+VERBOSE: 16:47:59:((18/31):C:\sc\verb-Text\Public\convertTo-StUdlycaPs.ps1:has no existing Authenticode signature)
+VERBOSE: 16:47:59:((19/31):C:\sc\verb-Text\Public\convertTo-TitleCase.ps1:has no existing Authenticode signature)
+VERBOSE: 16:47:59:((20/31):C:\sc\verb-Text\Public\convertTo-UnWrappedText.ps1:has no existing Authenticode signature)
+VERBOSE: 16:47:59:((21/31):C:\sc\verb-Text\Public\convertTo-WordsReverse.ps1:has no existing Authenticode signature)
+VERBOSE: 16:47:59:((22/31):C:\sc\verb-Text\Public\convertTo-WrappedText.ps1:has no existing Authenticode signature)
+VERBOSE: 16:47:59:((23/31):C:\sc\verb-Text\Public\create-AcronymFromCaps.ps1:has no existing Authenticode signature)
+VERBOSE: 16:47:59:((24/31):C:\sc\verb-Text\Public\get-StringHash.ps1:has no existing Authenticode signature)
+VERBOSE: 16:47:59:((25/31):C:\sc\verb-Text\Public\Remove-StringDiacritic.ps1:has no existing Authenticode signature)
+VERBOSE: 16:47:59:((26/31):C:\sc\verb-Text\Public\Remove-StringLatinCharacters.ps1:has no existing Authenticode signature)
+VERBOSE: 16:47:59:((27/31):C:\sc\verb-Text\Public\test-IsGuid.ps1:has no existing Authenticode signature)
+VERBOSE: 16:47:59:((28/31):C:\sc\verb-Text\Public\test-IsNumeric.ps1:has no existing Authenticode signature)
+VERBOSE: 16:47:59:((29/31):C:\sc\verb-Text\Public\test-IsRegexPattern.ps1:has no existing Authenticode signature)
+VERBOSE: 16:47:59:((30/31):C:\sc\verb-Text\Public\test-IsRegexValid.ps1:has no existing Authenticode signature)
+VERBOSE: 16:47:59:((31/31):C:\sc\verb-Text\Public\test-IsUri.ps1:has no existing Authenticode signature)
+16:47:59: INFO: Processing (1/31):C:\sc\verb-Text\Public\compare-CodeRevision.ps1...
+VERBOSE: $PSBoundParameters:
+Key      Value                                                                                                                             
+---      -----                                                                                                                             
+Path     {c:\sc\verb-Text\verb-Text\verb-Text.psm1_TMP}                                                                                    
+PassThru True                                                                                                                              
+Verbose  True                                                                                                                              
+whatIf   False                                                                                                                             
+Value    ...
+VERBOSE: 16:47:59:(Add-ContentFixEncoding:)
+VERBOSE: 16:47:59:Set-Content w
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+encoding                       UTF8                                                                                                        
+Path                           c:\sc\verb-Text\verb-Text\verb-Text.psm1_TMP                                                                
+whatif                         False                                                                                                       
+PassThru                       True                                                                                                        
+ErrorAction                    STOP
+-Value[0,2]:
+#*------v compare-CodeRevision.ps1 v------
+function compare-CodeRevision {
+16:47:59: INFO: Processing (2/31):C:\sc\verb-Text\Public\convert-CaesarCipher.ps1...
+VERBOSE: $PSBoundParameters:
+Key      Value                                                                                                                             
+---      -----                                                                                                                             
+Path     {c:\sc\verb-Text\verb-Text\verb-Text.psm1_TMP}                                                                                    
+PassThru True                                                                                                                              
+Verbose  True                                                                                                                              
+whatIf   False                                                                                                                             
+Value    ...
+VERBOSE: 16:47:59:(Add-ContentFixEncoding:)
+VERBOSE: 16:47:59:Set-Content w
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+encoding                       UTF8                                                                                                        
+Path                           c:\sc\verb-Text\verb-Text\verb-Text.psm1_TMP                                                                
+whatif                         False                                                                                                       
+PassThru                       True                                                                                                        
+ErrorAction                    STOP
+-Value[0,2]:
+#*------v convert-CaesarCipher.ps1 v------
+function convert-CaesarCipher {
+16:48:00: INFO: Processing (3/31):C:\sc\verb-Text\Public\convertFrom-Base64String.ps1...
+VERBOSE: $PSBoundParameters:
+Key      Value                                                                                                                             
+---      -----                                                                                                                             
+Path     {c:\sc\verb-Text\verb-Text\verb-Text.psm1_TMP}                                                                                    
+PassThru True                                                                                                                              
+Verbose  True                                                                                                                              
+whatIf   False                                                                                                                             
+Value    ...
+VERBOSE: 16:48:00:(Add-ContentFixEncoding:)
+VERBOSE: 16:48:00:Set-Content w
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+encoding                       UTF8                                                                                                        
+Path                           c:\sc\verb-Text\verb-Text\verb-Text.psm1_TMP                                                                
+whatif                         False                                                                                                       
+PassThru                       True                                                                                                        
+ErrorAction                    STOP
+-Value[0,2]:
+#*------v convertFrom-Base64String.ps1 v------
+function convertFrom-Base64String {
+16:48:00: INFO: Processing (4/31):C:\sc\verb-Text\Public\convertFrom-Html.ps1...
+VERBOSE: $PSBoundParameters:
+Key      Value                                                                                                                             
+---      -----                                                                                                                             
+Path     {c:\sc\verb-Text\verb-Text\verb-Text.psm1_TMP}                                                                                    
+PassThru True                                                                                                                              
+Verbose  True                                                                                                                              
+whatIf   False                                                                                                                             
+Value    ...
+VERBOSE: 16:48:00:(Add-ContentFixEncoding:)
+VERBOSE: 16:48:00:Set-Content w
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+encoding                       UTF8                                                                                                        
+Path                           c:\sc\verb-Text\verb-Text\verb-Text.psm1_TMP                                                                
+whatif                         False                                                                                                       
+PassThru                       True                                                                                                        
+ErrorAction                    STOP
+-Value[0,2]:
+#*------v convertFrom-Html.ps1 v------
+function convertFrom-Html {
+16:48:00: INFO: Processing (5/31):C:\sc\verb-Text\Public\Convert-invertCase.ps1...
+VERBOSE: $PSBoundParameters:
+Key      Value                                                                                                                             
+---      -----                                                                                                                             
+Path     {c:\sc\verb-Text\verb-Text\verb-Text.psm1_TMP}                                                                                    
+PassThru True                                                                                                                              
+Verbose  True                                                                                                                              
+whatIf   False                                                                                                                             
+Value    ...
+VERBOSE: 16:48:00:(Add-ContentFixEncoding:)
+VERBOSE: 16:48:00:Set-Content w
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+encoding                       UTF8                                                                                                        
+Path                           c:\sc\verb-Text\verb-Text\verb-Text.psm1_TMP                                                                
+whatif                         False                                                                                                       
+PassThru                       True                                                                                                        
+ErrorAction                    STOP
+-Value[0,2]:
+#*------v Convert-invertCase.ps1 v------
+function Convert-invertCase {
+16:48:00: INFO: Processing (6/31):C:\sc\verb-Text\Public\convert-Rot13.ps1...
+VERBOSE: $PSBoundParameters:
+Key      Value                                                                                                                             
+---      -----                                                                                                                             
+Path     {c:\sc\verb-Text\verb-Text\verb-Text.psm1_TMP}                                                                                    
+PassThru True                                                                                                                              
+Verbose  True                                                                                                                              
+whatIf   False                                                                                                                             
+Value    ...
+VERBOSE: 16:48:00:(Add-ContentFixEncoding:)
+VERBOSE: 16:48:00:Set-Content w
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+encoding                       UTF8                                                                                                        
+Path                           c:\sc\verb-Text\verb-Text\verb-Text.psm1_TMP                                                                
+whatif                         False                                                                                                       
+PassThru                       True                                                                                                        
+ErrorAction                    STOP
+-Value[0,2]:
+#*------v convert-Rot13.ps1 v------
+function convert-Rot13 {
+16:48:00: INFO: Processing (7/31):C:\sc\verb-Text\Public\convert-Rot47.ps1...
+VERBOSE: $PSBoundParameters:
+Key      Value                                                                                                                             
+---      -----                                                                                                                             
+Path     {c:\sc\verb-Text\verb-Text\verb-Text.psm1_TMP}                                                                                    
+PassThru True                                                                                                                              
+Verbose  True                                                                                                                              
+whatIf   False                                                                                                                             
+Value    ...
+VERBOSE: 16:48:00:(Add-ContentFixEncoding:)
+VERBOSE: 16:48:00:Set-Content w
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+encoding                       UTF8                                                                                                        
+Path                           c:\sc\verb-Text\verb-Text\verb-Text.psm1_TMP                                                                
+whatif                         False                                                                                                       
+PassThru                       True                                                                                                        
+ErrorAction                    STOP
+-Value[0,2]:
+#*------v convert-Rot47.ps1 v------
+function convert-Rot47 {
+16:48:00: INFO: Processing (8/31):C:\sc\verb-Text\Public\convertTo-Base64String.ps1...
+VERBOSE: $PSBoundParameters:
+Key      Value                                                                                                                             
+---      -----                                                                                                                             
+Path     {c:\sc\verb-Text\verb-Text\verb-Text.psm1_TMP}                                                                                    
+PassThru True                                                                                                                              
+Verbose  True                                                                                                                              
+whatIf   False                                                                                                                             
+Value    ...
+VERBOSE: 16:48:00:(Add-ContentFixEncoding:)
+VERBOSE: 16:48:00:Set-Content w
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+encoding                       UTF8                                                                                                        
+Path                           c:\sc\verb-Text\verb-Text\verb-Text.psm1_TMP                                                                
+whatif                         False                                                                                                       
+PassThru                       True                                                                                                        
+ErrorAction                    STOP
+-Value[0,2]:
+#*------v convertTo-Base64String.ps1 v------
+function convertTo-Base64String {
+16:48:01: INFO: Processing (9/31):C:\sc\verb-Text\Public\ConvertTo-CamelCase.ps1...
+VERBOSE: $PSBoundParameters:
+Key      Value                                                                                                                             
+---      -----                                                                                                                             
+Path     {c:\sc\verb-Text\verb-Text\verb-Text.psm1_TMP}                                                                                    
+PassThru True                                                                                                                              
+Verbose  True                                                                                                                              
+whatIf   False                                                                                                                             
+Value    ...
+VERBOSE: 16:48:01:(Add-ContentFixEncoding:)
+VERBOSE: 16:48:01:Set-Content w
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+encoding                       UTF8                                                                                                        
+Path                           c:\sc\verb-Text\verb-Text\verb-Text.psm1_TMP                                                                
+whatif                         False                                                                                                       
+PassThru                       True                                                                                                        
+ErrorAction                    STOP
+-Value[0,2]:
+#*------v ConvertTo-CamelCase.ps1 v------
+function ConvertTo-CamelCase {
+16:48:01: INFO: Processing (10/31):C:\sc\verb-Text\Public\ConvertTo-L33t.ps1...
+VERBOSE: $PSBoundParameters:
+Key      Value                                                                                                                             
+---      -----                                                                                                                             
+Path     {c:\sc\verb-Text\verb-Text\verb-Text.psm1_TMP}                                                                                    
+PassThru True                                                                                                                              
+Verbose  True                                                                                                                              
+whatIf   False                                                                                                                             
+Value    ...
+VERBOSE: 16:48:01:(Add-ContentFixEncoding:)
+VERBOSE: 16:48:01:Set-Content w
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+encoding                       UTF8                                                                                                        
+Path                           c:\sc\verb-Text\verb-Text\verb-Text.psm1_TMP                                                                
+whatif                         False                                                                                                       
+PassThru                       True                                                                                                        
+ErrorAction                    STOP
+-Value[0,2]:
+#*------v ConvertTo-L33t.ps1 v------
+function ConvertTo-L33t {
+16:48:01: INFO: Processing (11/31):C:\sc\verb-Text\Public\ConvertTo-lowerCamelCase.ps1...
+VERBOSE: $PSBoundParameters:
+Key      Value                                                                                                                             
+---      -----                                                                                                                             
+Path     {c:\sc\verb-Text\verb-Text\verb-Text.psm1_TMP}                                                                                    
+PassThru True                                                                                                                              
+Verbose  True                                                                                                                              
+whatIf   False                                                                                                                             
+Value    ...
+VERBOSE: 16:48:01:(Add-ContentFixEncoding:)
+VERBOSE: 16:48:01:Set-Content w
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+encoding                       UTF8                                                                                                        
+Path                           c:\sc\verb-Text\verb-Text\verb-Text.psm1_TMP                                                                
+whatif                         False                                                                                                       
+PassThru                       True                                                                                                        
+ErrorAction                    STOP
+-Value[0,2]:
+#*------v ConvertTo-lowerCamelCase.ps1 v------
+function ConvertTo-lowerCamelCase {
+16:48:01: INFO: Processing (12/31):C:\sc\verb-Text\Public\convertTo-PSHelpExample.ps1...
+VERBOSE: $PSBoundParameters:
+Key      Value                                                                                                                             
+---      -----                                                                                                                             
+Path     {c:\sc\verb-Text\verb-Text\verb-Text.psm1_TMP}                                                                                    
+PassThru True                                                                                                                              
+Verbose  True                                                                                                                              
+whatIf   False                                                                                                                             
+Value    ...
+VERBOSE: 16:48:01:(Add-ContentFixEncoding:)
+VERBOSE: 16:48:01:Set-Content w
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+encoding                       UTF8                                                                                                        
+Path                           c:\sc\verb-Text\verb-Text\verb-Text.psm1_TMP                                                                
+whatif                         False                                                                                                       
+PassThru                       True                                                                                                        
+ErrorAction                    STOP
+-Value[0,2]:
+#*------v convertTo-PSHelpExample.ps1 v------
+Function convertTo-PSHelpExample {
+16:48:01: INFO: Processing (13/31):C:\sc\verb-Text\Public\convertTo-QuotedList.ps1...
+VERBOSE: $PSBoundParameters:
+Key      Value                                                                                                                             
+---      -----                                                                                                                             
+Path     {c:\sc\verb-Text\verb-Text\verb-Text.psm1_TMP}                                                                                    
+PassThru True                                                                                                                              
+Verbose  True                                                                                                                              
+whatIf   False                                                                                                                             
+Value    ...
+VERBOSE: 16:48:01:(Add-ContentFixEncoding:)
+VERBOSE: 16:48:01:Set-Content w
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+encoding                       UTF8                                                                                                        
+Path                           c:\sc\verb-Text\verb-Text\verb-Text.psm1_TMP                                                                
+whatif                         False                                                                                                       
+PassThru                       True                                                                                                        
+ErrorAction                    STOP
+-Value[0,2]:
+#*------v convertTo-QuotedList.ps1 v------
+Function convertTo-QuotedList {
+16:48:02: INFO: Processing (14/31):C:\sc\verb-Text\Public\ConvertTo-SCase.ps1...
+VERBOSE: $PSBoundParameters:
+Key      Value                                                                                                                             
+---      -----                                                                                                                             
+Path     {c:\sc\verb-Text\verb-Text\verb-Text.psm1_TMP}                                                                                    
+PassThru True                                                                                                                              
+Verbose  True                                                                                                                              
+whatIf   False                                                                                                                             
+Value    ...
+VERBOSE: 16:48:02:(Add-ContentFixEncoding:)
+VERBOSE: 16:48:02:Set-Content w
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+encoding                       UTF8                                                                                                        
+Path                           c:\sc\verb-Text\verb-Text\verb-Text.psm1_TMP                                                                
+whatif                         False                                                                                                       
+PassThru                       True                                                                                                        
+ErrorAction                    STOP
+-Value[0,2]:
+#*------v ConvertTo-SCase.ps1 v------
+function ConvertTo-SCase {
+16:48:02: INFO: Processing (15/31):C:\sc\verb-Text\Public\ConvertTo-SNAKE_CASE.ps1...
+VERBOSE: $PSBoundParameters:
+Key      Value                                                                                                                             
+---      -----                                                                                                                             
+Path     {c:\sc\verb-Text\verb-Text\verb-Text.psm1_TMP}                                                                                    
+PassThru True                                                                                                                              
+Verbose  True                                                                                                                              
+whatIf   False                                                                                                                             
+Value    ...
+VERBOSE: 16:48:02:(Add-ContentFixEncoding:)
+VERBOSE: 16:48:02:Set-Content w
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+encoding                       UTF8                                                                                                        
+Path                           c:\sc\verb-Text\verb-Text\verb-Text.psm1_TMP                                                                
+whatif                         False                                                                                                       
+PassThru                       True                                                                                                        
+ErrorAction                    STOP
+-Value[0,2]:
+#*------v ConvertTo-SNAKE_CASE.ps1 v------
+function ConvertTo-SNAKE_CASE {
+16:48:02: INFO: Processing (16/31):C:\sc\verb-Text\Public\ConvertTo-StringQuoted.ps1...
+VERBOSE: $PSBoundParameters:
+Key      Value                                                                                                                             
+---      -----                                                                                                                             
+Path     {c:\sc\verb-Text\verb-Text\verb-Text.psm1_TMP}                                                                                    
+PassThru True                                                                                                                              
+Verbose  True                                                                                                                              
+whatIf   False                                                                                                                             
+Value    ...
+VERBOSE: 16:48:02:(Add-ContentFixEncoding:)
+VERBOSE: 16:48:02:Set-Content w
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+encoding                       UTF8                                                                                                        
+Path                           c:\sc\verb-Text\verb-Text\verb-Text.psm1_TMP                                                                
+whatif                         False                                                                                                       
+PassThru                       True                                                                                                        
+ErrorAction                    STOP
+-Value[0,2]:
+#*------v ConvertTo-StringQuoted.ps1 v------
+Function ConvertTo-StringQuoted {
+16:48:02: INFO: Processing (17/31):C:\sc\verb-Text\Public\convertTo-StringReverse.ps1...
+VERBOSE: $PSBoundParameters:
+Key      Value                                                                                                                             
+---      -----                                                                                                                             
+Path     {c:\sc\verb-Text\verb-Text\verb-Text.psm1_TMP}                                                                                    
+PassThru True                                                                                                                              
+Verbose  True                                                                                                                              
+whatIf   False                                                                                                                             
+Value    ...
+VERBOSE: 16:48:02:(Add-ContentFixEncoding:)
+VERBOSE: 16:48:02:Set-Content w
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+encoding                       UTF8                                                                                                        
+Path                           c:\sc\verb-Text\verb-Text\verb-Text.psm1_TMP                                                                
+whatif                         False                                                                                                       
+PassThru                       True                                                                                                        
+ErrorAction                    STOP
+-Value[0,2]:
+#*------v convertTo-StringReverse.ps1 v------
+function convertTo-StringReverse {
+16:48:02: INFO: Processing (18/31):C:\sc\verb-Text\Public\convertTo-StUdlycaPs.ps1...
+VERBOSE: $PSBoundParameters:
+Key      Value                                                                                                                             
+---      -----                                                                                                                             
+Path     {c:\sc\verb-Text\verb-Text\verb-Text.psm1_TMP}                                                                                    
+PassThru True                                                                                                                              
+Verbose  True                                                                                                                              
+whatIf   False                                                                                                                             
+Value    ...
+VERBOSE: 16:48:02:(Add-ContentFixEncoding:)
+VERBOSE: 16:48:02:Set-Content w
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+encoding                       UTF8                                                                                                        
+Path                           c:\sc\verb-Text\verb-Text\verb-Text.psm1_TMP                                                                
+whatif                         False                                                                                                       
+PassThru                       True                                                                                                        
+ErrorAction                    STOP
+-Value[0,2]:
+#*------v convertTo-StUdlycaPs.ps1 v------
+function convertTo-StUdlycaPs {
+16:48:02: INFO: Processing (19/31):C:\sc\verb-Text\Public\convertTo-TitleCase.ps1...
+VERBOSE: $PSBoundParameters:
+Key      Value                                                                                                                             
+---      -----                                                                                                                             
+Path     {c:\sc\verb-Text\verb-Text\verb-Text.psm1_TMP}                                                                                    
+PassThru True                                                                                                                              
+Verbose  True                                                                                                                              
+whatIf   False                                                                                                                             
+Value    ...
+VERBOSE: 16:48:02:(Add-ContentFixEncoding:)
+VERBOSE: 16:48:02:Set-Content w
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+encoding                       UTF8                                                                                                        
+Path                           c:\sc\verb-Text\verb-Text\verb-Text.psm1_TMP                                                                
+whatif                         False                                                                                                       
+PassThru                       True                                                                                                        
+ErrorAction                    STOP
+-Value[0,2]:
+#*------v convertTo-TitleCase.ps1 v------
+function convertTo-TitleCase {
+16:48:02: INFO: Processing (20/31):C:\sc\verb-Text\Public\convertTo-UnWrappedText.ps1...
+VERBOSE: $PSBoundParameters:
+Key      Value                                                                                                                             
+---      -----                                                                                                                             
+Path     {c:\sc\verb-Text\verb-Text\verb-Text.psm1_TMP}                                                                                    
+PassThru True                                                                                                                              
+Verbose  True                                                                                                                              
+whatIf   False                                                                                                                             
+Value    ...
+VERBOSE: 16:48:02:(Add-ContentFixEncoding:)
+VERBOSE: 16:48:02:Set-Content w
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+encoding                       UTF8                                                                                                        
+Path                           c:\sc\verb-Text\verb-Text\verb-Text.psm1_TMP                                                                
+whatif                         False                                                                                                       
+PassThru                       True                                                                                                        
+ErrorAction                    STOP
+-Value[0,2]:
+#*------v convertTo-UnWrappedText.ps1 v------
+Function convertTo-UnWrappedText {
+16:48:02: INFO: Processing (21/31):C:\sc\verb-Text\Public\convertTo-WordsReverse.ps1...
+VERBOSE: $PSBoundParameters:
+Key      Value                                                                                                                             
+---      -----                                                                                                                             
+Path     {c:\sc\verb-Text\verb-Text\verb-Text.psm1_TMP}                                                                                    
+PassThru True                                                                                                                              
+Verbose  True                                                                                                                              
+whatIf   False                                                                                                                             
+Value    ...
+VERBOSE: 16:48:02:(Add-ContentFixEncoding:)
+VERBOSE: 16:48:02:Set-Content w
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+encoding                       UTF8                                                                                                        
+Path                           c:\sc\verb-Text\verb-Text\verb-Text.psm1_TMP                                                                
+whatif                         False                                                                                                       
+PassThru                       True                                                                                                        
+ErrorAction                    STOP
+-Value[0,2]:
+#*------v convertTo-WordsReverse.ps1 v------
+Function convertTo-WordsReverse {
+16:48:03: INFO: Processing (22/31):C:\sc\verb-Text\Public\convertTo-WrappedText.ps1...
+VERBOSE: $PSBoundParameters:
+Key      Value                                                                                                                             
+---      -----                                                                                                                             
+Path     {c:\sc\verb-Text\verb-Text\verb-Text.psm1_TMP}                                                                                    
+PassThru True                                                                                                                              
+Verbose  True                                                                                                                              
+whatIf   False                                                                                                                             
+Value    ...
+VERBOSE: 16:48:03:(Add-ContentFixEncoding:)
+VERBOSE: 16:48:03:Set-Content w
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+encoding                       UTF8                                                                                                        
+Path                           c:\sc\verb-Text\verb-Text\verb-Text.psm1_TMP                                                                
+whatif                         False                                                                                                       
+PassThru                       True                                                                                                        
+ErrorAction                    STOP
+-Value[0,2]:
+#*------v convertTo-WrappedText.ps1 v------
+Function convertTo-WrappedText {
+16:48:03: INFO: Processing (23/31):C:\sc\verb-Text\Public\create-AcronymFromCaps.ps1...
+VERBOSE: $PSBoundParameters:
+Key      Value                                                                                                                             
+---      -----                                                                                                                             
+Path     {c:\sc\verb-Text\verb-Text\verb-Text.psm1_TMP}                                                                                    
+PassThru True                                                                                                                              
+Verbose  True                                                                                                                              
+whatIf   False                                                                                                                             
+Value    ...
+VERBOSE: 16:48:03:(Add-ContentFixEncoding:)
+VERBOSE: 16:48:03:Set-Content w
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+encoding                       UTF8                                                                                                        
+Path                           c:\sc\verb-Text\verb-Text\verb-Text.psm1_TMP                                                                
+whatif                         False                                                                                                       
+PassThru                       True                                                                                                        
+ErrorAction                    STOP
+-Value[0,2]:
+#*------v create-AcronymFromCaps.ps1 v------
+Function create-AcronymFromCaps {
+16:48:03: INFO: Processing (24/31):C:\sc\verb-Text\Public\get-StringHash.ps1...
+VERBOSE: $PSBoundParameters:
+Key      Value                                                                                                                             
+---      -----                                                                                                                             
+Path     {c:\sc\verb-Text\verb-Text\verb-Text.psm1_TMP}                                                                                    
+PassThru True                                                                                                                              
+Verbose  True                                                                                                                              
+whatIf   False                                                                                                                             
+Value    ...
+VERBOSE: 16:48:03:(Add-ContentFixEncoding:)
+VERBOSE: 16:48:03:Set-Content w
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+encoding                       UTF8                                                                                                        
+Path                           c:\sc\verb-Text\verb-Text\verb-Text.psm1_TMP                                                                
+whatif                         False                                                                                                       
+PassThru                       True                                                                                                        
+ErrorAction                    STOP
+-Value[0,2]:
+#*------v get-StringHash.ps1 v------
+function get-StringHash {
+16:48:03: INFO: Processing (25/31):C:\sc\verb-Text\Public\Remove-StringDiacritic.ps1...
+VERBOSE: $PSBoundParameters:
+Key      Value                                                                                                                             
+---      -----                                                                                                                             
+Path     {c:\sc\verb-Text\verb-Text\verb-Text.psm1_TMP}                                                                                    
+PassThru True                                                                                                                              
+Verbose  True                                                                                                                              
+whatIf   False                                                                                                                             
+Value    ...
+VERBOSE: 16:48:03:(Add-ContentFixEncoding:)
+VERBOSE: 16:48:03:Set-Content w
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+encoding                       UTF8                                                                                                        
+Path                           c:\sc\verb-Text\verb-Text\verb-Text.psm1_TMP                                                                
+whatif                         False                                                                                                       
+PassThru                       True                                                                                                        
+ErrorAction                    STOP
+-Value[0,2]:
+#*------v Remove-StringDiacritic.ps1 v------
+function Remove-StringDiacritic {
+16:48:04: INFO: Processing (26/31):C:\sc\verb-Text\Public\Remove-StringLatinCharacters.ps1...
+VERBOSE: $PSBoundParameters:
+Key      Value                                                                                                                             
+---      -----                                                                                                                             
+Path     {c:\sc\verb-Text\verb-Text\verb-Text.psm1_TMP}                                                                                    
+PassThru True                                                                                                                              
+Verbose  True                                                                                                                              
+whatIf   False                                                                                                                             
+Value    ...
+VERBOSE: 16:48:04:(Add-ContentFixEncoding:)
+VERBOSE: 16:48:04:Set-Content w
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+encoding                       UTF8                                                                                                        
+Path                           c:\sc\verb-Text\verb-Text\verb-Text.psm1_TMP                                                                
+whatif                         False                                                                                                       
+PassThru                       True                                                                                                        
+ErrorAction                    STOP
+-Value[0,2]:
+#*------v Remove-StringLatinCharacters.ps1 v------
+function Remove-StringLatinCharacters {
+16:48:04: INFO: Processing (27/31):C:\sc\verb-Text\Public\test-IsGuid.ps1...
+VERBOSE: $PSBoundParameters:
+Key      Value                                                                                                                             
+---      -----                                                                                                                             
+Path     {c:\sc\verb-Text\verb-Text\verb-Text.psm1_TMP}                                                                                    
+PassThru True                                                                                                                              
+Verbose  True                                                                                                                              
+whatIf   False                                                                                                                             
+Value    ...
+VERBOSE: 16:48:04:(Add-ContentFixEncoding:)
+VERBOSE: 16:48:04:Set-Content w
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+encoding                       UTF8                                                                                                        
+Path                           c:\sc\verb-Text\verb-Text\verb-Text.psm1_TMP                                                                
+whatif                         False                                                                                                       
+PassThru                       True                                                                                                        
+ErrorAction                    STOP
+-Value[0,2]:
+#*------v test-IsGuid.ps1 v------
+function Test-IsGuid{
+16:48:04: INFO: Processing (28/31):C:\sc\verb-Text\Public\test-IsNumeric.ps1...
+VERBOSE: $PSBoundParameters:
+Key      Value                                                                                                                             
+---      -----                                                                                                                             
+Path     {c:\sc\verb-Text\verb-Text\verb-Text.psm1_TMP}                                                                                    
+PassThru True                                                                                                                              
+Verbose  True                                                                                                                              
+whatIf   False                                                                                                                             
+Value    ...
+VERBOSE: 16:48:04:(Add-ContentFixEncoding:)
+VERBOSE: 16:48:04:Set-Content w
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+encoding                       UTF8                                                                                                        
+Path                           c:\sc\verb-Text\verb-Text\verb-Text.psm1_TMP                                                                
+whatif                         False                                                                                                       
+PassThru                       True                                                                                                        
+ErrorAction                    STOP
+-Value[0,2]:
+#*------v test-IsNumeric.ps1 v------
+Function test-IsNumeric {
+16:48:04: INFO: Processing (29/31):C:\sc\verb-Text\Public\test-IsRegexPattern.ps1...
+VERBOSE: $PSBoundParameters:
+Key      Value                                                                                                                             
+---      -----                                                                                                                             
+Path     {c:\sc\verb-Text\verb-Text\verb-Text.psm1_TMP}                                                                                    
+PassThru True                                                                                                                              
+Verbose  True                                                                                                                              
+whatIf   False                                                                                                                             
+Value    ...
+VERBOSE: 16:48:04:(Add-ContentFixEncoding:)
+VERBOSE: 16:48:04:Set-Content w
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+encoding                       UTF8                                                                                                        
+Path                           c:\sc\verb-Text\verb-Text\verb-Text.psm1_TMP                                                                
+whatif                         False                                                                                                       
+PassThru                       True                                                                                                        
+ErrorAction                    STOP
+-Value[0,2]:
+#*------v test-IsRegexPattern.ps1 v------
+Function test-IsRegexPattern {
+16:48:04: INFO: Processing (30/31):C:\sc\verb-Text\Public\test-IsRegexValid.ps1...
+VERBOSE: $PSBoundParameters:
+Key      Value                                                                                                                             
+---      -----                                                                                                                             
+Path     {c:\sc\verb-Text\verb-Text\verb-Text.psm1_TMP}                                                                                    
+PassThru True                                                                                                                              
+Verbose  True                                                                                                                              
+whatIf   False                                                                                                                             
+Value    ...
+VERBOSE: 16:48:04:(Add-ContentFixEncoding:)
+VERBOSE: 16:48:04:Set-Content w
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+encoding                       UTF8                                                                                                        
+Path                           c:\sc\verb-Text\verb-Text\verb-Text.psm1_TMP                                                                
+whatif                         False                                                                                                       
+PassThru                       True                                                                                                        
+ErrorAction                    STOP
+-Value[0,2]:
+#*------v test-IsRegexValid.ps1 v------
+Function test-IsRegexValid {
+16:48:04: INFO: Processing (31/31):C:\sc\verb-Text\Public\test-IsUri.ps1...
+VERBOSE: $PSBoundParameters:
+Key      Value                                                                                                                             
+---      -----                                                                                                                             
+Path     {c:\sc\verb-Text\verb-Text\verb-Text.psm1_TMP}                                                                                    
+PassThru True                                                                                                                              
+Verbose  True                                                                                                                              
+whatIf   False                                                                                                                             
+Value    ...
+VERBOSE: 16:48:04:(Add-ContentFixEncoding:)
+VERBOSE: 16:48:04:Set-Content w
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+encoding                       UTF8                                                                                                        
+Path                           c:\sc\verb-Text\verb-Text\verb-Text.psm1_TMP                                                                
+whatif                         False                                                                                                       
+PassThru                       True                                                                                                        
+ErrorAction                    STOP
+-Value[0,2]:
+#*------v test-IsUri.ps1 v------
+function test-IsUri{
+16:48:04: INFO: 
+#*------^ (1/2):C:\sc\verb-Text\Public ^------
+16:48:04: INFO: 
+#*------v (2/2):C:\sc\verb-Text\Internal v------
+16:48:04: INFO: Processing 0 $ComponentScripts files through Remove-AuthenticodeSignature...
+16:48:04: INFO: Remove-AuthenticodeSignature w
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+Path                                                                                                                                       
+whatif                         False                                                                                                       
+verbose                        True
+16:48:04: INFO: 
+#*------^ (2/2):C:\sc\verb-Text\Internal ^------
+VERBOSE: (no Public\_CommonCode.ps1)
+16:48:04: INFO: (Updating Psm1 Export-ModuleMember -Function to reflect Public modules)
+16:48:04: INFO: Adding:FooterBlock...
+VERBOSE: $PSBoundParameters:
+Key      Value                                                                                                                             
+---      -----                                                                                                                             
+Path     {c:\sc\verb-Text\verb-Text\verb-Text.psm1_TMP}                                                                                    
+PassThru True                                                                                                                              
+Verbose  True                                                                                                                              
+whatIf   False                                                                                                                             
+Value    ...
+VERBOSE: 16:48:04:(Add-ContentFixEncoding:)
+VERBOSE: 16:48:04:Set-Content w
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+encoding                       UTF8                                                                                                        
+Path                           c:\sc\verb-Text\verb-Text\verb-Text.psm1_TMP                                                                
+whatif                         False                                                                                                       
+PassThru                       True                                                                                                        
+ErrorAction                    STOP
+-Value[0,2]:
+#*======^ END FUNCTIONS ^======
+Export-ModuleMember -Function compare-CodeRevision,convert-CaesarCipher,_encode,_decode,convertFrom-Base64String,convertFrom-Html,Convert-invertCase,convert-Rot13,convert-Rot47,convertTo-Base64String,ConvertTo-CamelCase,ConvertTo-L33t,ConvertTo-lowerCamelCase,convertTo-PSHelpExample,convertTo-QuotedList,ConvertTo-SCase,ConvertTo-SNAKE_CASE,ConvertTo-StringQuoted,convertTo-StringReverse,convertTo-StUdlycaPs,convertTo-TitleCase,convertTo-UnWrappedText,convertTo-WordsReverse,convertTo-WrappedText,create-AcronymFromCaps,get-StringHash,Remove-StringDiacritic,Remove-StringLatinCharacters,Test-IsGuid,test-IsNumeric,test-IsRegexPattern,test-IsRegexValid,test-IsUri -Alias *
+16:48:04: INFO: Updating the Psd1 FunctionsToExport to match
+VERBOSE: $PSBoundParameters:
+Key      Value                                                                                                                             
+---      -----                                                                                                                             
+Path     c:\sc\verb-Text\verb-Text\verb-Text.psd1_TMP                                                                                      
+PassThru True                                                                                                                              
+Verbose  True                                                                                                                              
+whatIf   False                                                                                                                             
+Value    {#...
+VERBOSE: 16:48:04:(Set-ContentFixEncoding:c:\sc\verb-Text\verb-Text\verb-Text.psd1_TMP)
+VERBOSE: 16:48:05:Set-Content w
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+PassThru                       True                                                                                                        
+Path                           c:\sc\verb-Text\verb-Text\verb-Text.psd1_TMP                                                                
+whatif                         False                                                                                                       
+encoding                       UTF8                                                                                                        
+ErrorAction                    STOP
+-Value[0,2]:
+#
+# Module manifest for module 'verb-Text'
+16:48:05: INFO: confirm-ModuleBuildSync w
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+ModPsdPath                     c:\sc\verb-Text\verb-Text\verb-Text.psd1_TMP                                                                
+RequiredVersion                5.0.0                                                                                                       
+NoTest                         True                                                                                                        
+whatif                         False                                                                                                       
+verbose                        True
+VERBOSE: $PSBoundParameters:
+Key             Value                                         
+---             -----                                         
+ModPsdPath      {c:\sc\verb-Text\verb-Text\verb-Text.psd1_TMP}
+RequiredVersion 5.0.0                                         
+NoTest          True                                          
+whatIf          False                                         
+Verbose         True
+16:48:05: INFO: #*======v confirm-ModuleBuildSync:  v======
+VERBOSE: (non-pipeline - param - input)
+16:48:05: INFO: (test-path confirms $ModPsm1 & $ModTestPs1)
+16:48:05: INFO: Import-PowerShellDataFile w
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+Path                           c:\sc\verb-Text\verb-Text\verb-Text.psd1_TMP                                                                
+ErrorAction                    Stop                                                                                                        
+verbose                        True
+16:48:05: INFO: (resolved Module attributes:
+$ModuleName:	verb-Text
+$ModRoot:	c:\sc\verb-Text
+$ModPsd1:	c:\sc\verb-Text\verb-Text\verb-Text.psd1_TMP
+$ModPsm1:	c:\sc\verb-Text\verb-Text\verb-Text.psm1_TMP
+$ModTestPs1:	c:\sc\verb-Text\Tests\verb-Text.tests.ps1
+$psd1Vers:	4.3.0
+$psd1guid:	17eb54c0-da66-4673-816a-586ff5e3090b)
+16:48:05: INFO: confirm-ModulePsd1Version w
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+Path                           c:\sc\verb-Text\verb-Text\verb-Text.psd1_TMP                                                                
+RequiredVersion                5.0.0                                                                                                       
+whatif                         False                                                                                                       
+verbose                        True
+VERBOSE: $PSBoundParameters:
+Key             Value                                         
+---             -----                                         
+Path            {c:\sc\verb-Text\verb-Text\verb-Text.psd1_TMP}
+RequiredVersion 5.0.0                                         
+whatIf          False                                         
+Verbose         True
+16:48:06: INFO: #*======v confirm-ModulePsd1Version: c:\sc\verb-Text\verb-Text\verb-Text.psd1_TMP v======
+VERBOSE: (non-pipeline - param - input)
+16:48:06: WARNING: In:c:\sc\verb-Text\verb-Text\verb-Text.psd1_TMP
+Version present:(4.3.0)
+*does not* properly match:5.0.0
+FORCING MATCHING UPDATE!
+VERBOSE: $PSBoundParameters:
+Key      Value                                                                                                                             
+---      -----                                                                                                                             
+Path     c:\sc\verb-Text\verb-Text\verb-Text.psd1_TMP                                                                                      
+PassThru True                                                                                                                              
+Verbose  True                                                                                                                              
+whatIf   False                                                                                                                             
+Value    {#...
+VERBOSE: 16:48:07:(Set-ContentFixEncoding:c:\sc\verb-Text\verb-Text\verb-Text.psd1_TMP)
+VERBOSE: 16:48:07:Set-Content w
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+PassThru                       True                                                                                                        
+Path                           c:\sc\verb-Text\verb-Text\verb-Text.psd1_TMP                                                                
+whatif                         False                                                                                                       
+encoding                       UTF8                                                                                                        
+ErrorAction                    STOP
+-Value[0,2]:
+#
+# Module manifest for module 'verb-Text'
+16:48:07: INFO: $objReport
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+Version                        5.0.0                                                                                                       
+Valid                          False
+16:48:07: INFO: (SET:$objReport.Valid = $true ;)
+16:48:07: INFO: (PIPELINE:New-Object PSObject -Property $objReport | write-output)
+$objReport
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+Version                        5.0.0                                                                                                       
+Valid                          True
+16:48:07: INFO: #*======^ confirm-ModulePsd1Version: c:\sc\verb-Text\verb-Text\verb-Text.psd1_TMP ^======
+16:48:07: INFO: (confirm-ModulePsd1Version:Success)
+16:48:07: INFO: confirm-ModulePsm1Version w
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+Path                           c:\sc\verb-Text\verb-Text\verb-Text.psm1_TMP                                                                
+RequiredVersion                5.0.0                                                                                                       
+whatif                         False                                                                                                       
+verbose                        True
+VERBOSE: $PSBoundParameters:
+Key             Value                                         
+---             -----                                         
+Path            {c:\sc\verb-Text\verb-Text\verb-Text.psm1_TMP}
+RequiredVersion 5.0.0                                         
+whatIf          False                                         
+Verbose         True
+16:48:07: INFO: #*======v confirm-ModulePsm1Version: c:\sc\verb-Text\verb-Text\verb-Text.psm1_TMP v======
+VERBOSE: (non-pipeline - param - input)
+16:48:08: WARNING: In:c:\sc\verb-Text\verb-Text\verb-Text.psm1_TMP
+Version present:(4.3.0)
+*does not* properly match:5.0.0
+FORCING MATCHING UPDATE!
+VERBOSE: $PSBoundParameters:
+Key      Value                                                                                                                             
+---      -----                                                                                                                             
+Path     c:\sc\verb-Text\verb-Text\verb-Text.psm1_TMP                                                                                      
+PassThru True                                                                                                                              
+Verbose  True                                                                                                                              
+whatIf   False                                                                                                                             
+Value    {# verb-Text.psm1...
+VERBOSE: 16:48:14:(Set-ContentFixEncoding:c:\sc\verb-Text\verb-Text\verb-Text.psm1_TMP)
+VERBOSE: 16:48:14:Set-Content w
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+PassThru                       True                                                                                                        
+Path                           c:\sc\verb-Text\verb-Text\verb-Text.psm1_TMP                                                                
+whatif                         False                                                                                                       
+encoding                       UTF8                                                                                                        
+ErrorAction                    STOP
+-Value[0,2]:
+# verb-Text.psm1
+  <#
+16:48:14: INFO: $objReport
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+Version                        5.0.0                                                                                                       
+Valid                          False
+16:48:14: INFO: (SET:$objReport.Valid = $true ;)
+16:48:14: INFO: (PIPELINE:New-Object PSObject -Property $objReport | write-output)
+$objReport
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+Version                        5.0.0                                                                                                       
+Valid                          True
+16:48:14: INFO: #*======^ confirm-ModulePsm1Version: c:\sc\verb-Text\verb-Text\verb-Text.psm1_TMP ^======
+16:48:14: INFO: (confirm-ModulePsm1Version:Success)
+16:48:14: INFO: (-NoTest: skipping confirm-ModuleTestPs1Guid)
+16:48:14: INFO: $objReport
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+Manifest                       c:\sc\verb-Text\verb-Text\verb-Text.psd1_TMP                                                                
+Module                         c:\sc\verb-Text\verb-Text\verb-Text.psm1_TMP                                                                
+Pester                         (SKIPPED)                                                                                                   
+Guid                           (SKIPPED)                                                                                                   
+Version                        5.0.0                                                                                                       
+Valid                          False
+16:48:14: INFO: (SET:$objReport.Valid = $true ;)
+16:48:14: INFO: (PIPELINE:New-Object PSObject -Property $objReport | write-output)
+$objReport
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+Manifest                       c:\sc\verb-Text\verb-Text\verb-Text.psd1_TMP                                                                
+Module                         c:\sc\verb-Text\verb-Text\verb-Text.psm1_TMP                                                                
+Pester                         (SKIPPED)                                                                                                   
+Guid                           (SKIPPED)                                                                                                   
+Version                        5.0.0                                                                                                       
+Valid                          True
+16:48:15: INFO: #*======^ confirm-ModuleBuildSync:  ^======
+16:48:15: INFO: (confirm-ModuleBuildSync:Success)
+16:48:15: INFO: Test-ModuleTMPFiles w
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+ModuleNamePSM1Path             c:\sc\verb-Text\verb-Text\verb-Text.psm1_TMP                                                                
+verbose                        True
+VERBOSE: $PSBoundParameters:
+Key                Value                                         
+---                -----                                         
+ModuleNamePSM1Path {c:\sc\verb-Text\verb-Text\verb-Text.psm1_TMP}
+Verbose            True
+16:48:15: INFO: #*======v Test-ModuleTMPFiles: c:\sc\verb-Text\verb-Text\verb-Text.psm1_TMP v======
+VERBOSE: (non-pipeline - param - input)
+16:48:15: INFO: 
+Psm1:c:\sc\verb-Text\verb-Text\verb-Text.psm1_TMP
+Psd1:c:\sc\verb-Text\verb-Text\verb-Text.psd1_TMP
+16:48:15: INFO: Creating Testable c:\sc\verb-Text\verb-Text\6260b9af-0a31-4a82-a78f-4a28a7df3f6a.psd1
+ to validate c:\sc\verb-Text\verb-Text\verb-Text.psd1_TMP will Test-ModuleManifest
+VERBOSE: Performing the operation "Copy File" on target "Item: C:\sc\verb-Text\verb-Text\verb-Text.psd1_TMP Destination: C:\sc\verb-Text\verb-Text\6260b9af-0a31-4a82-a78f-4a28a7df3f6a.psd1".
+16:48:15: INFO: Test-ModuleManifest w
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+verbose                        True                                                                                                        
+Path                           c:\sc\verb-Text\verb-Text\6260b9af-0a31-4a82-a78f-4a28a7df3f6a.psd1                                         
+ErrorVariable                  vManiErr                                                                                                    
+ErrorAction                    STOP
+VERBOSE: Loading module from path 'C:\sc\verb-Text\verb-Text\verb-Text.psm1'.
+16:48:15: INFO: Test-ModuleManifest:PASSED
+16:48:15: INFO: Creating Testable c:\sc\verb-Text\verb-Text\6260b9af-0a31-4a82-a78f-4a28a7df3f6a.psm1
+ to validate c:\sc\verb-Text\verb-Text\verb-Text.psm1_TMP will Import-Module
+VERBOSE: Performing the operation "Copy File" on target "Item: C:\sc\verb-Text\verb-Text\verb-Text.psm1_TMP Destination: C:\sc\verb-Text\verb-Text\6260b9af-0a31-4a82-a78f-4a28a7df3f6a.psm1".
+16:48:15: INFO: n import-module w
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+Name                           c:\sc\verb-Text\verb-Text\6260b9af-0a31-4a82-a78f-4a28a7df3f6a.psm1                                         
+Force                          True                                                                                                        
+verbose                        True                                                                                                        
+ErrorAction                    STOP                                                                                                        
+ErrorVariable                  vIpMoErr                                                                                                    
+PassThru                       True
+VERBOSE: Loading module from path 'C:\sc\verb-Text\verb-Text\6260b9af-0a31-4a82-a78f-4a28a7df3f6a.psm1'.
+VERBOSE: Importing function 'compare-CodeRevision'.
+VERBOSE: Importing function 'convert-CaesarCipher'.
+VERBOSE: Importing function 'Convert-invertCase'.
+VERBOSE: Importing function 'convert-Rot13'.
+VERBOSE: Importing function 'convert-Rot47'.
+VERBOSE: Importing function 'convertFrom-Base64String'.
+VERBOSE: Importing function 'convertFrom-Html'.
+VERBOSE: Importing function 'convertTo-Base64String'.
+VERBOSE: Importing function 'ConvertTo-CamelCase'.
+VERBOSE: Importing function 'ConvertTo-L33t'.
+VERBOSE: Importing function 'ConvertTo-lowerCamelCase'.
+VERBOSE: Importing function 'convertTo-PSHelpExample'.
+VERBOSE: Importing function 'convertTo-QuotedList'.
+VERBOSE: Importing function 'ConvertTo-SCase'.
+VERBOSE: Importing function 'ConvertTo-SNAKE_CASE'.
+VERBOSE: Importing function 'ConvertTo-StringQuoted'.
+VERBOSE: Importing function 'convertTo-StringReverse'.
+VERBOSE: Importing function 'convertTo-StUdlycaPs'.
+VERBOSE: Importing function 'convertTo-TitleCase'.
+VERBOSE: Importing function 'convertTo-UnWrappedText'.
+VERBOSE: Importing function 'convertTo-WordsReverse'.
+VERBOSE: Importing function 'convertTo-WrappedText'.
+WARNING: The names of some imported commands from the module '6260b9af-0a31-4a82-a78f-4a28a7df3f6a' include unapproved verbs that might make them less discoverable. To find the commands with unapproved verbs, run the Import-Module command again with the Verbose parameter. For a list of approved verbs, type Get-Verb.
+VERBOSE: The 'create-AcronymFromCaps' command in the 6260b9af-0a31-4a82-a78f-4a28a7df3f6a' module was imported, but because its name does not include an approved verb, it might be difficult to find. The suggested alternative verbs are "New".
+VERBOSE: Importing function 'create-AcronymFromCaps'.
+VERBOSE: Importing function 'get-StringHash'.
+VERBOSE: Importing function 'Remove-StringDiacritic'.
+VERBOSE: Importing function 'Remove-StringLatinCharacters'.
+VERBOSE: Importing function 'Test-IsGuid'.
+VERBOSE: Importing function 'test-IsNumeric'.
+VERBOSE: Importing function 'test-IsRegexPattern'.
+VERBOSE: Importing function 'test-IsRegexValid'.
+VERBOSE: Importing function 'test-IsUri'.
+VERBOSE: Importing alias 'convertTo-CrAzYCaPS'.
+VERBOSE: Importing alias 'convertTo-PascalCase'.
+VERBOSE: Importing alias 'convertTo-ProperCase'.
+VERBOSE: Importing alias 'convertTo-SentanceCase'.
+VERBOSE: Importing alias 'convertTo-StUdlycaSe'.
+VERBOSE: Importing alias 'convertTo-UpperCamelCase'.
+VERBOSE: Importing alias 'IsNumeric'.
+VERBOSE: Importing alias 'quote-list'.
+VERBOSE: Importing alias 'quote-string'.
+VERBOSE: Importing alias 'test-URI'.
+VERBOSE: Importing alias 'unwrap-text'.
+VERBOSE: Importing alias 'Unwrap-TextN'.
+VERBOSE: Importing alias 'wrap-text'.
+16:48:16: INFO: Ipmo: PASSED
+16:48:16: INFO: (remove-module -name c:\sc\verb-Text\verb-Text\6260b9af-0a31-4a82-a78f-4a28a7df3f6a.psm1 -force)
+16:48:16: INFO: (remove-item -path c:\sc\verb-Text\verb-Text\6260b9af-0a31-4a82-a78f-4a28a7df3f6a.psm1 -ErrorAction SilentlyContinue ;
+16:48:16: INFO: (remove-item -path c:\sc\verb-Text\verb-Text\6260b9af-0a31-4a82-a78f-4a28a7df3f6a.psd1 -ErrorAction SilentlyContinue ;
+16:48:16: INFO: $objReport
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+Manifest                       6260b9af-0a31-4a82-a78f-4a28a7df3f6a                                                                        
+Module                         6260b9af-0a31-4a82-a78f-4a28a7df3f6a                                                                        
+Valid                          False
+16:48:16: INFO: (SET:$objReport.Valid = $true ;)
+16:48:16: INFO: (PIPELINE:New-Object PSObject -Property $objReport | write-output)
+$objReport
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+Manifest                       6260b9af-0a31-4a82-a78f-4a28a7df3f6a                                                                        
+Module                         6260b9af-0a31-4a82-a78f-4a28a7df3f6a                                                                        
+Valid                          True
+16:48:16: INFO: #*======^ Test-ModuleTMPFiles: c:\sc\verb-Text\verb-Text\verb-Text.psm1_TMP ^======
+16:48:16: INFO: Processing error free: Overwriting temp .psm1 with temp copy
+copy-item w
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+Destination                    c:\sc\verb-Text\verb-Text\verb-Text.psm1                                                                    
+Path                           c:\sc\verb-Text\verb-Text\verb-Text.psm1_TMP                                                                
+whatif                         False                                                                                                       
+ErrorAction                    STOP
+16:48:16: INFO: Processing error free: Overwriting temp .psd1 with temp copy
+copy-item w
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+Destination                    c:\sc\verb-Text\verb-Text\verb-Text.psd1                                                                    
+Path                           c:\sc\verb-Text\verb-Text\verb-Text.psd1_TMP                                                                
+whatif                         False                                                                                                       
+ErrorAction                    STOP
+16:48:16: INFO: #*======^ ConvertTo-ModuleMergedTDO: ^======
+VERBOSE: Loading module from path 'C:\sc\verb-Text\verb-Text\verb-Text.psm1'.
+16:48:17: INFO: (Test-ModuleManifest:PASSED)
+16:48:17: INFO: Checking sync of Psd1 module guid to the Pester Test Script: c:\sc\verb-Text\Tests\verb-Text.tests.ps1
+16:48:17: INFO: confirm-ModuleBuildSync w
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+ModPsdPath                     C:\sc\verb-Text\verb-Text\verb-Text.psd1                                                                    
+RequiredVersion                5.0.0                                                                                                       
+whatif                         False                                                                                                       
+verbose                        True
+VERBOSE: $PSBoundParameters:
+Key             Value                                     
+---             -----                                     
+ModPsdPath      {C:\sc\verb-Text\verb-Text\verb-Text.psd1}
+RequiredVersion 5.0.0                                     
+whatIf          False                                     
+Verbose         True
+16:48:17: INFO: #*======v confirm-ModuleBuildSync:  v======
+VERBOSE: (non-pipeline - param - input)
+16:48:17: INFO: (test-path confirms $ModPsm1 & $ModTestPs1)
+16:48:17: INFO: Import-PowerShellDataFile w
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+Path                           C:\sc\verb-Text\verb-Text\verb-Text.psd1                                                                    
+ErrorAction                    Stop                                                                                                        
+verbose                        True
+16:48:17: INFO: (resolved Module attributes:
+$ModuleName:	verb-Text
+$ModRoot:	c:\sc\verb-Text
+$ModPsd1:	C:\sc\verb-Text\verb-Text\verb-Text.psd1
+$ModPsm1:	C:\sc\verb-Text\verb-Text\verb-Text.psm1
+$ModTestPs1:	c:\sc\verb-Text\Tests\verb-Text.tests.ps1
+$psd1Vers:	5.0.0
+$psd1guid:	17eb54c0-da66-4673-816a-586ff5e3090b)
+16:48:17: INFO: confirm-ModulePsd1Version w
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+Path                           C:\sc\verb-Text\verb-Text\verb-Text.psd1                                                                    
+RequiredVersion                5.0.0                                                                                                       
+whatif                         False                                                                                                       
+verbose                        True
+VERBOSE: $PSBoundParameters:
+Key             Value                                     
+---             -----                                     
+Path            {C:\sc\verb-Text\verb-Text\verb-Text.psd1}
+RequiredVersion 5.0.0                                     
+whatIf          False                                     
+Verbose         True
+16:48:18: INFO: #*======v confirm-ModulePsd1Version: C:\sc\verb-Text\verb-Text\verb-Text.psd1 v======
+VERBOSE: (non-pipeline - param - input)
+16:48:18: INFO: (Version already updated to match)
+16:48:18: INFO: $objReport
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+Version                        5.0.0                                                                                                       
+Valid                          False
+16:48:18: INFO: (SET:$objReport.Valid = $true ;)
+16:48:18: INFO: (PIPELINE:New-Object PSObject -Property $objReport | write-output)
+$objReport
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+Version                        5.0.0                                                                                                       
+Valid                          True
+16:48:18: INFO: #*======^ confirm-ModulePsd1Version: C:\sc\verb-Text\verb-Text\verb-Text.psd1 ^======
+16:48:18: INFO: (confirm-ModulePsd1Version:Success)
+16:48:18: INFO: confirm-ModulePsm1Version w
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+Path                           C:\sc\verb-Text\verb-Text\verb-Text.psm1                                                                    
+RequiredVersion                5.0.0                                                                                                       
+whatif                         False                                                                                                       
+verbose                        True
+VERBOSE: $PSBoundParameters:
+Key             Value                                     
+---             -----                                     
+Path            {C:\sc\verb-Text\verb-Text\verb-Text.psm1}
+RequiredVersion 5.0.0                                     
+whatIf          False                                     
+Verbose         True
+16:48:18: INFO: #*======v confirm-ModulePsm1Version: C:\sc\verb-Text\verb-Text\verb-Text.psm1 v======
+VERBOSE: (non-pipeline - param - input)
+16:48:18: INFO: (Version already updated to match)
+16:48:18: INFO: $objReport
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+Version                        5.0.0                                                                                                       
+Valid                          False
+16:48:18: INFO: (SET:$objReport.Valid = $true ;)
+16:48:18: INFO: (PIPELINE:New-Object PSObject -Property $objReport | write-output)
+$objReport
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+Version                        5.0.0                                                                                                       
+Valid                          True
+16:48:18: INFO: #*======^ confirm-ModulePsm1Version: C:\sc\verb-Text\verb-Text\verb-Text.psm1 ^======
+16:48:18: INFO: (confirm-ModulePsm1Version:Success)
+16:48:18: INFO: Checking sync of Psd1 module guid to the Pester Test Script: c:\sc\verb-Text\Tests\verb-Text.tests.ps1
+16:48:18: INFO: confirm-ModuleTestPs1Guid w
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+Path                           c:\sc\verb-Text\Tests\verb-Text.tests.ps1                                                                   
+RequiredGuid                   17eb54c0-da66-4673-816a-586ff5e3090b                                                                        
+whatif                         False                                                                                                       
+verbose                        True
+VERBOSE: $PSBoundParameters:
+Key          Value                                      
+---          -----                                      
+Path         {c:\sc\verb-Text\Tests\verb-Text.tests.ps1}
+RequiredGuid 17eb54c0-da66-4673-816a-586ff5e3090b       
+whatIf       False                                      
+Verbose      True
+16:48:18: INFO: #*======v confirm-ModuleTestPs1Guid: c:\sc\verb-Text\Tests\verb-Text.tests.ps1 v======
+VERBOSE: (non-pipeline - param - input)
+16:48:18: INFO: (Guid  already updated to match)
+16:48:18: INFO: $objReport
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+Guid                           17eb54c0-da66-4673-816a-586ff5e3090b                                                                        
+Valid                          False
+16:48:18: INFO: (SET:$objReport.Valid = $true ;)
+16:48:18: INFO: (PIPELINE:New-Object PSObject -Property $objReport | write-output)
+$objReport
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+Guid                           17eb54c0-da66-4673-816a-586ff5e3090b                                                                        
+Valid                          True
+16:48:18: INFO: #*======^ confirm-ModuleTestPs1Guid: c:\sc\verb-Text\Tests\verb-Text.tests.ps1 ^======
+16:48:18: INFO: (confirm-ModuleTestPs1Guid:Success)
+16:48:18: INFO: $objReport
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+Manifest                       C:\sc\verb-Text\verb-Text\verb-Text.psd1                                                                    
+Module                         C:\sc\verb-Text\verb-Text\verb-Text.psm1                                                                    
+Pester                         c:\sc\verb-Text\Tests\verb-Text.tests.ps1                                                                   
+Guid                           17eb54c0-da66-4673-816a-586ff5e3090b                                                                        
+Version                        5.0.0                                                                                                       
+Valid                          False
+16:48:18: INFO: (SET:$objReport.Valid = $true ;)
+16:48:18: INFO: (PIPELINE:New-Object PSObject -Property $objReport | write-output)
+$objReport
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+Manifest                       C:\sc\verb-Text\verb-Text\verb-Text.psd1                                                                    
+Module                         C:\sc\verb-Text\verb-Text\verb-Text.psm1                                                                    
+Pester                         c:\sc\verb-Text\Tests\verb-Text.tests.ps1                                                                   
+Guid                           17eb54c0-da66-4673-816a-586ff5e3090b                                                                        
+Version                        5.0.0                                                                                                       
+Valid                          True
+16:48:18: INFO: #*======^ confirm-ModuleBuildSync:  ^======
+16:48:18: INFO: (confirm-ModuleBuildSync:Success)
+VERBOSE: Get-ChildItem c:\sc\verb-Text\* -recur | where-object {.name -match $rgxGuidModFiles}
+16:48:19: INFO: Signing appropriate files...
+VERBOSE: (MONOLITH module:collecting non-include sign files)
+16:48:19: INFO: Sign-file w
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+file                           {C:\sc\verb-Text\rebuild-module.ps1, C:\sc\verb-Text\requirements.psd1, C:\sc\verb-Text\Tests\PPoShScript...
+ErrorAction                    Stop                                                                                                        
+showdebug                      False                                                                                                       
+whatif                         False
+
+
+    Directory: C:\sc\verb-Text
+
+
+SignerCertificate                         Status                                           Path
+-----------------                         ------                                           ----
+5F8F454A477F2C4539296F5E4EEE71FBB94CF5E5  Valid                                            rebuild-module.ps1
+5F8F454A477F2C4539296F5E4EEE71FBB94CF5E5  Valid                                            requirements.psd1
+
+
+    Directory: C:\sc\verb-Text\Tests
+
+
+SignerCertificate                         Status                                           Path
+-----------------                         ------                                           ----
+5F8F454A477F2C4539296F5E4EEE71FBB94CF5E5  Valid                                            PPoShScriptingStyle.psd1
+5F8F454A477F2C4539296F5E4EEE71FBB94CF5E5  Valid                                            ToddomationScriptingStyle-medium.psd1
+5F8F454A477F2C4539296F5E4EEE71FBB94CF5E5  Valid                                            verb-Text.tests.ps1
+
+
+    Directory: C:\sc\verb-Text\verb-Text
+
+
+SignerCertificate                         Status                                           Path
+-----------------                         ------                                           ----
+5F8F454A477F2C4539296F5E4EEE71FBB94CF5E5  Valid                                            verb-Text.psd1
+5F8F454A477F2C4539296F5E4EEE71FBB94CF5E5  Valid                                            verb-Text.psm1
+16:48:20: INFO: Removing existing profile verb-Text content...
+16:48:20: INFO: Uninstall-ModuleForce w
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+ModuleName                     verb-Text                                                                                                   
+Verbose                        True                                                                                                        
+whatif                         False
+VERBOSE: $PSBoundParameters:
+Key        Value      
+---        -----      
+ModuleName {verb-Text}
+Verbose    True       
+whatIf     False
+VERBOSE: (non-pipeline - param - input)
+16:48:35: INFO: 
+#*------v Uninstall PSGet Mod:verb-Text:v4.3.0 v------
+16:48:35: INFO: Uninstall-Script w
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+Force                          True                                                                                                        
+Whatif                         False                                                                                                       
+Verbose                        True
+VERBOSE: Populating RepositorySourceLocation property for module verb-Text.
+VERBOSE: Loading module from path 'C:\Users\kadritss\Documents\WindowsPowerShell\Modules\verb-Text\4.3.0\verb-Text.psm1'.
+VERBOSE: Performing the operation "Uninstall-Module" on target "Version '4.3.0' of module 'verb-Text'".
+VERBOSE: Successfully uninstalled the module 'verb-Text' from module base 'C:\Users\kadritss\Documents\WindowsPowerShell\Modules\verb-Text\4.3.0'.
+16:49:46: INFO: 
+#*------^ Uninstall PSGet Mod:verb-Text:v4.3.0 ^------
+16:49:46: INFO: (Processing $env:PSModulePath paths, for surviving locked copies of verb-Text to *manually* purge...)
+16:49:46: INFO: Checking: verb-Text below: C:\Users\kadritss\Documents\WindowsPowerShell\Modules...
+16:49:46:-GracefulFail specified, using EA:'Continue'
+16:49:46:No existing Match:test-path -path C:\Users\kadritss\Documents\WindowsPowerShell\Modules\verb-Text\*.*
+16:49:46: INFO: Checking: verb-Text below: C:\ProgramData\Boxstarter...
+16:49:46:-GracefulFail specified, using EA:'Continue'
+16:49:46:No existing Match:test-path -path C:\ProgramData\Boxstarter\verb-Text\*.*
+16:49:46: INFO: Checking: verb-Text below: C:\Program Files\WindowsPowerShell\Modules...
+16:49:46:-GracefulFail specified, using EA:'Continue'
+16:49:46:No existing Match:test-path -path C:\Program Files\WindowsPowerShell\Modules\verb-Text\*.*
+16:49:46: INFO: Checking: verb-Text below: C:\Windows\system32\WindowsPowerShell\v1.0\Modules...
+16:49:46:-GracefulFail specified, using EA:'Continue'
+16:49:46:No existing Match:test-path -path C:\Windows\system32\WindowsPowerShell\v1.0\Modules\verb-Text\*.*
+16:49:46: INFO: Checking: verb-Text below: C:\Program Files\Microsoft Message Analyzer\PowerShell\...
+16:49:46:-GracefulFail specified, using EA:'Continue'
+16:49:46:No existing Match:test-path -path C:\Program Files\Microsoft Message Analyzer\PowerShell\verb-Text\*.*
+16:49:46: INFO: (no $sRet returned on call)
+16:49:46: INFO: Copying module to profile (net of .git & .vscode dirs, and backed up content)...
+16:49:47:Creating Remove-Item w 
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+path                           {C:\Users\kadritss\Documents\WindowsPowerShell\Modules\verb-Text\fingerprint, C:\Users\kadritss\Documents...
+whatif                         False
+VERBOSE: Loading module from path 'C:\Users\kadritss\Documents\WindowsPowerShell\Modules\verb-Text\verb-Text\verb-Text.psm1'.
+16:49:47: INFO: (Profiling Repo: get-PSRepository -name lyncRepo...)
+16:49:48: INFO: 
+Publish-Module w
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+Name                           verb-Text                                                                                                   
+Repository                     lyncRepo                                                                                                    
+RequiredVersion                5.0.0                                                                                                       
+Verbose                        True                                                                                                        
+ErrorAction                    Stop                                                                                                        
+whatif                         False
+VERBOSE: Suppressed Verbose Repository details, Name = 'lyncRepo', Location = '\\lynmsv10\lync_fs\scripts\sc'; IsTrusted = 'True'; IsRegistered = 'True'.
+VERBOSE: Repository details, Name = 'lyncRepo', Location = '\\lynmsv10\lync_fs\scripts\sc'; IsTrusted = 'True'; IsRegistered = 'True'.
+VERBOSE: Repository details, Name = 'lyncRepo', Location = '\\lynmsv10\lync_fs\scripts\sc'; IsTrusted = 'True'; IsRegistered = 'True'.
+VERBOSE: Publish Location:'\\lynmsv10\lync_fs\scripts\sc'.
+VERBOSE: Module 'verb-Text' was found in 'C:\Users\kadritss\Documents\WindowsPowerShell\Modules\verb-Text\verb-Text'.
+VERBOSE: Loading module from path 'C:\Users\kadritss\AppData\Local\Temp\449972196\verb-Text\verb-Text.psm1'.
+VERBOSE: Suppressed Verbose Repository details, Name = 'lyncRepo', Location = '\\lynmsv10\lync_fs\scripts\sc'; IsTrusted = 'True'; IsRegistered = 'True'.
+VERBOSE: Repository details, Name = 'lyncRepo', Location = '\\lynmsv10\lync_fs\scripts\sc'; IsTrusted = 'True'; IsRegistered = 'True'.
+VERBOSE: Using the provider 'PowerShellGet' for searching packages.
+VERBOSE: Using the specified source names : 'lyncRepo'.
+VERBOSE: Getting the provider object for the PackageManagement Provider 'NuGet'.
+VERBOSE: The specified Location is '\\lynmsv10\lync_fs\scripts\sc' and PackageManagementProvider is 'NuGet'.
+VERBOSE: Total package yield:'0' for the specified package 'verb-Text'.
+VERBOSE: Suppressed Verbose Repository details, Name = 'lyncRepo', Location = '\\lynmsv10\lync_fs\scripts\sc'; IsTrusted = 'True'; IsRegistered = 'True'.
+VERBOSE: Repository details, Name = 'lyncRepo', Location = '\\lynmsv10\lync_fs\scripts\sc'; IsTrusted = 'True'; IsRegistered = 'True'.
+VERBOSE: Using the provider 'PowerShellGet' for searching packages.
+VERBOSE: Using the specified source names : 'lyncRepo'.
+VERBOSE: Getting the provider object for the PackageManagement Provider 'NuGet'.
+VERBOSE: The specified Location is '\\lynmsv10\lync_fs\scripts\sc' and PackageManagementProvider is 'NuGet'.
+VERBOSE: Total package yield:'1' for the specified package 'verb-Text'.
+VERBOSE: Performing the operation "Publish-Module" on target "Version '5.0.0' of module 'verb-Text'".
+VERBOSE: Calling Publish-PSArtifactUtility
+VERBOSE: Calling New-NuspecFile
+VERBOSE: Calling New-NugetPackage
+VERBOSE: Calling C:\Chocolatey\bin\NuGet.exe pack "C:\Users\kadritss\AppData\Local\Temp\449972196\verb-Text\verb-Text.nuspec" -outputdirectory "C:\Users\kadritss\AppData\Local\Temp\449972196\verb-Text" -noninteractive
+VERBOSE: C:\Chocolatey\bin\NuGet.exe output:
+VERBOSE: 	Attempting to build package from 'verb-Text.nuspec'.
+VERBOSE: 	Successfully created package 'C:\Users\kadritss\AppData\Local\Temp\449972196\verb-Text\verb-Text.5.0.0.nupkg'.
+VERBOSE:
+VERBOSE: finished running C:\Chocolatey\bin\NuGet.exe with exit code 0
+VERBOSE: Created Nuget Package C:\Users\kadritss\AppData\Local\Temp\449972196\verb-Text\verb-Text.5.0.0.nupkg
+VERBOSE: Successfully created nuget package at C:\Users\kadritss\AppData\Local\Temp\449972196\verb-Text\verb-Text.5.0.0.nupkg
+VERBOSE: Calling Publish-NugetPackage -NupkgPath C:\Users\kadritss\AppData\Local\Temp\449972196\verb-Text\verb-Text.5.0.0.nupkg -Destination \\lynmsv10\lync_fs\scripts\sc -NugetExePath C:\Chocolatey\bin\NuGet.exe -UseDotnetCli:False
+VERBOSE: Pushing verb-Text.5.0.0.nupkg to '\\lynmsv10\lync_fs\scripts\sc'...
+Your package was pushed.
+VERBOSE: Successfully published module 'verb-Text' to the module publish location '\\lynmsv10\lync_fs\scripts\sc'. Please allow few minutes for 'verb-Text' to show up in the search results.
+16:50:09: INFO: Waiting for:find-module -name verb-Text -Repository lyncRepo ...
+.
+16:50:14:-GracefulFail specified, using EA:'Continue'
+16:50:14:remove-item w
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+Path                           {C:\Users\kadritss\Documents\WindowsPowerShell\Modules\verb-Text\Docs\Quick-Start-Installation-and-Exampl...
+Recurse                        True                                                                                                        
+ErrorAction                    Continue                                                                                                    
+whatif                         False
+16:50:15: INFO: Install-Module w
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+Name                           verb-Text                                                                                                   
+Repository                     lyncRepo                                                                                                    
+RequiredVersion                5.0.0                                                                                                       
+scope                          CurrentUser                                                                                                 
+force                          True                                                                                                        
+AllowClobber                   True                                                                                                        
+ErrorAction                    Stop                                                                                                        
+whatif                         False
+16:50:41: INFO: Testing Module:Import-Module w
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+Name                           verb-Text                                                                                                   
+ErrorAction                    Stop                                                                                                        
+force                          True                                                                                                        
+verbose                        True
+VERBOSE: Loading module from path 'C:\Users\kadritss\Documents\WindowsPowerShell\Modules\verb-Text\5.0.0\verb-Text.psd1'.
+VERBOSE: Populating RepositorySourceLocation property for module verb-Text.
+VERBOSE: Loading module from path 'C:\Users\kadritss\Documents\WindowsPowerShell\Modules\verb-Text\5.0.0\verb-Text.psm1'.
+VERBOSE: Importing function 'compare-CodeRevision'.
+VERBOSE: Importing function 'convert-CaesarCipher'.
+VERBOSE: Importing function 'Convert-invertCase'.
+VERBOSE: Importing function 'convert-Rot13'.
+VERBOSE: Importing function 'convert-Rot47'.
+VERBOSE: Importing function 'convertFrom-Base64String'.
+VERBOSE: Importing function 'convertFrom-Html'.
+VERBOSE: Importing function 'convertTo-Base64String'.
+VERBOSE: Importing function 'ConvertTo-CamelCase'.
+VERBOSE: Importing function 'ConvertTo-L33t'.
+VERBOSE: Importing function 'ConvertTo-lowerCamelCase'.
+VERBOSE: Importing function 'convertTo-PSHelpExample'.
+VERBOSE: Importing function 'convertTo-QuotedList'.
+VERBOSE: Importing function 'ConvertTo-SCase'.
+VERBOSE: Importing function 'ConvertTo-SNAKE_CASE'.
+VERBOSE: Importing function 'ConvertTo-StringQuoted'.
+VERBOSE: Importing function 'convertTo-StringReverse'.
+VERBOSE: Importing function 'convertTo-StUdlycaPs'.
+VERBOSE: Importing function 'convertTo-TitleCase'.
+VERBOSE: Importing function 'convertTo-UnWrappedText'.
+VERBOSE: Importing function 'convertTo-WordsReverse'.
+VERBOSE: Importing function 'convertTo-WrappedText'.
+WARNING: The names of some imported commands from the module 'verb-Text' include unapproved verbs that might make them less discoverable. To find the commands with unapproved verbs, run the Import-Module command again with the Verbose parameter. For a list of approved verbs, type Get-Verb.
+VERBOSE: The 'create-AcronymFromCaps' command in the verb-Text' module was imported, but because its name does not include an approved verb, it might be difficult to find. The suggested alternative verbs are "New".
+VERBOSE: Importing function 'create-AcronymFromCaps'.
+VERBOSE: Importing function 'get-StringHash'.
+VERBOSE: Importing function 'Remove-StringDiacritic'.
+VERBOSE: Importing function 'Remove-StringLatinCharacters'.
+VERBOSE: Importing function 'Test-IsGuid'.
+VERBOSE: Importing function 'test-IsNumeric'.
+VERBOSE: Importing function 'test-IsRegexPattern'.
+VERBOSE: Importing function 'test-IsRegexValid'.
+VERBOSE: Importing function 'test-IsUri'.
+VERBOSE: Importing alias 'convertTo-CrAzYCaPS'.
+VERBOSE: Importing alias 'convertTo-PascalCase'.
+VERBOSE: Importing alias 'convertTo-ProperCase'.
+VERBOSE: Importing alias 'convertTo-SentanceCase'.
+VERBOSE: Importing alias 'convertTo-StUdlycaSe'.
+VERBOSE: Importing alias 'convertTo-UpperCamelCase'.
+VERBOSE: Importing alias 'IsNumeric'.
+VERBOSE: Importing alias 'quote-list'.
+VERBOSE: Importing alias 'quote-string'.
+VERBOSE: Importing alias 'test-URI'.
+VERBOSE: Importing alias 'unwrap-text'.
+VERBOSE: Importing alias 'Unwrap-TextN'.
+VERBOSE: Importing alias 'wrap-text'.
+16:50:43: INFO: Retrieving matching Repo .nupkg file:
+gci \\lynmsv10\lync_fs\scripts\sc\verb-Text.5.0.0.nupkgl..
+16:50:43: INFO: Proper updated .nupkg file found:verb-Text.5.0.0.nupkg, copying to local Pkg directory.
+16:50:43:Copy-Item w
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+path                           \\lynmsv10\lync_fs\scripts\sc\verb-Text.5.0.0.nupkg                                                         
+destination                    c:\sc\verb-Text\Package                                                                                     
+whatif                         False
+16:50:43: INFO: remove-UnneededFileVariants w
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+Path                           c:\sc\verb-Text\Package                                                                                     
+Include                        verb-Text*.nupkg                                                                                            
+Pattern                                                                                                                                    
+FilterOn                       CreationTime                                                                                                
+Keep                           2                                                                                                           
+KeepToday                      True                                                                                                        
+verbose                        True                                                                                                        
+whatif                         False
+16:50:43:gci w
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+path                           c:\sc\verb-Text\Package\*                                                                                   
+include                        verb-Text*.nupkg                                                                                            
+ErrorAction                    Stop
+VERBOSE: $cuttime:09/08/2022 00:00:00
+VERBOSE: filtering on files prior to $cuttime:09/08/2022 00:00:00 AM, on CreationTime property
+(4 in set *before* filtering)
+(3 in set *after* filtering)
+VERBOSE: attempting to retain remaining 2 generations net of prior filtering
+(3 in set *before* filtering)
+(1 in set *after* filtering)
+(Note:net population is *below* target -Keep:2 spec - insufficient older files available)
+16:50:44:Reducing matched population from 4 to 1 files via:
+filtered files on CreationTime prior to 09/08/2022 00:00:00 AM
+16:50:44:Remove-Item w 
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+path                           C:\sc\verb-Text\Package\verb-Text.4.2.0.nupkg                                                               
+ErrorAction                    STOP                                                                                                        
+whatif                         False
+True
+16:50:44: INFO: remove-UnneededFileVariants w
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+Path                           c:\sc\verb-Text\Tests                                                                                       
+Include                        ScriptAnalyzer-Results-*.xml                                                                                
+Pattern                                                                                                                                    
+FilterOn                       CreationTime                                                                                                
+Keep                           4                                                                                                           
+KeepToday                      True                                                                                                        
+verbose                        True                                                                                                        
+whatif                         False
+16:50:44:gci w
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+path                           c:\sc\verb-Text\Tests\*                                                                                     
+include                        ScriptAnalyzer-Results-*.xml                                                                                
+ErrorAction                    Stop
+VERBOSE: $cuttime:09/08/2022 00:00:00
+VERBOSE: filtering on files prior to $cuttime:09/08/2022 00:00:00 AM, on CreationTime property
+(5 in set *before* filtering)
+(5 in set *after* filtering)
+VERBOSE: attempting to retain remaining 4 generations net of prior filtering
+(5 in set *before* filtering)
+(1 in set *after* filtering)
+(Note:net population is *below* target -Keep:4 spec - insufficient older files available)
+16:50:44:Reducing matched population from 5 to 1 files via:
+filtered files on CreationTime prior to 09/08/2022 00:00:00 AM
+16:50:44:Remove-Item w 
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+path                           C:\sc\verb-Text\Tests\ScriptAnalyzer-Results-20211206-1427PM.xml                                            
+ErrorAction                    STOP                                                                                                        
+whatif                         False
+True
+16:50:44: INFO: -RunTest specified: Running Pester Test script:
+c:\sc\verb-Text\Tests\verb-Text.tests.ps1
+16:50:44:
+#*------v RUNNING c:\sc\verb-Text\Tests\verb-Text.tests.ps1: v------
+WARNING: The names of some imported commands from the module 'verb-Text' include unapproved verbs that might make them less discoverable. To find the commands with unapproved verbs, run the Import-Module command again with the Verbose parameter. For a list of approved verbs, type Get-Verb.
+
+Describing Module Information
+
+  Context Manifest Testing
+    [+] Valid Module Manifest
+ 49ms
+    [+] Valid Manifest Name
+ 31ms
+    [+] Generic Version Check
+ 18ms
+    [+] Valid Author
+ 14ms
+    [+] Valid Company Name
+ 14ms
+PS>TerminatingError(): "Expected a value, but got $null or empty."
+>> TerminatingError(): "Expected a value, but got $null or empty."
+>> TerminatingError(): "Expected a value, but got $null or empty."
+    [-] Valid License
+ 18ms
+      Expected a value, but got $null or empty.
+      155:             $ModuleInformation.LicenseURI | Should not BeNullOrEmpty
+      at <ScriptBlock>, C:\sc\verb-Text\Tests\verb-Text.tests.ps1: line 155
+    [+] Valid Manifest Description
+ 18ms
+    [+] Valid Manifest Root Module
+ 18ms
+    [+] Valid Manifest GUID
+ 36ms
+    [+] Required Modules
+ 40ms
+
+  Context Exported Functions
+PS>TerminatingError(): "Expected 31, but got 43."
+>> TerminatingError(): "Expected 31, but got 43."
+>> TerminatingError(): "Expected 31, but got 43."
+    [-] Proper Number of Functions Exported
+ 131ms
+      Expected 31, but got 43.
+      215:             $ExportedCount | Should be $FileCount
+      at <ScriptBlock>, C:\sc\verb-Text\Tests\verb-Text.tests.ps1: line 215
+    [+] Exports All Public Functions
+ 212ms
+    [+] Compare Missing Functions
+ 6ms
+
+Describing Help
+
+  Context Function - convertTo-CrAzYCaPS
+    [+] Synopsis
+ 320ms
+    [+] Description
+ 312ms
+    [+] Examples
+ 190ms
+
+Describing Help
+
+  Context Function - convertTo-PascalCase
+    [+] Synopsis
+ 167ms
+    [+] Description
+ 199ms
+    [+] Examples
+ 151ms
+
+Describing Help
+
+  Context Function - convertTo-ProperCase
+    [+] Synopsis
+ 117ms
+    [+] Description
+ 448ms
+    [+] Examples
+ 295ms
+
+Describing Help
+
+  Context Function - convertTo-SentanceCase
+    [+] Synopsis
+ 212ms
+    [+] Description
+ 260ms
+    [+] Examples
+ 173ms
+
+Describing Help
+
+  Context Function - convertTo-StUdlycaSe
+    [+] Synopsis
+ 264ms
+    [+] Description
+ 265ms
+    [+] Examples
+ 444ms
+
+Describing Help
+
+  Context Function - convertTo-UpperCamelCase
+    [+] Synopsis
+ 159ms
+    [+] Description
+ 252ms
+    [+] Examples
+ 353ms
+
+Describing Help
+
+  Context Function - quote-list
+    [+] Synopsis
+ 102ms
+    [+] Description
+ 130ms
+Select-Object : Property "Examples" cannot be found.
+At C:\sc\verb-Text\Tests\verb-Text.tests.ps1:255 char:43
++ ... amples = Get-Help $_ | Select-Object -ExpandProperty Examples | Measu ...
++                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidArgument: (@{alertSet=@{al...Name=verb-Text}:PSObject) [Select-Object], 
+PSArgumentException
+    + FullyQualifiedErrorId : ExpandPropertyNotFound,Microsoft.PowerShell.Commands.SelectObjectCommand
+Select-Object : Property "Examples" cannot be found.
+At C:\sc\verb-Text\Tests\verb-Text.tests.ps1:255 char:43
++ ... amples = Get-Help $_ | Select-Object -ExpandProperty Examples | Measu ...
++                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidArgument: (@{alertSet=@{al...Name=verb-Text}:PSObject) [Select-Object], PSArgumentException
+    + FullyQualifiedErrorId : ExpandPropertyNotFound,Microsoft.PowerShell.Commands.SelectObjectCommand
+
+PS>TerminatingError(): "Expected $true, but got $false."
+>> TerminatingError(): "Expected $true, but got $false."
+>> TerminatingError(): "Expected $true, but got $false."
+    [-] Examples
+ 805ms
+      Expected $true, but got $false.
+      256:                 $Examples.Count -gt 0 | Should be $true
+      at <ScriptBlock>, C:\sc\verb-Text\Tests\verb-Text.tests.ps1: line 256
+
+Describing Help
+
+  Context Function - quote-string
+    [+] Synopsis
+ 207ms
+    [+] Description
+ 746ms
+    [+] Examples
+ 257ms
+
+Describing Help
+
+  Context Function - test-URI
+    [+] Synopsis
+ 272ms
+    [+] Description
+ 117ms
+    [+] Examples
+ 109ms
+
+Describing Help
+
+  Context Function - unwrap-text
+    [+] Synopsis
+ 105ms
+    [+] Description
+ 123ms
+    [+] Examples
+ 112ms
+
+Describing Help
+
+  Context Function - Unwrap-TextN
+    [+] Synopsis
+ 588ms
+    [+] Description
+ 338ms
+    [+] Examples
+ 583ms
+
+Describing Help
+
+  Context Function - wrap-text
+    [+] Synopsis
+ 212ms
+    [+] Description
+ 137ms
+    [+] Examples
+ 127ms
+
+Describing Help
+
+  Context Function - compare-CodeRevision
+    [+] Synopsis
+ 546ms
+    [+] Description
+ 390ms
+    [+] Examples
+ 347ms
+
+Describing Help
+
+  Context Function - convert-CaesarCipher
+    [+] Synopsis
+ 438ms
+    [+] Description
+ 418ms
+    [+] Examples
+ 271ms
+
+Describing Help
+
+  Context Function - convertFrom-Base64String
+    [+] Synopsis
+ 293ms
+    [+] Description
+ 268ms
+    [+] Examples
+ 368ms
+
+Describing Help
+
+  Context Function - convertFrom-Html
+    [+] Synopsis
+ 201ms
+    [+] Description
+ 143ms
+    [+] Examples
+ 179ms
+
+Describing Help
+
+  Context Function - Convert-invertCase
+    [+] Synopsis
+ 175ms
+    [+] Description
+ 388ms
+    [+] Examples
+ 500ms
+
+Describing Help
+
+  Context Function - convert-Rot13
+    [+] Synopsis
+ 167ms
+    [+] Description
+ 196ms
+    [+] Examples
+ 444ms
+
+Describing Help
+
+  Context Function - convert-Rot47
+    [+] Synopsis
+ 170ms
+    [+] Description
+ 237ms
+    [+] Examples
+ 171ms
+
+Describing Help
+
+  Context Function - convertTo-Base64String
+    [+] Synopsis
+ 209ms
+    [+] Description
+ 206ms
+    [+] Examples
+ 204ms
+
+Describing Help
+
+  Context Function - ConvertTo-CamelCase
+    [+] Synopsis
+ 201ms
+    [+] Description
+ 175ms
+    [+] Examples
+ 210ms
+
+Describing Help
+
+  Context Function - ConvertTo-L33t
+    [+] Synopsis
+ 93ms
+    [+] Description
+ 134ms
+    [+] Examples
+ 140ms
+
+Describing Help
+
+  Context Function - ConvertTo-lowerCamelCase
+    [+] Synopsis
+ 131ms
+    [+] Description
+ 94ms
+    [+] Examples
+ 458ms
+
+Describing Help
+
+  Context Function - convertTo-PSHelpExample
+    [+] Synopsis
+ 293ms
+    [+] Description
+ 241ms
+    [+] Examples
+ 259ms
+
+Describing Help
+
+  Context Function - convertTo-QuotedList
+    [+] Synopsis
+ 763ms
+    [+] Description
+ 289ms
+Select-Object : Property "Examples" cannot be found.
+At C:\sc\verb-Text\Tests\verb-Text.tests.ps1:255 char:43
++ ... amples = Get-Help $_ | Select-Object -ExpandProperty Examples | Measu ...
++                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidArgument: (@{alertSet=@{al...Name=verb-Text}:PSObject) [Select-Object], 
+PSArgumentException
+    + FullyQualifiedErrorId : ExpandPropertyNotFound,Microsoft.PowerShell.Commands.SelectObjectCommand
+Select-Object : Property "Examples" cannot be found.
+At C:\sc\verb-Text\Tests\verb-Text.tests.ps1:255 char:43
++ ... amples = Get-Help $_ | Select-Object -ExpandProperty Examples | Measu ...
++                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidArgument: (@{alertSet=@{al...Name=verb-Text}:PSObject) [Select-Object], PSArgumentException
+    + FullyQualifiedErrorId : ExpandPropertyNotFound,Microsoft.PowerShell.Commands.SelectObjectCommand
+
+PS>TerminatingError(): "Expected $true, but got $false."
+>> TerminatingError(): "Expected $true, but got $false."
+>> TerminatingError(): "Expected $true, but got $false."
+    [-] Examples
+ 1.12s
+      Expected $true, but got $false.
+      256:                 $Examples.Count -gt 0 | Should be $true
+      at <ScriptBlock>, C:\sc\verb-Text\Tests\verb-Text.tests.ps1: line 256
+
+Describing Help
+
+  Context Function - ConvertTo-SCase
+    [+] Synopsis
+ 231ms
+    [+] Description
+ 177ms
+    [+] Examples
+ 163ms
+
+Describing Help
+
+  Context Function - ConvertTo-SNAKE_CASE
+    [+] Synopsis
+ 163ms
+    [+] Description
+ 182ms
+    [+] Examples
+ 271ms
+
+Describing Help
+
+  Context Function - ConvertTo-StringQuoted
+    [+] Synopsis
+ 88ms
+    [+] Description
+ 186ms
+    [+] Examples
+ 197ms
+
+Describing Help
+
+  Context Function - convertTo-StringReverse
+    [+] Synopsis
+ 171ms
+    [+] Description
+ 116ms
+    [+] Examples
+ 146ms
+
+Describing Help
+
+  Context Function - convertTo-StUdlycaPs
+    [+] Synopsis
+ 1.12s
+    [+] Description
+ 253ms
+    [+] Examples
+ 222ms
+
+Describing Help
+
+  Context Function - convertTo-TitleCase
+    [+] Synopsis
+ 136ms
+    [+] Description
+ 255ms
+    [+] Examples
+ 145ms
+
+Describing Help
+
+  Context Function - convertTo-UnWrappedText
+    [+] Synopsis
+ 105ms
+    [+] Description
+ 242ms
+    [+] Examples
+ 287ms
+
+Describing Help
+
+  Context Function - convertTo-WordsReverse
+    [+] Synopsis
+ 252ms
+    [+] Description
+ 258ms
+    [+] Examples
+ 158ms
+
+Describing Help
+
+  Context Function - convertTo-WrappedText
+    [+] Synopsis
+ 391ms
+    [+] Description
+ 184ms
+    [+] Examples
+ 167ms
+
+Describing Help
+
+  Context Function - create-AcronymFromCaps
+    [+] Synopsis
+ 222ms
+    [+] Description
+ 222ms
+    [+] Examples
+ 376ms
+
+Describing Help
+
+  Context Function - get-StringHash
+    [+] Synopsis
+ 184ms
+    [+] Description
+ 146ms
+    [+] Examples
+ 155ms
+
+Describing Help
+
+  Context Function - Remove-StringDiacritic
+    [+] Synopsis
+ 167ms
+    [+] Description
+ 1.14s
+    [+] Examples
+ 371ms
+
+Describing Help
+
+  Context Function - Remove-StringLatinCharacters
+    [+] Synopsis
+ 148ms
+    [+] Description
+ 151ms
+    [+] Examples
+ 339ms
+
+Describing Help
+
+  Context Function - Test-IsGuid
+    [+] Synopsis
+ 313ms
+    [+] Description
+ 203ms
+    [+] Examples
+ 203ms
+
+Describing Help
+
+  Context Function - test-IsNumeric
+    [+] Synopsis
+ 223ms
+    [+] Description
+ 141ms
+    [+] Examples
+ 162ms
+
+Describing Help
+
+  Context Function - test-IsRegexPattern
+    [+] Synopsis
+ 207ms
+    [+] Description
+ 310ms
+    [+] Examples
+ 205ms
+
+Describing Help
+
+  Context Function - test-IsRegexValid
+    [+] Synopsis
+ 149ms
+    [+] Description
+ 156ms
+    [+] Examples
+ 142ms
+
+Describing Help
+
+  Context Function - test-IsUri
+    [+] Synopsis
+ 97ms
+    [+] Description
+ 77ms
+    [+] Examples
+ 209ms
+
+Describing General - Testing all scripts and modules against the Script Analyzer Rules
+
+  Context Checking files to test exist and Invoke-ScriptAnalyzer cmdLet is available
+    [+] Checking files exist to test.
+ 52ms
+    [+] Checking Invoke-ScriptAnalyzer exists.
+ 67ms
+
+Describing Testing against PSScriptAnalyzer rules
+
+  Context PSSA Standard Rules
+    [+] Should pass PSAlignAssignmentStatement
+ 72ms
+    [!] Should pass PSAvoidUsingCmdletAliases
+, is skipped
+ 0ms
+    [+] Should pass PSAvoidAssignmentToAutomaticVariable
+ 32ms
+PS>TerminatingError(): "Expected 0, but got 2."
+>> TerminatingError(): "Expected 0, but got 2."
+>> TerminatingError(): "Expected 0, but got 2."
+    [-] Should pass PSAvoidDefaultValueSwitchParameter
+ 52ms
+      Expected 0, but got 2.
+      319:                 ($Failures | Measure-Object).Count | Should Be 0
+      at <ScriptBlock>, C:\sc\verb-Text\Tests\verb-Text.tests.ps1: line 319
+PS>TerminatingError(): "Expected 0, but got 2."
+>> TerminatingError(): "Expected 0, but got 2."
+>> TerminatingError(): "Expected 0, but got 2."
+    [-] Should pass PSAvoidDefaultValueForMandatoryParameter
+ 59ms
+      Expected 0, but got 2.
+      319:                 ($Failures | Measure-Object).Count | Should Be 0
+      at <ScriptBlock>, C:\sc\verb-Text\Tests\verb-Text.tests.ps1: line 319
+    [+] Should pass PSAvoidUsingEmptyCatchBlock
+ 34ms
+    [+] Should pass PSAvoidGlobalAliases
+ 33ms
+    [+] Should pass PSAvoidGlobalFunctions
+ 61ms
+    [!] Should pass PSAvoidGlobalVars
+, is skipped
+ 0ms
+    [+] Should pass PSAvoidInvokingEmptyMembers
+ 34ms
+    [+] Should pass PSAvoidLongLines
+ 40ms
+    [+] Should pass PSAvoidNullOrEmptyHelpMessageAttribute
+ 40ms
+    [+] Should pass PSAvoidOverwritingBuiltInCmdlets
+ 44ms
+    [+] Should pass PSAvoidUsingPositionalParameters
+ 46ms
+    [+] Should pass PSReservedCmdletChar
+ 36ms
+    [+] Should pass PSReservedParams
+ 34ms
+    [+] Should pass PSAvoidShouldContinueWithoutForce
+ 48ms
+    [+] Should pass PSAvoidTrailingWhitespace
+ 37ms
+    [+] Should pass PSAvoidUsingUsernameAndPasswordParams
+ 71ms
+    [+] Should pass PSAvoidUsingComputerNameHardcoded
+ 79ms
+    [+] Should pass PSAvoidUsingConvertToSecureStringWithPlainText
+ 78ms
+    [+] Should pass PSAvoidUsingDeprecatedManifestFields
+ 57ms
+    [+] Should pass PSAvoidUsingDoubleQuotesForConstantString
+ 38ms
+PS>TerminatingError(): "Expected 0, but got 1."
+>> TerminatingError(): "Expected 0, but got 1."
+>> TerminatingError(): "Expected 0, but got 1."
+    [-] Should pass PSAvoidUsingInvokeExpression
+ 67ms
+      Expected 0, but got 1.
+      319:                 ($Failures | Measure-Object).Count | Should Be 0
+      at <ScriptBlock>, C:\sc\verb-Text\Tests\verb-Text.tests.ps1: line 319
+    [+] Should pass PSAvoidUsingPlainTextForPassword
+ 40ms
+    [+] Should pass PSAvoidUsingWMICmdlet
+ 33ms
+    [!] Should pass PSAvoidUsingWriteHost
+, is skipped
+ 0ms
+    [+] Should pass PSUseCompatibleCommands
+ 28ms
+    [+] Should pass PSUseCompatibleSyntax
+ 62ms
+    [+] Should pass PSUseCompatibleTypes
+ 37ms
+    [+] Should pass PSMisleadingBacktick
+ 38ms
+    [+] Should pass PSMissingModuleManifestField
+ 34ms
+PS>TerminatingError(): "Expected 0, but got 2."
+>> TerminatingError(): "Expected 0, but got 2."
+>> TerminatingError(): "Expected 0, but got 2."
+    [-] Should pass PSPlaceCloseBrace
+ 35ms
+      Expected 0, but got 2.
+      319:                 ($Failures | Measure-Object).Count | Should Be 0
+      at <ScriptBlock>, C:\sc\verb-Text\Tests\verb-Text.tests.ps1: line 319
+PS>TerminatingError(): "Expected 0, but got 1."
+>> TerminatingError(): "Expected 0, but got 1."
+>> TerminatingError(): "Expected 0, but got 1."
+    [-] Should pass PSPlaceOpenBrace
+ 23ms
+      Expected 0, but got 1.
+      319:                 ($Failures | Measure-Object).Count | Should Be 0
+      at <ScriptBlock>, C:\sc\verb-Text\Tests\verb-Text.tests.ps1: line 319
+PS>TerminatingError(): "Expected 0, but got 4."
+>> TerminatingError(): "Expected 0, but got 4."
+>> TerminatingError(): "Expected 0, but got 4."
+    [-] Should pass PSPossibleIncorrectComparisonWithNull
+ 35ms
+      Expected 0, but got 4.
+      319:                 ($Failures | Measure-Object).Count | Should Be 0
+      at <ScriptBlock>, C:\sc\verb-Text\Tests\verb-Text.tests.ps1: line 319
+    [+] Should pass PSPossibleIncorrectUsageOfAssignmentOperator
+ 26ms
+    [+] Should pass PSPossibleIncorrectUsageOfRedirectionOperator
+ 23ms
+    [!] Should pass PSProvideCommentHelp
+, is skipped
+ 0ms
+    [+] Should pass PSReviewUnusedParameter
+ 39ms
+    [!] Should pass PSUseApprovedVerbs
+, is skipped
+ 0ms
+PS>TerminatingError(): "Expected 0, but got 1."
+>> TerminatingError(): "Expected 0, but got 1."
+>> TerminatingError(): "Expected 0, but got 1."
+    [-] Should pass PSUseBOMForUnicodeEncodedFile
+ 27ms
+      Expected 0, but got 1.
+      319:                 ($Failures | Measure-Object).Count | Should Be 0
+      at <ScriptBlock>, C:\sc\verb-Text\Tests\verb-Text.tests.ps1: line 319
+    [!] Should pass PSUseCmdletCorrectly
+, is skipped
+ 0ms
+    [+] Should pass PSUseCompatibleCmdlets
+ 21ms
+    [+] Should pass PSUseConsistentIndentation
+ 21ms
+    [!] Should pass PSUseConsistentWhitespace
+, is skipped
+ 0ms
+    [+] Should pass PSUseCorrectCasing
+ 21ms
+    [!] Should pass PSUseDeclaredVarsMoreThanAssignments
+, is skipped
+ 0ms
+    [+] Should pass PSUseLiteralInitializerForHashtable
+ 16ms
+    [+] Should pass PSUseOutputTypeCorrectly
+ 51ms
+    [+] Should pass PSUseProcessBlockForPipelineCommand
+ 64ms
+    [+] Should pass PSUsePSCredentialType
+ 77ms
+    [+] Should pass PSShouldProcess
+ 86ms
+PS>TerminatingError(): "Expected 0, but got 4."
+>> TerminatingError(): "Expected 0, but got 4."
+>> TerminatingError(): "Expected 0, but got 4."
+    [-] Should pass PSUseShouldProcessForStateChangingFunctions
+ 104ms
+      Expected 0, but got 4.
+      319:                 ($Failures | Measure-Object).Count | Should Be 0
+      at <ScriptBlock>, C:\sc\verb-Text\Tests\verb-Text.tests.ps1: line 319
+PS>TerminatingError(): "Expected 0, but got 6."
+>> TerminatingError(): "Expected 0, but got 6."
+>> TerminatingError(): "Expected 0, but got 6."
+    [-] Should pass PSUseSingularNouns
+ 56ms
+      Expected 0, but got 6.
+      319:                 ($Failures | Measure-Object).Count | Should Be 0
+      at <ScriptBlock>, C:\sc\verb-Text\Tests\verb-Text.tests.ps1: line 319
+    [+] Should pass PSUseSupportsShouldProcess
+ 69ms
+    [+] Should pass PSUseToExportFieldsInManifest
+ 82ms
+    [+] Should pass PSUseUsingScopeModifierInNewRunspaces
+ 54ms
+    [+] Should pass PSUseUTF8EncodingForHelpFile
+ 53ms
+    [+] Should pass PSDSCDscExamplesPresent
+ 44ms
+    [+] Should pass PSDSCDscTestsPresent
+ 31ms
+    [+] Should pass PSDSCReturnCorrectTypesForDSCFunctions
+ 44ms
+    [+] Should pass PSDSCUseIdenticalMandatoryParametersForDSC
+ 37ms
+    [+] Should pass PSDSCUseIdenticalParametersForDSC
+ 27ms
+    [+] Should pass PSDSCStandardDSCFunctionsInResource
+ 34ms
+    [+] Should pass PSDSCUseVerboseMessageInDSCResource
+ 37ms
+16:52:48:
+#*------^ RUNNING c:\sc\verb-Text\Tests\verb-Text.tests.ps1: ^------
+16:52:48: INFO: 
+---------------------------------------------------------------------------------
+Processing completed: verb-Text :: c:\sc\verb-Text
+- Script is currently installed (from PsRep: with scope:CurrentUser, under TORO\kadriTSS profile
+
+- To update other scopes/accounts on same machine, or install on other machines:
+    1. Uninstall current module copies:
+
+        Uninstall-Module -Name verb-Text) -AllVersion -whatif ;
+
+    2. Install the current version (or higher) from the Repo:lyncRepo:
+
+        install-Module -name verb-Text -Repository lyncRepo -MinimumVersion 5.0.0 -scope currentuser -whatif ;
+
+    3. Reimport the module with -force, to ensure the current installed verison is loaded:
+
+        import-Module -name verb-Text -force -verbose ;
+
+#-=-Stacked list: Unwrap to create a 1-liner for the above: CURRENTUSER =-=-=-=-=-=-=
+$whatif=$false ; $tMod = 'verb-Text' ; $tVer = '5.0.0' ;  $tScop = 'CurrentUser' ;
+TRY {
+Remove-Module -Name $tmod -ea 0 ;
+Uninstall-Module -Name $tmod -AllVersion -whatif:$($whatif) ;
+install-Module -name $tmod -Repository 'lyncRepo' -MinimumVersion $tVer -scope $tScop -AllowClobber -whatif:$($whatif) ;
+import-Module -name $tmod -force -verbose ;
+} CATCH {
+Write-Warning "Failed processing $($_.Exception.ItemName). 
+Error Message: $($_.Exception.Message)
+Error Details: $($_)" ; Break ;
+} ;
+#-=-=-=-=-=-=-=-=
+#-=-Stacked list: Unwrap to create a 1-liner for the above: ALLUSERS =-=-=-=-=-=-=
+$whatif=$false ; $tMod = 'verb-Text' ; $tVer = '5.0.0' ;  $tScop = 'AllUsers' ;
+TRY {
+Remove-Module -Name $tmod -ea 0 ;
+Uninstall-Module -Name $tmod -AllVersion -whatif:$($whatif) ;
+install-Module -name $tmod -Repository 'lyncRepo' -MinimumVersion $tVer -scope $tScop -AllowClobber -whatif:$($whatif) ;
+import-Module -name $tmod -force -verbose ;
+} CATCH {
+Write-Warning "Failed processing $($_.Exception.ItemName). 
+Error Message: $($_.Exception.Message)
+Error Details: $($_)" ; Break ;
+} ;
+#-=-=-=-=-=-=-=-=
+
+- You may also want to run the configured Pester Tests of the new script:
+
+        . c:\sc\verb-Text\Tests\verb-Text.tests.ps1
+
+Full Processing Details can be found in:
+
+C:\sc\verb-dev\verb-dev\logs\VERB-dev-verb-Text-LOG-BATCH-EXEC-20220908-1647PM-log.txt
+
+---------------------------------------------------------------------------------
+16:52:49: INFO: 
+(Processing log can be found at:c:\sc\verb-Text\C:\sc\verb-dev\verb-dev\logs\VERB-dev-verb-Text-LOG-BATCH-EXEC-20220908-1647PM-log.txt)
+16:52:49: INFO: remove-UnneededFileVariants w
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+Path                           c:\sc\verb-Text                                                                                             
+Include                        VERB-dev-verb-Text-LOG-BATCH-*-log.txt                                                                      
+Pattern                                                                                                                                    
+FilterOn                       CreationTime                                                                                                
+Keep                           2                                                                                                           
+KeepToday                      True                                                                                                        
+verbose                        True                                                                                                        
+whatif                         False
+16:52:49:gci w
+Name                           Value                                                                                                       
+----                           -----                                                                                                       
+path                           c:\sc\verb-Text\*                                                                                           
+include                        VERB-dev-verb-Text-LOG-BATCH-*-log.txt                                                                      
+ErrorAction                    Stop
+VERBOSE: $cuttime:09/08/2022 00:00:00
+VERBOSE: filtering on files prior to $cuttime:09/08/2022 00:00:00 AM, on CreationTime property
+(1 in set *before* filtering)
+(0 in set *after* filtering)
+VERBOSE: attempting to retain remaining 2 generations net of prior filtering
+(0 in set *before* filtering)
+(0 in set *after* filtering)
+(Note:net population is *below* target -Keep:2 spec - insufficient older files available)
+16:52:49:Reducing matched population from 1 to 0 files via:
+filtered files on CreationTime prior to 09/08/2022 00:00:00 AM
+16:52:49:There are *no* files to be removed, as per the specified inputs. ($population:0)
+16:52:49: INFO: #*======^ VERB-dev.psm1:verb-Text ^======
+write-host 16:52:49:
+#*------^ (1/1):PROC:verb-Text: ^------
+16:52:49:
+#*======^ RUNNING processbulk-NewModule.ps1 ^======
+
+
+
+▒
+▒
+▒
+░
+░
+
+LYN-8DCZ1G2
+ ▓▒▓
+TORO\kadriTSS
+ ▓▒▓
+Thu 09/08/2022 16:52
+ [00:05:45]
+
+▒
+▒
+▒
+▒
+▒
+
+[PS]
+:
+C:\U\W\P\SCRIPTS
+
+$
+
+
+
+PS>choco update googledrive
+
+
+▒
+▒
+▒
+░
+░
+
+LYN-8DCZ1G2
+ ▓▒▓
+TORO\kadriTSS
+ ▓▒▓
+Fri 09/09/2022 09:53
+ [00:01:41]
+
+▒
+▒
+▒
+▒
+▒
+
+[PS]
+:
+C:\U\W\P\SCRIPTS
+
+$
+
+
+
+PS>choco list googledrive -local
+
+
+▒
+▒
+▒
+░
+░
+
+LYN-8DCZ1G2
+ ▓▒▓
+TORO\kadriTSS
+ ▓▒▓
+Fri 09/09/2022 09:54
+ [3s]
+
+▒
+▒
+▒
+▒
+▒
+
+[PS]
+:
+C:\U\W\P\SCRIPTS
+
+$
+
+
+
