@@ -2526,3 +2526,110 @@ $
 
 
 
+PS>sdb
+09:31:27:KILLING DRIVE SUCKERS!
+QUIT READING BY THE HARDDRIVE LIGHT!
+09:31:27:(no LDIScn32 processes found)
+09:31:27:(no Cagent32 processes found)
+09:31:27:(no gatherproducts processes found)
+09:31:27:===Windows Search:Status:Running
+09:31:28:STOPPING WSEARCH SVC
+
+▒
+▒
+▒
+░
+░
+
+LYN-8DCZ1G2
+ ▓▒▓
+TORO\kadriTSS
+ ▓▒▓
+Mon 09/12/2022 09:31
+ [737ms]
+
+▒
+▒
+▒
+▒
+▒
+
+[PS]
+:
+C:\U\W\P\SCRIPTS
+
+$
+
+
+
+PS>get-uptime
+
+
+Uptime       : 6.01:18:30.2474556
+Minutes      : 18
+Days         : 6
+Computername : LYN-8DCZ1G2
+Seconds      : 30
+UptimeStr    : LYN-8DCZ1G2:6d:1h:18m:30s
+Hours        : 1
+
+
+
+
+▒
+▒
+▒
+░
+░
+
+LYN-8DCZ1G2
+ ▓▒▓
+TORO\kadriTSS
+ ▓▒▓
+Mon 09/12/2022 09:39
+ [922ms]
+
+▒
+▒
+▒
+▒
+▒
+
+[PS]
+:
+C:\U\W\P\SCRIPTS
+
+$
+
+
+
+PS>$ThrottleMs
+500
+
+▒
+▒
+▒
+░
+░
+
+LYN-8DCZ1G2
+ ▓▒▓
+TORO\kadriTSS
+ ▓▒▓
+Mon 09/12/2022 09:45
+ [11ms]
+
+▒
+▒
+▒
+▒
+▒
+
+[PS]
+:
+C:\U\W\P\SCRIPTS
+
+$
+
+
+
