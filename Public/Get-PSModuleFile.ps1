@@ -2,7 +2,7 @@
 function Get-PSModuleFile {
     <#
     .SYNOPSIS
-    Get-PSModuleFile.ps1 - Locate a module's manifest .psd1 file, given the root path of the moodule (direct lift from BuildHelpers:Get-PSModuleManifest, but I want a sep copy wo BH as a dependancy)
+    Get-PSModuleFile.ps1 - Locate & return the string path to a module's manifest .psd1 file, given the root path of the moodule (direct lift from BuildHelpers:Get-PSModuleManifest, but I want a sep copy wo BH as a dependancy)
     .NOTES
     Version     : 1.0.0
     Author      : Todd Kadrie
@@ -19,11 +19,12 @@ function Get-PSModuleFile {
     AddedTwitter: @pscookiemonster
     AddedWebsite: https://github.com/RamblingCookieMonster/BuildHelpers
     REVISIONS
+    * 9:31 AM 9/27/2022 CBH update, clearly indic it returns a [string] and not a file obj 
     * 10:48 AM 3/14/2022 updated CBH for missing extension param
     * 11:38 AM 10/15/2021 init version, added support for locating both .psd1 & .psm1, a new -Extension param to drive the choice, and a 'both' optional extension spec to retrieve both file type paths.
     * 1/1/2019 BuildHelpers most recent rev of the get-PsModuleManifest function.
     .DESCRIPTION
-    Get-PSModuleFile.ps1 - Locate a module's Manifest (.psd1) or Module (.psm1) file, given the root path of the moodule (direct lift from BuildHelpers:Get-PSModuleManifest, but extended to do either psd1 or psm1)
+    Get-PSModuleFile.ps1 - Locate & return the string path to a module's manifest .psd1 file, given the root path of the moodule (direct lift from BuildHelpers:Get-PSModuleManifest, but I want a sep copy wo BH as a dependancy)
     Get the PowerShell key psd1|psm1 for a project ;
         Evaluates based on the following scenarios: ;
             * Subfolder with the same name as the current folder with a psd1|psm1 file in it ;
@@ -38,8 +39,7 @@ function Get-PSModuleFile {
     .INPUTS
     None. Does not accepted piped input.(.NET types, can add description)
     .OUTPUTS
-    None. Returns no objects or output (.NET types)
-    System.Boolean
+    System.String
     .EXAMPLE
     $psd1M = Get-PSModuleFile -path c:\sc\someproj\
     Retrieve the defualt .psd1 Manifest from the specified project, and assign the fullpath to the $psd1M variable
