@@ -1,4 +1,4 @@
-#*------v Function convertTo-UnwrappedPS v------
+﻿#*------v Function convertTo-UnwrappedPS v------
 Function convertTo-UnwrappedPS {
     <#
     .SYNOPSIS

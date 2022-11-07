@@ -1,4 +1,4 @@
-#*------v import-ISEOpenFiles.ps1 v------
+﻿#*------v import-ISEOpenFiles.ps1 v------
 function import-ISEOpenFiles {
     <#
     .SYNOPSIS

@@ -1,4 +1,4 @@
-#*------v Function get-VariableAssignsAST v------
+﻿#*------v Function get-VariableAssignsAST v------
 function get-VariableAssignsAST {
     <#
     .SYNOPSIS

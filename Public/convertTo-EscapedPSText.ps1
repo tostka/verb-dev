@@ -1,4 +1,4 @@
-#*------v convertTo-EscapedPSText.ps1 v------
+﻿#*------v convertTo-EscapedPSText.ps1 v------
 Function convertTo-EscapedPSText {
     <#
     .SYNOPSIS

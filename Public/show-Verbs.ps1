@@ -1,4 +1,4 @@
-# show-Verbs.ps1 
+﻿# show-Verbs.ps1 
 
 # #*------v show-Verbs.ps1 v------
 Function show-Verbs {

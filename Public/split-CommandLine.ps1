@@ -1,4 +1,4 @@
-#*------v Function Split-CommandLine v------
+﻿#*------v Function Split-CommandLine v------
 function Split-CommandLine {
     <#
     .SYNOPSIS

@@ -1,4 +1,4 @@
-#*------v export-ISEOpenFiles.ps1 v------
+﻿#*------v export-ISEOpenFiles.ps1 v------
 function export-ISEOpenFiles {
     <#
     .SYNOPSIS

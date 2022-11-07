@@ -1,4 +1,4 @@
-#*------v Function check-PsLocalRepoRegistration v------
+﻿#*------v Function check-PsLocalRepoRegistration v------
 function check-PsLocalRepoRegistration {
     <#
     .SYNOPSIS

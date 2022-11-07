@@ -1,4 +1,4 @@
-#*------v Initialize-ModuleFingerprint.ps1 v------
+﻿#*------v Initialize-ModuleFingerprint.ps1 v------
 function Initialize-ModuleFingerprint {
     <#
     .SYNOPSIS

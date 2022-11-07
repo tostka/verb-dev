@@ -1,4 +1,4 @@
-# test-VerbStandard.ps1 
+﻿# test-VerbStandard.ps1 
 
 # #*------v test-VerbStandard.ps1 v------
 Function test-VerbStandard {

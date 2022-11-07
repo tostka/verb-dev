@@ -1,4 +1,4 @@
-#*------v Function move-ISEBreakPoints v------
+﻿#*------v Function move-ISEBreakPoints v------
 function move-ISEBreakPoints {
     <#
     .SYNOPSIS

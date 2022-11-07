@@ -1,4 +1,4 @@
-#*------v Function get-FunctionBlocks v------
+﻿#*------v Function get-FunctionBlocks v------
 function get-FunctionBlocks {
     <#
     .SYNOPSIS

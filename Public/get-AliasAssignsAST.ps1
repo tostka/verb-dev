@@ -1,4 +1,4 @@
-#*------v Function get-AliasAssignsAST v------
+﻿#*------v Function get-AliasAssignsAST v------
 function get-AliasAssignsAST {
     <#
     .SYNOPSIS

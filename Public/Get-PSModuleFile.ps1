@@ -1,4 +1,4 @@
-#*------v Get-PSModuleFile.ps1 v------
+﻿#*------v Get-PSModuleFile.ps1 v------
 function Get-PSModuleFile {
     <#
     .SYNOPSIS

@@ -1,4 +1,4 @@
-#*------v Function convertTo-WrappedPS v------
+﻿#*------v Function convertTo-WrappedPS v------
 Function convertTo-WrappedPS {
     <#
     .SYNOPSIS

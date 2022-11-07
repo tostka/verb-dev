@@ -1,4 +1,4 @@
-#*------v export-ISEBreakPointsALL.ps1 v------
+﻿#*------v export-ISEBreakPointsALL.ps1 v------
 function export-ISEBreakPointsALL {
     <#
     .SYNOPSIS
