@@ -21,6 +21,7 @@ function Step-ModuleVersionCalculated {
     AddedWebsite: www.thesurlyadmin.com
     AddedTwitter: @thesurlyadm1n
     REVISIONS
+    * 11:20 AM 12/12/2022 completely purged verb-* require stmts too risky w recursive load triggers:,verb-IO, verb-logging, verb-Mods, verb-Text
     * 3:57 PM 5/26/2022 backstop profile rgxs ; implment pre-cache & post-reload of installed modules ; 
         found can rmo the temp module ipmo, by targeting gmo | path, rather than common name (like verb-io). ; 
         fixed asset of $bumpVersionType = $MinVersionIncrementBump (was dropping 'Patch' through, rather than 'build')
@@ -122,7 +123,7 @@ function Step-ModuleVersionCalculated {
     https://powershellexplained.com/2017-10-14-Powershell-module-semantic-version/
     #>
     #Requires -Version 3
-    #Requires -Modules BuildHelpers,verb-IO, verb-logging, verb-Mods, verb-Text
+    #Requires -Modules BuildHelpers
     ##Requires -RunasAdministrator    
     [CmdletBinding()]
     PARAM(

@@ -15,6 +15,7 @@ function update-NewModule {
     Github      : https://github.com/tostka/verb-dev
     Tags        : Powershell,Module,Build,Development
     REVISIONS
+    * 11:20 AM 12/12/2022 completely purged rem'd require stmts, confusing, when they echo in build..., ,verb-IO, verb-logging, verb-Mods, verb-Text
     * 3:10 PM 9/7/2022 ren & alias orig name (verb compliance): process-NewModule -> update-NewModule
     * 11:55 AM 6/2/2022 finally got through full build on verb-io; typo: pltCMPV -> pltCMBS; 
     * 3:42 PM 6/1/2022 add: -RequiredVersion picked up from psd1 post step ; defer into confirm-ModuleBuildSync ; echo update-NewModule splt before running; typo in $psd1vers ; cleaned old rems; 
@@ -117,9 +118,7 @@ function update-NewModule {
     Merge & Republish pass: Only Publish/Install/Test specified module, with debug messages, and whatif pass.
     .LINK
     #>
-
-    ##Requires -Module verb-dev # added to verb-dev (recursive if present)
-    #Requires -Modules BuildHelpers,verb-IO, verb-logging, verb-Mods, verb-Text
+    #Requires -Modules BuildHelpers
     [CmdletBinding()]
     [Alias('process-NewModule')]
     PARAM(

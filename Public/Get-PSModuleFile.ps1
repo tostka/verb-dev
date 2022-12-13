@@ -19,6 +19,7 @@ function Get-PSModuleFile {
     AddedTwitter: @pscookiemonster
     AddedWebsite: https://github.com/RamblingCookieMonster/BuildHelpers
     REVISIONS
+    * 11:20 AM 12/12/2022 completely purged rem'd require stmts, confusing, when they echo in build...
     * 9:31 AM 9/27/2022 CBH update, clearly indic it returns a [string] and not a file obj 
     * 10:48 AM 3/14/2022 updated CBH for missing extension param
     * 11:38 AM 10/15/2021 init version, added support for locating both .psd1 & .psm1, a new -Extension param to drive the choice, and a 'both' optional extension spec to retrieve both file type paths.
@@ -53,9 +54,7 @@ function Get-PSModuleFile {
     https://github.com/tostka/verb-dev
     .LINK
     https://github.com/RamblingCookieMonster/BuildHelpers
-    #>
-    ##Requires -Modules BuildHelpers,verb-IO, verb-logging, verb-Mods, verb-Text
-    ##Requires -RunasAdministrator    
+    #>  
     [CmdletBinding()]
     PARAM(
         [Parameter(Mandatory=$True,ValueFromPipeline=$true,ValueFromPipelineByPropertyName=$true,HelpMessage="Path to project root. Defaults to the current working path [-path 'C:\sc\PowerShell-Statistics\']")]

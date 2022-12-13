@@ -5,7 +5,7 @@
 .SYNOPSIS
 VERB-dev - Development PS Module-related generic functions
 .NOTES
-Version     : 1.5.16
+Version     : 1.5.17
 Author      : Todd Kadrie
 Website     :	https://www.toddomation.com
 Twitter     :	@tostka
@@ -4789,6 +4789,7 @@ function get-ProjectNameTDO {
     AddedTwitter: @pscookiemonster
     AddedWebsite: https://github.com/RamblingCookieMonster/BuildHelpers
     REVISIONS
+    * 11:20 AM 12/12/2022 completely purged rem'd require stmts, confusing, when they echo in build...
     * 11:51 AM 10/16/2021 init version, minor CBH mods, put into OTB format. 
     * 1/1/2019 BuildHelpers most recent rev of the get-PsModuleManifest function.
     .DESCRIPTION
@@ -4830,8 +4831,6 @@ function get-ProjectNameTDO {
     .LINK
     about_BuildHelpers
     #>
-    ##Requires -Modules BuildHelpers,verb-IO, verb-logging, verb-Mods, verb-Text
-    ##Requires -RunasAdministrator    
     [CmdletBinding()]
     PARAM(
         [Parameter(Mandatory=$True,ValueFromPipeline=$true,ValueFromPipelineByPropertyName=$true,HelpMessage="Path to project root. Defaults to the current working path [-path 'C:\sc\PowerShell-Statistics\']")]
@@ -4958,7 +4957,7 @@ function Get-PSBreakpointSorted {
 function Get-PSModuleFile {
     <#
     .SYNOPSIS
-    Get-PSModuleFile.ps1 - Locate a module's manifest .psd1 file, given the root path of the moodule (direct lift from BuildHelpers:Get-PSModuleManifest, but I want a sep copy wo BH as a dependancy)
+    Get-PSModuleFile.ps1 - Locate & return the string path to a module's manifest .psd1 file, given the root path of the moodule (direct lift from BuildHelpers:Get-PSModuleManifest, but I want a sep copy wo BH as a dependancy)
     .NOTES
     Version     : 1.0.0
     Author      : Todd Kadrie
@@ -4975,11 +4974,13 @@ function Get-PSModuleFile {
     AddedTwitter: @pscookiemonster
     AddedWebsite: https://github.com/RamblingCookieMonster/BuildHelpers
     REVISIONS
+    * 11:20 AM 12/12/2022 completely purged rem'd require stmts, confusing, when they echo in build...
+    * 9:31 AM 9/27/2022 CBH update, clearly indic it returns a [string] and not a file obj 
     * 10:48 AM 3/14/2022 updated CBH for missing extension param
     * 11:38 AM 10/15/2021 init version, added support for locating both .psd1 & .psm1, a new -Extension param to drive the choice, and a 'both' optional extension spec to retrieve both file type paths.
     * 1/1/2019 BuildHelpers most recent rev of the get-PsModuleManifest function.
     .DESCRIPTION
-    Get-PSModuleFile.ps1 - Locate a module's Manifest (.psd1) or Module (.psm1) file, given the root path of the moodule (direct lift from BuildHelpers:Get-PSModuleManifest, but extended to do either psd1 or psm1)
+    Get-PSModuleFile.ps1 - Locate & return the string path to a module's manifest .psd1 file, given the root path of the moodule (direct lift from BuildHelpers:Get-PSModuleManifest, but I want a sep copy wo BH as a dependancy)
     Get the PowerShell key psd1|psm1 for a project ;
         Evaluates based on the following scenarios: ;
             * Subfolder with the same name as the current folder with a psd1|psm1 file in it ;
@@ -4994,8 +4995,7 @@ function Get-PSModuleFile {
     .INPUTS
     None. Does not accepted piped input.(.NET types, can add description)
     .OUTPUTS
-    None. Returns no objects or output (.NET types)
-    System.Boolean
+    System.String
     .EXAMPLE
     $psd1M = Get-PSModuleFile -path c:\sc\someproj\
     Retrieve the defualt .psd1 Manifest from the specified project, and assign the fullpath to the $psd1M variable
@@ -5009,9 +5009,7 @@ function Get-PSModuleFile {
     https://github.com/tostka/verb-dev
     .LINK
     https://github.com/RamblingCookieMonster/BuildHelpers
-    #>
-    ##Requires -Modules BuildHelpers,verb-IO, verb-logging, verb-Mods, verb-Text
-    ##Requires -RunasAdministrator    
+    #>  
     [CmdletBinding()]
     PARAM(
         [Parameter(Mandatory=$True,ValueFromPipeline=$true,ValueFromPipelineByPropertyName=$true,HelpMessage="Path to project root. Defaults to the current working path [-path 'C:\sc\PowerShell-Statistics\']")]
@@ -7210,6 +7208,7 @@ function Step-ModuleVersionCalculated {
     AddedWebsite: www.thesurlyadmin.com
     AddedTwitter: @thesurlyadm1n
     REVISIONS
+    * 11:20 AM 12/12/2022 completely purged verb-* require stmts too risky w recursive load triggers:,verb-IO, verb-logging, verb-Mods, verb-Text
     * 3:57 PM 5/26/2022 backstop profile rgxs ; implment pre-cache & post-reload of installed modules ; 
         found can rmo the temp module ipmo, by targeting gmo | path, rather than common name (like verb-io). ; 
         fixed asset of $bumpVersionType = $MinVersionIncrementBump (was dropping 'Patch' through, rather than 'build')
@@ -7311,7 +7310,7 @@ function Step-ModuleVersionCalculated {
     https://powershellexplained.com/2017-10-14-Powershell-module-semantic-version/
     #>
     #Requires -Version 3
-    #Requires -Modules BuildHelpers,verb-IO, verb-logging, verb-Mods, verb-Text
+    #Requires -Modules BuildHelpers
     ##Requires -RunasAdministrator    
     [CmdletBinding()]
     PARAM(
@@ -8340,6 +8339,7 @@ function update-NewModule {
     Github      : https://github.com/tostka/verb-dev
     Tags        : Powershell,Module,Build,Development
     REVISIONS
+    * 11:20 AM 12/12/2022 completely purged rem'd require stmts, confusing, when they echo in build..., ,verb-IO, verb-logging, verb-Mods, verb-Text
     * 3:10 PM 9/7/2022 ren & alias orig name (verb compliance): process-NewModule -> update-NewModule
     * 11:55 AM 6/2/2022 finally got through full build on verb-io; typo: pltCMPV -> pltCMBS; 
     * 3:42 PM 6/1/2022 add: -RequiredVersion picked up from psd1 post step ; defer into confirm-ModuleBuildSync ; echo update-NewModule splt before running; typo in $psd1vers ; cleaned old rems; 
@@ -8442,9 +8442,7 @@ function update-NewModule {
     Merge & Republish pass: Only Publish/Install/Test specified module, with debug messages, and whatif pass.
     .LINK
     #>
-
-    ##Requires -Module verb-dev # added to verb-dev (recursive if present)
-    #Requires -Modules BuildHelpers,verb-IO, verb-logging, verb-Mods, verb-Text
+    #Requires -Modules BuildHelpers
     [CmdletBinding()]
     [Alias('process-NewModule')]
     PARAM(

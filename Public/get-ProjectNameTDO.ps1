@@ -19,6 +19,7 @@ function get-ProjectNameTDO {
     AddedTwitter: @pscookiemonster
     AddedWebsite: https://github.com/RamblingCookieMonster/BuildHelpers
     REVISIONS
+    * 11:20 AM 12/12/2022 completely purged rem'd require stmts, confusing, when they echo in build...
     * 11:51 AM 10/16/2021 init version, minor CBH mods, put into OTB format. 
     * 1/1/2019 BuildHelpers most recent rev of the get-PsModuleManifest function.
     .DESCRIPTION
@@ -60,8 +61,6 @@ function get-ProjectNameTDO {
     .LINK
     about_BuildHelpers
     #>
-    ##Requires -Modules BuildHelpers,verb-IO, verb-logging, verb-Mods, verb-Text
-    ##Requires -RunasAdministrator    
     [CmdletBinding()]
     PARAM(
         [Parameter(Mandatory=$True,ValueFromPipeline=$true,ValueFromPipelineByPropertyName=$true,HelpMessage="Path to project root. Defaults to the current working path [-path 'C:\sc\PowerShell-Statistics\']")]
