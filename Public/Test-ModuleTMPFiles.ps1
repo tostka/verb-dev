@@ -16,6 +16,7 @@ Function Test-ModuleTMPFiles {
     Github      : https://github.com/tostka/verb-dev
     Tags        : Powershell,Module,Management,Lifecycle
     REVISIONS
+    * 2:08 PM 3/22/2023 expanded catch's they were coming up blank; fixed spurious 'Unable to Add-ContentFixEncoding' error (completely offbase)
     * 2:27 PM 5/12/2022 fix typo #217 & 220, added w-v echoes; expanded #218 echo
     * 2:08 PM 5/11/2022 move the module test code out to a portable func
     .DESCRIPTION
@@ -140,8 +141,11 @@ Function Test-ModuleTMPFiles {
 
                 } ;
             } CATCH {
+                $ErrTrapd=$Error[0] ;
                 $PassStatus += ";ERROR";
                 write-warning  "$(get-date -format 'HH:mm:ss'): Failed processing $($_.Exception.ItemName). `nError Message: $($_.Exception.Message)`nError Details: $($_)" ;
+                $smsg = $ErrTrapd.Exception.Message ;
+                write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" ;
                 $objReport.Manifest = $null ;
                 Break ;
             } ;
@@ -191,11 +195,15 @@ Function Test-ModuleTMPFiles {
                 $smsg = "$('*'*5)`nFailed processing $($ErrTrapd.Exception.ItemName). `nError Message: $($ErrTrapd.Exception.Message)`nError Details: `n$(($ErrTrapd|out-string).trim())`n$('-'*5)" ;
                 if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN } #Error|Warn|Debug
                 else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                $smsg = $ErrTrapd.Exception.Message ;
+                write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" ;
+                $smsg = "Test-ModuleTMPFiles:Unable to copy/ipmo/remove:$($pltIpmo.Name)" ;
+                write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" ;
                 #-=-record a STATUSWARN=-=-=-=-=-=-=
                 $statusdelta = ";ERROR"; # CHANGE|INCOMPLETE|ERROR|WARN|FAIL ;
                 if(gv passstatus -scope Script -ea 0){$script:PassStatus += $statusdelta } ;
                 if(gv -Name PassStatus_$($tenorg) -scope Script -ea 0){set-Variable -Name PassStatus_$($tenorg) -scope Script -Value ((get-Variable -Name PassStatus_$($tenorg)).value + $statusdelta)} ;
-                Write-Warning "Unable to Add-ContentFixEncoding:$($Path.FullName)" ;
+                
                 #$false | write-output ;
                 start-sleep -s $RetrySleep ;
                 #Break #Opts: STOP(debug)|EXIT(close)|CONTINUE(move on in loop cycle)|BREAK(exit loop iteration)|THROW $_/'CustomMsg'(end script with Err output)
