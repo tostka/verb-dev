@@ -15,6 +15,7 @@ function update-NewModule {
     Github      : https://github.com/tostka/verb-dev
     Tags        : Powershell,Module,Build,Development
     REVISIONS
+    * 1:46 PM 3/22/2023 #1212:Publish-Module throws error if repo.SourceLocation isn't testable (when vpn is down), test and throw prescriptive error (otherwise is obtuse); expanded catch's they were coming up blank
     * 11:20 AM 12/12/2022 completely purged rem'd require stmts, confusing, when they echo in build..., ,verb-IO, verb-logging, verb-Mods, verb-Text
     * 3:10 PM 9/7/2022 ren & alias orig name (verb compliance): process-NewModule -> update-NewModule
     * 11:55 AM 6/2/2022 finally got through full build on verb-io; typo: pltCMPV -> pltCMBS; 
@@ -400,6 +401,9 @@ function update-NewModule {
         $smsg = "Failed processing $($ErrTrapd.Exception.ItemName). `nError Message: $($ErrTrapd.Exception.Message)`nError Details: $($ErrTrapd)" ;
         if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug
         else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+        $smsg = $ErrTrapd.Exception.Message ;
+        if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN }
+        else{ write-WARNING "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
     } ;
     
     $sBnr="#*======v $($ScriptBaseName):$($ModuleName) v======" ;
@@ -469,10 +473,14 @@ function update-NewModule {
                 else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
             }
         } CATCH {
+            $ErrTrapd=$Error[0] ;
             $PassStatus += ";ERROR";
-            $smsg= "Failed processing $($_.Exception.ItemName). `nError Message: $($_.Exception.Message)`nError Details: $($_)" ;
+            $smsg= "Failed processing $($ErrTrapd.Exception.ItemName). `nError Message: $($ErrTrapd.Exception.Message)`nError Details: $($ErrTrapd)" ;
             if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN }  #Error|Warn|Debug
             else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+            $smsg = $ErrTrapd.Exception.Message ;
+            if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN }
+            else{ write-WARNING "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
             Break ;
         } ;
         if($RequiredVersion.tostring() -AND  $psd1Profile){
@@ -540,10 +548,13 @@ function update-NewModule {
     TRY{
         $psd1UpdatedVers = (Import-PowerShellDataFile -Path $ModPsdPath).ModuleVersion.tostring() ;
     } CATCH {
+        $ErrTrapd=$Error[0] ;
         $PassStatus += ";ERROR";
-        $smsg = "Import-PowerShellDataFile:Failed processing $($_.Exception.ItemName). `nError Message: $($_.Exception.Message)`nError Details: $($_)" ;
+        $smsg = "Import-PowerShellDataFile:Failed processing $($ErrTrapd.Exception.ItemName). `nError Message: $($ErrTrapd.Exception.Message)`nError Details: $($ErrTrapd)" ;
         if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN }  #Error|Warn|Debug
         else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+        $smsg = $ErrTrapd.Exception.Message ;
+        write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" ;
         Break ;
     } ;
     if($RequiredVersion.tostring() -AND $psd1UpdatedVers){
@@ -774,10 +785,13 @@ $(if($Merge){'MERGE parm specified as well:`n-Merge Public|Internal|Classes incl
             else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
         }
     } CATCH {
+         $ErrTrapd=$Error[0] ;
         $PassStatus += ";ERROR";
-        $smsg = "Failed processing $($_.Exception.ItemName). `nError Message: $($_.Exception.Message)`nError Details: $($_)" ;
+        $smsg = "Failed processing $($ErrTrapd.Exception.ItemName). `nError Message: $($ErrTrapd.Exception.Message)`nError Details: $($ErrTrapd)" ;
         if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN }  #Error|Warn|Debug
         else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+        $smsg = $ErrTrapd.Exception.Message ;
+        write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" ;
         Break ;
     } ;
 
@@ -979,10 +993,13 @@ $(if($Merge){'MERGE parm specified as well:`n-Merge Public|Internal|Classes incl
         TRY {
             sign-file @pltSignFile ;
         } CATCH {
+            $ErrTrapd=$Error[0] ;
             $PassStatus += ";ERROR";
-            $smsg = "Failed processing $($_.Exception.ItemName). `nError Message: $($_.Exception.Message)`nError Details: $($_)" ;
+            $smsg = "Failed processing $($ErrTrapd.Exception.ItemName). `nError Message: $($ErrTrapd.Exception.Message)`nError Details: $($ErrTrapd)" ;
             if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN }  #Error|Warn|Debug
             else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+            $smsg = $ErrTrapd.Exception.Message ;
+            write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" ;
             Break ;
         } ;
     } else {
@@ -1148,9 +1165,12 @@ $(if($Merge){'MERGE parm specified as well:`n-Merge Public|Internal|Classes incl
         TRY {
             Remove-Item @pltRItm ;
         } CATCH {
-            $smsg = "Failed processing $($_.Exception.ItemName). `nError Message: $($_.Exception.Message)`nError Details: $($_)" ;
+            $ErrTrapd=$Error[0] ;
+            $smsg = "Failed processing $($ErrTrapd.Exception.ItemName). `nError Message: $($ErrTrapd.Exception.Message)`nError Details: $($ErrTrapd)" ;
             if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN }  #Error|Warn|Debug
             else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+            $smsg = $ErrTrapd.Exception.Message ;
+            write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" ;
             $PassStatus += ";ERROR";
             Break #STOP(debug)|EXIT(close)|Continue(move on in loop cycle) ;
         } ;
@@ -1178,7 +1198,7 @@ $(if($Merge){'MERGE parm specified as well:`n-Merge Public|Internal|Classes incl
             if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info }  #Error|Warn|Debug
             else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
             TRY {
-                $tRepo = get-PSRepository -name $localPSRepo
+                $tRepo = get-PSRepository -name $localPSRepo ; 
             } CATCH {
                 $ErrorTrapped = $Error[0] ;
                 $PassStatus += ";ERROR";
@@ -1189,6 +1209,20 @@ $(if($Merge){'MERGE parm specified as well:`n-Merge Public|Internal|Classes incl
             } ;
 
             if($tRepo){
+
+                # #1212:throws error if repo.SourceLocation isn't testable (when vpn is down), test and throw prescriptive error
+                if(-not (test-path -path $tRepo.PublishLocation)){
+                    $smsg= "Failed: test-path -path `$tRepo.PublishLocation: $($tRepo.PublishLocation)" ;
+                    $smsg += "Is Repo share accesisble (VPN online?)" ; 
+                    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Error } #Error|Warn
+                    else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                    Break ; 
+                } else {
+                    $smsg = "(confirmed:`$tRepo.PublishLocation accessible)" ; 
+                    if($verbose){if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level VERBOSE } 
+                    else{ write-verbose "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; } ; 
+                } ;  
+
                 $rgxPsd1Version="ModuleVersion\s=\s'\d*\.\d*\.\d*((\.\d*)*)'" ;
                 # 12:47 PM 1/14/2020 move the psdv1Vers detect code to always - need it for installs, as install-module doesn't prioritize, just throws up.
                 <# regx
@@ -1271,8 +1305,8 @@ And then re-run update-NewModule.
                 else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
                 if($ErrorTrapped.Exception.Message -match 'The\sversion\smust\sexceed\sthe\scurrent\sversion'){
                     $smsg= "NOTE: If the psdVers ($($psd1Vers)) *is* > prior rev ($($localmod)) (e.g. publish-Module has bad SemanticVersion code),`nbump the rev a minor level`nStep-ModuleVersion -Path $($ModPsdPath) -by minor" ;
-                if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Error } #Error|Warn
-                else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Error } #Error|Warn
+                    else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
                 } ;
                 Break ;
             } ;
@@ -1383,10 +1417,13 @@ And then re-run update-NewModule.
                         TRY {
                             New-Item @pltNItm ;
                         } CATCH {
-                            $smsg = "Failed processing $($_.Exception.ItemName). `nError Message: $($_.Exception.Message)`nError Details: $($_)" ;
+                            $ErrTrapd=$Error[0] ;
+                            $smsg = "Failed processing $($ErrTrapd.Exception.ItemName). `nError Message: $($ErrTrapd.Exception.Message)`nError Details: $($ErrTrapd)" ;
                             if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN }  #Error|Warn|Debug
                             else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
                             $PassStatus += ";ERROR";
+                            $smsg = $ErrTrapd.Exception.Message ;
+                            write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" ;
                             Break #STOP(debug)|EXIT(close)|Continue(move on in loop cycle) ;
                         } ;
                     } ;
@@ -1395,9 +1432,12 @@ And then re-run update-NewModule.
                     TRY {
                         copy-Item @pltCItm ;
                     } CATCH {
-                        $smsg = "Failed processing $($_.Exception.ItemName). `nError Message: $($_.Exception.Message)`nError Details: $($_)" ;
+                        $ErrTrapd=$Error[0] ;
+                        $smsg = "Failed processing $($ErrTrapd.Exception.ItemName). `nError Message: $($ErrTrapd.Exception.Message)`nError Details: $($ErrTrapd)" ;
                         if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN }  #Error|Warn|Debug
                         else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                        $smsg = $ErrTrapd.Exception.Message ;
+                        write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" ;
                         $PassStatus += ";ERROR";
                         Break #STOP(debug)|EXIT(close)|Continue(move on in loop cycle) ;
                     } ;
