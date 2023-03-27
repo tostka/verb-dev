@@ -15,6 +15,7 @@ function import-ISEOpenFiles {
     Github      : https://github.com/tostka/verb-dev
     Tags        : Powershell,ISE,development,debugging
     REVISIONS
+    * 1:20 PM 3/27/2023 bugfix: coerce $txmlf into [system.io.fileinfo], to make it match $fileinfo's type.
     * 9:35 AM 3/8/2023 added -filepath (with pipeline support), explicit pathed file support (to pipeline in from get-IseOpenFilesExported()).
     * 3:28 PM 6/23/2022 add -Tag param to permit running interger-suffixed variants (ie. mult ise sessions open & stored from same desktop). 
     * 9:19 AM 5/20/2022 add: iIseOpen alias (using these a lot lately; w freq crashouts of ise, and need to recover all files open & BPs to quickly get back to function)
@@ -56,9 +57,9 @@ function import-ISEOpenFiles {
                 #$AllUsrsScripts = "$($env:ProgramFiles)\WindowsPowerShell\Scripts" ;
                 $CUScripts = "$([Environment]::GetFolderPath('MyDocuments'))\WindowsPowershell\Scripts" ;
                 if($Tag){
-                    [array]$txmlf = @(join-path -path $CUScripts -ChildPath "ISESavedSession-$($Tag).psXML") ;
+                    [array]$txmlf = @( [system.io.fileinfo](join-path -path $CUScripts -ChildPath "ISESavedSession-$($Tag).psXML") ) ;
                 } else { 
-                    [array]$txmlf = @(join-path -path $CUScripts -ChildPath 'ISESavedSession.psXML') ;
+                    [array]$txmlf = @( [system.io.fileinfo](join-path -path $CUScripts -ChildPath 'ISESavedSession.psXML') ) ;
                 } ; 
                 #$allISEScripts = $psise.powershelltabs.files.fullpath ;
             } else { 
@@ -109,6 +110,10 @@ function import-ISEOpenFiles {
                 $ErrTrapd=$Error[0] ;
                 $smsg = "$('*'*5)`nFailed processing $($ErrTrapd.Exception.ItemName). `nError Message: $($ErrTrapd.Exception.Message)`nError Details: `n$(($ErrTrapd|out-string).trim())`n$('-'*5)" ;
                 write-warning $smsg ;
+                $smsg = $ErrTrapd.Exception.Message ;
+                if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN }
+                else{ write-WARNING $smsg } ;
+                BREAK ;
                 Continue ; #Opts: STOP(debug)|EXIT(close)|CONTINUE(move on in loop cycle)|BREAK(exit loop iteration)|THROW $_/'CustomMsg'(end script with Err output)
             } ;
         } else {  write-warning "This script only functions within PS ISE, with a script file open for editing" };
@@ -117,4 +122,5 @@ function import-ISEOpenFiles {
         write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($sBnr.replace('=v','=^').replace('v=','^='))" ;
     }
 }
+
 #*------^ import-ISEOpenFiles.ps1 ^------
