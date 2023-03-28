@@ -5,7 +5,7 @@
 .SYNOPSIS
 VERB-dev - Development PS Module-related generic functions
 .NOTES
-Version     : 1.5.16
+Version     : 1.5.19
 Author      : Todd Kadrie
 Website     :	https://www.toddomation.com
 Twitter     :	@tostka
@@ -1920,6 +1920,182 @@ function converto-VSCConfig {
 }
 
 #*------^ converto-VSCConfig.ps1 ^------
+
+
+#*------v ConvertTo-Breakpoint.ps1 v------
+Function ConvertTo-Breakpoint {
+    <#
+    .SYNOPSIS
+    ConvertTo-Breakpoint - Converts an errorrecord to a breakpoint
+    .NOTES
+    Version     : 2.1.0
+    Author      : KevinMarquette
+    Website     :	https://github.com/KevinMarquette
+    Twitter     :	@KevinMarquette
+    CreatedDate : 2022-12-15
+    FileName    : ConvertTo-Breakpoint.ps1
+    License     : https://github.com/KevinMarquette/ConvertTo-Breakpoint/blob/master/LICENSE
+    Copyright   : (none asserted)
+    Github      : https://github.com/tostka/verb-dev
+    Tags        : Powershell,development,debugging
+    AddedCredit : Todd Kadrie
+    AddedWebsite:	http://www.toddomation.com
+    AddedTwitter:	@tostka / http://twitter.com/tostka
+    REVISIONS
+    * 12:20 PM 12/22/2022 distilled into freestanding function .ps1: shifted priv func into internal, and added to verb-dev, OTB formatting. 
+    * 4/18/18 KM's posted git version
+    .DESCRIPTION
+    ConvertTo-Breakpoint - Converts an errorrecord to a breakpoint 
+    
+    This works the best in the ISE
+    VSCode requires the debugger to be running for Set-PSBreakpoint to work
+    
+    Comments from linked blog post:
+    
+    [Powershell: ConvertTo-Breakpoint - powershellexplained.com/](https://powershellexplained.com/2018-04-18-Powershell-ConvertTo-Breakpoint/)
+   
+    # The Idea
+
+    I often check the `$error[0].ScriptStackTrace` for the source of an error and then go place a breakpoint where the error was raised. I realized that I could parse the `ScriptStackTrace` and call `Set-PSBreakPoint` directly. It is a fairly simple idea and it turned out to be just as easy to write.
+
+    # Putting it all together
+
+    If you ever looked at a `ScriptStackTrace` on an error, you would see something like this:
+
+    ```powershell
+    PS> $error[0].ScriptStackTrace
+        at New-Error, C:\workspace\ConvertTo-Breakpoint\testing.ps1: line 2
+        at Get-Error, C:\workspace\ConvertTo-Breakpoint\testing.ps1: line 6
+        at <ScriptBlock>, C:\workspace\ConvertTo-Breakpoint\testing.ps1: line 9
+    ```
+
+    While the data is just a string, it is very consistent and easy to parse with regex. Here is the regex pattern that I used to match each line: `at .+, (?<Script>.+): line (?<Line>\d+)`
+
+    I was a little fancy and used [named sub-expression matches](https://powershellexplained.com/2016-11-06-powershell-hashtable-everything-you-wanted-to-know-about/?utm_source=blog&utm_medium=blog#regex-matches). I do this so I can access them by name with `$matches.Script` and `$matches.Line`.
+
+    Once I had the data that I needed, it was a quick call to `Set-PSBreakPoint` to set the breakpoint.
+
+    ```powershell
+    Set-PSBreakPoint -Script $matches.Script -Line $matches.Line
+    ```
+
+    I put a bit more polish on it and called it `ConvertTo-Breakpoint`.
+
+    I do a full step by step walk of the entire function in this video: [ConvertTo-Breakpoint: Writing the cmdlet](https://youtu.be/2tsA1zsIwGE?t=27m26s).
+
+    # How to use
+
+    This is the cool part. I can now take any `$error` and pipe it to `ConvertTo-Breakpoint`. Then a breakpoint will be created where the error was thrown.
+
+    ```powershell
+    $error[0] | ConvertTo-BreakPoint
+    ```
+
+    I added proper pipeline support so you can give it all your errors.
+
+    ```powershell
+    $error | ConvertTo-BreakPoint
+    ```
+
+    I even added `-All` as a switch to create a breakpoint at each point in the callstack instead of just the source of the error.
+
+    ```powershell
+    $error[0] | ConvertTo-BreakPoint -All
+    ```
+
+    ## VSCode debugger
+
+    In my experimentation with VSCode and `Set-PSBreakpoint`; I discovered that you have to have the debugger running for `Set-PSBreakpoint` to set breakpoints. There is an issue on github about this already. This is why I did the demo video in the ISE.
+
+    # Where do I find it?
+
+    This is already published in the PSGallery. You can install it and start experimenting with it right away.
+
+    ```powershell
+    Install-Module -Name ConvertTo-Breakpoint -Scope CurrentUser
+    ```
+
+    If you would like to checkout the source, I published it on github with all my other tools:
+
+    -   [https://github.com/KevinMarquette/ConvertTo-Breakpoint](https://github.com/KevinMarquette/ConvertTo-Breakpoint/blob/master/module/public/ConvertTo-Breakpoint.ps1)
+    
+    .EXAMPLE
+    PS> $error[0] | ConvertTo-Breakpoint ;
+    The various values returned will be Version 1, Version 2, or Off.
+    .EXAMPLE
+    PS> $error[0] | ConvertTo-Breakpoint -All
+     
+    .LINK
+    https://github.com/tostka/verb-dev
+    https://github.com/KevinMarquette/ConvertTo-Breakpoint
+    https://powershellexplained.com/2018-04-18-Powershell-ConvertTo-Breakpoint/
+    #>
+    [CmdletBinding(SupportsShouldProcess)]
+    PARAM(
+        [parameter(Mandatory,Position = 0,ValueFromPipeline,HelpMessage='The Error Record[-ErrorRecord `$Error[0]]')]
+        [Alias('InputObject')]
+        $ErrorRecord,   
+        [parameter(HelpMessage='Switch that sets breakpoints on the entire stack[-ALL]')] 
+        [switch]$All
+    )  ; 
+    BEGIN{
+        #*------v Function _extractBreakpoint v------
+        function _extractBreakpoint {
+            <#
+            .DESCRIPTION
+            Parses a script stack trace for breakpoints
+            .EXAMPLE
+            $error[0].ScriptStackTrace | _extractBreakpoint
+            #>
+            [OutputType('System.Collections.Hashtable')]
+            [cmdletbinding()]
+            PARAM(
+                # The ScriptStackTrace
+                [parameter(
+                    ValueFromPipeline
+                )]
+                [AllowNull()]
+                [AllowEmptyString()]
+                [Alias('InputObject')]
+                [string]
+                $ScriptStackTrace
+            )
+            BEGIN{$breakpointPattern = 'at .+, (?<Script>.+): line (?<Line>\d+)'} ;
+            PROCESS{
+                if (-not [string]::IsNullOrEmpty($ScriptStackTrace)){
+                    $lineList = $ScriptStackTrace -split [System.Environment]::NewLine
+                    foreach($line in $lineList){
+                        if ($line -match $breakpointPattern){
+                            if ($matches.Script -ne '<No file>' -and (Test-Path $matches.Script)){  
+                                @{
+                                    Script = $matches.Script
+                                    Line   = $matches.Line ; 
+                                } ;                           
+                            } ; 
+                        } ; 
+                    } ;  # loop-E
+                } ; 
+            } ;  # PROC-E
+        } ;   
+        #*------^ END Function _extractBreakpoint ^------      
+    } ;
+    PROCESS{
+        foreach ($node in $ErrorRecord){
+            $breakpointList = $node.ScriptStackTrace | _extractBreakpoint ; 
+            foreach ($breakpoint in $breakpointList){
+                $message = '{0}:{1}' -f $breakpoint.Script,$breakpoint.Line ; 
+                if($PSCmdlet.ShouldProcess($message)){
+                    Set-PSBreakpoint @breakpoint ; 
+                    if (-Not $PSBoundParameters.All){
+                        break ; 
+                    } ; 
+                } ; 
+            } ; 
+        } ; 
+    }  ; # PROC-E
+}
+
+#*------^ ConvertTo-Breakpoint.ps1 ^------
 
 
 #*------v convertTo-EscapedPSText.ps1 v------
@@ -4583,6 +4759,101 @@ function get-FunctionBlocks {
 #*------^ get-FunctionBlocks.ps1 ^------
 
 
+#*------v get-ISEOpenFilesExported.ps1 v------
+function get-ISEOpenFilesExported {
+    <#
+    .SYNOPSIS
+    get-ISEOpenFilesExported - List CU profile .\Documents\WindowsPowerShell\Scripts\*.psXML files, reflecting prior exports via export-ISEOpenFiles, as targets for import via import-ISEOpenFiles
+    .NOTES
+    Version     : 1.0.0
+    Author      : Todd Kadrie
+    Website     : http://www.toddomation.com
+    Twitter     : @tostka / http://twitter.com/tostka
+    CreatedDate : 2022-05-11
+    FileName    : get-ISEOpenFilesExported.ps1
+    License     : MIT License
+    Copyright   : (c) 2022 Todd Kadrie
+    Github      : https://github.com/tostka/verb-dev
+    Tags        : Powershell,ISE,development,debugging
+    REVISIONS
+    * 8:51 AM 3/8/2023 init
+    .DESCRIPTION
+    get-ISEOpenFilesExported - List CU profile .\Documents\WindowsPowerShell\Scripts\*.psXML files, reflecting prior exports via export-ISEOpenFiles, as targets for import via import-ISEOpenFiles
+    Returns list of string filepaths to pipeline, for further filtering, and passage to import-ISEOpenFiles
+    .PARAMETER Tag
+    Optional Tag to apply to as filename suffix[-tag 'label']
+    .EXAMPLE
+    PS> get-ISEOpenFilesExported -verbose
+    Find any pre-existing exported ISESavedSession*.psXML files (those exported via export-ISEOpenFiles)
+    .EXAMPLE
+    PS> get-ISEOpenFilesExported -Tag MFA -verbose  
+    Find any pre-existing exported ISESavedSession*MFA*.psXML files (those exported with -Tag MFA)
+    .EXAMPLE
+    PS> get-ISEOpenFilesExported -Tag MFA | import-ISEOpenFiles ; 
+    Example pipelining the outputs into import-ISEOPenFiles() (via pipeline support for it's -FilePath param)
+    .LINK
+    https://github.com/tostka/verb-dev
+    #>
+    [CmdletBinding()]
+    [Alias('iIseOpen')]
+    PARAM(
+        [Parameter(Position=0,HelpMessage="Optional Tag to check for, within prior-export filename[-Tag MFA]")]
+        [string]$Tag
+    ) ;
+    BEGIN {
+        ${CmdletName} = $PSCmdlet.MyInvocation.MyCommand.Name ;
+        $verbose = $($VerbosePreference -eq "Continue")
+        $sBnr="#*======v $($CmdletName): v======" ;
+        $smsg = $sBnr ;
+        if($verbose){if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level VERBOSE } 
+        else{ write-verbose "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; } ; 
+    }
+    PROCESS {
+        if ($psise){
+            #$AllUsrsScripts = "$($env:ProgramFiles)\WindowsPowerShell\Scripts" ;
+            $CUScripts = "$([Environment]::GetFolderPath('MyDocuments'))\WindowsPowershell\Scripts" ;
+            if($Tag){
+                $txmlf = join-path -path $CUScripts -ChildPath "ISESavedSession-*$($Tag)*.psXML" ;
+            } else { 
+                $txmlf = join-path -path $CUScripts -ChildPath 'ISESavedSession*.psXML' ;
+            } ; 
+            #$allISEScripts = $psise.powershelltabs.files.fullpath ;
+            $error.clear() ;
+            TRY {
+                
+                if($hits = get-childitem -path $txmlf -ErrorAction SilentlyContinue){
+                    $smsg = "(returning matched file fullnames to pipeline for ..."
+                    $smsg += "`ngci $($txmlf):" ; 
+                    $smsg += "`n)" ; 
+                    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } 
+                    else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                    #Levels:Error|Warn|Info|H1|H2|H3|H4|H5|Debug|Verbose|Prompt|Success
+                    $hits | select -expand fullname ; 
+                } else { 
+                     $smsg = "No matches found for search..."
+                    $smsg += "`ngci $($txmlf):" ; 
+                    $smsg += "`n)" ; 
+                    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN -Indent} 
+                    else{ write-WARNING "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; 
+                } ; 
+            } CATCH {
+                $ErrTrapd=$Error[0] ;
+                $smsg = "$('*'*5)`nFailed processing $($ErrTrapd.Exception.ItemName). `nError Message: $($ErrTrapd.Exception.Message)`nError Details: `n$(($ErrTrapd|out-string).trim())`n$('-'*5)" ;
+                write-warning $smsg ;
+                Continue ; #Opts: STOP(debug)|EXIT(close)|CONTINUE(move on in loop cycle)|BREAK(exit loop iteration)|THROW $_/'CustomMsg'(end script with Err output)
+            } ;
+        } else {  write-warning "This script only functions within PS ISE, with a script file open for editing" };
+    } # PROC-E
+    END{
+        $smsg = "$($sBnr.replace('=v','=^').replace('v=','^='))" ;
+        if($verbose){if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level VERBOSE } 
+        else{ write-verbose "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; } ; 
+    }
+}
+
+#*------^ get-ISEOpenFilesExported.ps1 ^------
+
+
 #*------v get-ModuleRevisedCommands.ps1 v------
 function get-ModuleRevisedCommands {
     <#
@@ -4789,6 +5060,7 @@ function get-ProjectNameTDO {
     AddedTwitter: @pscookiemonster
     AddedWebsite: https://github.com/RamblingCookieMonster/BuildHelpers
     REVISIONS
+    * 11:20 AM 12/12/2022 completely purged rem'd require stmts, confusing, when they echo in build...
     * 11:51 AM 10/16/2021 init version, minor CBH mods, put into OTB format. 
     * 1/1/2019 BuildHelpers most recent rev of the get-PsModuleManifest function.
     .DESCRIPTION
@@ -4830,8 +5102,6 @@ function get-ProjectNameTDO {
     .LINK
     about_BuildHelpers
     #>
-    ##Requires -Modules BuildHelpers,verb-IO, verb-logging, verb-Mods, verb-Text
-    ##Requires -RunasAdministrator    
     [CmdletBinding()]
     PARAM(
         [Parameter(Mandatory=$True,ValueFromPipeline=$true,ValueFromPipelineByPropertyName=$true,HelpMessage="Path to project root. Defaults to the current working path [-path 'C:\sc\PowerShell-Statistics\']")]
@@ -4958,7 +5228,7 @@ function Get-PSBreakpointSorted {
 function Get-PSModuleFile {
     <#
     .SYNOPSIS
-    Get-PSModuleFile.ps1 - Locate a module's manifest .psd1 file, given the root path of the moodule (direct lift from BuildHelpers:Get-PSModuleManifest, but I want a sep copy wo BH as a dependancy)
+    Get-PSModuleFile.ps1 - Locate & return the string path to a module's manifest .psd1 file, given the root path of the moodule (direct lift from BuildHelpers:Get-PSModuleManifest, but I want a sep copy wo BH as a dependancy)
     .NOTES
     Version     : 1.0.0
     Author      : Todd Kadrie
@@ -4975,11 +5245,13 @@ function Get-PSModuleFile {
     AddedTwitter: @pscookiemonster
     AddedWebsite: https://github.com/RamblingCookieMonster/BuildHelpers
     REVISIONS
+    * 11:20 AM 12/12/2022 completely purged rem'd require stmts, confusing, when they echo in build...
+    * 9:31 AM 9/27/2022 CBH update, clearly indic it returns a [string] and not a file obj 
     * 10:48 AM 3/14/2022 updated CBH for missing extension param
     * 11:38 AM 10/15/2021 init version, added support for locating both .psd1 & .psm1, a new -Extension param to drive the choice, and a 'both' optional extension spec to retrieve both file type paths.
     * 1/1/2019 BuildHelpers most recent rev of the get-PsModuleManifest function.
     .DESCRIPTION
-    Get-PSModuleFile.ps1 - Locate a module's Manifest (.psd1) or Module (.psm1) file, given the root path of the moodule (direct lift from BuildHelpers:Get-PSModuleManifest, but extended to do either psd1 or psm1)
+    Get-PSModuleFile.ps1 - Locate & return the string path to a module's manifest .psd1 file, given the root path of the moodule (direct lift from BuildHelpers:Get-PSModuleManifest, but I want a sep copy wo BH as a dependancy)
     Get the PowerShell key psd1|psm1 for a project ;
         Evaluates based on the following scenarios: ;
             * Subfolder with the same name as the current folder with a psd1|psm1 file in it ;
@@ -4994,8 +5266,7 @@ function Get-PSModuleFile {
     .INPUTS
     None. Does not accepted piped input.(.NET types, can add description)
     .OUTPUTS
-    None. Returns no objects or output (.NET types)
-    System.Boolean
+    System.String
     .EXAMPLE
     $psd1M = Get-PSModuleFile -path c:\sc\someproj\
     Retrieve the defualt .psd1 Manifest from the specified project, and assign the fullpath to the $psd1M variable
@@ -5009,9 +5280,7 @@ function Get-PSModuleFile {
     https://github.com/tostka/verb-dev
     .LINK
     https://github.com/RamblingCookieMonster/BuildHelpers
-    #>
-    ##Requires -Modules BuildHelpers,verb-IO, verb-logging, verb-Mods, verb-Text
-    ##Requires -RunasAdministrator    
+    #>  
     [CmdletBinding()]
     PARAM(
         [Parameter(Mandatory=$True,ValueFromPipeline=$true,ValueFromPipelineByPropertyName=$true,HelpMessage="Path to project root. Defaults to the current working path [-path 'C:\sc\PowerShell-Statistics\']")]
@@ -5076,6 +5345,114 @@ function Get-PSModuleFile {
 }
 
 #*------^ Get-PSModuleFile.ps1 ^------
+
+
+#*------v get-StrictMode.ps1 v------
+Function get-StrictMode {
+    <#
+    .SYNOPSIS
+    get-StrictMode - A very simple function to retrieve the Set-StrictMode setting of the user
+session. 
+    .NOTES
+    Version     : 2.1.0
+    Author      : Sea Star Development
+    Website     :	https://www.powershellgallery.com/packages/strictmode/2.1/Content/strictmode.ps1
+    Twitter     :	
+    CreatedDate : 2022-12-15
+    FileName    : get-StrictMode.ps1
+    License     : (none asserted)
+    Copyright   : Sea Star Development
+    Github      : https://github.com/tostka/verb-dev
+    Tags        : Powershell,development,debugging
+    AddedCredit : Todd Kadrie
+    AddedWebsite:	http://www.toddomation.com
+    AddedTwitter:	@tostka / http://twitter.com/tostka
+    REVISIONS
+    * 1:10 PM 12/15/2022 added vers 3 test/triggers (existing only went to v2); updated CBH; added to verb-dev
+    * 11/17/2017 (posted psg version) "V2.1 Incorporate Version() and ToString() ScriptMethods, 4 Jan 2013."
+    .DESCRIPTION
+    get-StrictMode - A very simple function to retrieve the Set-StrictMode setting of the user
+session. 
+    Retrieve the Set-StrictMode setting for the current session.
+This procedure is necessary as there is, apparently, no equivalent PowerShell
+variable for this and it enables the setting to be returned to its original
+state after possibly being changed within a script. Add this function
+to your $profile. 
+
+    [Set-StrictMode (Microsoft.PowerShell.Core) - PowerShell | Microsoft Learn - learn.microsoft.com/](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/set-strictmode?view=powershell-7.2)
+
+    ## -Version
+
+    ### `1.0`
+
+    -   Prohibits references to uninitialized variables, except for uninitialized variables in strings.
+
+    ### `2.0`
+
+    -   Prohibits references to uninitialized variables. This includes uninitialized variables in strings.
+    -   Prohibits references to non-existent properties of an object.
+    -   Prohibits function calls that use the syntax for calling methods.
+
+    ### `3.0`
+
+    -   Prohibits references to uninitialized variables. This includes uninitialized variables in strings.
+    -   Prohibits references to non-existent properties of an object.
+    -   Prohibits function calls that use the syntax for calling methods.
+    -   Prohibit out of bounds or unresolvable array indexes.
+
+    .EXAMPLE
+    PS> Get-StrictMode
+    The various values returned will be Version 1, Version 2, or Off.
+    .EXAMPLE
+    PS> $a = (Get-StrictMode).Version()
+    This will allow the environment to be restored just by entering the commmand
+    Invoke-Expression "Set-StrictMode $a" 
+    .LINK
+    https://github.com/tostka/verb-Text
+    https://www.powershellgallery.com/packages/strictmode/2.1
+    #>
+    [CmdletBinding()]
+    PARAM()  ; 
+    $errorActionPreference = 'Stop' ; 
+    $version = '0' ; 
+    try {
+        $version = '3' ; 
+        #V3 will catch on these
+        $a = @(1) ; 
+        $null -eq $a[2] | out-null ; 
+        $null -eq $a['abc'] | out-null ; 
+        $version = '2' ; 
+        #V2 will catch this
+        $z = "2 * $nil"       
+        $version = '1' ; 
+        #V1 will catch this.
+        $z = 2 * $nil ;
+        $version = 'Off' ; 
+    } catch {} ; 
+    $errorActionPreference = 'Continue' ; 
+    New-Module -ArgumentList $version -AsCustomObject -ScriptBlock {
+        param ([String]$version) ; 
+        function Version() {
+            if ($version -eq 'Off') {
+                [String]$output = '-Off' ; 
+            } else {
+                [String]$output = "-Version $version" ; 
+            } ; 
+            #(Get-StrictMode).Version() ; 
+            "$output" | write-output ;
+        } ; 
+        function ToString() {
+            if ($version -ne 'Off') {
+              $version = "Version $version" ; 
+            } ; 
+            #Get-StrictMode will output string.
+            "StrictMode: $version" | write-output  ;
+        }  ; 
+        Export-ModuleMember -function Version,ToString  ; 
+    }  ; 
+}
+
+#*------^ get-StrictMode.ps1 ^------
 
 
 #*------v get-VariableAssignsAST.ps1 v------
@@ -5529,6 +5906,7 @@ function import-ISEOpenFiles {
     Github      : https://github.com/tostka/verb-dev
     Tags        : Powershell,ISE,development,debugging
     REVISIONS
+    * 9:35 AM 3/8/2023 added -filepath (with pipeline support), explicit pathed file support (to pipeline in from get-IseOpenFilesExported()).
     * 3:28 PM 6/23/2022 add -Tag param to permit running interger-suffixed variants (ie. mult ise sessions open & stored from same desktop). 
     * 9:19 AM 5/20/2022 add: iIseOpen alias (using these a lot lately; w freq crashouts of ise, and need to recover all files open & BPs to quickly get back to function)
     * 12:12 PM 5/11/2022 init
@@ -5537,6 +5915,8 @@ function import-ISEOpenFiles {
     Quick bulk dump, when ISE ineveitbly stops properly echo'ing variable values to terminal (and need to close and re-open all open files)
     .PARAMETER Tag
     Optional Tag to apply to as filename suffix[-tag 'label']
+    .PARAMETER FilePath
+    Optional FullName path to prior export-ISEOpenFiles pass[-FilePath `$env:userprofile\Documents\WindowsPowershell\Scripts\ISESavedSession-DEV.psXML
     .EXAMPLE
     PS> import-ISEOpenFiles -verbose
     Export all 'line'-type breakpoints on all current open ISE tabs, to a matching xml file, with verbose output, and whatif
@@ -5550,8 +5930,11 @@ function import-ISEOpenFiles {
     [Alias('iIseOpen')]
     PARAM(
         [Parameter(Position=0,HelpMessage="Optional Tag to apply to filename[-Tag MFA]")]
-        [string]$Tag
+        [string]$Tag,
+        [Parameter(ValueFromPipeline = $True, HelpMessage="Optional FullName path to prior export-ISEOpenFiles pass[-FilePath `$env:userprofile\Documents\WindowsPowershell\Scripts\ISESavedSession-DEV.psXML]")]
+        [system.io.fileinfo[]]$FilePath 
     ) ;
+
     BEGIN {
         ${CmdletName} = $PSCmdlet.MyInvocation.MyCommand.Name ;
         $verbose = $($VerbosePreference -eq "Continue")
@@ -5560,37 +5943,59 @@ function import-ISEOpenFiles {
     }
     PROCESS {
         if ($psise){
-            #$AllUsrsScripts = "$($env:ProgramFiles)\WindowsPowerShell\Scripts" ;
-            $CUScripts = "$([Environment]::GetFolderPath('MyDocuments'))\WindowsPowershell\Scripts" ;
-            if($Tag){
-                $txmlf = join-path -path $CUScripts -ChildPath "ISESavedSession-$($Tag).psXML" ;
+            if(-not $FilePath){
+                #$AllUsrsScripts = "$($env:ProgramFiles)\WindowsPowerShell\Scripts" ;
+                $CUScripts = "$([Environment]::GetFolderPath('MyDocuments'))\WindowsPowershell\Scripts" ;
+                if($Tag){
+                    [array]$txmlf = @(join-path -path $CUScripts -ChildPath "ISESavedSession-$($Tag).psXML") ;
+                } else { 
+                    [array]$txmlf = @(join-path -path $CUScripts -ChildPath 'ISESavedSession.psXML') ;
+                } ; 
+                #$allISEScripts = $psise.powershelltabs.files.fullpath ;
             } else { 
-                $txmlf = join-path -path $CUScripts -ChildPath 'ISESavedSession.psXML' ;
+                foreach($item in $FilePath){
+                    [array]$txmlf = @() ; 
+                    if($txmlf += @(get-childitem -path $item.fullname -ea continue)){
+                        $smsg = "(found specified -FilePath file)" ; 
+                        if($verbose){if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level VERBOSE } 
+                        else{ write-verbose "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; } ; 
+                    } else { 
+                        $smsg = "Unable to locate specified -FilePath:" ; 
+                        $smsg += "`n$($item.fullname)" ; 
+                        if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN -Indent} 
+                        else{ write-WARNING "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; 
+                    } ; 
+                } ; 
             } ; 
-            #$allISEScripts = $psise.powershelltabs.files.fullpath ;
             $error.clear() ;
             TRY {
-                $allISEScripts = import-Clixml -Path $txmlf ;
-                $smsg = "Opening $($allISEScripts| measure | select -expand count) files" ; 
-                write-verbose $smsg ; 
-                if($allISEScripts){
-                    foreach($ISES in $allISEScripts){
-                        if($psise.powershelltabs.files.fullpath -contains $ISES){
-                            write-host "($ISES) is already OPEN in Current ISE tab list (skipping)" ;
-                        } else {
-                            if(test-path $ISES){
-                                <# #New tab & open in new tab: - no we want them all in one tab
-                                write-verbose "(adding tab, opening:$($ISES))"
-                                $tab = $psISE.PowerShellTabs.Add() ;
-                                $tab.Files.Add($ISES) ;
-                                #>
-                                #open in current tab
-                                write-verbose "(opening:$($ISES))"
-                                $psISE.CurrentPowerShellTab.Files.Add($ISES) ;  ;
-                            } else {  write-warning "Unable to Open missing orig file:`n$($ISES)" };
-                        } ;
-                    }; # loop-E
-                }
+                foreach($file in $txmlf){
+                    $smsg = "==$($file.fullname)" ; 
+                    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } 
+                    else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                    #Levels:Error|Warn|Info|H1|H2|H3|H4|H5|Debug|Verbose|Prompt|Success
+                    $allISEScripts = import-Clixml -Path $file.fullname ;
+                    $smsg = "Opening $($allISEScripts| measure | select -expand count) files" ; 
+                    write-verbose $smsg ; 
+                    if($allISEScripts){
+                        foreach($ISES in $allISEScripts){
+                            if($psise.powershelltabs.files.fullpath -contains $ISES){
+                                write-host "($ISES) is already OPEN in Current ISE tab list (skipping)" ;
+                            } else {
+                                if(test-path $ISES){
+                                    <# #New tab & open in new tab: - no we want them all in one tab
+                                    write-verbose "(adding tab, opening:$($ISES))"
+                                    $tab = $psISE.PowerShellTabs.Add() ;
+                                    $tab.Files.Add($ISES) ;
+                                    #>
+                                    #open in current tab
+                                    write-verbose "(opening:$($ISES))"
+                                    $psISE.CurrentPowerShellTab.Files.Add($ISES) ;  ;
+                                } else {  write-warning "Unable to Open missing orig file:`n$($ISES)" };
+                            } ;
+                        }; # loop-E
+                    } ; 
+                } ; 
             } CATCH {
                 $ErrTrapd=$Error[0] ;
                 $smsg = "$('*'*5)`nFailed processing $($ErrTrapd.Exception.ItemName). `nError Message: $($ErrTrapd.Exception.Message)`nError Details: `n$(($ErrTrapd|out-string).trim())`n$('-'*5)" ;
@@ -7210,6 +7615,7 @@ function Step-ModuleVersionCalculated {
     AddedWebsite: www.thesurlyadmin.com
     AddedTwitter: @thesurlyadm1n
     REVISIONS
+    * 11:20 AM 12/12/2022 completely purged verb-* require stmts too risky w recursive load triggers:,verb-IO, verb-logging, verb-Mods, verb-Text
     * 3:57 PM 5/26/2022 backstop profile rgxs ; implment pre-cache & post-reload of installed modules ; 
         found can rmo the temp module ipmo, by targeting gmo | path, rather than common name (like verb-io). ; 
         fixed asset of $bumpVersionType = $MinVersionIncrementBump (was dropping 'Patch' through, rather than 'build')
@@ -7311,7 +7717,7 @@ function Step-ModuleVersionCalculated {
     https://powershellexplained.com/2017-10-14-Powershell-module-semantic-version/
     #>
     #Requires -Version 3
-    #Requires -Modules BuildHelpers,verb-IO, verb-logging, verb-Mods, verb-Text
+    #Requires -Modules BuildHelpers
     ##Requires -RunasAdministrator    
     [CmdletBinding()]
     PARAM(
@@ -7896,6 +8302,7 @@ Function Test-ModuleTMPFiles {
     Github      : https://github.com/tostka/verb-dev
     Tags        : Powershell,Module,Management,Lifecycle
     REVISIONS
+    * 2:08 PM 3/22/2023 expanded catch's they were coming up blank; fixed spurious 'Unable to Add-ContentFixEncoding' error (completely offbase)
     * 2:27 PM 5/12/2022 fix typo #217 & 220, added w-v echoes; expanded #218 echo
     * 2:08 PM 5/11/2022 move the module test code out to a portable func
     .DESCRIPTION
@@ -8020,8 +8427,11 @@ Function Test-ModuleTMPFiles {
 
                 } ;
             } CATCH {
+                $ErrTrapd=$Error[0] ;
                 $PassStatus += ";ERROR";
                 write-warning  "$(get-date -format 'HH:mm:ss'): Failed processing $($_.Exception.ItemName). `nError Message: $($_.Exception.Message)`nError Details: $($_)" ;
+                $smsg = $ErrTrapd.Exception.Message ;
+                write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" ;
                 $objReport.Manifest = $null ;
                 Break ;
             } ;
@@ -8071,11 +8481,15 @@ Function Test-ModuleTMPFiles {
                 $smsg = "$('*'*5)`nFailed processing $($ErrTrapd.Exception.ItemName). `nError Message: $($ErrTrapd.Exception.Message)`nError Details: `n$(($ErrTrapd|out-string).trim())`n$('-'*5)" ;
                 if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN } #Error|Warn|Debug
                 else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                $smsg = $ErrTrapd.Exception.Message ;
+                write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" ;
+                $smsg = "Test-ModuleTMPFiles:Unable to copy/ipmo/remove:$($pltIpmo.Name)" ;
+                write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" ;
                 #-=-record a STATUSWARN=-=-=-=-=-=-=
                 $statusdelta = ";ERROR"; # CHANGE|INCOMPLETE|ERROR|WARN|FAIL ;
                 if(gv passstatus -scope Script -ea 0){$script:PassStatus += $statusdelta } ;
                 if(gv -Name PassStatus_$($tenorg) -scope Script -ea 0){set-Variable -Name PassStatus_$($tenorg) -scope Script -Value ((get-Variable -Name PassStatus_$($tenorg)).value + $statusdelta)} ;
-                Write-Warning "Unable to Add-ContentFixEncoding:$($Path.FullName)" ;
+                
                 #$false | write-output ;
                 start-sleep -s $RetrySleep ;
                 #Break #Opts: STOP(debug)|EXIT(close)|CONTINUE(move on in loop cycle)|BREAK(exit loop iteration)|THROW $_/'CustomMsg'(end script with Err output)
@@ -8340,6 +8754,8 @@ function update-NewModule {
     Github      : https://github.com/tostka/verb-dev
     Tags        : Powershell,Module,Build,Development
     REVISIONS
+    * 1:46 PM 3/22/2023 #1212:Publish-Module throws error if repo.SourceLocation isn't testable (when vpn is down), test and throw prescriptive error (otherwise is obtuse); expanded catch's they were coming up blank
+    * 11:20 AM 12/12/2022 completely purged rem'd require stmts, confusing, when they echo in build..., ,verb-IO, verb-logging, verb-Mods, verb-Text
     * 3:10 PM 9/7/2022 ren & alias orig name (verb compliance): process-NewModule -> update-NewModule
     * 11:55 AM 6/2/2022 finally got through full build on verb-io; typo: pltCMPV -> pltCMBS; 
     * 3:42 PM 6/1/2022 add: -RequiredVersion picked up from psd1 post step ; defer into confirm-ModuleBuildSync ; echo update-NewModule splt before running; typo in $psd1vers ; cleaned old rems; 
@@ -8442,9 +8858,7 @@ function update-NewModule {
     Merge & Republish pass: Only Publish/Install/Test specified module, with debug messages, and whatif pass.
     .LINK
     #>
-
-    ##Requires -Module verb-dev # added to verb-dev (recursive if present)
-    #Requires -Modules BuildHelpers,verb-IO, verb-logging, verb-Mods, verb-Text
+    #Requires -Modules BuildHelpers
     [CmdletBinding()]
     [Alias('process-NewModule')]
     PARAM(
@@ -8726,6 +9140,9 @@ function update-NewModule {
         $smsg = "Failed processing $($ErrTrapd.Exception.ItemName). `nError Message: $($ErrTrapd.Exception.Message)`nError Details: $($ErrTrapd)" ;
         if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug
         else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+        $smsg = $ErrTrapd.Exception.Message ;
+        if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN }
+        else{ write-WARNING "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
     } ;
     
     $sBnr="#*======v $($ScriptBaseName):$($ModuleName) v======" ;
@@ -8795,10 +9212,14 @@ function update-NewModule {
                 else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
             }
         } CATCH {
+            $ErrTrapd=$Error[0] ;
             $PassStatus += ";ERROR";
-            $smsg= "Failed processing $($_.Exception.ItemName). `nError Message: $($_.Exception.Message)`nError Details: $($_)" ;
+            $smsg= "Failed processing $($ErrTrapd.Exception.ItemName). `nError Message: $($ErrTrapd.Exception.Message)`nError Details: $($ErrTrapd)" ;
             if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN }  #Error|Warn|Debug
             else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+            $smsg = $ErrTrapd.Exception.Message ;
+            if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN }
+            else{ write-WARNING "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
             Break ;
         } ;
         if($RequiredVersion.tostring() -AND  $psd1Profile){
@@ -8866,10 +9287,13 @@ function update-NewModule {
     TRY{
         $psd1UpdatedVers = (Import-PowerShellDataFile -Path $ModPsdPath).ModuleVersion.tostring() ;
     } CATCH {
+        $ErrTrapd=$Error[0] ;
         $PassStatus += ";ERROR";
-        $smsg = "Import-PowerShellDataFile:Failed processing $($_.Exception.ItemName). `nError Message: $($_.Exception.Message)`nError Details: $($_)" ;
+        $smsg = "Import-PowerShellDataFile:Failed processing $($ErrTrapd.Exception.ItemName). `nError Message: $($ErrTrapd.Exception.Message)`nError Details: $($ErrTrapd)" ;
         if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN }  #Error|Warn|Debug
         else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+        $smsg = $ErrTrapd.Exception.Message ;
+        write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" ;
         Break ;
     } ;
     if($RequiredVersion.tostring() -AND $psd1UpdatedVers){
@@ -9100,10 +9524,13 @@ $(if($Merge){'MERGE parm specified as well:`n-Merge Public|Internal|Classes incl
             else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
         }
     } CATCH {
+         $ErrTrapd=$Error[0] ;
         $PassStatus += ";ERROR";
-        $smsg = "Failed processing $($_.Exception.ItemName). `nError Message: $($_.Exception.Message)`nError Details: $($_)" ;
+        $smsg = "Failed processing $($ErrTrapd.Exception.ItemName). `nError Message: $($ErrTrapd.Exception.Message)`nError Details: $($ErrTrapd)" ;
         if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN }  #Error|Warn|Debug
         else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+        $smsg = $ErrTrapd.Exception.Message ;
+        write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" ;
         Break ;
     } ;
 
@@ -9305,10 +9732,13 @@ $(if($Merge){'MERGE parm specified as well:`n-Merge Public|Internal|Classes incl
         TRY {
             sign-file @pltSignFile ;
         } CATCH {
+            $ErrTrapd=$Error[0] ;
             $PassStatus += ";ERROR";
-            $smsg = "Failed processing $($_.Exception.ItemName). `nError Message: $($_.Exception.Message)`nError Details: $($_)" ;
+            $smsg = "Failed processing $($ErrTrapd.Exception.ItemName). `nError Message: $($ErrTrapd.Exception.Message)`nError Details: $($ErrTrapd)" ;
             if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN }  #Error|Warn|Debug
             else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+            $smsg = $ErrTrapd.Exception.Message ;
+            write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" ;
             Break ;
         } ;
     } else {
@@ -9474,9 +9904,12 @@ $(if($Merge){'MERGE parm specified as well:`n-Merge Public|Internal|Classes incl
         TRY {
             Remove-Item @pltRItm ;
         } CATCH {
-            $smsg = "Failed processing $($_.Exception.ItemName). `nError Message: $($_.Exception.Message)`nError Details: $($_)" ;
+            $ErrTrapd=$Error[0] ;
+            $smsg = "Failed processing $($ErrTrapd.Exception.ItemName). `nError Message: $($ErrTrapd.Exception.Message)`nError Details: $($ErrTrapd)" ;
             if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN }  #Error|Warn|Debug
             else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+            $smsg = $ErrTrapd.Exception.Message ;
+            write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" ;
             $PassStatus += ";ERROR";
             Break #STOP(debug)|EXIT(close)|Continue(move on in loop cycle) ;
         } ;
@@ -9504,7 +9937,7 @@ $(if($Merge){'MERGE parm specified as well:`n-Merge Public|Internal|Classes incl
             if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info }  #Error|Warn|Debug
             else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
             TRY {
-                $tRepo = get-PSRepository -name $localPSRepo
+                $tRepo = get-PSRepository -name $localPSRepo ; 
             } CATCH {
                 $ErrorTrapped = $Error[0] ;
                 $PassStatus += ";ERROR";
@@ -9515,6 +9948,20 @@ $(if($Merge){'MERGE parm specified as well:`n-Merge Public|Internal|Classes incl
             } ;
 
             if($tRepo){
+
+                # #1212:throws error if repo.SourceLocation isn't testable (when vpn is down), test and throw prescriptive error
+                if(-not (test-path -path $tRepo.PublishLocation)){
+                    $smsg= "Failed: test-path -path `$tRepo.PublishLocation: $($tRepo.PublishLocation)" ;
+                    $smsg += "Is Repo share accesisble (VPN online?)" ; 
+                    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Error } #Error|Warn
+                    else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                    Break ; 
+                } else {
+                    $smsg = "(confirmed:`$tRepo.PublishLocation accessible)" ; 
+                    if($verbose){if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level VERBOSE } 
+                    else{ write-verbose "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; } ; 
+                } ;  
+
                 $rgxPsd1Version="ModuleVersion\s=\s'\d*\.\d*\.\d*((\.\d*)*)'" ;
                 # 12:47 PM 1/14/2020 move the psdv1Vers detect code to always - need it for installs, as install-module doesn't prioritize, just throws up.
                 <# regx
@@ -9597,8 +10044,8 @@ And then re-run update-NewModule.
                 else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
                 if($ErrorTrapped.Exception.Message -match 'The\sversion\smust\sexceed\sthe\scurrent\sversion'){
                     $smsg= "NOTE: If the psdVers ($($psd1Vers)) *is* > prior rev ($($localmod)) (e.g. publish-Module has bad SemanticVersion code),`nbump the rev a minor level`nStep-ModuleVersion -Path $($ModPsdPath) -by minor" ;
-                if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Error } #Error|Warn
-                else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Error } #Error|Warn
+                    else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
                 } ;
                 Break ;
             } ;
@@ -9709,10 +10156,13 @@ And then re-run update-NewModule.
                         TRY {
                             New-Item @pltNItm ;
                         } CATCH {
-                            $smsg = "Failed processing $($_.Exception.ItemName). `nError Message: $($_.Exception.Message)`nError Details: $($_)" ;
+                            $ErrTrapd=$Error[0] ;
+                            $smsg = "Failed processing $($ErrTrapd.Exception.ItemName). `nError Message: $($ErrTrapd.Exception.Message)`nError Details: $($ErrTrapd)" ;
                             if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN }  #Error|Warn|Debug
                             else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
                             $PassStatus += ";ERROR";
+                            $smsg = $ErrTrapd.Exception.Message ;
+                            write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" ;
                             Break #STOP(debug)|EXIT(close)|Continue(move on in loop cycle) ;
                         } ;
                     } ;
@@ -9721,9 +10171,12 @@ And then re-run update-NewModule.
                     TRY {
                         copy-Item @pltCItm ;
                     } CATCH {
-                        $smsg = "Failed processing $($_.Exception.ItemName). `nError Message: $($_.Exception.Message)`nError Details: $($_)" ;
+                        $ErrTrapd=$Error[0] ;
+                        $smsg = "Failed processing $($ErrTrapd.Exception.ItemName). `nError Message: $($ErrTrapd.Exception.Message)`nError Details: $($ErrTrapd)" ;
                         if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN }  #Error|Warn|Debug
                         else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                        $smsg = $ErrTrapd.Exception.Message ;
+                        write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" ;
                         $PassStatus += ";ERROR";
                         Break #STOP(debug)|EXIT(close)|Continue(move on in loop cycle) ;
                     } ;
@@ -9920,7 +10373,7 @@ $($logfile)
 
 #*======^ END FUNCTIONS ^======
 
-Export-ModuleMember -Function backup-ModuleBuild,check-PsLocalRepoRegistration,confirm-ModuleBuildSync,confirm-ModulePsd1Version,confirm-ModulePsm1Version,confirm-ModuleTestPs1Guid,convert-CommandLine2VSCDebugJson,convertFrom-EscapedPSText,convert-ISEOpenSession,converto-VSCConfig,convertTo-EscapedPSText,ConvertTo-ModuleDynamicTDO,ConvertTo-ModuleMergedTDO,convertTo-UnwrappedPS,convertTo-WrappedPS,export-ISEBreakPoints,export-ISEBreakPointsALL,export-ISEOpenFiles,get-AliasAssignsAST,get-CodeProfileAST,get-CodeRiskProfileAST,Get-CommentBlocks,get-FunctionBlock,get-FunctionBlocks,get-ModuleRevisedCommands,get-ProjectNameTDO,Get-PSBreakpointSorted,Get-PSModuleFile,get-VariableAssignsAST,get-VersionInfo,import-ISEBreakPoints,import-ISEBreakPointsALL,import-ISEConsoleColors,import-ISEOpenFiles,Initialize-ModuleFingerprint,Get-PSModuleFile,Initialize-PSModuleDirectories,move-ISEBreakPoints,new-CBH,New-GitHubGist,parseHelp,restore-ISEConsoleColors,restore-ModuleBuild,save-ISEConsoleColors,show-Verbs,Split-CommandLine,Step-ModuleVersionCalculated,Get-PSModuleFile,Test-ModuleTMPFiles,test-VerbStandard,Uninstall-ModuleForce,update-NewModule -Alias *
+Export-ModuleMember -Function backup-ModuleBuild,check-PsLocalRepoRegistration,confirm-ModuleBuildSync,confirm-ModulePsd1Version,confirm-ModulePsm1Version,confirm-ModuleTestPs1Guid,convert-CommandLine2VSCDebugJson,convertFrom-EscapedPSText,convert-ISEOpenSession,converto-VSCConfig,ConvertTo-Breakpoint,_extractBreakpoint,convertTo-EscapedPSText,ConvertTo-ModuleDynamicTDO,ConvertTo-ModuleMergedTDO,convertTo-UnwrappedPS,convertTo-WrappedPS,export-ISEBreakPoints,export-ISEBreakPointsALL,export-ISEOpenFiles,get-AliasAssignsAST,get-CodeProfileAST,get-CodeRiskProfileAST,Get-CommentBlocks,get-FunctionBlock,get-FunctionBlocks,get-ISEOpenFilesExported,get-ModuleRevisedCommands,get-ProjectNameTDO,Get-PSBreakpointSorted,Get-PSModuleFile,get-StrictMode,Version,ToString,get-VariableAssignsAST,get-VersionInfo,import-ISEBreakPoints,import-ISEBreakPointsALL,import-ISEConsoleColors,import-ISEOpenFiles,Initialize-ModuleFingerprint,Get-PSModuleFile,Initialize-PSModuleDirectories,move-ISEBreakPoints,new-CBH,New-GitHubGist,parseHelp,restore-ISEConsoleColors,restore-ModuleBuild,save-ISEConsoleColors,show-Verbs,Split-CommandLine,Step-ModuleVersionCalculated,Get-PSModuleFile,Test-ModuleTMPFiles,test-VerbStandard,Uninstall-ModuleForce,update-NewModule -Alias *
 
 
 
@@ -9928,8 +10381,8 @@ Export-ModuleMember -Function backup-ModuleBuild,check-PsLocalRepoRegistration,c
 # SIG # Begin signature block
 # MIIELgYJKoZIhvcNAQcCoIIEHzCCBBsCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUOS7NZHc2vjJq3ej79z1CGF+S
-# hmqgggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUVC8RGaAX0/x8e3AcTGtYR1XG
+# HHOgggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
 # MCwxKjAoBgNVBAMTIVBvd2VyU2hlbGwgTG9jYWwgQ2VydGlmaWNhdGUgUm9vdDAe
 # Fw0xNDEyMjkxNzA3MzNaFw0zOTEyMzEyMzU5NTlaMBUxEzARBgNVBAMTClRvZGRT
 # ZWxmSUkwgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBALqRVt7uNweTkZZ+16QG
@@ -9944,9 +10397,9 @@ Export-ModuleMember -Function backup-ModuleBuild,check-PsLocalRepoRegistration,c
 # AWAwggFcAgEBMEAwLDEqMCgGA1UEAxMhUG93ZXJTaGVsbCBMb2NhbCBDZXJ0aWZp
 # Y2F0ZSBSb290AhBaydK0VS5IhU1Hy6E1KUTpMAkGBSsOAwIaBQCgeDAYBgorBgEE
 # AYI3AgEMMQowCKACgAChAoAAMBkGCSqGSIb3DQEJAzEMBgorBgEEAYI3AgEEMBwG
-# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBQ2GFl3
-# nGoAvXU7KJQTAPfitZhHxTANBgkqhkiG9w0BAQEFAASBgGUGqJI6udi3psSAsREW
-# jUZF2i5qPxZb2+gTt2troPSI+mXgoK3XYvPq3Gooobt+Orz+TlRhZmLl4Ua/qclP
-# 1FmTsUayqDm3Ab3plHoM0WGshPmUgVmimM8tQpCZQTCwQEVLCPxX9qVab3MLf+pV
-# gmpKjmEG+LaP/RoEy1kZvCif
+# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBRjROZV
+# rkqQGAh9npC26OO4l1+2mjANBgkqhkiG9w0BAQEFAASBgHqIjQ8Tu7LCBzHwrKsm
+# tEoZ6SDhqrIhGx0EkunvmTyQ11sTD1/AJscawWRU5zo/oxhGo4IVn/H93RBR9avX
+# FuiLeQ2h1e2yVh9YVeXkSwamOjgSzwcJ5O/aeY1K2rySjGyjaawe1BEoWJtLB481
+# mirihmDT48tOYmGooxvNPvda
 # SIG # End signature block
