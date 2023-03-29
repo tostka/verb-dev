@@ -16,6 +16,7 @@ function get-ISEOpenFilesExported {
     Github      : https://github.com/tostka/verb-dev
     Tags        : Powershell,ISE,development,debugging
     REVISIONS
+    * 1:55 PM 3/29/2023 flipped alias (clashed) iIseOpen -> gIseOpen
     * 8:51 AM 3/8/2023 init
     .DESCRIPTION
     get-ISEOpenFilesExported - List CU profile .\Documents\WindowsPowerShell\Scripts\*.psXML files, reflecting prior exports via export-ISEOpenFiles, as targets for import via import-ISEOpenFiles
@@ -35,7 +36,7 @@ function get-ISEOpenFilesExported {
     https://github.com/tostka/verb-dev
     #>
     [CmdletBinding()]
-    [Alias('iIseOpen')]
+    [Alias('gIseOpen')]
     PARAM(
         [Parameter(Position=0,HelpMessage="Optional Tag to check for, within prior-export filename[-Tag MFA]")]
         [string]$Tag

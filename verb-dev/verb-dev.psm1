@@ -5,7 +5,7 @@
 .SYNOPSIS
 VERB-dev - Development PS Module-related generic functions
 .NOTES
-Version     : 1.5.20
+Version     : 1.5.21
 Author      : Todd Kadrie
 Website     :	https://www.toddomation.com
 Twitter     :	@tostka
@@ -4776,6 +4776,7 @@ function get-ISEOpenFilesExported {
     Github      : https://github.com/tostka/verb-dev
     Tags        : Powershell,ISE,development,debugging
     REVISIONS
+    * 1:55 PM 3/29/2023 flipped alias (clashed) iIseOpen -> gIseOpen
     * 8:51 AM 3/8/2023 init
     .DESCRIPTION
     get-ISEOpenFilesExported - List CU profile .\Documents\WindowsPowerShell\Scripts\*.psXML files, reflecting prior exports via export-ISEOpenFiles, as targets for import via import-ISEOpenFiles
@@ -4795,7 +4796,7 @@ function get-ISEOpenFilesExported {
     https://github.com/tostka/verb-dev
     #>
     [CmdletBinding()]
-    [Alias('iIseOpen')]
+    [Alias('gIseOpen')]
     PARAM(
         [Parameter(Position=0,HelpMessage="Optional Tag to check for, within prior-export filename[-Tag MFA]")]
         [string]$Tag
@@ -5543,7 +5544,7 @@ function get-VersionInfo {
     * 9:36 AM 12/30/2019 added CBH .INPUTS & OUTPUTS, including description of the hashtable of key/value pairs returned, for existing CBH .NOTES block
     * added explicit -path param to get-help
     * 8:39 PM 11/21/2019 added test for returned get-help
-    * 8:27 AM 11/5/2019 Todd rework: Added Path param, parsed to REVISIONS: block, & return the top rev as LastRevision key in returned object.
+    * 8:27 AM 11.5.2119 Todd rework: Added Path param, parsed to REVISIONS: block, & return the top rev as LastRevision key in returned object.
     * 02/07/2019 Posted version
     .DESCRIPTION
     get-VersionInfo.ps1 - Extract comment-help .NOTES block into a hashtable, key-value split on colons, to provide portable metadata (for New/Update-ScriptFileInfo inputs).
@@ -5890,77 +5891,128 @@ Function import-ISEConsoleColors {
 
 
 #*------v import-ISEOpenFiles.ps1 v------
-Function Wait-AADSync {
+function import-ISEOpenFiles {
     <#
     .SYNOPSIS
-    Wait-AADSync - Dawdle loop for notifying on next AzureAD sync (AzureAD/MSOL)
+    import-ISEOpenFiles - Import/Re-Open a list of all ISE tab files, from CU Documents\WindowsPowershell\Scripts\ISESavedSession.psXML file
     .NOTES
     Version     : 1.0.0
     Author      : Todd Kadrie
-    Website     :	http://www.toddomation.com
-    Twitter     :	@tostka / http://twitter.com/tostka
-    CreatedDate : 2020-01-12
-    FileName    : Wait-AADSync.ps1
+    Website     : http://www.toddomation.com
+    Twitter     : @tostka / http://twitter.com/tostka
+    CreatedDate : 2022-05-11
+    FileName    : import-ISEOpenFiles
     License     : MIT License
-    Copyright   : (c) 2020 Todd Kadrie
-    Github      : https://github.com/tostka
-    Tags        : Powershell
-    Updated By: : Todd Kadrie
-    REVISIONS   :
-    * 2:05 PM 12/13/2022 recoded for AzureAD backend (with msol deprecated; shouldn't have used aad in the name, initially, with msol as the backend).
-    * 4:22 PM 7/24/2020 added verbose
-    * 12:14 PM 5/27/2020 moved alias:wait-msolsync win the func
-    * 10:27 AM 2/25/2020 bumped polling interval to 30s
-    * 8:50 PM 1/12/2020 expanded aliases
-    * 11:38 AM 5/6/2019 moved from tsksid-incl-ServerApp.ps1
-    * 9:53 AM 3/1/2019 init vers, repl'd native cmsolsvc with Connect-AAD
+    Copyright   : (c) 2022 Todd Kadrie
+    Github      : https://github.com/tostka/verb-dev
+    Tags        : Powershell,ISE,development,debugging
+    REVISIONS
+    * 1:20 PM 3/27/2023 bugfix: coerce $txmlf into [system.io.fileinfo], to make it match $fileinfo's type.
+    * 9:35 AM 3/8/2023 added -filepath (with pipeline support), explicit pathed file support (to pipeline in from get-IseOpenFilesExported()).
+    * 3:28 PM 6/23/2022 add -Tag param to permit running interger-suffixed variants (ie. mult ise sessions open & stored from same desktop). 
+    * 9:19 AM 5/20/2022 add: iIseOpen alias (using these a lot lately; w freq crashouts of ise, and need to recover all files open & BPs to quickly get back to function)
+    * 12:12 PM 5/11/2022 init
     .DESCRIPTION
-    Wait-AADSync - Collect last AD-AAD sync (AzureAD/MSOL)
-    .PARAMETER Credential
-    Credential to be used for connection
-    .INPUTS
-    None. Does not accepted piped input.
-    .OUTPUTS
-    Returns an object with LastDirSyncTime, expressed as TimeGMT & TimeLocal
+    import-ISEOpenFiles - Import/Re-Open a list of all ISE tab files, from CU Documents\WindowsPowershell\Scripts\ISESavedSession.psXML file
+    Quick bulk dump, when ISE ineveitbly stops properly echo'ing variable values to terminal (and need to close and re-open all open files)
+    .PARAMETER Tag
+    Optional Tag to apply to as filename suffix[-tag 'label']
+    .PARAMETER FilePath
+    Optional FullName path to prior export-ISEOpenFiles pass[-FilePath `$env:userprofile\Documents\WindowsPowershell\Scripts\ISESavedSession-DEV.psXML
     .EXAMPLE
-    Wait-AADSync
+    PS> import-ISEOpenFiles -verbose
+    Export all 'line'-type breakpoints on all current open ISE tabs, to a matching xml file, with verbose output, and whatif
+    .EXAMPLE
+    PS> import-ISEOpenFiles -Tag 2 -verbose  
+    Export with Tag '2' applied to filename (e.g. "ISESavedSession2.psXML")
     .LINK
+    https://github.com/tostka/verb-dev
     #>
     [CmdletBinding()]
-    [Alias('Wait-MSolSync')]
-    Param([Parameter()]$Credential = $global:credo365TORSID) ;
-    $verbose = ($VerbosePreference -eq "Continue") ; 
-    <# MSOL original
-    try { Get-MsolAccountSku -ErrorAction Stop | out-null }
-    catch [Microsoft.Online.Administration.Automation.MicrosoftOnlineException] {
-        "Not connected to MSOnline. Now connecting." ;
-        Connect-AAD ;
-    } ;
-    $DirSyncLast = (Get-MsolCompanyInformation).LastDirSyncTime ;
-    write-host -foregroundcolor yellow "$((get-date).ToString('HH:mm:ss')):Waiting for next AAD Dirsync:`n(prior:$($DirSyncLast.ToLocalTime()))`n[" ;
-    Do { Connect-AAD  ; write-host "." -NoNewLine ; Start-Sleep -m (1000 * 30) ; Connect-MSOL } Until ((Get-MsolCompanyInformation).LastDirSyncTime -ne $DirSyncLast) ;
-    write-host -foregroundcolor yellow "]`n$((get-date).ToString('HH:mm:ss')):AD->AAD REPLICATED!" ;
-    write-host "`a" ; write-host "`a" ; write-host "`a" ;
-    #>
-    
-    try { $AADTenDtl = Get-AzureADTenantDetail -ErrorAction Stop } # authenticated to "a" tenant
-    catch { 
-        write-host "(Not connected to AzureAD. Now connecting)" ;
-        Connect-AAD ;
-        $AADTenDtl = Get-AzureADTenantDetail -ErrorAction Stop ; 
-    } ;
-    $DirSyncLast = $AADTenDtl.CompanyLastDirSyncTime ; 
-    write-host -foregroundcolor yellow "$((get-date).ToString('HH:mm:ss')):Waiting for next AAD Dirsync:`n(prior:$($DirSyncLast.ToLocalTime()))`n[" ;
+    [Alias('iIseOpen')]
+    PARAM(
+        [Parameter(Position=0,HelpMessage="Optional Tag to apply to filename[-Tag MFA]")]
+        [string]$Tag,
+        [Parameter(ValueFromPipeline = $True, HelpMessage="Optional FullName path to prior export-ISEOpenFiles pass[-FilePath `$env:userprofile\Documents\WindowsPowershell\Scripts\ISESavedSession-DEV.psXML]")]
+        [system.io.fileinfo[]]$FilePath 
+    ) ;
 
-    Do { 
-        Connect-AAD -silent  ;
-        write-host "." -NoNewLine ;
-        Start-Sleep -m (1000 * 30) ;
-    } Until ((Get-AzureADTenantDetail).CompanyLastDirSyncTime -ne $DirSyncLast) ;
-    write-host -foregroundcolor yellow "]`n$((get-date).ToString('HH:mm:ss')):AD->AAD REPLICATED!" ;
-    write-host "`a" ;
-    write-host "`a" ;
-    write-host "`a" ;
+    BEGIN {
+        ${CmdletName} = $PSCmdlet.MyInvocation.MyCommand.Name ;
+        $verbose = $($VerbosePreference -eq "Continue")
+        $sBnr="#*======v $($CmdletName): v======" ;
+        write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($sBnr)" ;
+    }
+    PROCESS {
+        if ($psise){
+            if(-not $FilePath){
+                #$AllUsrsScripts = "$($env:ProgramFiles)\WindowsPowerShell\Scripts" ;
+                $CUScripts = "$([Environment]::GetFolderPath('MyDocuments'))\WindowsPowershell\Scripts" ;
+                if($Tag){
+                    [array]$txmlf = @( [system.io.fileinfo](join-path -path $CUScripts -ChildPath "ISESavedSession-$($Tag).psXML") ) ;
+                } else { 
+                    [array]$txmlf = @( [system.io.fileinfo](join-path -path $CUScripts -ChildPath 'ISESavedSession.psXML') ) ;
+                } ; 
+                #$allISEScripts = $psise.powershelltabs.files.fullpath ;
+            } else { 
+                foreach($item in $FilePath){
+                    [array]$txmlf = @() ; 
+                    if($txmlf += @(get-childitem -path $item.fullname -ea continue)){
+                        $smsg = "(found specified -FilePath file)" ; 
+                        if($verbose){if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level VERBOSE } 
+                        else{ write-verbose "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; } ; 
+                    } else { 
+                        $smsg = "Unable to locate specified -FilePath:" ; 
+                        $smsg += "`n$($item.fullname)" ; 
+                        if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN -Indent} 
+                        else{ write-WARNING "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; 
+                    } ; 
+                } ; 
+            } ; 
+            $error.clear() ;
+            TRY {
+                foreach($file in $txmlf){
+                    $smsg = "==$($file.fullname)" ; 
+                    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } 
+                    else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                    #Levels:Error|Warn|Info|H1|H2|H3|H4|H5|Debug|Verbose|Prompt|Success
+                    $allISEScripts = import-Clixml -Path $file.fullname ;
+                    $smsg = "Opening $($allISEScripts| measure | select -expand count) files" ; 
+                    write-verbose $smsg ; 
+                    if($allISEScripts){
+                        foreach($ISES in $allISEScripts){
+                            if($psise.powershelltabs.files.fullpath -contains $ISES){
+                                write-host "($ISES) is already OPEN in Current ISE tab list (skipping)" ;
+                            } else {
+                                if(test-path $ISES){
+                                    <# #New tab & open in new tab: - no we want them all in one tab
+                                    write-verbose "(adding tab, opening:$($ISES))"
+                                    $tab = $psISE.PowerShellTabs.Add() ;
+                                    $tab.Files.Add($ISES) ;
+                                    #>
+                                    #open in current tab
+                                    write-verbose "(opening:$($ISES))"
+                                    $psISE.CurrentPowerShellTab.Files.Add($ISES) ;  ;
+                                } else {  write-warning "Unable to Open missing orig file:`n$($ISES)" };
+                            } ;
+                        }; # loop-E
+                    } ; 
+                } ; 
+            } CATCH {
+                $ErrTrapd=$Error[0] ;
+                $smsg = "$('*'*5)`nFailed processing $($ErrTrapd.Exception.ItemName). `nError Message: $($ErrTrapd.Exception.Message)`nError Details: `n$(($ErrTrapd|out-string).trim())`n$('-'*5)" ;
+                write-warning $smsg ;
+                $smsg = $ErrTrapd.Exception.Message ;
+                if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN }
+                else{ write-WARNING $smsg } ;
+                BREAK ;
+                Continue ; #Opts: STOP(debug)|EXIT(close)|CONTINUE(move on in loop cycle)|BREAK(exit loop iteration)|THROW $_/'CustomMsg'(end script with Err output)
+            } ;
+        } else {  write-warning "This script only functions within PS ISE, with a script file open for editing" };
+    } # PROC-E
+    END{
+        write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($sBnr.replace('=v','=^').replace('v=','^='))" ;
+    }
 }
 
 #*------^ import-ISEOpenFiles.ps1 ^------
@@ -10327,7 +10379,7 @@ $($logfile)
 
 #*======^ END FUNCTIONS ^======
 
-Export-ModuleMember -Function backup-ModuleBuild,check-PsLocalRepoRegistration,confirm-ModuleBuildSync,confirm-ModulePsd1Version,confirm-ModulePsm1Version,confirm-ModuleTestPs1Guid,convert-CommandLine2VSCDebugJson,convertFrom-EscapedPSText,convert-ISEOpenSession,converto-VSCConfig,ConvertTo-Breakpoint,_extractBreakpoint,convertTo-EscapedPSText,ConvertTo-ModuleDynamicTDO,ConvertTo-ModuleMergedTDO,convertTo-UnwrappedPS,convertTo-WrappedPS,export-ISEBreakPoints,export-ISEBreakPointsALL,export-ISEOpenFiles,get-AliasAssignsAST,get-CodeProfileAST,get-CodeRiskProfileAST,Get-CommentBlocks,get-FunctionBlock,get-FunctionBlocks,get-ISEOpenFilesExported,get-ModuleRevisedCommands,get-ProjectNameTDO,Get-PSBreakpointSorted,Get-PSModuleFile,get-StrictMode,Version,ToString,get-VariableAssignsAST,get-VersionInfo,import-ISEBreakPoints,import-ISEBreakPointsALL,import-ISEConsoleColors,Wait-AADSync,Initialize-ModuleFingerprint,Get-PSModuleFile,Initialize-PSModuleDirectories,move-ISEBreakPoints,new-CBH,New-GitHubGist,parseHelp,restore-ISEConsoleColors,restore-ModuleBuild,save-ISEConsoleColors,show-Verbs,Split-CommandLine,Step-ModuleVersionCalculated,Get-PSModuleFile,Test-ModuleTMPFiles,test-VerbStandard,Uninstall-ModuleForce,update-NewModule -Alias *
+Export-ModuleMember -Function backup-ModuleBuild,check-PsLocalRepoRegistration,confirm-ModuleBuildSync,confirm-ModulePsd1Version,confirm-ModulePsm1Version,confirm-ModuleTestPs1Guid,convert-CommandLine2VSCDebugJson,convertFrom-EscapedPSText,convert-ISEOpenSession,converto-VSCConfig,ConvertTo-Breakpoint,_extractBreakpoint,convertTo-EscapedPSText,ConvertTo-ModuleDynamicTDO,ConvertTo-ModuleMergedTDO,convertTo-UnwrappedPS,convertTo-WrappedPS,export-ISEBreakPoints,export-ISEBreakPointsALL,export-ISEOpenFiles,get-AliasAssignsAST,get-CodeProfileAST,get-CodeRiskProfileAST,Get-CommentBlocks,get-FunctionBlock,get-FunctionBlocks,get-ISEOpenFilesExported,get-ModuleRevisedCommands,get-ProjectNameTDO,Get-PSBreakpointSorted,Get-PSModuleFile,get-StrictMode,Version,ToString,get-VariableAssignsAST,get-VersionInfo,import-ISEBreakPoints,import-ISEBreakPointsALL,import-ISEConsoleColors,import-ISEOpenFiles,Initialize-ModuleFingerprint,Get-PSModuleFile,Initialize-PSModuleDirectories,move-ISEBreakPoints,new-CBH,New-GitHubGist,parseHelp,restore-ISEConsoleColors,restore-ModuleBuild,save-ISEConsoleColors,show-Verbs,Split-CommandLine,Step-ModuleVersionCalculated,Get-PSModuleFile,Test-ModuleTMPFiles,test-VerbStandard,Uninstall-ModuleForce,update-NewModule -Alias *
 
 
 
@@ -10335,8 +10387,8 @@ Export-ModuleMember -Function backup-ModuleBuild,check-PsLocalRepoRegistration,c
 # SIG # Begin signature block
 # MIIELgYJKoZIhvcNAQcCoIIEHzCCBBsCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUVAuk9o8lmoJaMXuGplcLNjd0
-# ldegggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUki7W3P38k5V9lwI4r2VgKrHq
+# enOgggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
 # MCwxKjAoBgNVBAMTIVBvd2VyU2hlbGwgTG9jYWwgQ2VydGlmaWNhdGUgUm9vdDAe
 # Fw0xNDEyMjkxNzA3MzNaFw0zOTEyMzEyMzU5NTlaMBUxEzARBgNVBAMTClRvZGRT
 # ZWxmSUkwgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBALqRVt7uNweTkZZ+16QG
@@ -10351,9 +10403,9 @@ Export-ModuleMember -Function backup-ModuleBuild,check-PsLocalRepoRegistration,c
 # AWAwggFcAgEBMEAwLDEqMCgGA1UEAxMhUG93ZXJTaGVsbCBMb2NhbCBDZXJ0aWZp
 # Y2F0ZSBSb290AhBaydK0VS5IhU1Hy6E1KUTpMAkGBSsOAwIaBQCgeDAYBgorBgEE
 # AYI3AgEMMQowCKACgAChAoAAMBkGCSqGSIb3DQEJAzEMBgorBgEEAYI3AgEEMBwG
-# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBRxrdZE
-# vQL7+EV6qsZ+5E0EYFcmljANBgkqhkiG9w0BAQEFAASBgBOYFJECVC/2TrK3Yzdt
-# Kj2x/sq7fbPeP0dyQvbYVrSh6VpS3NJLK6ZdGfklFm/CH1XAtrNCGA5/rOwRWlC9
-# xe5NqvTqDhCCZY2qxaG09rxD8NtsqRGFexMTEOQY4GtNJPNMuHfEvQyZNMFlnyfD
-# FOkVXY5NPMHL4WvUzuY61+5T
+# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBQn8lPI
+# pGq1vhwUK67Wrn2EqY/0pDANBgkqhkiG9w0BAQEFAASBgJ+vN8X9efWlaX8iAeLf
+# wCU8px2sW7JyBKiJ9stuivKOlinBqbOeg5Y4Jt++E+kkF6CSlCq7cgUT+FFK0BMp
+# C2zf7H32Uw5RI80oOgFMTAx7h7AV9CcxIg4SQ5N/0qMBbwtpNtCNjJ7s487vNXdO
+# y+/beNaZwE8i6+bPqowSJpIn
 # SIG # End signature block
