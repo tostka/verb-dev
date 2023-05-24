@@ -1,4 +1,6 @@
-﻿#*------v export-ISEBreakPoints.ps1 v------
+﻿# export-ISEBreakPoints.ps1 
+
+#*------v export-ISEBreakPoints.ps1 v------
 function export-ISEBreakPoints {
     <#
     .SYNOPSIS
@@ -15,6 +17,7 @@ function export-ISEBreakPoints {
     Github      : https://github.com/tostka
     Tags        : Powershell,ISE,development,debugging
     REVISIONS
+    * 2:35 PM 5/24/2023 add: prompt for force deletion of existing .xml if no psbreakpoints defined in loaded ISE copy for script.
     * 10:20 AM 5/11/2022 added whatif support; updated CBH ; expanded echos; cleanedup
     * 8:58 AM 5/9/2022 add: test for bps before exporting
     * 12:56 PM 8/25/2020 fixed typo in 1.0.0 ; init, added to verb-dev module
@@ -90,8 +93,19 @@ function export-ISEBreakPoints {
                 $smsg = "$(($xBPs|measure).count) Breakpoints exported to $xFname`n$(($xBPs|sort line|ft -a Line,Script|out-string).trim())" ;
                 if($whatif){$smsg = "-whatif:$($smsg)" };
                 write-host $smsg ; 
+            }elseif(test-path $xfname){
+                $smsg = "$($tScript): has *no* Breakpoints set," 
+                $smsg += "`n`tbut PREVIOUS file EXISTS!" ; 
+                $smsg += "`nDo you want to DELETE/OVERWRITE the existing file? " ; 
+                write-host -foregroundcolor YELLOW "$((get-date).ToString('HH:mm:ss')):$($smsg)"  ;
+                $bRet=Read-Host "Enter YYY to continue. Anything else will exit"  ; 
+                if ($bRet.ToUpper() -eq "YYY") {
+                    remove-item -path $xFname -verbose -whatif:$($whatif); 
+                } else { 
+                    write-host "(invalid response, skipping .xml file purge)" ; 
+                } ; 
             } else {
-                write-warning "$($tScript): has *no* Breakpoints set!" ; 
+                write-warning "$($tScript): has *no* Breakpoints set!`n(an no existing .xml exists: No Action)" ; 
             }
         } else {  write-warning "This script only functions within PS ISE, with a script file open for editing" };
     } # PROC-E
