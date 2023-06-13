@@ -5,7 +5,7 @@
 .SYNOPSIS
 VERB-dev - Development PS Module-related generic functions
 .NOTES
-Version     : 1.5.21
+Version     : 1.5.22
 Author      : Todd Kadrie
 Website     :	https://www.toddomation.com
 Twitter     :	@tostka
@@ -3762,6 +3762,7 @@ function export-ISEBreakPoints {
     Github      : https://github.com/tostka
     Tags        : Powershell,ISE,development,debugging
     REVISIONS
+    * 2:35 PM 5/24/2023 add: prompt for force deletion of existing .xml if no psbreakpoints defined in loaded ISE copy for script.
     * 10:20 AM 5/11/2022 added whatif support; updated CBH ; expanded echos; cleanedup
     * 8:58 AM 5/9/2022 add: test for bps before exporting
     * 12:56 PM 8/25/2020 fixed typo in 1.0.0 ; init, added to verb-dev module
@@ -3837,8 +3838,19 @@ function export-ISEBreakPoints {
                 $smsg = "$(($xBPs|measure).count) Breakpoints exported to $xFname`n$(($xBPs|sort line|ft -a Line,Script|out-string).trim())" ;
                 if($whatif){$smsg = "-whatif:$($smsg)" };
                 write-host $smsg ; 
+            }elseif(test-path $xfname){
+                $smsg = "$($tScript): has *no* Breakpoints set," 
+                $smsg += "`n`tbut PREVIOUS file EXISTS!" ; 
+                $smsg += "`nDo you want to DELETE/OVERWRITE the existing file? " ; 
+                write-host -foregroundcolor YELLOW "$((get-date).ToString('HH:mm:ss')):$($smsg)"  ;
+                $bRet=Read-Host "Enter YYY to continue. Anything else will exit"  ; 
+                if ($bRet.ToUpper() -eq "YYY") {
+                    remove-item -path $xFname -verbose -whatif:$($whatif); 
+                } else { 
+                    write-host "(invalid response, skipping .xml file purge)" ; 
+                } ; 
             } else {
-                write-warning "$($tScript): has *no* Breakpoints set!" ; 
+                write-warning "$($tScript): has *no* Breakpoints set!`n(an no existing .xml exists: No Action)" ; 
             }
         } else {  write-warning "This script only functions within PS ISE, with a script file open for editing" };
     } # PROC-E
@@ -5544,7 +5556,7 @@ function get-VersionInfo {
     * 9:36 AM 12/30/2019 added CBH .INPUTS & OUTPUTS, including description of the hashtable of key/value pairs returned, for existing CBH .NOTES block
     * added explicit -path param to get-help
     * 8:39 PM 11/21/2019 added test for returned get-help
-    * 8:27 AM 11.5.2119 Todd rework: Added Path param, parsed to REVISIONS: block, & return the top rev as LastRevision key in returned object.
+    * 8:27 AM 11/5/2019 Todd rework: Added Path param, parsed to REVISIONS: block, & return the top rev as LastRevision key in returned object.
     * 02/07/2019 Posted version
     .DESCRIPTION
     get-VersionInfo.ps1 - Extract comment-help .NOTES block into a hashtable, key-value split on colons, to provide portable metadata (for New/Update-ScriptFileInfo inputs).
@@ -10387,8 +10399,8 @@ Export-ModuleMember -Function backup-ModuleBuild,check-PsLocalRepoRegistration,c
 # SIG # Begin signature block
 # MIIELgYJKoZIhvcNAQcCoIIEHzCCBBsCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUki7W3P38k5V9lwI4r2VgKrHq
-# enOgggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUPRF2INpxFlAXVzCRRCTfL0gQ
+# vqagggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
 # MCwxKjAoBgNVBAMTIVBvd2VyU2hlbGwgTG9jYWwgQ2VydGlmaWNhdGUgUm9vdDAe
 # Fw0xNDEyMjkxNzA3MzNaFw0zOTEyMzEyMzU5NTlaMBUxEzARBgNVBAMTClRvZGRT
 # ZWxmSUkwgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBALqRVt7uNweTkZZ+16QG
@@ -10403,9 +10415,9 @@ Export-ModuleMember -Function backup-ModuleBuild,check-PsLocalRepoRegistration,c
 # AWAwggFcAgEBMEAwLDEqMCgGA1UEAxMhUG93ZXJTaGVsbCBMb2NhbCBDZXJ0aWZp
 # Y2F0ZSBSb290AhBaydK0VS5IhU1Hy6E1KUTpMAkGBSsOAwIaBQCgeDAYBgorBgEE
 # AYI3AgEMMQowCKACgAChAoAAMBkGCSqGSIb3DQEJAzEMBgorBgEEAYI3AgEEMBwG
-# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBQn8lPI
-# pGq1vhwUK67Wrn2EqY/0pDANBgkqhkiG9w0BAQEFAASBgJ+vN8X9efWlaX8iAeLf
-# wCU8px2sW7JyBKiJ9stuivKOlinBqbOeg5Y4Jt++E+kkF6CSlCq7cgUT+FFK0BMp
-# C2zf7H32Uw5RI80oOgFMTAx7h7AV9CcxIg4SQ5N/0qMBbwtpNtCNjJ7s487vNXdO
-# y+/beNaZwE8i6+bPqowSJpIn
+# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBTp8wGD
+# CpOe60+YNcFgLVUjSK2qozANBgkqhkiG9w0BAQEFAASBgB16joeLwC6sWcgExcfb
+# QY4UG3r7Xr1iZZRyJwTmYwMg0aJQ14sdacnVvh0XJt3Ls3l9He1I+6JhTYElXhT7
+# iwZ8iL2OiR5R7nFzQ79vfRUGkmhyUstMP5iC2+1ceA7mgxnw1Yw3/c4RP+v0qbSz
+# Nd5y8TuSI5+yjt6Z1Zu33LHt
 # SIG # End signature block
