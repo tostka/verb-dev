@@ -5,7 +5,7 @@
 .SYNOPSIS
 VERB-dev - Development PS Module-related generic functions
 .NOTES
-Version     : 1.5.19
+Version     : 1.5.22
 Author      : Todd Kadrie
 Website     :	https://www.toddomation.com
 Twitter     :	@tostka
@@ -3762,6 +3762,7 @@ function export-ISEBreakPoints {
     Github      : https://github.com/tostka
     Tags        : Powershell,ISE,development,debugging
     REVISIONS
+    * 2:35 PM 5/24/2023 add: prompt for force deletion of existing .xml if no psbreakpoints defined in loaded ISE copy for script.
     * 10:20 AM 5/11/2022 added whatif support; updated CBH ; expanded echos; cleanedup
     * 8:58 AM 5/9/2022 add: test for bps before exporting
     * 12:56 PM 8/25/2020 fixed typo in 1.0.0 ; init, added to verb-dev module
@@ -3837,8 +3838,19 @@ function export-ISEBreakPoints {
                 $smsg = "$(($xBPs|measure).count) Breakpoints exported to $xFname`n$(($xBPs|sort line|ft -a Line,Script|out-string).trim())" ;
                 if($whatif){$smsg = "-whatif:$($smsg)" };
                 write-host $smsg ; 
+            }elseif(test-path $xfname){
+                $smsg = "$($tScript): has *no* Breakpoints set," 
+                $smsg += "`n`tbut PREVIOUS file EXISTS!" ; 
+                $smsg += "`nDo you want to DELETE/OVERWRITE the existing file? " ; 
+                write-host -foregroundcolor YELLOW "$((get-date).ToString('HH:mm:ss')):$($smsg)"  ;
+                $bRet=Read-Host "Enter YYY to continue. Anything else will exit"  ; 
+                if ($bRet.ToUpper() -eq "YYY") {
+                    remove-item -path $xFname -verbose -whatif:$($whatif); 
+                } else { 
+                    write-host "(invalid response, skipping .xml file purge)" ; 
+                } ; 
             } else {
-                write-warning "$($tScript): has *no* Breakpoints set!" ; 
+                write-warning "$($tScript): has *no* Breakpoints set!`n(an no existing .xml exists: No Action)" ; 
             }
         } else {  write-warning "This script only functions within PS ISE, with a script file open for editing" };
     } # PROC-E
@@ -4776,6 +4788,7 @@ function get-ISEOpenFilesExported {
     Github      : https://github.com/tostka/verb-dev
     Tags        : Powershell,ISE,development,debugging
     REVISIONS
+    * 1:55 PM 3/29/2023 flipped alias (clashed) iIseOpen -> gIseOpen
     * 8:51 AM 3/8/2023 init
     .DESCRIPTION
     get-ISEOpenFilesExported - List CU profile .\Documents\WindowsPowerShell\Scripts\*.psXML files, reflecting prior exports via export-ISEOpenFiles, as targets for import via import-ISEOpenFiles
@@ -4795,7 +4808,7 @@ function get-ISEOpenFilesExported {
     https://github.com/tostka/verb-dev
     #>
     [CmdletBinding()]
-    [Alias('iIseOpen')]
+    [Alias('gIseOpen')]
     PARAM(
         [Parameter(Position=0,HelpMessage="Optional Tag to check for, within prior-export filename[-Tag MFA]")]
         [string]$Tag
@@ -5906,6 +5919,7 @@ function import-ISEOpenFiles {
     Github      : https://github.com/tostka/verb-dev
     Tags        : Powershell,ISE,development,debugging
     REVISIONS
+    * 1:20 PM 3/27/2023 bugfix: coerce $txmlf into [system.io.fileinfo], to make it match $fileinfo's type.
     * 9:35 AM 3/8/2023 added -filepath (with pipeline support), explicit pathed file support (to pipeline in from get-IseOpenFilesExported()).
     * 3:28 PM 6/23/2022 add -Tag param to permit running interger-suffixed variants (ie. mult ise sessions open & stored from same desktop). 
     * 9:19 AM 5/20/2022 add: iIseOpen alias (using these a lot lately; w freq crashouts of ise, and need to recover all files open & BPs to quickly get back to function)
@@ -5947,9 +5961,9 @@ function import-ISEOpenFiles {
                 #$AllUsrsScripts = "$($env:ProgramFiles)\WindowsPowerShell\Scripts" ;
                 $CUScripts = "$([Environment]::GetFolderPath('MyDocuments'))\WindowsPowershell\Scripts" ;
                 if($Tag){
-                    [array]$txmlf = @(join-path -path $CUScripts -ChildPath "ISESavedSession-$($Tag).psXML") ;
+                    [array]$txmlf = @( [system.io.fileinfo](join-path -path $CUScripts -ChildPath "ISESavedSession-$($Tag).psXML") ) ;
                 } else { 
-                    [array]$txmlf = @(join-path -path $CUScripts -ChildPath 'ISESavedSession.psXML') ;
+                    [array]$txmlf = @( [system.io.fileinfo](join-path -path $CUScripts -ChildPath 'ISESavedSession.psXML') ) ;
                 } ; 
                 #$allISEScripts = $psise.powershelltabs.files.fullpath ;
             } else { 
@@ -6000,6 +6014,10 @@ function import-ISEOpenFiles {
                 $ErrTrapd=$Error[0] ;
                 $smsg = "$('*'*5)`nFailed processing $($ErrTrapd.Exception.ItemName). `nError Message: $($ErrTrapd.Exception.Message)`nError Details: `n$(($ErrTrapd|out-string).trim())`n$('-'*5)" ;
                 write-warning $smsg ;
+                $smsg = $ErrTrapd.Exception.Message ;
+                if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN }
+                else{ write-WARNING $smsg } ;
+                BREAK ;
                 Continue ; #Opts: STOP(debug)|EXIT(close)|CONTINUE(move on in loop cycle)|BREAK(exit loop iteration)|THROW $_/'CustomMsg'(end script with Err output)
             } ;
         } else {  write-warning "This script only functions within PS ISE, with a script file open for editing" };
@@ -10381,8 +10399,8 @@ Export-ModuleMember -Function backup-ModuleBuild,check-PsLocalRepoRegistration,c
 # SIG # Begin signature block
 # MIIELgYJKoZIhvcNAQcCoIIEHzCCBBsCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUVC8RGaAX0/x8e3AcTGtYR1XG
-# HHOgggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUPRF2INpxFlAXVzCRRCTfL0gQ
+# vqagggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
 # MCwxKjAoBgNVBAMTIVBvd2VyU2hlbGwgTG9jYWwgQ2VydGlmaWNhdGUgUm9vdDAe
 # Fw0xNDEyMjkxNzA3MzNaFw0zOTEyMzEyMzU5NTlaMBUxEzARBgNVBAMTClRvZGRT
 # ZWxmSUkwgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBALqRVt7uNweTkZZ+16QG
@@ -10397,9 +10415,9 @@ Export-ModuleMember -Function backup-ModuleBuild,check-PsLocalRepoRegistration,c
 # AWAwggFcAgEBMEAwLDEqMCgGA1UEAxMhUG93ZXJTaGVsbCBMb2NhbCBDZXJ0aWZp
 # Y2F0ZSBSb290AhBaydK0VS5IhU1Hy6E1KUTpMAkGBSsOAwIaBQCgeDAYBgorBgEE
 # AYI3AgEMMQowCKACgAChAoAAMBkGCSqGSIb3DQEJAzEMBgorBgEEAYI3AgEEMBwG
-# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBRjROZV
-# rkqQGAh9npC26OO4l1+2mjANBgkqhkiG9w0BAQEFAASBgHqIjQ8Tu7LCBzHwrKsm
-# tEoZ6SDhqrIhGx0EkunvmTyQ11sTD1/AJscawWRU5zo/oxhGo4IVn/H93RBR9avX
-# FuiLeQ2h1e2yVh9YVeXkSwamOjgSzwcJ5O/aeY1K2rySjGyjaawe1BEoWJtLB481
-# mirihmDT48tOYmGooxvNPvda
+# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBTp8wGD
+# CpOe60+YNcFgLVUjSK2qozANBgkqhkiG9w0BAQEFAASBgB16joeLwC6sWcgExcfb
+# QY4UG3r7Xr1iZZRyJwTmYwMg0aJQ14sdacnVvh0XJt3Ls3l9He1I+6JhTYElXhT7
+# iwZ8iL2OiR5R7nFzQ79vfRUGkmhyUstMP5iC2+1ceA7mgxnw1Yw3/c4RP+v0qbSz
+# Nd5y8TuSI5+yjt6Z1Zu33LHt
 # SIG # End signature block

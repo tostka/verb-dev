@@ -15,6 +15,7 @@ function update-NewModule {
     Github      : https://github.com/tostka/verb-dev
     Tags        : Powershell,Module,Build,Development
     REVISIONS
+    # 3:03 PM 6/22/2023 #361: splice in better error-handling fail through code from psb-psparamt ($budrv covers for empty referrals)
     * 1:46 PM 3/22/2023 #1212:Publish-Module throws error if repo.SourceLocation isn't testable (when vpn is down), test and throw prescriptive error (otherwise is obtuse); expanded catch's they were coming up blank
     * 11:20 AM 12/12/2022 completely purged rem'd require stmts, confusing, when they echo in build..., ,verb-IO, verb-logging, verb-Mods, verb-Text
     * 3:10 PM 9/7/2022 ren & alias orig name (verb compliance): process-NewModule -> update-NewModule
@@ -357,14 +358,15 @@ function update-NewModule {
     } ;
     $pltSL=[ordered]@{Path=$null ;NoTimeStamp=$false ;Tag=$null ;showdebug=$($showdebug) ; Verbose=$($VerbosePreference -eq 'Continue') ; whatif=$($whatif) ;} ;
     $pltSL.Tag = $ModuleName ;
+    # 3:03 PM 6/22/2023 #361: splice in better error-handling fail through code from psb-psparamt ($budrv covers for empty referrals)
     if($script:PSCommandPath){
         if(($script:PSCommandPath -match $rgxPSAllUsersScope) -OR ($script:PSCommandPath -match $rgxPSCurrUserScope)){
-            $bDivertLog = $true ;
+            $bDivertLog = $true ; 
             switch -regex ($script:PSCommandPath){
-                $rgxPSAllUsersScope{$smsg = "AllUsers"}
+                $rgxPSAllUsersScope{$smsg = "AllUsers"} 
                 $rgxPSCurrUserScope{$smsg = "CurrentUser"}
             } ;
-            $smsg += " context script/module, divert logging into [$budrv]:\scripts"
+            $smsg += " context script/module, divert logging into [$budrv]:\scripts" 
             write-verbose $smsg  ;
             if($bDivertLog){
                 if((split-path $script:PSCommandPath -leaf) -ne $cmdletname){
@@ -381,11 +383,18 @@ function update-NewModule {
     } else {
         if(($MyInvocation.MyCommand.Definition -match $rgxPSAllUsersScope) -OR ($MyInvocation.MyCommand.Definition -match $rgxPSCurrUserScope) ){
              $pltSL.Path = (join-path -Path "$($budrv):\scripts" -ChildPath (split-path $script:PSCommandPath -leaf)) ;
-        } else {
+        } elseif(test-path $MyInvocation.MyCommand.Definition) {
             $pltSL.Path = $MyInvocation.MyCommand.Definition ;
-        } ;
+        } elseif($cmdletname){
+            $pltSL.Path = (join-path -Path "$($budrv):\scripts" -ChildPath "$($cmdletname).ps1") ;
+        } else {
+            $smsg = "UNABLE TO RESOLVE A FUNCTIONAL `$CMDLETNAME, FROM WHICH TO BUILD A START-LOG.PATH!" ; 
+            if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Warn } #Error|Warn|Debug 
+            else{ write-WARNING "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+            BREAK ;
+        } ; 
     } ;
-    write-verbose "start-Log w`n$(($pltSL|out-string).trim())" ;
+    write-verbose "start-Log w`n$(($pltSL|out-string).trim())" ; 
     $logspec = start-Log @pltSL ;
     $error.clear() ;
     TRY {
