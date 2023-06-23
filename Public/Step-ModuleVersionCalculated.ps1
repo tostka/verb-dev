@@ -23,6 +23,7 @@ function Step-ModuleVersionCalculated {
     AddedWebsite: www.thesurlyadmin.com
     AddedTwitter: @thesurlyadm1n
     REVISIONS
+    * 8:02 AM 6/23/2023 fix: #433: # 2:20 PM 6/22/2023 if you're going to use a param with boolean, they have to be colon'd: -PassThru:$true (built into v1.5.26)
     * 2:18 PM 6/2/2023 added: Try/Catch around all critical items; added test for .psm1 diverge <<<<<< HEAD tags; expanded ipmo -fo -verb tests to include ErrorVariable and Passthru, capture into variable, for info tracking down compile fails.
     * 11:20 AM 12/12/2022 completely purged verb-* require stmts too risky w recursive load triggers:,verb-IO, verb-logging, verb-Mods, verb-Text
     * 3:57 PM 5/26/2022 backstop profile rgxs ; implment pre-cache & post-reload of installed modules ; 
