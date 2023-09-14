@@ -16,6 +16,7 @@ function get-ISEOpenFilesExported {
     Github      : https://github.com/tostka/verb-dev
     Tags        : Powershell,ISE,development,debugging
     REVISIONS
+    * 9:24 AM 9/14/2023 CBH add:demo of pulling lastwritetime and using to make automatd decisions, or comparison reporting (as this returns a fullname, not a file object)
     * 1:55 PM 3/29/2023 flipped alias (clashed) iIseOpen -> gIseOpen
     * 8:51 AM 3/8/2023 init
     .DESCRIPTION
@@ -32,6 +33,12 @@ function get-ISEOpenFilesExported {
     .EXAMPLE
     PS> get-ISEOpenFilesExported -Tag MFA | import-ISEOpenFiles ; 
     Example pipelining the outputs into import-ISEOPenFiles() (via pipeline support for it's -FilePath param)
+    .EXAMPLE
+    PS> get-ISEOpenFilesExported | %{gci $_} | sort LastWriteTime | ft -a fullname,lastwritetime ; 
+    Example finding the 'latest' (newest LastWritTime) and echoing for review
+    .EXAMPLE
+    get-ISEOpenFilesExported | %{gci $_} | sort LastWriteTime | select -last 1 | select -expand fullname | import-ISEOpenFiles ; 
+    Example finding the 'latest' (newest LastWritTime), and then importing into ISE.
     .LINK
     https://github.com/tostka/verb-dev
     #>
