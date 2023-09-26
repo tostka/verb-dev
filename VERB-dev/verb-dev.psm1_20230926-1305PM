@@ -5,7 +5,7 @@
 .SYNOPSIS
 VERB-dev - Development PS Module-related generic functions
 .NOTES
-Version     : 1.5.20
+Version     : 1.5.26
 Author      : Todd Kadrie
 Website     :	https://www.toddomation.com
 Twitter     :	@tostka
@@ -3762,6 +3762,7 @@ function export-ISEBreakPoints {
     Github      : https://github.com/tostka
     Tags        : Powershell,ISE,development,debugging
     REVISIONS
+    * 2:35 PM 5/24/2023 add: prompt for force deletion of existing .xml if no psbreakpoints defined in loaded ISE copy for script.
     * 10:20 AM 5/11/2022 added whatif support; updated CBH ; expanded echos; cleanedup
     * 8:58 AM 5/9/2022 add: test for bps before exporting
     * 12:56 PM 8/25/2020 fixed typo in 1.0.0 ; init, added to verb-dev module
@@ -3837,8 +3838,19 @@ function export-ISEBreakPoints {
                 $smsg = "$(($xBPs|measure).count) Breakpoints exported to $xFname`n$(($xBPs|sort line|ft -a Line,Script|out-string).trim())" ;
                 if($whatif){$smsg = "-whatif:$($smsg)" };
                 write-host $smsg ; 
+            }elseif(test-path $xfname){
+                $smsg = "$($tScript): has *no* Breakpoints set," 
+                $smsg += "`n`tbut PREVIOUS file EXISTS!" ; 
+                $smsg += "`nDo you want to DELETE/OVERWRITE the existing file? " ; 
+                write-host -foregroundcolor YELLOW "$((get-date).ToString('HH:mm:ss')):$($smsg)"  ;
+                $bRet=Read-Host "Enter YYY to continue. Anything else will exit"  ; 
+                if ($bRet.ToUpper() -eq "YYY") {
+                    remove-item -path $xFname -verbose -whatif:$($whatif); 
+                } else { 
+                    write-host "(invalid response, skipping .xml file purge)" ; 
+                } ; 
             } else {
-                write-warning "$($tScript): has *no* Breakpoints set!" ; 
+                write-warning "$($tScript): has *no* Breakpoints set!`n(an no existing .xml exists: No Action)" ; 
             }
         } else {  write-warning "This script only functions within PS ISE, with a script file open for editing" };
     } # PROC-E
@@ -4776,6 +4788,7 @@ function get-ISEOpenFilesExported {
     Github      : https://github.com/tostka/verb-dev
     Tags        : Powershell,ISE,development,debugging
     REVISIONS
+    * 1:55 PM 3/29/2023 flipped alias (clashed) iIseOpen -> gIseOpen
     * 8:51 AM 3/8/2023 init
     .DESCRIPTION
     get-ISEOpenFilesExported - List CU profile .\Documents\WindowsPowerShell\Scripts\*.psXML files, reflecting prior exports via export-ISEOpenFiles, as targets for import via import-ISEOpenFiles
@@ -4795,7 +4808,7 @@ function get-ISEOpenFilesExported {
     https://github.com/tostka/verb-dev
     #>
     [CmdletBinding()]
-    [Alias('iIseOpen')]
+    [Alias('gIseOpen')]
     PARAM(
         [Parameter(Position=0,HelpMessage="Optional Tag to check for, within prior-export filename[-Tag MFA]")]
         [string]$Tag
@@ -5890,77 +5903,128 @@ Function import-ISEConsoleColors {
 
 
 #*------v import-ISEOpenFiles.ps1 v------
-Function Wait-AADSync {
+function import-ISEOpenFiles {
     <#
     .SYNOPSIS
-    Wait-AADSync - Dawdle loop for notifying on next AzureAD sync (AzureAD/MSOL)
+    import-ISEOpenFiles - Import/Re-Open a list of all ISE tab files, from CU Documents\WindowsPowershell\Scripts\ISESavedSession.psXML file
     .NOTES
     Version     : 1.0.0
     Author      : Todd Kadrie
-    Website     :	http://www.toddomation.com
-    Twitter     :	@tostka / http://twitter.com/tostka
-    CreatedDate : 2020-01-12
-    FileName    : Wait-AADSync.ps1
+    Website     : http://www.toddomation.com
+    Twitter     : @tostka / http://twitter.com/tostka
+    CreatedDate : 2022-05-11
+    FileName    : import-ISEOpenFiles
     License     : MIT License
-    Copyright   : (c) 2020 Todd Kadrie
-    Github      : https://github.com/tostka
-    Tags        : Powershell
-    Updated By: : Todd Kadrie
-    REVISIONS   :
-    * 2:05 PM 12/13/2022 recoded for AzureAD backend (with msol deprecated; shouldn't have used aad in the name, initially, with msol as the backend).
-    * 4:22 PM 7/24/2020 added verbose
-    * 12:14 PM 5/27/2020 moved alias:wait-msolsync win the func
-    * 10:27 AM 2/25/2020 bumped polling interval to 30s
-    * 8:50 PM 1/12/2020 expanded aliases
-    * 11:38 AM 5/6/2019 moved from tsksid-incl-ServerApp.ps1
-    * 9:53 AM 3/1/2019 init vers, repl'd native cmsolsvc with Connect-AAD
+    Copyright   : (c) 2022 Todd Kadrie
+    Github      : https://github.com/tostka/verb-dev
+    Tags        : Powershell,ISE,development,debugging
+    REVISIONS
+    * 1:20 PM 3/27/2023 bugfix: coerce $txmlf into [system.io.fileinfo], to make it match $fileinfo's type.
+    * 9:35 AM 3/8/2023 added -filepath (with pipeline support), explicit pathed file support (to pipeline in from get-IseOpenFilesExported()).
+    * 3:28 PM 6/23/2022 add -Tag param to permit running interger-suffixed variants (ie. mult ise sessions open & stored from same desktop). 
+    * 9:19 AM 5/20/2022 add: iIseOpen alias (using these a lot lately; w freq crashouts of ise, and need to recover all files open & BPs to quickly get back to function)
+    * 12:12 PM 5/11/2022 init
     .DESCRIPTION
-    Wait-AADSync - Collect last AD-AAD sync (AzureAD/MSOL)
-    .PARAMETER Credential
-    Credential to be used for connection
-    .INPUTS
-    None. Does not accepted piped input.
-    .OUTPUTS
-    Returns an object with LastDirSyncTime, expressed as TimeGMT & TimeLocal
+    import-ISEOpenFiles - Import/Re-Open a list of all ISE tab files, from CU Documents\WindowsPowershell\Scripts\ISESavedSession.psXML file
+    Quick bulk dump, when ISE ineveitbly stops properly echo'ing variable values to terminal (and need to close and re-open all open files)
+    .PARAMETER Tag
+    Optional Tag to apply to as filename suffix[-tag 'label']
+    .PARAMETER FilePath
+    Optional FullName path to prior export-ISEOpenFiles pass[-FilePath `$env:userprofile\Documents\WindowsPowershell\Scripts\ISESavedSession-DEV.psXML
     .EXAMPLE
-    Wait-AADSync
+    PS> import-ISEOpenFiles -verbose
+    Export all 'line'-type breakpoints on all current open ISE tabs, to a matching xml file, with verbose output, and whatif
+    .EXAMPLE
+    PS> import-ISEOpenFiles -Tag 2 -verbose  
+    Export with Tag '2' applied to filename (e.g. "ISESavedSession2.psXML")
     .LINK
+    https://github.com/tostka/verb-dev
     #>
     [CmdletBinding()]
-    [Alias('Wait-MSolSync')]
-    Param([Parameter()]$Credential = $global:credo365TORSID) ;
-    $verbose = ($VerbosePreference -eq "Continue") ; 
-    <# MSOL original
-    try { Get-MsolAccountSku -ErrorAction Stop | out-null }
-    catch [Microsoft.Online.Administration.Automation.MicrosoftOnlineException] {
-        "Not connected to MSOnline. Now connecting." ;
-        Connect-AAD ;
-    } ;
-    $DirSyncLast = (Get-MsolCompanyInformation).LastDirSyncTime ;
-    write-host -foregroundcolor yellow "$((get-date).ToString('HH:mm:ss')):Waiting for next AAD Dirsync:`n(prior:$($DirSyncLast.ToLocalTime()))`n[" ;
-    Do { Connect-AAD  ; write-host "." -NoNewLine ; Start-Sleep -m (1000 * 30) ; Connect-MSOL } Until ((Get-MsolCompanyInformation).LastDirSyncTime -ne $DirSyncLast) ;
-    write-host -foregroundcolor yellow "]`n$((get-date).ToString('HH:mm:ss')):AD->AAD REPLICATED!" ;
-    write-host "`a" ; write-host "`a" ; write-host "`a" ;
-    #>
-    
-    try { $AADTenDtl = Get-AzureADTenantDetail -ErrorAction Stop } # authenticated to "a" tenant
-    catch { 
-        write-host "(Not connected to AzureAD. Now connecting)" ;
-        Connect-AAD ;
-        $AADTenDtl = Get-AzureADTenantDetail -ErrorAction Stop ; 
-    } ;
-    $DirSyncLast = $AADTenDtl.CompanyLastDirSyncTime ; 
-    write-host -foregroundcolor yellow "$((get-date).ToString('HH:mm:ss')):Waiting for next AAD Dirsync:`n(prior:$($DirSyncLast.ToLocalTime()))`n[" ;
+    [Alias('iIseOpen')]
+    PARAM(
+        [Parameter(Position=0,HelpMessage="Optional Tag to apply to filename[-Tag MFA]")]
+        [string]$Tag,
+        [Parameter(ValueFromPipeline = $True, HelpMessage="Optional FullName path to prior export-ISEOpenFiles pass[-FilePath `$env:userprofile\Documents\WindowsPowershell\Scripts\ISESavedSession-DEV.psXML]")]
+        [system.io.fileinfo[]]$FilePath 
+    ) ;
 
-    Do { 
-        Connect-AAD -silent  ;
-        write-host "." -NoNewLine ;
-        Start-Sleep -m (1000 * 30) ;
-    } Until ((Get-AzureADTenantDetail).CompanyLastDirSyncTime -ne $DirSyncLast) ;
-    write-host -foregroundcolor yellow "]`n$((get-date).ToString('HH:mm:ss')):AD->AAD REPLICATED!" ;
-    write-host "`a" ;
-    write-host "`a" ;
-    write-host "`a" ;
+    BEGIN {
+        ${CmdletName} = $PSCmdlet.MyInvocation.MyCommand.Name ;
+        $verbose = $($VerbosePreference -eq "Continue")
+        $sBnr="#*======v $($CmdletName): v======" ;
+        write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($sBnr)" ;
+    }
+    PROCESS {
+        if ($psise){
+            if(-not $FilePath){
+                #$AllUsrsScripts = "$($env:ProgramFiles)\WindowsPowerShell\Scripts" ;
+                $CUScripts = "$([Environment]::GetFolderPath('MyDocuments'))\WindowsPowershell\Scripts" ;
+                if($Tag){
+                    [array]$txmlf = @( [system.io.fileinfo](join-path -path $CUScripts -ChildPath "ISESavedSession-$($Tag).psXML") ) ;
+                } else { 
+                    [array]$txmlf = @( [system.io.fileinfo](join-path -path $CUScripts -ChildPath 'ISESavedSession.psXML') ) ;
+                } ; 
+                #$allISEScripts = $psise.powershelltabs.files.fullpath ;
+            } else { 
+                foreach($item in $FilePath){
+                    [array]$txmlf = @() ; 
+                    if($txmlf += @(get-childitem -path $item.fullname -ea continue)){
+                        $smsg = "(found specified -FilePath file)" ; 
+                        if($verbose){if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level VERBOSE } 
+                        else{ write-verbose "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; } ; 
+                    } else { 
+                        $smsg = "Unable to locate specified -FilePath:" ; 
+                        $smsg += "`n$($item.fullname)" ; 
+                        if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN -Indent} 
+                        else{ write-WARNING "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; 
+                    } ; 
+                } ; 
+            } ; 
+            $error.clear() ;
+            TRY {
+                foreach($file in $txmlf){
+                    $smsg = "==$($file.fullname)" ; 
+                    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } 
+                    else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                    #Levels:Error|Warn|Info|H1|H2|H3|H4|H5|Debug|Verbose|Prompt|Success
+                    $allISEScripts = import-Clixml -Path $file.fullname ;
+                    $smsg = "Opening $($allISEScripts| measure | select -expand count) files" ; 
+                    write-verbose $smsg ; 
+                    if($allISEScripts){
+                        foreach($ISES in $allISEScripts){
+                            if($psise.powershelltabs.files.fullpath -contains $ISES){
+                                write-host "($ISES) is already OPEN in Current ISE tab list (skipping)" ;
+                            } else {
+                                if(test-path $ISES){
+                                    <# #New tab & open in new tab: - no we want them all in one tab
+                                    write-verbose "(adding tab, opening:$($ISES))"
+                                    $tab = $psISE.PowerShellTabs.Add() ;
+                                    $tab.Files.Add($ISES) ;
+                                    #>
+                                    #open in current tab
+                                    write-verbose "(opening:$($ISES))"
+                                    $psISE.CurrentPowerShellTab.Files.Add($ISES) ;  ;
+                                } else {  write-warning "Unable to Open missing orig file:`n$($ISES)" };
+                            } ;
+                        }; # loop-E
+                    } ; 
+                } ; 
+            } CATCH {
+                $ErrTrapd=$Error[0] ;
+                $smsg = "$('*'*5)`nFailed processing $($ErrTrapd.Exception.ItemName). `nError Message: $($ErrTrapd.Exception.Message)`nError Details: `n$(($ErrTrapd|out-string).trim())`n$('-'*5)" ;
+                write-warning $smsg ;
+                $smsg = $ErrTrapd.Exception.Message ;
+                if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN }
+                else{ write-WARNING $smsg } ;
+                BREAK ;
+                Continue ; #Opts: STOP(debug)|EXIT(close)|CONTINUE(move on in loop cycle)|BREAK(exit loop iteration)|THROW $_/'CustomMsg'(end script with Err output)
+            } ;
+        } else {  write-warning "This script only functions within PS ISE, with a script file open for editing" };
+    } # PROC-E
+    END{
+        write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($sBnr.replace('=v','=^').replace('v=','^='))" ;
+    }
 }
 
 #*------^ import-ISEOpenFiles.ps1 ^------
@@ -7569,6 +7633,7 @@ function Step-ModuleVersionCalculated {
     AddedWebsite: www.thesurlyadmin.com
     AddedTwitter: @thesurlyadm1n
     REVISIONS
+    * 2:18 PM 6/2/2023 added: Try/Catch around all critical items; added test for .psm1 diverge <<<<<< HEAD tags; expanded ipmo -fo -verb tests to include ErrorVariable and Passthru, capture into variable, for info tracking down compile fails.
     * 11:20 AM 12/12/2022 completely purged verb-* require stmts too risky w recursive load triggers:,verb-IO, verb-logging, verb-Mods, verb-Text
     * 3:57 PM 5/26/2022 backstop profile rgxs ; implment pre-cache & post-reload of installed modules ; 
         found can rmo the temp module ipmo, by targeting gmo | path, rather than common name (like verb-io). ; 
@@ -7710,6 +7775,9 @@ function Step-ModuleVersionCalculated {
         if(-not $rgxModsSystemScope){$rgxModsSystemScope = "^[A-Za-z]:\\Windows\\system32\\WindowsPowerShell\\v1\.0\\Modules\\" } ;
         if(-not $rgxPSAllUsersScopeDyn){$rgxPSAllUsersScopeDyn = "^C:\\Program\ Files\\((Windows)*)PowerShell\\(Scripts|Modules)\\.*\.(ps(((d|m))*)1|dll)$" ; } ;
         if(-not $rgxPSCurrUserScope ) {$rgxPSCurrUserScope = "^[A-Za-z]:\\Users\\\w*\\((OneDrive\s-\s.*\\)*)Documents\\((Windows)*)PowerShell\\(Scripts|Modules)\\.*\.(ps((d|m)*)1|dll)$" } ; 
+        $rgxRequireVersionLine = '(\s|^)#requires\s+-version\s' ;
+        $rgxRequireModNested = "(\s|^)#Requires\s+-Modules\s+.*,((\s)*)$($ModName)" ;  # added: either BOL or after a space
+        $rgxFuncDeclare = '(^|((\s)*))Function\s+[\w-_]+\s+((\(.*)*)\{' ;  # supports opt inline param syntax as well; and func names made from [A-Za-z0-9-_]chars
 
         if($whatif -AND -not $applyChange){
             $smsg = "You have specified -whatif, but have not also specified -applyChange" ; 
@@ -7719,12 +7787,12 @@ function Step-ModuleVersionCalculated {
         } ; 
         
         # add filter for BOL or \s lead, drop the ##-rem'd lines
-        $rgxRequireVersionLine = '(\s|^)#requires\s+-version\s' ;
+        #$rgxRequireVersionLine = '(\s|^)#requires\s+-version\s' ;
         # also should check for nested recursion - ensure the Module isn't in any #requires\s-module
         # '((\s)*)#Requires\s+-Modules\s+.*,((\s)*)verb-exo' ; # module name
         # $Path will be c:\sc\verb-exo ; split-path c:\sc\verb-exo -leaf gets you the modulename back
         $ModName = split-path -Path $path -leaf ; 
-        $rgxRequireModNested = "(\s|^)#Requires\s+-Modules\s+.*,((\s)*)$($ModName)" ;  # added: either BOL or after a space
+        #$rgxRequireModNested = "(\s|^)#Requires\s+-Modules\s+.*,((\s)*)$($ModName)" ;  # added: either BOL or after a space
         $ASTMatchThreshold = .8 ; # gcm must be w/in 80% of AST functions count, or this forces a 'Build' revision, to patch bugs in get-command -module xxx, where it fails to return full func/alias list from the module
         # increment bump used with -MinVersionIncrementBump
         #$MinVersionIncrementBump = 'Build' # moved to a full param, to permit explicit build spec, using step-ModuleVersionCalculated - adds the followup testing etc this provides, wo the fingerprinting
@@ -7732,15 +7800,18 @@ function Step-ModuleVersionCalculated {
     } ;  # BEGIN-E
     PROCESS {
         $error.clear() ;
-        TRY {
-            $smsg = "profiling existing content..."
-            if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
-            elseif(-not $Silent){ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+        $smsg = "profiling existing content..."
+        if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
+        elseif(-not $Silent){ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
 
+        $error.clear() ;
+        TRY {
             $Path = $moddir = (Resolve-Path $Path).Path ; 
-            $moddirfiles = gci -path $path -recur 
+            $moddirfiles = get-childitem -path $path -recur 
             #-=-=-=-=-=-=-=-=
-            if(-not (gcm Get-PSModuleFile -ea 0)){
+                                                                                                                                                                                                                                                                        
+                                                                                                                                                                                                                                                                        
+            if(-not (get-command Get-PSModuleFile -ea 0)){
                 function Get-PSModuleFile {
                     [CmdletBinding()]
                     PARAM(
@@ -7809,13 +7880,23 @@ function Step-ModuleVersionCalculated {
 
             $psd1M = Get-PSModuleFile -path $Path -ext .psd1 -verbose:$($VerbosePreference -eq 'Continue');
             $psm1 = Get-PSModuleFile -path $Path -ext .psm1 -verbose:$($VerbosePreference -eq 'Continue' ); 
-            if ((split-path (split-path $psd1m) -leaf) -eq (gci $psd1m).basename){
+
+            if($diverged = get-childitem -path $psm1 | select-string -pattern '<<<<<<<\sHEAD'){
+                $smsg = "PSM1:$($PSM1)`nFOUND TO HAVE *DIVERGE* DAMAGE IN THE FILE!" ; 
+                $smsg += "`n$(($diverged | ft -a linenumber,line|out-string).trim())" ; 
+                $SMSG += "(if the diff has passed the source, restore the prior build's clean .psm1|psd1 & _TMPs, then reprocess)" ; 
+                if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN -Indent} 
+                else{ write-WARNING "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; 
+                BREAK ; 
+            } 
+
+            if ((split-path (split-path $psd1m) -leaf) -eq (get-childitem $psd1m).basename){
                 $ModuleName = split-path -leaf (split-path $psd1m) 
-            } else {throw "`$ModuleName:Unable to match psd1.Basename $((gci $psd1m).basename) to psd1.parentfolder.name $(split-path (split-path $psd1m) -leaf)" }  ;
+            } else {throw "`$ModuleName:Unable to match psd1.Basename $((get-childitem $psd1m).basename) to psd1.parentfolder.name $(split-path (split-path $psd1m) -leaf)" }  ;
         
             # check for incidental ipmo crasher: multiple #require -versions, pretest (everything to that point is fine, just won't ipmo, and catch returns zippo)
             # no, revise, it's multi-versions of -vers, not mult instances. Has to be a single version spec across entire .psm1 (and $moddir of source files)
-            if($PsFilesWVers = gci $moddir -include *.ps*1 -recur | sls -Pattern $rgxRequireVersionLine){
+            if($PsFilesWVers = get-childitem $moddir -include *.ps*1 -recur | sls -Pattern $rgxRequireVersionLine){
                 # only run if $PsFilesWVers populated
                 $profilePsFilesVersions = $PsFilesWVers.line | %{$_.trim()} | group ;
                 if($profilePsFilesVersions.count -gt 1){
@@ -7840,7 +7921,7 @@ function Step-ModuleVersionCalculated {
             } ; 
             #>
             # check for recursion call of the hosting module in subs: $rgxRequireModNested
-            if($PsFilesWNestedMod = gci $moddir -include *.ps*1 -recur | sls -Pattern $rgxRequireModNested){
+            if($PsFilesWNestedMod = get-childitem $moddir -include *.ps*1 -recur | sls -Pattern $rgxRequireModNested){
                 # only run if $PsFilesWNestedMod populated, and unique single entry of matches, trimmed
                 $profilePsFilesRecursive = $PsFilesWNestedMod.line | %{$_.trim()} | group ;
                 if($profilePsFilesRecursive.count -gt 0){
@@ -7861,7 +7942,21 @@ function Step-ModuleVersionCalculated {
                 } 
             } ; 
 
-
+        } CATCH {
+            $ErrTrapd=$Error[0] ;
+            $smsg = "$('*'*5)`nFailed processing $($ErrTrapd.Exception.ItemName). `nError Message: $($ErrTrapd.Exception.Message)`nError Details: `n$(($ErrTrapd|out-string).trim())`n$('-'*5)" ;
+            $smsg += "`n$($ErrTrapd.Exception.Message)" ;
+            if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN -Indent}
+            else{ write-WARNING "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+            #-=-record a STATUSWARN=-=-=-=-=-=-=
+            $statusdelta = ";WARN"; # CHANGE|INCOMPLETE|ERROR|WARN|FAIL ;
+            if(gv passstatus -scope Script -ea 0){$script:PassStatus += $statusdelta } ;
+            if(gv -Name PassStatus_$($tenorg) -scope Script -ea 0){set-Variable -Name PassStatus_$($tenorg) -scope Script -Value ((get-Variable -Name PassStatus_$($tenorg)).value + $statusdelta)} ;
+            #-=-=-=-=-=-=-=-=
+            BREAK ;
+        } ; 
+        $error.clear() ;
+        TRY { 
             $pltXMO=@{Name=$null ; force=$true ; ErrorAction='STOP'; Verbose = $($VerbosePreference -eq 'Continue') } ;
             $pltXpsd1M=[ordered]@{path=$psd1M ; ErrorAction='STOP'; Verbose = $($VerbosePreference -eq 'Continue') } ; 
 
@@ -7879,34 +7974,121 @@ function Step-ModuleVersionCalculated {
                 elseif(-not $Silent){ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
                 $ModuleName = $TestReport.Name ; 
             } 
-            
+        } CATCH {
+            $ErrTrapd=$Error[0] ;
+            $smsg = "$('*'*5)`nFailed processing $($ErrTrapd.Exception.ItemName). `nError Message: $($ErrTrapd.Exception.Message)`nError Details: `n$(($ErrTrapd|out-string).trim())`n$('-'*5)" ;
+            $smsg += "`n$($ErrTrapd.Exception.Message)" ;
+            if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN -Indent}
+            else{ write-WARNING "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+            #-=-record a STATUSWARN=-=-=-=-=-=-=
+            $statusdelta = ";WARN"; # CHANGE|INCOMPLETE|ERROR|WARN|FAIL ;
+            if(gv passstatus -scope Script -ea 0){$script:PassStatus += $statusdelta } ;
+            if(gv -Name PassStatus_$($tenorg) -scope Script -ea 0){set-Variable -Name PassStatus_$($tenorg) -scope Script -Value ((get-Variable -Name PassStatus_$($tenorg)).value + $statusdelta)} ;
+            #-=-=-=-=-=-=-=-=
+            BREAK ;
+        } ; 
+        $error.clear() ;
+        TRY{
             # we need to precache the modules loaded - as rmo verb-io takes out both the build module and the installed, so we need a mechanism to put back the installed after testing
             $loadedMods = get-module ;
             $loadedInstalledMods = $loadedMods |?{ $_.path -match $rgxPSAllUsersScopeDyn -OR $_.path -match $rgxPSCurrUserScope -OR $_.path -match $rgxModsSystemScope}  ; 
             $loadedRevisedMods = $loadedMods |?{ $_.path -notmatch $rgxPSAllUsersScopeDyn -AND $_.path -notmatch $rgxPSCurrUserScope -ANd $_.path -notmatch $rgxModsSystemScope}  ; 
+        } CATCH {
+            $ErrTrapd=$Error[0] ;
+            $smsg = "$('*'*5)`nFailed processing $($ErrTrapd.Exception.ItemName). `nError Message: $($ErrTrapd.Exception.Message)`nError Details: `n$(($ErrTrapd|out-string).trim())`n$('-'*5)" ;
+            $smsg += "`n$($ErrTrapd.Exception.Message)" ;
+            if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN -Indent}
+            else{ write-WARNING "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+            #-=-record a STATUSWARN=-=-=-=-=-=-=
+            $statusdelta = ";WARN"; # CHANGE|INCOMPLETE|ERROR|WARN|FAIL ;
+            if(gv passstatus -scope Script -ea 0){$script:PassStatus += $statusdelta } ;
+            if(gv -Name PassStatus_$($tenorg) -scope Script -ea 0){set-Variable -Name PassStatus_$($tenorg) -scope Script -Value ((get-Variable -Name PassStatus_$($tenorg)).value + $statusdelta)} ;
+            #-=-=-=-=-=-=-=-=
+            BREAK ;
+        } ; 
 
-            switch ($Method) {
+        switch ($Method) {
+            'Fingerprint' {
 
-                'Fingerprint' {
+                $smsg = "Module:psd1M:calculating *FINGERPRINT* change Version Step" ; 
+                if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
+                elseif(-not $Silent){ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
 
-                    $smsg = "Module:psd1M:calculating *FINGERPRINT* change Version Step" ; 
-                    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
-                    elseif(-not $Silent){ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
-
-                    #$fingerprintfile = get-childitem -path "$($ModDirPath)\fingerprint*" -ea 0 | select -expand fullname ; 
-                    if($fingerprintfile = ($moddirfiles|?{$_.name -eq "fingerprint"}).FullName){
+                if($fingerprintfile = ($moddirfiles|?{$_.name -eq "fingerprint"}).FullName){
+                    TRY{
                         $oldfingerprint = Get-Content $fingerprintfile ; 
-                
-                        if($psm1){
-                            $pltXMO.Name = $psm1 # ipmo via full path to .psm1
+                    } CATCH {
+                        $ErrTrapd=$Error[0] ;
+                        $smsg = "$('*'*5)`nFailed processing $($ErrTrapd.Exception.ItemName). `nError Message: $($ErrTrapd.Exception.Message)`nError Details: `n$(($ErrTrapd|out-string).trim())`n$('-'*5)" ;
+                        $smsg += "`n$($ErrTrapd.Exception.Message)" ;
+                        if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN -Indent}
+                        else{ write-WARNING "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                        #-=-record a STATUSWARN=-=-=-=-=-=-=
+                        $statusdelta = ";ERROR"; # CHANGE|INCOMPLETE|ERROR|WARN|FAIL ;
+                        if(gv passstatus -scope Script -ea 0){$script:PassStatus += $statusdelta } ;
+                        if(gv -Name PassStatus_$($tenorg) -scope Script -ea 0){set-Variable -Name PassStatus_$($tenorg) -scope Script -Value ((get-Variable -Name PassStatus_$($tenorg)).value + $statusdelta)} ;
+                        BREAK ;
+                    } ; 
+                    if($psm1){
+                        $pltXMO.Name = $psm1 # ipmo via full path to .psm1
                             
-                            $smsg = "import-module w`n$(($pltXMO|out-string).trim())" ; 
-                            if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
-                            else{ write-verbose "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; 
-                            import-module @pltXMO ;
+                        $smsg = "import-module w`n$(($pltXMO|out-string).trim())" ; 
+                        if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
+                        else{ write-verbose "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; 
 
+                        TRY{
+                            #import-module @pltXMO ;
+                            # add passthru/capture, and errovari, to try to capture something on fails
+                            # 2:20 PM 6/22/2023 if you're going to use a param with boolean, they have to be colon'd
+                            $ModResult = import-module @pltXMO -ErrorVariable 'vIpMoErr' -PassThru:$true ; 
+                            if($vIpMoErr){
+                                $smsg = "Force throwing ipmo error into catch" ;
+                                if($verbose){if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level VERBOSE }
+                                else{ write-verbose "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; } ;
+                                throw $vIpMoErr ;
+                            } else {
+                                $smsg = "Ipmo: PASSED" ;
+                                if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug
+                                else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                            } ; 
+                        }CATCH{
+                            $ErrTrapd=$Error[0] ;
+                            $smsg = "$('*'*5)`nFailed processing $($ErrTrapd.Exception.ItemName). `nError Message: $($ErrTrapd.Exception.Message)`nError Details: `n$(($ErrTrapd|out-string).trim())`n$('-'*5)" ;
+                            if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN } #Error|Warn|Debug
+                            else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                            $smsg = $ErrTrapd.Exception.Message ;
+                            write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" ;
+                            $smsg = "Test-ModuleTMPFiles:Unable to copy/ipmo/remove:$($pltIpmo.Name)" ;
+                            write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" ;
+                            #-=-record a STATUSWARN=-=-=-=-=-=-=
+                            $statusdelta = ";ERROR"; # CHANGE|INCOMPLETE|ERROR|WARN|FAIL ;
+                            if(gv passstatus -scope Script -ea 0){$script:PassStatus += $statusdelta } ;
+                            if(gv -Name PassStatus_$($tenorg) -scope Script -ea 0){set-Variable -Name PassStatus_$($tenorg) -scope Script -Value ((get-Variable -Name PassStatus_$($tenorg)).value + $statusdelta)} ;
+
+                            if(-not $ErrTrapd -AND $vIpMoErr){
+                                $smsg = "blank `$ErrTrapd, but populated `$vIpMoErr, recycling as reportable error..." ; 
+                                if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } 
+                                else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                                #Levels:Error|Warn|Info|H1|H2|H3|H4|H5|Debug|Verbose|Prompt|Success
+                                $ErrTrapd = $vIpMoErr ; 
+                                $smsg = "$('*'*5)`nFailed processing $($ErrTrapd.Exception.ItemName). `nError Message: $($ErrTrapd.Exception.Message)`nError Details: `n$(($ErrTrapd|out-string).trim())`n$('-'*5)" ;
+                                if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN } #Error|Warn|Debug
+                                else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                                $smsg = $ErrTrapd.Exception.Message ;
+                                write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" ;
+                                $smsg = "Test-ModuleTMPFiles:Unable to copy/ipmo/remove:$($pltIpmo.Name)" ;
+                                write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" ;
+                                #-=-record a STATUSWARN=-=-=-=-=-=-=
+                                $statusdelta = ";ERROR"; # CHANGE|INCOMPLETE|ERROR|WARN|FAIL ;
+                                if(gv passstatus -scope Script -ea 0){$script:PassStatus += $statusdelta } ;
+                                if(gv -Name PassStatus_$($tenorg) -scope Script -ea 0){set-Variable -Name PassStatus_$($tenorg) -scope Script -Value ((get-Variable -Name PassStatus_$($tenorg)).value + $statusdelta)} ;
+                            } ; 
+                            Break ; 
+                        } ; # TRY-E
+
+                        TRY{
                             $commandList = Get-Command -Module $ModuleName # gcm doesn't support full path to module .psm1 
-                            $rgxFuncDeclare = '(^|((\s)*))Function\s+[\w-_]+\s+((\(.*)*)\{' ;  # supports opt inline param syntax as well; and func names made from [A-Za-z0-9-_]chars
+                            #$rgxFuncDeclare = '(^|((\s)*))Function\s+[\w-_]+\s+((\(.*)*)\{' ;  # supports opt inline param syntax as well; and func names made from [A-Za-z0-9-_]chars
                             $rawfunccount = get-childitem -path $psm1 | select-string -pattern $rgxFuncDeclare |  measure | select -expand count  ; 
                             <# 8:52 AM 5/18/2022 issue:
                                 get-command -module verb-io is only returning the 3 renamed funcs 
@@ -7918,8 +8100,8 @@ function Step-ModuleVersionCalculated {
                                 Cmdlet          Invoke-Command                                     3.0.0.0    Microsoft.PowerShell.Core                                                                                                                                                                                   
                                 Cmdlet          Invoke-CommandInDesktopPackage                     2.0.0.0    Appx    
 
-                                 detect and redir the build process into step:BUILD, as the above completely breaks the fingerprint-based step process
-                                 Otherwise it under revs the build.
+                                    detect and redir the build process into step:BUILD, as the above completely breaks the fingerprint-based step process
+                                    Otherwise it under revs the build.
                             #>
                             # use Select-String regex parse to prxy count # of funcs that roughly should come back from gcm w/in $ASTMatchThreshold
                             if( ($commandList.count / $rawfunccount) -lt $ASTMatchThreshold ){
@@ -7934,52 +8116,65 @@ function Step-ModuleVersionCalculated {
                                 if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
                                 else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
                             } ;
-                            <# AST based approach - dirt slow, adds 3min wait to the build process for 126 function .psm1:  better to regex sls out the functions and use that as a guage ^
-                            # -----------
-                            #if(( ($commandList.count / $rawfunccount) -lt $ASTMatchThreshold ) -AND (get-command get-FunctionBlocks) -AND (get-command get-AliasAssignsAST)){
-                                $smsg = "(ASTprofile: get-FunctionBlocks $($ModuleName)..." ; 
-                                if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
-                                else{ write-verbose "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; 
-                                #$ASTfuncs = get-FunctionBlocks $ModuleName ; 
-                                $ASTcmds = @() ; 
-                                $ASTProfile = get-codeprofileast -path 'C:\sc\verb-IO\verb-IO\verb-IO.psm1' -Functions -aliases -verbose:$($VerbosePreference -eq "Continue")  ;
-                                $ASTCmds = $ASTProfile.Functions.name ; 
-                                $ASTCmds += $ASTProfile.Aliases.extent.text ; 
-                                $diffCount = $ASTCmds.count - $commandList.name.count ;
-                                $diffPerc = $commandList.name.count / $ASTCmds.count ; ;
-                                if($diffPerc -lt $ASTMatchThreshold ){
-                                    $smsg = "get-command failed to return a complete Func/Alias list from $($ModuleName) -lt AST $($ASTMatchThreshold * 100)% match:" ; 
-                                    $smsg += "`nAST profile (get-FunctionBlocks+get-AliasAssignsAST) returned:$($ASTCmds.count)"
-                                    $smsg += "`nFORCING STEP EVAL INTO 'PATCH' TO WORK AROUND BUG" ;
-                                    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
-                                    else{ write-verbose "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; 
-                                    $MinVersionIncrement = $true ; 
-                                } else { 
-                                    $smsg = "get-command $($ModuleName) -gt AST $($ASTMatchThreshold * 100)% match:" ; 
-                                    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
-                                    else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
-                                } ;
-
-                            } else { 
-                                $smsg = "Unable to gcm get-FunctionBlocks & get-AliasAssignsAST!" ;
-                                if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Warn } #Error|Warn|Debug 
-                                else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
-                                throw $smsg ;
-                            } ;
-                            # -----------
-                            #>
-
-                            #$pltXMO.Name = $ModuleName; # have to rmo using *basename*
-                            <# revised: you can target specific like-named mods, using the path, which will vary:
-                            gmo |?{$_.path -eq $psm1} | remove-module -WhatIf -verbose 
-                            #>
-                            $pltXMO.remove('Name') # 
-                            #$smsg = "remove-module w`n$(($pltXMO|out-string).trim())" ; 
-                            # get-module |where-object{$_.path -eq $psm1} | remove-module @pltXMO
-                            $smsg = "get-module |where-object{`$_.path -eq '$($psm1)'} |remove-module w`n$(($pltXMO|out-string).trim())" ; 
+                        } CATCH {
+                            $ErrTrapd=$Error[0] ;
+                            $smsg = "$('*'*5)`nFailed processing $($ErrTrapd.Exception.ItemName). `nError Message: $($ErrTrapd.Exception.Message)`nError Details: `n$(($ErrTrapd|out-string).trim())`n$('-'*5)" ;
+                            $smsg += "`n$($ErrTrapd.Exception.Message)" ;
+                            if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN -Indent}
+                            else{ write-WARNING "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                            #-=-record a STATUSWARN=-=-=-=-=-=-=
+                            $statusdelta = ";ERROR"; # CHANGE|INCOMPLETE|ERROR|WARN|FAIL ;
+                            if(gv passstatus -scope Script -ea 0){$script:PassStatus += $statusdelta } ;
+                            if(gv -Name PassStatus_$($tenorg) -scope Script -ea 0){set-Variable -Name PassStatus_$($tenorg) -scope Script -Value ((get-Variable -Name PassStatus_$($tenorg)).value + $statusdelta)} ;
+                            BREAK ;
+                        } ; 
+                        <# AST based approach - dirt slow, adds 3min wait to the build process for 126 function .psm1:  better to regex sls out the functions and use that as a guage ^
+                        # -----------
+                        #if(( ($commandList.count / $rawfunccount) -lt $ASTMatchThreshold ) -AND (get-command get-FunctionBlocks) -AND (get-command get-AliasAssignsAST)){
+                            $smsg = "(ASTprofile: get-FunctionBlocks $($ModuleName)..." ; 
                             if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
                             else{ write-verbose "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; 
-                            #remove-module @pltXMO ;
+                            #$ASTfuncs = get-FunctionBlocks $ModuleName ; 
+                            $ASTcmds = @() ; 
+                            $ASTProfile = get-codeprofileast -path 'C:\sc\verb-IO\verb-IO\verb-IO.psm1' -Functions -aliases -verbose:$($VerbosePreference -eq "Continue")  ;
+                            $ASTCmds = $ASTProfile.Functions.name ; 
+                            $ASTCmds += $ASTProfile.Aliases.extent.text ; 
+                            $diffCount = $ASTCmds.count - $commandList.name.count ;
+                            $diffPerc = $commandList.name.count / $ASTCmds.count ; ;
+                            if($diffPerc -lt $ASTMatchThreshold ){
+                                $smsg = "get-command failed to return a complete Func/Alias list from $($ModuleName) -lt AST $($ASTMatchThreshold * 100)% match:" ; 
+                                $smsg += "`nAST profile (get-FunctionBlocks+get-AliasAssignsAST) returned:$($ASTCmds.count)"
+                                $smsg += "`nFORCING STEP EVAL INTO 'PATCH' TO WORK AROUND BUG" ;
+                                if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
+                                else{ write-verbose "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; 
+                                $MinVersionIncrement = $true ; 
+                            } else { 
+                                $smsg = "get-command $($ModuleName) -gt AST $($ASTMatchThreshold * 100)% match:" ; 
+                                if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
+                                else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                            } ;
+
+                        } else { 
+                            $smsg = "Unable to gcm get-FunctionBlocks & get-AliasAssignsAST!" ;
+                            if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Warn } #Error|Warn|Debug 
+                            else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                            throw $smsg ;
+                        } ;
+                        # -----------
+                        #>
+
+                        #$pltXMO.Name = $ModuleName; # have to rmo using *basename*
+                        <# revised: you can target specific like-named mods, using the path, which will vary:
+                        gmo |?{$_.path -eq $psm1} | remove-module -WhatIf -verbose 
+                        #>
+                        $pltXMO.remove('Name') # 
+                        #$smsg = "remove-module w`n$(($pltXMO|out-string).trim())" ; 
+                        # get-module |where-object{$_.path -eq $psm1} | remove-module @pltXMO
+                        $smsg = "get-module |where-object{`$_.path -eq '$($psm1)'} |remove-module w`n$(($pltXMO|out-string).trim())" ; 
+                        if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
+                        else{ write-verbose "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; 
+                        #remove-module @pltXMO ;
+                        TRY{
                             $tmpmodtarget = get-module |where-object{$_.path -eq $psm1} 
                             if($tmpmodtarget){ $tmpmodtarget | remove-module @pltXMO }
                             else {
@@ -7987,195 +8182,289 @@ function Step-ModuleVersionCalculated {
                                 $smsg += "`nget-module |where-object{$_.path -eq $($psm1)}!" ; 
                                 if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level  WARN } #Error|Warn|Debug 
                                 else{ write-WARNING "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; 
-
                             } ; 
+                        } CATCH {
+                            $ErrTrapd=$Error[0] ;
+                            $smsg = "$('*'*5)`nFailed processing $($ErrTrapd.Exception.ItemName). `nError Message: $($ErrTrapd.Exception.Message)`nError Details: `n$(($ErrTrapd|out-string).trim())`n$('-'*5)" ;
+                            $smsg += "`n$($ErrTrapd.Exception.Message)" ;
+                            if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN -Indent}
+                            else{ write-WARNING "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                            #-=-record a STATUSWARN=-=-=-=-=-=-=
+                            $statusdelta = ";ERROR"; # CHANGE|INCOMPLETE|ERROR|WARN|FAIL ;
+                            if(gv passstatus -scope Script -ea 0){$script:PassStatus += $statusdelta } ;
+                            if(gv -Name PassStatus_$($tenorg) -scope Script -ea 0){set-Variable -Name PassStatus_$($tenorg) -scope Script -Value ((get-Variable -Name PassStatus_$($tenorg)).value + $statusdelta)} ;
+                            BREAK ;
+                        } ; 
 
-                            # here's where we should restore any missing $loadedInstalledMods, taken out with the build module by above rmo...
-                            # post confirm instlmods still loaded:
-                            $postpaths = (get-module |where-object { $_.path -match $rgxPSAllUsersScopeDyn -OR $_.path -match $rgxPSCurrUserScope -OR $_.path -match $rgxModsSystemScope}).path ; 
-                            $loadedInstalledMods.path |foreach-object{
-                                if($postpaths -contains  $_){
-                                    $smsg = "($($_):still loaded)" 
-                                    if($verbose){if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } 
-                                    else{ write-verbose "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; } ; 
-                                }else{
-                                    $smsg = "ipmo missing installedmod:$($_)" ; 
-                                    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN } 
-                                    else{ write-WARNING "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; 
-                                    import-module $_ -fo -verb ;
-                                } ;
-                            } ; 
+                        # here's where we should restore any missing $loadedInstalledMods, taken out with the build module by above rmo...
+                        # post confirm instlmods still loaded:
+                        $postpaths = (get-module |where-object {
+                             $_.path -match $rgxPSAllUsersScopeDyn -OR $_.path -match $rgxPSCurrUserScope -OR $_.path -match $rgxModsSystemScope
+                        }).path ; 
+                        $loadedInstalledMods.path |foreach-object{
+                            if($postpaths -contains  $_){
+                                $smsg = "($($_):still loaded)" 
+                                if($verbose){if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } 
+                                else{ write-verbose "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; } ; 
+                            }else{
+                                $smsg = "ipmo missing installedmod:$($_)" ; 
+                                if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN } 
+                                else{ write-WARNING "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; 
+                                #import-module $_ -fo -verb ;
+                                TRY{
+                                    $pltXMO.name = $_ ; 
+                                    $ModResult = import-module @pltXMO -ErrorVariable 'vIpMoErr' -PassThru $true ;
+                                    if($vIpMoErr){
+                                        $smsg = "Force throwing ipmo error into catch" ;
+                                        if($verbose){if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level VERBOSE }
+                                        else{ write-verbose "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; } ;
+                                        throw $vIpMoErr ;
+                                    } else {
+                                        $smsg = "Ipmo: PASSED" ;
+                                        if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug
+                                        else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                                    } ;
+                                }CATCH{
+                                    $ErrTrapd=$Error[0] ;
+                                    $smsg = "$('*'*5)`nFailed processing $($ErrTrapd.Exception.ItemName). `nError Message: $($ErrTrapd.Exception.Message)`nError Details: `n$(($ErrTrapd|out-string).trim())`n$('-'*5)" ;
+                                    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN } #Error|Warn|Debug
+                                    else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                                    $smsg = $ErrTrapd.Exception.Message ;
+                                    write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" ;
+                                    $smsg = "Test-ModuleTMPFiles:Unable to copy/ipmo/remove:$($pltIpmo.Name)" ;
+                                    write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" ;
+                                    #-=-record a STATUSWARN=-=-=-=-=-=-=
+                                    $statusdelta = ";ERROR"; # CHANGE|INCOMPLETE|ERROR|WARN|FAIL ;
+                                    if(gv passstatus -scope Script -ea 0){$script:PassStatus += $statusdelta } ;
+                                    if(gv -Name PassStatus_$($tenorg) -scope Script -ea 0){set-Variable -Name PassStatus_$($tenorg) -scope Script -Value ((get-Variable -Name PassStatus_$($tenorg)).value + $statusdelta)} ;
+                                    if(-not $ErrTrapd -AND $vIpMoErr){
+                                        $smsg = "blank `$ErrTrapd, but populated `$vIpMoErr, recycling as reportable error..." ;
+                                        if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info }
+                                        else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                                        #Levels:Error|Warn|Info|H1|H2|H3|H4|H5|Debug|Verbose|Prompt|Success
+                                        $ErrTrapd = $vIpMoErr ;
+                                        $smsg = "$('*'*5)`nFailed processing $($ErrTrapd.Exception.ItemName). `nError Message: $($ErrTrapd.Exception.Message)`nError Details: `n$(($ErrTrapd|out-string).trim())`n$('-'*5)" ;
+                                        if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN } #Error|Warn|Debug
+                                        else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                                        $smsg = $ErrTrapd.Exception.Message ;
+                                        write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" ;
+                                        $smsg = "Test-ModuleTMPFiles:Unable to copy/ipmo/remove:$($pltIpmo.Name)" ;
+                                        write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" ;
+                                        #-=-record a STATUSWARN=-=-=-=-=-=-=
+                                        $statusdelta = ";ERROR"; # CHANGE|INCOMPLETE|ERROR|WARN|FAIL ;
+                                        if(gv passstatus -scope Script -ea 0){$script:PassStatus += $statusdelta } ;
+                                        if(gv -Name PassStatus_$($tenorg) -scope Script -ea 0){set-Variable -Name PassStatus_$($tenorg) -scope Script -Value ((get-Variable -Name PassStatus_$($tenorg)).value + $statusdelta)} ;
+                                    } ;
+                                    Break ;
+                                } ; # TRY-E
+
+                            } ;
+                        } ; 
 
 
-                            if(-not $MinVersionIncrement){
-                                $smsg = "Calculating fingerprint"
-                                # KM's core logic code:
-                                $fingerprint = foreach ( $command in $commandList ){
-                                    $smsg = "(=cmd:$($command)...)" ;
+                        if(-not $MinVersionIncrement){
+                            $smsg = "Calculating fingerprint"
+                            # KM's core logic code:
+                            $fingerprint = foreach ( $command in $commandList ){
+                                $smsg = "(=cmd:$($command)...)" ;
+                                if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
+                                else{ write-verbose "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; 
+                                foreach ( $parameter in $command.parameters.keys ){
+                                    $smsg = "(---param:$($parameter)...)" ;
                                     if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
                                     else{ write-verbose "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; 
-                                    foreach ( $parameter in $command.parameters.keys ){
-                                        $smsg = "(---param:$($parameter)...)" ;
-                                        if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
-                                        else{ write-verbose "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; 
-                                        '{0}:{1}' -f $command.name, $command.parameters[$parameter].Name
-                                        $command.parameters[$parameter].aliases | 
-                                            Foreach-Object { '{0}:{1}' -f $command.name, $_}
-                                    };  
-                                } ;   
-                            } else { 
-                                $smsg = "(-MinVersionIncrement: skipped fingerprint calculation)" ; 
-                                if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
-                                else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
-                            } ; 
-                            # step-ModuleVersion supports -By: "Major", "Minor", "Build","Patch"
-                            # SemVers uses 3-digits, a prerelease tag and a build meta tag (only 3 are used in pkg builds etc)
-                            $bumpVersionType = 'Patch' ; 
-                            if($MinVersionIncrement){
-                                $smsg = "-MinVersionIncrement override specified: incrementing by min .$($MinVersionIncrementBump)" ; 
-                                if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
-                                elseif(-not $Silent){ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
-                                #$Version.Build ++ ;
-                                #$Version.Revision = 0 ; 
-                                # drop through min patch rev above - no, it now uses $MinVersionIncrementBump
-                                $bumpVersionType = $MinVersionIncrementBump ; 
-                            } else { 
-                                # KM's core logic code:
-                                $smsg = "Detecting new features" ; 
-                                if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
-                                elseif(-not $Silent){ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
-                                # yank out the pipeline drops (or accumulate them)
-                                $NewChgs = $BreakChgs =@() ; 
-                                $fingerprint | Where {$_ -notin $oldFingerprint } | 
-                                    ForEach-Object {$bumpVersionType = 'Minor'; $NewChgs += "`n  $_"} ; 
-                                $smsg = "Detecting breaking changes" ; 
-                                if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
-                                elseif(-not $Silent){ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
-                                $oldFingerprint | Where {$_ -notin $fingerprint } | 
-                                    ForEach-Object {$bumpVersionType = 'Major'; $BreakChgs += "`n  $_"} ; 
-                            } ;
-
-                        } else {
-                            $smsg = "No module .psm1 file found in tree of `$path:`n$($moddir)" ;
-                            if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Warn } #Error|Warn|Debug 
-                            else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
-                            throw $smsg ;
+                                    '{0}:{1}' -f $command.name, $command.parameters[$parameter].Name
+                                    $command.parameters[$parameter].aliases | 
+                                        Foreach-Object { '{0}:{1}' -f $command.name, $_}
+                                };  
+                            } ;   
+                        } else { 
+                            $smsg = "(-MinVersionIncrement: skipped fingerprint calculation)" ; 
+                            if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
+                            else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                        } ; 
+                        # step-ModuleVersion supports -By: "Major", "Minor", "Build","Patch"
+                        # SemVers uses 3-digits, a prerelease tag and a build meta tag (only 3 are used in pkg builds etc)
+                        $bumpVersionType = 'Patch' ; 
+                        if($MinVersionIncrement){
+                            $smsg = "-MinVersionIncrement override specified: incrementing by min .$($MinVersionIncrementBump)" ; 
+                            if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
+                            elseif(-not $Silent){ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                            #$Version.Build ++ ;
+                            #$Version.Revision = 0 ; 
+                            # drop through min patch rev above - no, it now uses $MinVersionIncrementBump
+                            $bumpVersionType = $MinVersionIncrementBump ; 
+                        } else { 
+                            # KM's core logic code:
+                            $smsg = "Detecting new features" ; 
+                            if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
+                            elseif(-not $Silent){ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                            # yank out the pipeline drops (or accumulate them)
+                            $NewChgs = $BreakChgs =@() ; 
+                            $fingerprint | Where {$_ -notin $oldFingerprint } | 
+                                ForEach-Object {$bumpVersionType = 'Minor'; $NewChgs += "`n  $_"} ; 
+                            $smsg = "Detecting breaking changes" ; 
+                            if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
+                            elseif(-not $Silent){ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                            $oldFingerprint | Where {$_ -notin $fingerprint } | 
+                                ForEach-Object {$bumpVersionType = 'Major'; $BreakChgs += "`n  $_"} ; 
                         } ;
-                    
+
                     } else {
-                        $smsg =  "No fingerprint file found in `$path:`n$(join-path -path $moddir -child "$ModuleName.psm1")" ;
-                        $smsg += "`nTo configure a fingerprint for this module, plese run:`n"
-                        $smsg += "`nInitialize-ModuleFingerprint -path $($moddir) ;"
-                        $smsg += "`n... and then re-run the Step-ModuleVersionCalculated cmdlet" ; 
+                        $smsg = "No module .psm1 file found in tree of `$path:`n$($moddir)" ;
                         if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Warn } #Error|Warn|Debug 
                         else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
                         throw $smsg ;
-                    } ;  
+                    } ;
+                    
+                } else {
+                    $smsg =  "No fingerprint file found in `$path:`n$(join-path -path $moddir -child "$ModuleName.psm1")" ;
+                    $smsg += "`nTo configure a fingerprint for this module, plese run:`n"
+                    $smsg += "`nInitialize-ModuleFingerprint -path $($moddir) ;"
+                    $smsg += "`n... and then re-run the Step-ModuleVersionCalculated cmdlet" ; 
+                    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Warn } #Error|Warn|Debug 
+                    else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                    throw $smsg ;
+                } ;  
 
-                    if ( $fingerprint ){
+                if ( $fingerprint ){
 
-                        if($fingerprintfile){
-                            write-verbose "(backup-FileTDO -path $($fingerprintfile))" ;
-                            $fingerprintBU = backup-FileTDO -path $fingerprintfile -showdebug:$($showdebug) -whatif:$($whatif) ;
-                            if(-not $FingerprintBU -AND -not $whatif){throw "backup-FileTDO -Source $($fingerprintfile)!" }
-                        } else { 
-                           write-verbose "(no fingerprint file to backup)" ;  
-                        } ; 
-
-                        $pltOFile=[ordered]@{Encoding='utf8' ;FilePath=(join-path -path $moddir -childpath 'fingerprint') ;whatif=$($whatif) ; Verbose = $($VerbosePreference -eq 'Continue') } ;
-                        $smsg = "Writing fingerprint: Out-File w`n$(($pltOFile|out-string).trim())" ; 
-                        if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
-                        elseif(-not $Silent){ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
-                        $fingerprint | out-file @pltOFile ; 
-                    } else {
-                        $smsg = "No funtional Module `$fingerprint generated for path specified`n$($Path)" ; 
-                        if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level warn } #Error|Warn|Debug 
-                        else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                    if($fingerprintfile){
+                        write-verbose "(backup-FileTDO -path $($fingerprintfile))" ;
+                        $fingerprintBU = backup-FileTDO -path $fingerprintfile -showdebug:$($showdebug) -whatif:$($whatif) ;
+                        if(-not $FingerprintBU -AND -not $whatif){throw "backup-FileTDO -Source $($fingerprintfile)!" }
+                    } else { 
+                        write-verbose "(no fingerprint file to backup)" ;  
                     } ; 
-                } 
-                'Percentage' {
-                    # implement's Martin Pugh's revision step code on percentage of files changed after psd1.LastWriteTime
-                    $smsg = "Module:psd1M:calculating *PERCENTAGE* change Version Step" ; 
+
+                    $pltOFile=[ordered]@{
+                        Encoding='utf8' ;
+                        FilePath=(join-path -path $moddir -childpath 'fingerprint') ;
+                        whatif=$($whatif) ;
+                        Verbose = $($VerbosePreference -eq 'Continue')                     
+                    } ;
+                    $smsg = "Writing fingerprint: Out-File w`n$(($pltOFile|out-string).trim())" ; 
                     if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
                     elseif(-not $Silent){ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                    TRY{
+                        $fingerprint | out-file @pltOFile ; 
+                    } CATCH {
+                        # or just do idiotproof: Write-Warning -Message $_.Exception.Message ;
+                        $ErrTrapd=$Error[0] ;
+                        $smsg = "$('*'*5)`nFailed processing $($ErrTrapd.Exception.ItemName). `nError Message: $($ErrTrapd.Exception.Message)`nError Details: `n$(($ErrTrapd|out-string).trim())`n$('-'*5)" ;
+                        if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN } #Error|Warn|Debug
+                        else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                        $smsg = $ErrTrapd.Exception.Message ;
+                        if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN } #Error|Warn|Debug
+                        else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                        #-=-record a STATUSWARN=-=-=-=-=-=-=
+                        $statusdelta = ";WARN"; # CHANGE|INCOMPLETE|ERROR|WARN|FAIL ;
+                        if(gv passstatus -scope Script -ea 0){$script:PassStatus += $statusdelta } ;
+                        if(gv -Name PassStatus_$($tenorg) -scope Script -ea 0){set-Variable -Name PassStatus_$($tenorg) -scope Script -Value ((get-Variable -Name PassStatus_$($tenorg)).value + $statusdelta)} ;
+                        #-=-=-=-=-=-=-=-=
+                        $smsg = "FULL ERROR TRAPPED (EXPLICIT CATCH BLOCK WOULD LOOK LIKE): } catch[$($ErrTrapd.Exception.GetType().FullName)]{" ;
+                        if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level ERROR } #Error|Warn|Debug
+                        else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                        Break #Opts: STOP(debug)|EXIT(close)|CONTINUE(move on in loop cycle)|BREAK(exit loop iteration)|THROW $_/'CustomMsg'(end script with Err output)
+                    } ; 
+                } else {
+                    $smsg = "No funtional Module `$fingerprint generated for path specified`n$($Path)" ; 
+                    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level warn } #Error|Warn|Debug 
+                    else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                } ; 
+            } 
+            'Percentage' {
+                # implement's Martin Pugh's revision step code on percentage of files changed after psd1.LastWriteTime
+                $smsg = "Module:psd1M:calculating *PERCENTAGE* change Version Step" ; 
+                if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
+                elseif(-not $Silent){ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
 
+                TRY{
                     $LastChange = (Get-ChildItem $psd1M).LastWriteTime ; 
                     $ChangedFiles = ($moddirfiles | Where LastWriteTime -gt $LastChange).Count ; 
                     $PercentChange = 100 - ((($moddirfiles.Count - $ChangedFiles) / $moddirfiles.Count) * 100) ; 
-                    $smsg = "PercentChange:$($PercentChange)" ; 
-                    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
-                    else{ write-verbose "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; 
-                    #$Version = ([version]$Psd1PriorData.ModuleVersion) | Select Major,Minor,Build,Revision ; 
-                    # coerce Build & Revision:-1 to 0, handling; doesn't like it when rev is -1
-                    #$Version = ([version]$Psd1PriorData.ModuleVersion) | select Major,Minor,Build,@{name='Revision';Expression={[System.Math]::Max($_.revision,0)} }
-                    <#$Version = ([version]$Psd1PriorData.ModuleVersion) | select Major,Minor,
-                        @{name='Build';Expression={[System.Math]::Max($_.Build,0)} },
-                        @{name='Revision';Expression={[System.Math]::Max($_.revision,0)} }
-                    $PriorVers =  $Version | Select Major,Minor,Build,Revision
-                    #>
-                    if($MinVersionIncrement){
-                        write-host -foregroundcolor green "-MinVersionIncrement override specified: incrementing by min:$($MinVersionIncrementBump)" ; 
-                        #$Version.Build ++ ;
+                } CATCH {
+                    # or just do idiotproof: Write-Warning -Message $_.Exception.Message ;
+                    $ErrTrapd=$Error[0] ;
+                    $smsg = "$('*'*5)`nFailed processing $($ErrTrapd.Exception.ItemName). `nError Message: $($ErrTrapd.Exception.Message)`nError Details: `n$(($ErrTrapd|out-string).trim())`n$('-'*5)" ;
+                    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN } #Error|Warn|Debug
+                    else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                    $smsg = $ErrTrapd.Exception.Message ;
+                    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN } #Error|Warn|Debug
+                    else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                    #-=-record a STATUSWARN=-=-=-=-=-=-=
+                    $statusdelta = ";WARN"; # CHANGE|INCOMPLETE|ERROR|WARN|FAIL ;
+                    if(gv passstatus -scope Script -ea 0){$script:PassStatus += $statusdelta } ;
+                    if(gv -Name PassStatus_$($tenorg) -scope Script -ea 0){set-Variable -Name PassStatus_$($tenorg) -scope Script -Value ((get-Variable -Name PassStatus_$($tenorg)).value + $statusdelta)} ;
+                    #-=-=-=-=-=-=-=-=
+                    $smsg = "FULL ERROR TRAPPED (EXPLICIT CATCH BLOCK WOULD LOOK LIKE): } catch[$($ErrTrapd.Exception.GetType().FullName)]{" ;
+                    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level ERROR } #Error|Warn|Debug
+                    else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                    Break #Opts: STOP(debug)|EXIT(close)|CONTINUE(move on in loop cycle)|BREAK(exit loop iteration)|THROW $_/'CustomMsg'(end script with Err output)
+                } ; 
+                $smsg = "PercentChange:$($PercentChange)" ; 
+                if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
+                else{ write-verbose "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; 
+                #$Version = ([version]$Psd1PriorData.ModuleVersion) | Select Major,Minor,Build,Revision ; 
+                # coerce Build & Revision:-1 to 0, handling; doesn't like it when rev is -1
+                #$Version = ([version]$Psd1PriorData.ModuleVersion) | select Major,Minor,Build,@{name='Revision';Expression={[System.Math]::Max($_.revision,0)} }
+                <#$Version = ([version]$Psd1PriorData.ModuleVersion) | select Major,Minor,
+                    @{name='Build';Expression={[System.Math]::Max($_.Build,0)} },
+                    @{name='Revision';Expression={[System.Math]::Max($_.revision,0)} }
+                $PriorVers =  $Version | Select Major,Minor,Build,Revision
+                #>
+                if($MinVersionIncrement){
+                    write-host -foregroundcolor green "-MinVersionIncrement override specified: incrementing by min:$($MinVersionIncrementBump)" ; 
+                    #$Version.Build ++ ;
+                    #$Version.Revision = 0 ; 
+                    $bumpVersionType = $MinVersionIncrementBump  ; 
+                } else { 
+                    If ($PercentChange -ge 50){
+                        #$Version.Major ++ ; # MAJOR (breaking change)
+                        #$Version.Minor = 0 ; 
+                        #$Version.Build = 0 ; 
                         #$Version.Revision = 0 ; 
-                        $bumpVersionType = $MinVersionIncrementBump  ; 
-                    } else { 
-                        If ($PercentChange -ge 50){
-                            #$Version.Major ++ ; # MAJOR (breaking change)
-                            #$Version.Minor = 0 ; 
-                            #$Version.Build = 0 ; 
-                            #$Version.Revision = 0 ; 
-                            $bumpVersionType = 'Major';
-                        }ElseIf ($PercentChange -ge 25){
-                            #$Version.Minor ++ ; # .MINOR (new feature - backward compatible)
-                            #$Version.Build = 0 ; 
-                            #$Version.Revision = 0 ; 
-                           $bumpVersionType = 'Minor' ; 
-                        }ElseIf ($PercentChagne -ge 10){
-                            #$Version.Build ++ ; # NORMALLY .PATCH (bug fix)
-                            #$Version.Revision = 0 ; 
-                            $bumpVersionType = 'Patch'
-                        }ElseIf ($PercentChange -gt 0){
-                            #$Version.Revision ++ ; # NORMALLY +BUILD (pre-release and build metadata) # doesn't look like buildhelper  does 4-digit Build variants
-                            $bumpVersionType = 'Patch' 
-                        } ; 
+                        $bumpVersionType = 'Major';
+                    }ElseIf ($PercentChange -ge 25){
+                        #$Version.Minor ++ ; # .MINOR (new feature - backward compatible)
+                        #$Version.Build = 0 ; 
+                        #$Version.Revision = 0 ; 
+                        $bumpVersionType = 'Minor' ; 
+                    }ElseIf ($PercentChagne -ge 10){
+                        #$Version.Build ++ ; # NORMALLY .PATCH (bug fix)
+                        #$Version.Revision = 0 ; 
+                        $bumpVersionType = 'Patch'
+                    }ElseIf ($PercentChange -gt 0){
+                        #$Version.Revision ++ ; # NORMALLY +BUILD (pre-release and build metadata) # doesn't look like buildhelper  does 4-digit Build variants
+                        $bumpVersionType = 'Patch' 
                     } ; 
-                } ;
-            } # switch-E
+                } ; 
+            } ;
+        } # switch-E
 
-            if($TestReport -AND $applyChange ){ 
-                $pltStepMV=[ordered]@{Path=$psd1M ; By=$bumpVersionType ; ErrorAction='STOP';} ; 
+        if($TestReport -AND $applyChange ){ 
+            $pltStepMV=[ordered]@{Path=$psd1M ; By=$bumpVersionType ; ErrorAction='STOP';} ; 
 
-                $smsg = "Step-ModuleVersion w`n$(($pltStepMV|out-string).trim())" ; 
+            $smsg = "Step-ModuleVersion w`n$(($pltStepMV|out-string).trim())" ; 
+            if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
+            elseif(-not $Silent){ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+            if(!$whatif){
+                # Step-ModuleVersion -Path $env:BHPSModuleManifest -By $bumpVersionType ; 
+                Step-ModuleVersion @pltStepMV ; 
+                $PsdInfo = Import-PowerShellDataFile -path $env:BHPSModuleManifest ;
+                $smsg = "----PsdVers incremented from $($PsdInfoPre.ModuleVersion) to $((Import-PowerShellDataFile -path $env:BHPSModuleManifest).ModuleVersion)" ;
                 if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
                 elseif(-not $Silent){ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
-                if(!$whatif){
-                    # Step-ModuleVersion -Path $env:BHPSModuleManifest -By $bumpVersionType ; 
-                    Step-ModuleVersion @pltStepMV ; 
-                    $PsdInfo = Import-PowerShellDataFile -path $env:BHPSModuleManifest ;
-                    $smsg = "----PsdVers incremented from $($PsdInfoPre.ModuleVersion) to $((Import-PowerShellDataFile -path $env:BHPSModuleManifest).ModuleVersion)" ;
-                    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
-                    elseif(-not $Silent){ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
 
-                } else {
-                    $smsg = "(-whatif, skipping exec:`nStep-ModuleVersion -Path $($env:BHPSModuleManifest) -By $($bumpVersionType)) ;" ; 
-                    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
-                    elseif(-not $Silent){ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
-                    $PsdInfo.ModuleVersion | write-output ; 
-                } ;
-            } ; 
-  
-        } CATCH {
-            $ErrTrapd=$Error[0] ;
-            $smsg = "$('*'*5)`nFailed processing $($ErrTrapd.Exception.ItemName). `nError Message: $($ErrTrapd.Exception.Message)`nError Details: `n$(($ErrTrapd|out-string).trim())`n$('-'*5)" ;
-            if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
-            else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
-            #-=-record a STATUSWARN=-=-=-=-=-=-=
-            $statusdelta = ";WARN"; # CHANGE|INCOMPLETE|ERROR|WARN|FAIL ;
-            if(gv passstatus -scope Script -ea 0){$script:PassStatus += $statusdelta } ;
-            if(gv -Name PassStatus_$($tenorg) -scope Script -ea 0){set-Variable -Name PassStatus_$($tenorg) -scope Script -Value ((get-Variable -Name PassStatus_$($tenorg)).value + $statusdelta)} ; 
-            #-=-=-=-=-=-=-=-=
-            Break #Opts: STOP(debug)|EXIT(close)|CONTINUE(move on in loop cycle)|BREAK(exit loop iteration)|THROW $_/'CustomMsg'(end script with Err output)
+            } else {
+                $smsg = "(-whatif, skipping exec:`nStep-ModuleVersion -Path $($env:BHPSModuleManifest) -By $($bumpVersionType)) ;" ; 
+                if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
+                elseif(-not $Silent){ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                $PsdInfo.ModuleVersion | write-output ; 
+            } ;
         } ; 
+  
+        
     } ;  # PROC-E
     END {
     
@@ -8708,6 +8997,7 @@ function update-NewModule {
     Github      : https://github.com/tostka/verb-dev
     Tags        : Powershell,Module,Build,Development
     REVISIONS
+    # 3:03 PM 6/22/2023 #361: splice in better error-handling fail through code from psb-psparamt ($budrv covers for empty referrals)
     * 1:46 PM 3/22/2023 #1212:Publish-Module throws error if repo.SourceLocation isn't testable (when vpn is down), test and throw prescriptive error (otherwise is obtuse); expanded catch's they were coming up blank
     * 11:20 AM 12/12/2022 completely purged rem'd require stmts, confusing, when they echo in build..., ,verb-IO, verb-logging, verb-Mods, verb-Text
     * 3:10 PM 9/7/2022 ren & alias orig name (verb compliance): process-NewModule -> update-NewModule
@@ -9050,14 +9340,15 @@ function update-NewModule {
     } ;
     $pltSL=[ordered]@{Path=$null ;NoTimeStamp=$false ;Tag=$null ;showdebug=$($showdebug) ; Verbose=$($VerbosePreference -eq 'Continue') ; whatif=$($whatif) ;} ;
     $pltSL.Tag = $ModuleName ;
+    # 3:03 PM 6/22/2023 #361: splice in better error-handling fail through code from psb-psparamt ($budrv covers for empty referrals)
     if($script:PSCommandPath){
         if(($script:PSCommandPath -match $rgxPSAllUsersScope) -OR ($script:PSCommandPath -match $rgxPSCurrUserScope)){
-            $bDivertLog = $true ;
+            $bDivertLog = $true ; 
             switch -regex ($script:PSCommandPath){
-                $rgxPSAllUsersScope{$smsg = "AllUsers"}
+                $rgxPSAllUsersScope{$smsg = "AllUsers"} 
                 $rgxPSCurrUserScope{$smsg = "CurrentUser"}
             } ;
-            $smsg += " context script/module, divert logging into [$budrv]:\scripts"
+            $smsg += " context script/module, divert logging into [$budrv]:\scripts" 
             write-verbose $smsg  ;
             if($bDivertLog){
                 if((split-path $script:PSCommandPath -leaf) -ne $cmdletname){
@@ -9074,11 +9365,18 @@ function update-NewModule {
     } else {
         if(($MyInvocation.MyCommand.Definition -match $rgxPSAllUsersScope) -OR ($MyInvocation.MyCommand.Definition -match $rgxPSCurrUserScope) ){
              $pltSL.Path = (join-path -Path "$($budrv):\scripts" -ChildPath (split-path $script:PSCommandPath -leaf)) ;
-        } else {
+        } elseif(test-path $MyInvocation.MyCommand.Definition) {
             $pltSL.Path = $MyInvocation.MyCommand.Definition ;
-        } ;
+        } elseif($cmdletname){
+            $pltSL.Path = (join-path -Path "$($budrv):\scripts" -ChildPath "$($cmdletname).ps1") ;
+        } else {
+            $smsg = "UNABLE TO RESOLVE A FUNCTIONAL `$CMDLETNAME, FROM WHICH TO BUILD A START-LOG.PATH!" ; 
+            if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Warn } #Error|Warn|Debug 
+            else{ write-WARNING "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+            BREAK ;
+        } ; 
     } ;
-    write-verbose "start-Log w`n$(($pltSL|out-string).trim())" ;
+    write-verbose "start-Log w`n$(($pltSL|out-string).trim())" ; 
     $logspec = start-Log @pltSL ;
     $error.clear() ;
     TRY {
@@ -10327,7 +10625,7 @@ $($logfile)
 
 #*======^ END FUNCTIONS ^======
 
-Export-ModuleMember -Function backup-ModuleBuild,check-PsLocalRepoRegistration,confirm-ModuleBuildSync,confirm-ModulePsd1Version,confirm-ModulePsm1Version,confirm-ModuleTestPs1Guid,convert-CommandLine2VSCDebugJson,convertFrom-EscapedPSText,convert-ISEOpenSession,converto-VSCConfig,ConvertTo-Breakpoint,_extractBreakpoint,convertTo-EscapedPSText,ConvertTo-ModuleDynamicTDO,ConvertTo-ModuleMergedTDO,convertTo-UnwrappedPS,convertTo-WrappedPS,export-ISEBreakPoints,export-ISEBreakPointsALL,export-ISEOpenFiles,get-AliasAssignsAST,get-CodeProfileAST,get-CodeRiskProfileAST,Get-CommentBlocks,get-FunctionBlock,get-FunctionBlocks,get-ISEOpenFilesExported,get-ModuleRevisedCommands,get-ProjectNameTDO,Get-PSBreakpointSorted,Get-PSModuleFile,get-StrictMode,Version,ToString,get-VariableAssignsAST,get-VersionInfo,import-ISEBreakPoints,import-ISEBreakPointsALL,import-ISEConsoleColors,Wait-AADSync,Initialize-ModuleFingerprint,Get-PSModuleFile,Initialize-PSModuleDirectories,move-ISEBreakPoints,new-CBH,New-GitHubGist,parseHelp,restore-ISEConsoleColors,restore-ModuleBuild,save-ISEConsoleColors,show-Verbs,Split-CommandLine,Step-ModuleVersionCalculated,Get-PSModuleFile,Test-ModuleTMPFiles,test-VerbStandard,Uninstall-ModuleForce,update-NewModule -Alias *
+Export-ModuleMember -Function backup-ModuleBuild,check-PsLocalRepoRegistration,confirm-ModuleBuildSync,confirm-ModulePsd1Version,confirm-ModulePsm1Version,confirm-ModuleTestPs1Guid,convert-CommandLine2VSCDebugJson,convertFrom-EscapedPSText,convert-ISEOpenSession,converto-VSCConfig,ConvertTo-Breakpoint,_extractBreakpoint,convertTo-EscapedPSText,ConvertTo-ModuleDynamicTDO,ConvertTo-ModuleMergedTDO,convertTo-UnwrappedPS,convertTo-WrappedPS,export-ISEBreakPoints,export-ISEBreakPointsALL,export-ISEOpenFiles,get-AliasAssignsAST,get-CodeProfileAST,get-CodeRiskProfileAST,Get-CommentBlocks,get-FunctionBlock,get-FunctionBlocks,get-ISEOpenFilesExported,get-ModuleRevisedCommands,get-ProjectNameTDO,Get-PSBreakpointSorted,Get-PSModuleFile,get-StrictMode,Version,ToString,get-VariableAssignsAST,get-VersionInfo,import-ISEBreakPoints,import-ISEBreakPointsALL,import-ISEConsoleColors,import-ISEOpenFiles,Initialize-ModuleFingerprint,Get-PSModuleFile,Initialize-PSModuleDirectories,move-ISEBreakPoints,new-CBH,New-GitHubGist,parseHelp,restore-ISEConsoleColors,restore-ModuleBuild,save-ISEConsoleColors,show-Verbs,Split-CommandLine,Step-ModuleVersionCalculated,Get-PSModuleFile,Test-ModuleTMPFiles,test-VerbStandard,Uninstall-ModuleForce,update-NewModule -Alias *
 
 
 
@@ -10335,8 +10633,8 @@ Export-ModuleMember -Function backup-ModuleBuild,check-PsLocalRepoRegistration,c
 # SIG # Begin signature block
 # MIIELgYJKoZIhvcNAQcCoIIEHzCCBBsCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUVAuk9o8lmoJaMXuGplcLNjd0
-# ldegggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUGGi+BX+SCMYWVYo04iemXbak
+# LbegggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
 # MCwxKjAoBgNVBAMTIVBvd2VyU2hlbGwgTG9jYWwgQ2VydGlmaWNhdGUgUm9vdDAe
 # Fw0xNDEyMjkxNzA3MzNaFw0zOTEyMzEyMzU5NTlaMBUxEzARBgNVBAMTClRvZGRT
 # ZWxmSUkwgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBALqRVt7uNweTkZZ+16QG
@@ -10351,9 +10649,9 @@ Export-ModuleMember -Function backup-ModuleBuild,check-PsLocalRepoRegistration,c
 # AWAwggFcAgEBMEAwLDEqMCgGA1UEAxMhUG93ZXJTaGVsbCBMb2NhbCBDZXJ0aWZp
 # Y2F0ZSBSb290AhBaydK0VS5IhU1Hy6E1KUTpMAkGBSsOAwIaBQCgeDAYBgorBgEE
 # AYI3AgEMMQowCKACgAChAoAAMBkGCSqGSIb3DQEJAzEMBgorBgEEAYI3AgEEMBwG
-# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBRxrdZE
-# vQL7+EV6qsZ+5E0EYFcmljANBgkqhkiG9w0BAQEFAASBgBOYFJECVC/2TrK3Yzdt
-# Kj2x/sq7fbPeP0dyQvbYVrSh6VpS3NJLK6ZdGfklFm/CH1XAtrNCGA5/rOwRWlC9
-# xe5NqvTqDhCCZY2qxaG09rxD8NtsqRGFexMTEOQY4GtNJPNMuHfEvQyZNMFlnyfD
-# FOkVXY5NPMHL4WvUzuY61+5T
+# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBTw4mi8
+# 3DUPh1icbHY3uCcDRQDezDANBgkqhkiG9w0BAQEFAASBgG1eZKy50cewRH/q/9rj
+# vOOg8Mfp+uUDJ1cSNM4hz+lSy0O3VAvuFGGljnd7vWMsT2JQAngGT+ntbz9JQf40
+# dSSUzqXUaVOdbCzLmykQ9vfo3a3iUxtQ8TbfTZL7JX5ZBvcmP08sCcpuVLCeUE5H
+# h3ted2BH3N4/rtJMWvCgsbDs
 # SIG # End signature block

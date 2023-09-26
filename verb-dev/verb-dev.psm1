@@ -5,7 +5,7 @@
 .SYNOPSIS
 VERB-dev - Development PS Module-related generic functions
 .NOTES
-Version     : 1.5.26
+Version     : 1.5.27
 Author      : Todd Kadrie
 Website     :	https://www.toddomation.com
 Twitter     :	@tostka
@@ -4788,6 +4788,7 @@ function get-ISEOpenFilesExported {
     Github      : https://github.com/tostka/verb-dev
     Tags        : Powershell,ISE,development,debugging
     REVISIONS
+    * 9:24 AM 9/14/2023 CBH add:demo of pulling lastwritetime and using to make automatd decisions, or comparison reporting (as this returns a fullname, not a file object)
     * 1:55 PM 3/29/2023 flipped alias (clashed) iIseOpen -> gIseOpen
     * 8:51 AM 3/8/2023 init
     .DESCRIPTION
@@ -4804,6 +4805,12 @@ function get-ISEOpenFilesExported {
     .EXAMPLE
     PS> get-ISEOpenFilesExported -Tag MFA | import-ISEOpenFiles ; 
     Example pipelining the outputs into import-ISEOPenFiles() (via pipeline support for it's -FilePath param)
+    .EXAMPLE
+    PS> get-ISEOpenFilesExported | %{gci $_} | sort LastWriteTime | ft -a fullname,lastwritetime ; 
+    Example finding the 'latest' (newest LastWritTime) and echoing for review
+    .EXAMPLE
+    get-ISEOpenFilesExported | %{gci $_} | sort LastWriteTime | select -last 1 | select -expand fullname | import-ISEOpenFiles ; 
+    Example finding the 'latest' (newest LastWritTime), and then importing into ISE.
     .LINK
     https://github.com/tostka/verb-dev
     #>
@@ -7633,6 +7640,7 @@ function Step-ModuleVersionCalculated {
     AddedWebsite: www.thesurlyadmin.com
     AddedTwitter: @thesurlyadm1n
     REVISIONS
+    * 8:02 AM 6/23/2023 fix: #433: # 2:20 PM 6/22/2023 if you're going to use a param with boolean, they have to be colon'd: -PassThru:$true (built into v1.5.27)
     * 2:18 PM 6/2/2023 added: Try/Catch around all critical items; added test for .psm1 diverge <<<<<< HEAD tags; expanded ipmo -fo -verb tests to include ErrorVariable and Passthru, capture into variable, for info tracking down compile fails.
     * 11:20 AM 12/12/2022 completely purged verb-* require stmts too risky w recursive load triggers:,verb-IO, verb-logging, verb-Mods, verb-Text
     * 3:57 PM 5/26/2022 backstop profile rgxs ; implment pre-cache & post-reload of installed modules ; 
@@ -10633,8 +10641,8 @@ Export-ModuleMember -Function backup-ModuleBuild,check-PsLocalRepoRegistration,c
 # SIG # Begin signature block
 # MIIELgYJKoZIhvcNAQcCoIIEHzCCBBsCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUGGi+BX+SCMYWVYo04iemXbak
-# LbegggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUba1+F+tN8XDVCfO8eWUMLvuT
+# 0d6gggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
 # MCwxKjAoBgNVBAMTIVBvd2VyU2hlbGwgTG9jYWwgQ2VydGlmaWNhdGUgUm9vdDAe
 # Fw0xNDEyMjkxNzA3MzNaFw0zOTEyMzEyMzU5NTlaMBUxEzARBgNVBAMTClRvZGRT
 # ZWxmSUkwgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBALqRVt7uNweTkZZ+16QG
@@ -10649,9 +10657,9 @@ Export-ModuleMember -Function backup-ModuleBuild,check-PsLocalRepoRegistration,c
 # AWAwggFcAgEBMEAwLDEqMCgGA1UEAxMhUG93ZXJTaGVsbCBMb2NhbCBDZXJ0aWZp
 # Y2F0ZSBSb290AhBaydK0VS5IhU1Hy6E1KUTpMAkGBSsOAwIaBQCgeDAYBgorBgEE
 # AYI3AgEMMQowCKACgAChAoAAMBkGCSqGSIb3DQEJAzEMBgorBgEEAYI3AgEEMBwG
-# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBTw4mi8
-# 3DUPh1icbHY3uCcDRQDezDANBgkqhkiG9w0BAQEFAASBgG1eZKy50cewRH/q/9rj
-# vOOg8Mfp+uUDJ1cSNM4hz+lSy0O3VAvuFGGljnd7vWMsT2JQAngGT+ntbz9JQf40
-# dSSUzqXUaVOdbCzLmykQ9vfo3a3iUxtQ8TbfTZL7JX5ZBvcmP08sCcpuVLCeUE5H
-# h3ted2BH3N4/rtJMWvCgsbDs
+# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBRjc5sx
+# 2Nq2grAITqy2d8KN3mg/ADANBgkqhkiG9w0BAQEFAASBgJAp57R6Q7xLR3dBTOIg
+# syKWYURkmcoT4TQBpeV4QFHU2Vd5XjjyGSdHtolRHrEkskq+VXrFxViNuF6W3DPI
+# d5BxRLb/TitpnGcJeC4RWfzCdVnjxpNb8J4QjSDS/nbnSBEb4pbrgz6aETm5MVA2
+# p1wjY74B0kaxqid/IfRDEu59
 # SIG # End signature block
