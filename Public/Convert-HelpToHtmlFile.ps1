@@ -10,15 +10,15 @@ function Convert-HelpToHtmlFile {
     Twitter     : @tostka / http://twitter.com/tostka
     CreatedDate : 2023-10-02
     FileName    : Convert-HelpToHtmlFile.ps1
-    License     : MIT License
-    Copyright   : (c) 2023 Todd Kadrie
-    Github      : https://github.com/tostka/verb-XXX
-    Tags        : Powershell
+    License     : (None Asserted)
+    Copyright   : (None Asserted)
+    Github      : https://github.com/tostka/verb-dev
+    Tags        : Powershell, development, html, markdown, conversion
     AddedCredit : Øyvind Kallstad @okallstad
     AddedWebsite: https://communary.net/
     AddedTwitter: @okallstad / https://twitter.com/okallstad
     REVISIONS
-    * 9:39 AM 10/3/2023 add: -markdownhelp echos ; add:CBH expl that demos capture & recycle of output filename through convert-HtmlToMarkdown equivelent markdown .md doc. The CBH -> markdown via PlattyPS New-MarkdownHelp yields decent leaf cmdlet docs, but doesn't create the same holistic module nav-menued .html doc (which can be manually created with convert-htmlToMarkdown, tho the menues don't work)
+    * 9:50 AM 10/3/2023 add: -markdownhelp echos ; add:CBH expl that demos capture & recycle of output filename through convert-HtmlToMarkdown equivelent markdown .md doc. The CBH -> markdown via PlattyPS New-MarkdownHelp yields decent leaf cmdlet docs, but doesn't create the same holistic module nav-menued .html doc (which can be manually created with convert-htmlToMarkdown, tho the menues don't work)
     * 3:58 PM 10/2/2023 added -MarkdownHelp and simple call branching each commandlet process into plattyps to output quick markdown .md files in the parent dir of -Destination ; 
     Moving this into verb-dev, no reason it should sit in it's own repo (renaming Invoke-CreateModuleHelpFile -> Convert-HelpToHtmlFile) ; 
     ren & alias ModuleName -> CodeObject ;
@@ -40,11 +40,17 @@ function Convert-HelpToHtmlFile {
     Updated variant of Øyvind Kallstad's Invoke-CreateModuleHelpFile() function. 
 
     Dependancies:
-    - jquery; the bootstrap framework & jasny bootstrap add-on.
+    - Rendered html uses jquery, the bootstrap framework & jasny bootstrap add-on (and following .css files):
+            jasny-bootstrap.min.css
+            jasny-bootstrap.min.js
+            jquery-1.11.1.min.js
+            navmenu.css
+            bootstrap.min.css
+            bootstrap.min.js
     - my verb-dev:get-HelpParsed() (to parse script CBH into rough equivelent's of get-module metadata outputs, drops missing details from output if unavailable).
 
     .PARAMETER CodeObject
-    Name of module or script. [-CodeObject myMod]
+    Name of module or path to script [-CodeObject myMod]
     .PARAMETER Destination
     Directoy into which 'genericly-named output files should be written, or the full path to a specified output file[-Destination c:\pathto\MyModuleHelp.html]
     .PARAMETER SkipDependencyCheck
@@ -55,12 +61,10 @@ function Convert-HelpToHtmlFile {
     Switch to use PlatyPS to output markdown help variants[-MarkdownHelp]
     .PARAMETER NoPreview
     Switch to suppress trailing preview of html in default browser[-NoPreview]
-    .PARAMETER whatIf
-    Whatif Flag  [-whatIf]
     .INPUTS
-    None. Does not accepted piped input.(.NET types, can add description)
+    None. Does not accepted piped input.
     .OUTPUTS
-    None. Returns no objects or output (.NET types)
+    System.Object.string converted file path(s) returned to pipeline
     System.Boolean
     [| get-member the output to see what .NET obj TypeName is returned, to use here]
     .EXAMPLE
@@ -89,7 +93,7 @@ function Convert-HelpToHtmlFile {
     [Alias('Invoke-CreateModuleHelpFile')]
     PARAM(
         # Name of module. Note! The module must be imported before running this function.
-        [Parameter(Mandatory = $true,HelpMessage="Name of module. Note! The module must be imported before running this function[-CodeObject myMod]")]
+        [Parameter(Mandatory = $true,HelpMessage="Name of module or path to script [-CodeObject myMod]")]
             [ValidateNotNullOrEmpty()]
             [Alias('ModuleName','Name')]
             [string] $CodeObject,
