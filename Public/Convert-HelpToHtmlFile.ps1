@@ -18,6 +18,7 @@ function Convert-HelpToHtmlFile {
     AddedWebsite: https://communary.net/
     AddedTwitter: @okallstad / https://twitter.com/okallstad
     REVISIONS
+    * 9:06 AM 10/3/2023 add:CBH expl that demos capture & recycle of output filename through convert-HtmlToMarkdown equivelent markdown .md doc. The CBH -> markdown via PlattyPS New-MarkdownHelp yields decent leaf cmdlet docs, but doesn't create the same holistic module nav-menued .html doc (which can be manually created with convert-htmlToMarkdown, tho the menues don't work)
     * 3:58 PM 10/2/2023 added -MarkdownHelp and simple call branching each commandlet process into plattyps to output quick markdown .md files in the parent dir of -Destination ; 
     Moving this into verb-dev, no reason it should sit in it's own repo (renaming Invoke-CreateModuleHelpFile -> Convert-HelpToHtmlFile) ; 
     ren & alias ModuleName -> CodeObject ;
@@ -32,11 +33,15 @@ function Convert-HelpToHtmlFile {
     10/18/2014 OK's posted rev 1.1
     .DESCRIPTION
     Convert-HelpToHtmlFile.ps1 - Create a HTML help file for a PowerShell module or script.
-    For modules, generates a full HTML help file for all commands in the module.
-    For scripts it generates same for the script's CBH content. 
+    
+    - For modules, generates a full HTML help file for all commands in the module, with a nav menu at the top.
+    - For scripts it generates same for the script's CBH content. 
 
-    This function is dependent on jquery, the bootstrap framework and the jasny bootstrap add-on.
-    Also relies on my verb-dev:get-HelpParsed() to parse script CBH into rough equivelent's of get-module metadata outputs.
+    Updated variant of Øyvind Kallstad's Invoke-CreateModuleHelpFile() function. 
+
+    Dependancies:
+    - jquery; the bootstrap framework & jasny bootstrap add-on.
+    - my verb-dev:get-HelpParsed() (to parse script CBH into rough equivelent's of get-module metadata outputs, drops missing details from output if unavailable).
 
     .PARAMETER CodeObject
     Name of module or script. [-CodeObject myMod]
@@ -59,18 +64,26 @@ function Convert-HelpToHtmlFile {
     System.Boolean
     [| get-member the output to see what .NET obj TypeName is returned, to use here]
     .EXAMPLE
-    PS> Convert-HelpToHtmlFile -CodeObject 'verb-text' -Dest 'c:\temp\verb-text_HLP.html' -verbose ; 
-    Generate Html Help file for 'verb-text' module and save it as 'c:\temp\verb-text_HLP.html' with verbose output.
+    PS> Convert-HelpToHtmlFile -CodeObject 'verb-text' -Destination 'c:\temp\verb-text_HLP.html' -verbose ; 
+    Generate Html Help file for 'verb-text' module and save it as explicit filename 'c:\temp\verb-text_HLP.html' with verbose output.
     .EXAMPLE
     PS> Convert-HelpToHtmlFile -CodeObject 'c:\usr\work\ps\scripts\move-ConvertedVidFiles.ps1' -Script -destination 'c:\temp\'  -verbose ; 
     Generate Html Help file for the 'move-ConvertedVidFiles.ps1' script and save it as with a generated default name (move-ConvertedVidFiles_HELP.html) to the 'c:\temp\' directory with verbose output.
-    EXDESCRIPTION
+    .EXAMPLE
+    PS> Convert-HelpToHtmlFile -CodeObject 'verb-text' -Destination 'c:\temp\' -verbose ; 
+    Generate Html Help file for 'verb-text' module and save it as specified directory, with generated xxx_HELP.html filename, and verbose output.
+    .EXAMPLE
+    PS> write-verbose "convert CBH for the verb-text module into html & assign the returned output path(s) to $ifile" ; 
+    PS> $ifile = Convert-HelpToHtmlFile -ModuleName 'verb-text' -destination 'c:\temp\' ; 
+    PS> write-verbose "then convert the .html output files to markdown using the convert-html-ToMarkdown module/command (recycling the input file names)" ; 
+    PS> $ifile | ?{$_ -match '\.html$'} | %{$ofile = $_.replace('/','\').replace('.html','.md') ; write-host "==$($ifile)->$($ofile):" ; get-content $_ -raw -force | Convert-HtmlToMarkdown -UnknownTags bypass | Set-Content -path $ofile -enc utf8 -force} ; 
+    Demo conversion of a module's CBH help to first html, and then the .html to markdown .md equivelent (via Brian Lalonde's seperate convert-HtmlToMarkdown binary module)
     .LINK
-    https://github.com/tostka/Convert-HelpToHtmlFile
+    https://github.com/tostka/Invoke-CreateModuleHelpFile
+    https://github.com/tostka/verb-dev
     .LINK
     https://github.com/gravejester/Invoke-CreateModuleHelpFile
     .LINK
-    [ name related topic(one keyword per topic), or http://|https:// to help, or add the name of 'paired' funcs in the same niche (enable/disable-xxx)]
     #>
     [CmdletBinding()]
     [Alias('Invoke-CreateModuleHelpFile')]
