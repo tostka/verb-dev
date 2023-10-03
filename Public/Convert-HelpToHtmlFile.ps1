@@ -18,7 +18,7 @@ function Convert-HelpToHtmlFile {
     AddedWebsite: https://communary.net/
     AddedTwitter: @okallstad / https://twitter.com/okallstad
     REVISIONS
-    * 9:06 AM 10/3/2023 add:CBH expl that demos capture & recycle of output filename through convert-HtmlToMarkdown equivelent markdown .md doc. The CBH -> markdown via PlattyPS New-MarkdownHelp yields decent leaf cmdlet docs, but doesn't create the same holistic module nav-menued .html doc (which can be manually created with convert-htmlToMarkdown, tho the menues don't work)
+    * 9:39 AM 10/3/2023 add: -markdownhelp echos ; add:CBH expl that demos capture & recycle of output filename through convert-HtmlToMarkdown equivelent markdown .md doc. The CBH -> markdown via PlattyPS New-MarkdownHelp yields decent leaf cmdlet docs, but doesn't create the same holistic module nav-menued .html doc (which can be manually created with convert-htmlToMarkdown, tho the menues don't work)
     * 3:58 PM 10/2/2023 added -MarkdownHelp and simple call branching each commandlet process into plattyps to output quick markdown .md files in the parent dir of -Destination ; 
     Moving this into verb-dev, no reason it should sit in it's own repo (renaming Invoke-CreateModuleHelpFile -> Convert-HelpToHtmlFile) ; 
     ren & alias ModuleName -> CodeObject ;
@@ -206,13 +206,15 @@ function Convert-HelpToHtmlFile {
         } ; 
 
         if($MarkdownHelp){
+            $smsg = "-MarkdownHelp specified: Loading PlatyPS module & will generate leaf commandlet '[cmdlet name].md' output files in specified destination dir"
+            write-host -ForegroundColor yellow $smsg  ;
+            write-verbose "Test platyPS dependancy..." ; 
             TRY{Import-Module platyPS -ea STOP} CATCH {
                 $ErrTrapd=$Error[0] ;
                 $smsg = "`n$(($ErrTrapd | fl * -Force|out-string).trim())" ;
                 write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" ;
             } ; 
         } ; 
-
     }  ;  # BEG-E
     PROCESS {
         $Error.Clear() ; 
