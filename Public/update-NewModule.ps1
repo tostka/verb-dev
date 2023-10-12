@@ -15,7 +15,7 @@ function update-NewModule {
     Github      : https://github.com/tostka/verb-dev
     Tags        : Powershell,Module,Build,Development
     REVISIONS
-    # 12:26 PM 10/12/2023 subst update to accomodate included non-psm1/psd1 
+    # 1:03 PM 10/12/2023 updated cached copy of get-foldertmpty, to latest; subst update to accomodate included non-psm1/psd1 
     resource files (in new Resource subdir); *12:29 PM 10/12/2023 add: 
     get-folderempty(), and code to loop out and remove empty folders in the module 
     tree; code to flatten move resources to the verb-MOD\verb-MOD root from 
@@ -360,7 +360,7 @@ function update-NewModule {
         Function get-FolderEmpty {
             <#
             .SYNOPSIS
-            get-FolderEmpty - Returns empty subfolders below specified folder (has Recusive param as well).
+            get-FolderEmpty.ps1 - Returns empty subfolders below specified folder (has Recusive param as well).
             .NOTES
             Version     : 1.0.0
             Author      : Todd Kadrie
@@ -373,9 +373,10 @@ function update-NewModule {
             Github      : https://github.com/tostka/verb-io
             Tags        : Powershell,Markdown,Input,Conversion
             REVISION
+            * 1:02 PM 10/12/2023 fix typo in proc: $folder -> $item
             * 3:22 PM 10/11/2023 init
             .DESCRIPTION
-            get-FolderEmpty - Returns empty subfolders below specified folder (has Recusive param as well)
+            get-FolderEmpty.ps1 - Returns empty subfolders below specified folder (has Recusive param as well)
     
             .PARAMETER Folder
 	        Directory from which to find empty subdirectories[-Folder c:\tmp\]
@@ -412,7 +413,7 @@ function update-NewModule {
 			        $sBnrS="`n#*------v PROCESSING : v------" ; 
 			        write-verbose $sBnrS ;
 			        $pltGCI=[ordered]@{
-				        Path = $folder ; 
+				        Path = $item ; 
 				        Directory = $true ;
 				        Recurse=$($Recurse) ; 
 				        erroraction = 'STOP' ;
