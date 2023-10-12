@@ -15,6 +15,31 @@ function update-NewModule {
     Github      : https://github.com/tostka/verb-dev
     Tags        : Powershell,Module,Build,Development
     REVISIONS
+    # 12:26 PM 10/12/2023 subst update to accomodate included non-psm1/psd1 
+    resource files (in new Resource subdir); *12:29 PM 10/12/2023 add: 
+    get-folderempty(), and code to loop out and remove empty folders in the module 
+    tree; code to flatten move resources to the verb-MOD\verb-MOD root from 
+    Resource & Licenses etc (won't pass test-modulemanifest or build if can't be 
+    validated in root). ; add: moved $rgxModExtIncl out to a param, to permit on 
+    the fly tweaking/override; moved swath of constants to top/central loc; add: 
+    $rgxSrcFilesPostExcl (rgx to exclude exported temp breakpoint files from 
+    inclusion in module build); $rgxPsd1FileListDirs = 
+    "\\(Docs|Licenses|Resource)\\" ;  # dirs of files to be included in the 
+    manifest FileList key     $rgxPsd1FileListExcl = 
+    "\\(\.vscode|ScriptAnalyzer-Results-|logs\\)|-LOG-BATCH-EXEC-" ; # file filter 
+    to exclude from mani FilList key     $rgxLicFileFilter = 
+    '\\(Resource|Licenses)\\' ; # exempt extensionless license files from removal 
+    in temp profile copy     # # post filter excludes regex, dir names in fullname 
+    path that should never be included in build, logs, and temp versions of 
+    .ps[md]1 files.     $rgxSrcFilesPostExcl = 
+    "\\(Package|Tests|logs)\\|(\.ps[dm]1_(\d+-\d+[AP]M|TMP)|-LOG-BATCH-EXEC-\d+-\d+[AP]M-log\.txt|\\(fingerprint|Psd1filelist))$" 
+    ;      # rgx to exclude exported temp breakpoint files from inclusion in module 
+    build     $rgxPsd1BPExcl = "\\(Public|Internal|Private)\\.*-ps1-BP\.xml$" ;     
+     $MergeBuildExcl = "\\(Public|Internal|External|Private)\\.*.ps1$" ;  expand 
+    $rgxIncludeDirs to cover External & Private variant names as well - this is 
+    used solely to exclude signing of component files that will be signed as a 
+    monolithic .psm1 ;  add: code to manully calc & update the .psd1 FileList 
+    key/value;  
     # 3:03 PM 6/22/2023 #361: splice in better error-handling fail through code from psb-psparamt ($budrv covers for empty referrals)
     * 1:46 PM 3/22/2023 #1212:Publish-Module throws error if repo.SourceLocation isn't testable (when vpn is down), test and throw prescriptive error (otherwise is obtuse); expanded catch's they were coming up blank
     * 11:20 AM 12/12/2022 completely purged rem'd require stmts, confusing, when they echo in build..., ,verb-IO, verb-logging, verb-Mods, verb-Text
@@ -125,29 +150,31 @@ function update-NewModule {
     [Alias('process-NewModule')]
     PARAM(
         [Parameter(Position=0,Mandatory=$True,ValueFromPipeline=$true,HelpMessage="ModuleName[-ModuleName verb-AAD]")]
-        [ValidateNotNullOrEmpty()]
-        [string]$ModuleName,
+            [ValidateNotNullOrEmpty()]
+            [string]$ModuleName,
         [Parameter(Mandatory=$True,HelpMessage="ModDirPath[-ModDirPath C:\sc\verb-ADMS]")]
-        [ValidateNotNullOrEmpty()]
-        [ValidateScript({Test-Path $_ -PathType 'Container'})]
+            [ValidateNotNullOrEmpty()]
+            [ValidateScript({Test-Path $_ -PathType 'Container'})]
         [system.io.fileinfo]$ModDirPath,
         [Parameter(Position=0,Mandatory=$True,ValueFromPipeline=$true,ValueFromPipelineByPropertyName=$true,HelpMessage="Target local Repo[-Repository lyncRepo]")]
-        [ValidateNotNullOrEmpty()]
-        [string]$Repository,
+            [ValidateNotNullOrEmpty()]
+            [string]$Repository,
         [Parameter(HelpMessage="Flag that indicates Module should be Merged into a monoolithic .psm1 [-Merge]")]
-        [switch] $Merge,
+            [switch] $Merge,
         [Parameter(HelpMessage="Flag that indicates Module should be republished into local Repo (skips ConvertTo-ModuleDynamicTDO & Sign-file steps) [-Republish]")]
-        [switch] $Republish,
+            [switch] $Republish,
         [Parameter(HelpMessage="Flag that indicates Pester test script should be run, at end of processing [-RunTest]")]
-        [switch] $RunTest,
+            [switch] $RunTest,
         [Parameter(HelpMessage="Skip BuildInfo use (workaround for hangs in that module)[-NoBuildInfo]")]
-        [switch] $NoBuildInfo,
+            [switch] $NoBuildInfo,
         [Parameter(HelpMessage="Optional Explicit 3-digit RequiredVersion specification (as contrasts with using current Manifest .psd1 ModuleVersion value)[-Version 2.0.3]")]
-        [version]$RequiredVersion,
+            [version]$RequiredVersion,
+        [Parameter(HelpMessage="regex reflecting an array of file extension strings to identify 'external' dependancy files in the module directory structure that are to be included in the distributed module(provided to provide run-time override)")]
+            [string[]]$rgxModExtIncl='\.(cab|cat|cmd|config|cscfg|csdef|css|dll|dylib|gif|html|ico|jpg|js|json|map|Materialize|MaterialUI|md|pdb|php|png|ps1|ps1xml|psd1|psm1|rcs|reg|snippet|so|txt|vscode|wixproj|wxi|xaml|xml|yml|zip)',
         [Parameter(HelpMessage="Debugging Flag [-showDebug]")]
-        [switch] $showDebug,
+            [switch] $showDebug,
         [Parameter(HelpMessage="Whatif Flag  [-whatIf]")]
-        [switch] $whatIf
+            [switch] $whatIf
     ) ;
     # function self-name (equiv to script's: $MyInvocation.MyCommand.Path) ;
     ${CmdletName} = $PSCmdlet.MyInvocation.MyCommand.Name ;
@@ -200,6 +227,31 @@ function update-NewModule {
     $Retries = 4 ;
     $RetrySleep = 5 ;
 
+    # constants relocated centrally
+    # exts for files that are bundled into final build pkg (and get copied to profile)
+    $ModExtIncl='*.cab','*.cat','*.cmd','*.config','*.cscfg','*.csdef','*.css','*.dll','*.dylib','*.gif','*.html','*.ico','*.jpg','*.js','*.json','*.map','*.Materialize','*.MaterialUI','*.md','*.pdb','*.php','*.png','*.ps1','*.ps1xml','*.psd1','*.psm1','*.rcs','*.reg','*.snippet','*.so','*.txt','*.vscode','*.wixproj','*.wxi','*.xaml','*.xml','*.yml','*.zip' ;
+    # rgx equiv of above
+    if(-not $rgxModExtIncl){
+        # should come down from parameter
+        $rgxModExtIncl='\.(cab|cat|cmd|config|cscfg|csdef|css|dll|dylib|gif|html|ico|jpg|js|json|map|Materialize|MaterialUI|md|pdb|php|png|ps1|ps1xml|psd1|psm1|rcs|reg|snippet|so|txt|vscode|wixproj|wxi|xaml|xml|yml|zip)' ;
+    } ; 
+    # trim down above into the manifest.psd1 FileList - non native module exec code files from the rgxModExtIncl
+    $rgxPsd1FileList = $rgxModExtIncl.replace('ps1|','').replace('psm1|','').replace('psd1|','') ; 
+    # files that are explicitly excluded from build/pkg/filelist by name
+    # gci -exclude spec:
+    # add exclude of pester .md module creation info to both
+    $exclude = @('main.js','rebuild-module.ps1','New-Module-Create.md') ; 
+    # gci post-filtered excludes from build/pkg
+    $excludeMatch = @('.git','.vscode','New-Module-Create.md') ;
+    [regex] $excludeMatchRegEx = '(?i)' + (($excludeMatch |ForEach-Object {[regex]::escape($_)}) -join "|") + '' ;
+    $rgxPsd1FileListDirs = "\\(Docs|Licenses|Resource)\\" ;  # dirs of files to be included in the manifest FileList key
+    $rgxPsd1FileListExcl = "\\(\.vscode|ScriptAnalyzer-Results-|logs\\)|-LOG-BATCH-EXEC-" ; # file filter to exclude from mani FilList key
+    $rgxLicFileFilter = '\\(Resource|Licenses)\\' ; # exempt extensionless license files from removal in temp profile copy
+    # # post filter excludes regex, dir names in fullname path that should never be included in build, logs, and temp versions of .ps[md]1 files.
+    $rgxSrcFilesPostExcl = "\\(Package|Tests|logs)\\|(\.ps[dm]1_(\d+-\d+[AP]M|TMP)|-LOG-BATCH-EXEC-\d+-\d+[AP]M-log\.txt|\\(fingerprint|Psd1filelist))$" ; 
+    # rgx to exclude exported temp breakpoint files from inclusion in module build
+    $rgxPsd1BPExcl = "\\(Public|Internal|Private)\\.*-ps1-BP\.xml$" ; 
+    $MergeBuildExcl = "\\(Public|Internal|External|Private)\\.*.ps1$" ; 
     #*======v FUNCTIONS v======
 
     # suppress VerbosePreference:Continue, if set, during mod loads (VERY NOISEY)
@@ -302,6 +354,79 @@ function update-NewModule {
         $VerbosePreference = $VerbosePrefPrior ;
         $verbose = ($VerbosePreference -eq "Continue") ;
     } ;
+
+    #*------v get-FolderEmpty.ps1 v------
+    if(-not (get-command get-FolderEmpty -ea 0)){
+        Function get-FolderEmpty {
+            <#
+            .SYNOPSIS
+            get-FolderEmpty - Returns empty subfolders below specified folder (has Recusive param as well).
+            .NOTES
+            Version     : 1.0.0
+            Author      : Todd Kadrie
+            Website     : http://www.toddomation.com
+            Twitter     : @tostka / http://twitter.com/tostka
+            CreatedDate : 2021-06-21
+            FileName    : get-FolderEmpty.ps1
+            License     : MIT License
+            Copyright   : (c) 2020 Todd Kadrie
+            Github      : https://github.com/tostka/verb-io
+            Tags        : Powershell,Markdown,Input,Conversion
+            REVISION
+            * 3:22 PM 10/11/2023 init
+            .DESCRIPTION
+            get-FolderEmpty - Returns empty subfolders below specified folder (has Recusive param as well)
+    
+            .PARAMETER Folder
+	        Directory from which to find empty subdirectories[-Folder c:\tmp\]
+	        PARAMETER Recurse
+	        Recurse directory switch[-Recurse]
+            .INPUTS
+            Accepts piped input.
+            .OUTPUTS
+            System.IO.DirectoryInfo[] Array of folder objects
+            .EXAMPLE
+            PS> get-FolderEmpty -folder $folder -recurse -verbose ' 
+            Locate and remove empty subdirs, recursively below the specified directory (single pass, doesn't remove parent folders, see below for looping recursive).
+           .EXAMPLE
+	        PS > $folder = 'C:\tmp\test' ;
+	        PS > Do {
+	        PS > 	write-host -nonewline "." ;
+	        PS > 	if($mtdirs = get-FolderEmpty -folder $folder -recurse -verbose){
+	        PS > 		$mtdirs | remove-item -ea 0 -verbose;
+	        PS > 	} ;
+	        PS > } Until (-not(get-FolderEmpty -folder $folder -recurse  -verbose)) ;
+	        Locate and remove empty subdirs, recursively below the specified directory, repeat pass until all empty subdirs are removed.
+            .LINK
+            https://github.com/tostka/verb-IO
+            #>
+            [CmdletBinding()]
+            PARAM(
+                [Parameter(Position=0,Mandatory=$True,ValueFromPipeline=$true,HelpMessage="Directory from which to find empty subdirectories[-Folder c:\tmp\]")]
+                    [System.IO.DirectoryInfo[]]$Folder,
+                [Parameter(HelpMessage="Recurse directory switch[-Recurse]")]
+                    [switch]$Recurse
+            )  ; 
+            PROCESS {
+                foreach($item in $folder){
+			        $sBnrS="`n#*------v PROCESSING : v------" ; 
+			        write-verbose $sBnrS ;
+			        $pltGCI=[ordered]@{
+				        Path = $folder ; 
+				        Directory = $true ;
+				        Recurse=$($Recurse) ; 
+				        erroraction = 'STOP' ;
+			        } ;
+			        $smsg = "get-childitem w`n$(($pltGCI|out-string).trim())" ; 
+			        if($verbose){if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level VERBOSE } 
+			        else{ write-verbose "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; } ; 
+			        Get-ChildItem @pltGCI | Where-Object { $_.GetFileSystemInfos().Count -eq 0 } | write-output ; 
+			        write-verbose $sBnrS.replace('-v','-^').replace('v-','^-') ;
+                } ; 
+            } ;  
+        } ; 
+    } ; 
+    #*------^ get-FolderEmpty.ps1 ^------
 
     #*======^ END FUNCTIONS ^======
 
@@ -445,7 +570,7 @@ function update-NewModule {
     # "C:\sc\verb-AAD" ; C:\sc\verb-AAD\Tests\verb-AAD.tests.ps1
     $TestScriptPath = "$($ModDirPath)\Tests\$($ModuleName).tests.ps1" ;
     $rgxSignFiles='\.(CAT|MSI|JAR,OCX|PS1|PSM1|PSD1|PS1XML|PSC1|MSP|CMD|BAT|VBS)$' ;
-    # expand to cover External & Private variant names as well
+    # expand to cover External & Private variant names as well - this is used solely to exclude signing of component files that will be signed as a monolithic .psm1
     $rgxIncludeDirs='\\(Public|Internal|External|Private|Classes)\\' ;
     $rgxOldFingerprint = 'fingerprint\._\d{8}-\d{4}(A|P)M' ; 
 
@@ -960,7 +1085,94 @@ $(if($Merge){'MERGE parm specified as well:`n-Merge Public|Internal|Classes incl
         Break ;
     } ;    
 
-    # Update the psd1 FunctionsToExport : (moved to ConvertTo-ModuleDynamicTDO, after the export-modulemember code)
+    # ==Update the psd1 FunctionsToExport : (moved to ConvertTo-ModuleDynamicTDO, after the export-modulemember code)
+
+    <# ==Update the psd1 FileList (external non-code files resources (normally in Resources) that need to be bundled in pkg: 
+        - only included in pkg/installed, if in the psd1.filelist key:value 
+        - have to resolve and access dynamically them using gmo
+        # this approach stocks an indexed hash with the associated path of each
+        $myModule = Get-Module YourModule ;
+        $ResFiles = @{} ;
+        foreach ($file in $myModule.FileList){
+            $path = Join-Path $myModule.ModuleBase $file ;
+            $ResFiles[$file] = $path ;
+        } ;
+        $myCsspath = $resfiles['bootstrap.min.css'] ; 
+        # they'll all be tossed into the module root dir/$myModule.ModuleBase dir unorganized when installed
+    #>
+    # 1) assemble the list of non-code/class module resourcs:
+    # $moddirpath: C:\sc\verb-dev
+    $pltGci=[ordered]@{Path=$moddirpath ;Recurse=$true ;File = $true ; Exclude=$exclude; ErrorAction="Stop" ; } ;
+    #$Psd1filelist = Get-ChildItem @pltGci | ?{($_.extension -match $rgxPsd1FileList -and $_.fullname -notmatch $rgxPsd1FileListExcl) -OR $_.fullname -match $rgxPsd1FileListDirs} | select -expand name ; 
+    # add: postfilter breakpoint filters
+    $Psd1filelist = Get-ChildItem @pltGci | ?{($_.extension -match $rgxPsd1FileList -and $_.fullname -notmatch $rgxPsd1FileListExcl) -OR $_.fullname -match $rgxPsd1FileListDirs} | 
+        ?{$_.fullname -notmatch $rgxPsd1BPExcl} ;
+    # add fullname variant for flatten copying resources
+    $Psd1filelistFull =  $Psd1filelist | select -expand fullname ; 
+    # and name only for the manifest FileList key
+    $Psd1filelist  = $Psd1filelist | select -expand name ; 
+    # export the list extensionless xml, to let it drop off of the Psd1filelist 
+    $rgxPsd1FileListLine = '((#\s)*)FileList((\s)*)=((\s)*).*' ;
+    if($Psd1filelist){
+        $smsg = "`$Psd1filelist populated: xXML:$($ModDirPath)\Psd1filelist" ; 
+        if($verbose){if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level VERBOSE } 
+        else{ write-verbose "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; } ; $smsg = "" ; 
+        $Psd1filelist | sort | export-clixml -path "$($ModDirPath)\Psd1filelist" ;
+    
+        # 2) then update the psd1.filelist prop into an array of the unpathed name's of each file found
+        # looks like by #906, we're using $ModPsdPath - finished, rather than the temp file? 
+        $smsg = "Updating the Psd1 FileList to with populated `$Psd1filelist..." ;
+        if($verbose){ if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug
+        else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; } ;
+
+        #$tf = $PsdNameTmp ;
+        $tf = $ModPsdPath ; 
+        # switch back to manual local updates
+        $pltSCFE=[ordered]@{Path = $tf ; PassThru=$true ;Verbose=$($verbose) ;whatif= $($whatif) ; }
+        $psd1ExpMatch = $null ; 
+        if($psd1ExpMatch = Get-ChildItem $tf | select-string -Pattern $rgxPsd1FileListLine ){
+            # 2-step it, we're getting only $value[-1] through the pipeline
+            # add | out-string to collapse object arrays
+            $newContent = (Get-Content $tf) | Foreach-Object {
+                $_ -replace $rgxPsd1FileListLine , ("FileList = " + "@('" + $($Psd1filelist -join "','") + "')")
+            } | out-string ;
+            # this writes to $PsdNameTmp
+            $bRet = Set-ContentFixEncoding @pltSCFE -Value $newContent ;
+            if(-not $bRet -AND -not $whatif){throw "Set-ContentFixEncoding $($tf)!" } ;
+            $PassStatus += ";Set-Content:UPDATED";
+        } else {
+            $smsg = "UNABLE TO Regex out $($rgxPsd1FileListLine) from $($tf)`nFileList CAN'T BE UPDATED!" ;
+            if($verbose){ if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN } #Error|Warn|Debug
+            else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; } ;
+        } ;
+    } else {
+        # unpopulated, default it rem'd: # FileList = @()
+        $smsg = "Updating the Psd1 FileList to with populated `$Psd1filelist..." ;
+        if($verbose){ if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug
+        else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; } ;
+
+        #$tf = $PsdNameTmp ;
+        $tf = $ModPsdPath ; 
+        # switch back to manual local updates
+        $pltSCFE=[ordered]@{Path = $tf ; PassThru=$true ;Verbose=$($verbose) ;whatif= $($whatif) ; }
+        $psd1ExpMatch = $null ; 
+        if($psd1ExpMatch = Get-ChildItem $tf | select-string -Pattern $rgxPsd1FileListLine ){
+            # 2-step it, we're getting only $value[-1] through the pipeline
+            # add | out-string to collapse object arrays
+            $newContent = (Get-Content $tf) | Foreach-Object {
+                $_ -replace $rgxPsd1FileListLine , ("# FileList = @()")
+            } | out-string ;
+            # this writes to $PsdNameTmp
+            $bRet = Set-ContentFixEncoding @pltSCFE -Value $newContent ;
+            if(-not $bRet -AND -not $whatif){throw "Set-ContentFixEncoding $($tf)!" } ;
+            $PassStatus += ";Set-Content:UPDATED";
+        } else {
+            $smsg = "UNABLE TO Regex out $($rgxPsd1FileListLine) from $($tf)`nFileList CAN'T BE UPDATED!" ;
+            if($verbose){ if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN } #Error|Warn|Debug
+            else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; } ;
+        } ;
+    }; 
+    
     write-verbose "Get-ChildItem $($ModDirPath)\* -recur | where-object {$_.name -match `$rgxGuidModFiles}"
     $rgxGuidModFiles = "[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}\.ps(d|m)1"
     $testfiles = Get-ChildItem "$($ModDirPath)\*" -recur | where-object {$_.name -match $rgxGuidModFiles} ; 
@@ -1020,54 +1232,7 @@ $(if($Merge){'MERGE parm specified as well:`n-Merge Public|Internal|Classes incl
     $smsg= "Removing existing profile $($ModuleName) content..." ;
     if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info }  #Error|Warn|Debug
     else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
-    <# rem defer to new Uninstall-ModuleForce()
-    if($PsGInstalled=Get-InstalledModule -name $($ModuleName) -AllVersions -ea 0 ){
-        foreach($PsGMod in $PsGInstalled){
-            $sBnrS="`n#*------v Uninstall PSGet Mod:$($PsGMod.name):v$($PsGMod.version) v------" ;
-            $smsg= $sBnrS ;
-            if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info }  #Error|Warn|Debug
-            else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
-            $pltRmv = [ordered]@{
-                force=$true ;
-                whatif=$($whatif) ;
-            } ;
-            $error.clear() ;
-            TRY {
-                if($showDebug){
-                    $sMsg = "Uninstall-Script w`n$(($pltRmv|out-string).trim())" ;
-                    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info }  #Error|Warn|Debug
-                    else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
-                } ;
-                get-module $PsGMod.installedlocation -listavailable |uninstall-module @pltRmv
-            } CATCH {
-                $ErrorTrapped = $Error[0] ;
-                $PassStatus += ";ERROR";
-                $smsg= "Failed processing $($ErrorTrapped.Exception.ItemName). `nError Message: $($ErrorTrapped.Exception.Message)`nError Details: $($ErrorTrapped)" ;
-                if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Error } #Error|Warn
-                else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
-                #Exit #Opts: STOP(debug)|EXIT(close)|Continue(move on in loop cycle)
-            } ;
-            $smsg="$($sBnrS.replace('-v','-^').replace('v-','^-'))" ;
-            if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info }  #Error|Warn|Debug
-            else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
-        } ;
-    } ;
-    # installed mods have PSGetModuleInfo.xml files
     
-    # 12:20 PM 1/14/2020 #438: surviving conflicts locking install-module: need to check everywhere, loop the entire $env:psprofilepath list
-    $modpaths = $env:PSModulePath.split(';') ;
-    foreach($modpath in $modpaths){
-        #"==$($modpath):"
-        $smsg= "Checking: $($ModuleName) below: $($modpath)..." ;
-        if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info }  #Error|Warn|Debug
-        else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
-        #$bRet = remove-ItemRetry -Path "$($env:userprofile)\Documents\WindowsPowerShell\Modules\$($ModuleName)\*.*" -Recurse -showdebug:$($showdebug) -whatif:$($whatif) ;
-        $searchPath = join-path -path $modpath -ChildPath "$($ModuleName)\*.*" ;
-        # 2:25 PM 4/21/2021 adding -GracefulFail to get past locked verb-dev cmdlets
-        $bRet = remove-ItemRetry -Path $searchPath -Recurse -showdebug:$($showdebug) -whatif:$($whatif) -GracefulFail ;
-        if (!$bRet) {throw "FAILURE" ; Break ; } ;
-    } ;
-    #>
     $pltUMF=[ordered]@{
         ModuleName = $ModuleName ;
         #ErrorAction="Stop" ;
@@ -1099,13 +1264,28 @@ $(if($Merge){'MERGE parm specified as well:`n-Merge Public|Internal|Classes incl
     $smsg= "Copying module to profile (net of .git & .vscode dirs, and backed up content)..." ;
     if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info }  #Error|Warn|Debug
     else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+    
+    <# move these constants up top, they're used for psd1.FileList population discovery as well (up around #965)
+    # exts for files that are bundled into final build pkg (and get copied to profile)
     $ModExtIncl='*.cab','*.cat','*.cmd','*.config','*.cscfg','*.csdef','*.css','*.dll','*.dylib','*.gif','*.html','*.ico','*.jpg','*.js','*.json','*.map','*.Materialize','*.MaterialUI','*.md','*.pdb','*.php','*.png','*.ps1','*.ps1xml','*.psd1','*.psm1','*.rcs','*.reg','*.snippet','*.so','*.txt','*.vscode','*.wixproj','*.wxi','*.xaml','*.xml','*.yml','*.zip' ;
-    $rgxModExtIncl='\.(cab|cat|cmd|config|cscfg|csdef|css|dll|dylib|gif|html|ico|jpg|js|json|map|Materialize|MaterialUI|md|pdb|php|png|ps1|ps1xml|psd1|psm1|rcs|reg|snippet|so|txt|vscode|wixproj|wxi|xaml|xml|yml|zip)' ;
+    # rgx equiv of above
+    if(-not $rgxModExtIncl){
+        # should come down from parameter
+        $rgxModExtIncl='\.(cab|cat|cmd|config|cscfg|csdef|css|dll|dylib|gif|html|ico|jpg|js|json|map|Materialize|MaterialUI|md|pdb|php|png|ps1|ps1xml|psd1|psm1|rcs|reg|snippet|so|txt|vscode|wixproj|wxi|xaml|xml|yml|zip)' ;
+    } ; 
+    # trim down above into the manifest.psd1 FileList - non native module exec code files from the rgxModExtIncl
+    $rgxPsd1FileList = $rgxmodextincl.replace('ps1|','').replace('psm1|','').replace('psd1|','') ; 
+    # files that are explicitly excluded from build/pkg/filelist by name
+    # gci -exclude spec:
+    $exclude = @('main.js','rebuild-module.ps1') ; 
+    # gci post-filtered excludes from build/pkg
+    $excludeMatch = @('.git','.vscode') ;
+    [regex] $excludeMatchRegEx = '(?i)' + (($excludeMatch |ForEach-Object {[regex]::escape($_)}) -join "|") + '' ;
+    #>
+
     $from="$($ModDirPath)" ;
     $to = "$([Environment]::GetFolderPath("MyDocuments"))\WindowsPowerShell\Modules\$($ModuleName)" ;
-    $exclude = @('main.js','rebuild-module.ps1') ; $excludeMatch = @('.git','.vscode') ;
 
-    [regex] $excludeMatchRegEx = '(?i)' + (($excludeMatch |ForEach-Object {[regex]::escape($_)}) -join "|") + '' ;
     # below is original copy-all gci
     $pltGci=[ordered]@{Path=$from ;Recurse=$true ;Exclude=$exclude; ErrorAction="Stop" ; } ;
     # explicitly only go after the common module component, by type, via -include -
@@ -1121,7 +1301,19 @@ $(if($Merge){'MERGE parm specified as well:`n-Merge Public|Internal|Classes incl
             # below is original copy-all gci
             #Get-ChildItem @pltGci | Where-Object { $excludeMatch -eq $null -or $_.FullName.Replace($from, '') -notmatch $excludeMatchRegEx} | Copy-Item -Destination {  if ($_.PSIsContainer) { Join-Path $to $_.Parent.FullName.Substring($from.length) }   else { Join-Path $to $_.FullName.Substring($from.length) }    } -Force -Exclude $exclude -whatif:$($whatif) ;
             # two stage it anyway
-            $srcFiles = Get-ChildItem @pltGci | Where-Object { $excludeMatch -eq $null -or $_.FullName.Replace($from, '') -notmatch $excludeMatchRegEx} ;
+            $srcFiles = Get-ChildItem @pltGci | Where-Object { $excludeMatch -eq $null -OR $_.FullName.Replace($from, '') -notmatch $excludeMatchRegEx} ;
+            $smsg = "`$srcFiles:post-filter out:`n$($rgxSrcFilesPostExcl)" ; 
+            if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } 
+            else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+            #Levels:Error|Warn|Info|H1|H2|H3|H4|H5|Debug|Verbose|Prompt|Success
+            $srcFiles = $srcFiles | ?{$_.fullname -notmatch $rgxSrcFilesPostExcl} ; 
+            if($Merge){
+                $smsg = "-Merge:exclude `$MergeBuildExcl $($MergeBuildExcl) files from temp build copy" ; 
+                if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } 
+                else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                #Levels:Error|Warn|Info|H1|H2|H3|H4|H5|Debug|Verbose|Prompt|Success
+                $srcFiles = $srcFiles | ?{$_.fullname -notmatch $MergeBuildExcl} ; 
+            } ; 
             $srcFiles | Copy-Item -Destination {
                     if ($_.PSIsContainer) {
                         Join-Path $to $_.Parent.FullName.Substring($from.length)
@@ -1162,7 +1354,9 @@ $(if($Merge){'MERGE parm specified as well:`n-Merge Public|Internal|Classes incl
 
     # if we've run a copy all, we need to loop back and pull the items that *arent* ext -match $rgxModExtIncl
     # $to = "$([Environment]::GetFolderPath("MyDocuments"))\WindowsPowerShell\Modules\$($ModuleName)" ;
-    $bannedFiles = get-childitem -path $to -recurse |?{$_.extension -notmatch $rgxModExtIncl -AND !$_.PSIsContainer} ;
+    #$bannedFiles = get-childitem -path $to -recurse |?{$_.extension -notmatch $rgxModExtIncl -AND !$_.PSIsContainer} ;
+    # post filter the new licenses dir out (they're req extensionless files)
+    $bannedFiles = get-childitem -path $to -recurse |?{$_.extension -notmatch $rgxModExtIncl -AND !$_.PSIsContainer} | ?{$_.fullname -notmatch $rgxLicFileFilter}
     # Remove-Item -Path -Filter -Include -Exclude -Recurse -Force -Credential -WhatIf
     $pltRItm = [ordered]@{
         path=$bannedFiles.fullname ;
@@ -1185,7 +1379,43 @@ $(if($Merge){'MERGE parm specified as well:`n-Merge Public|Internal|Classes incl
         } ;
     } ;
 
+    # 3:51 PM 10/11/2023 remove empty sub folders
+    $smsg = "Recursively remove empty subdirs below $($to)..." ; 
+    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } 
+    else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+    #Levels:Error|Warn|Info|H1|H2|H3|H4|H5|Debug|Verbose|Prompt|Success
+    Do {
+        write-host -nonewline "." ; 
+        if($mtdirs = get-FolderEmpty -folder $to -recurse ){
+            $mtdirs | remove-item -ea 0 -verbose; 
+        } ; 
+    } Until (-not(get-FolderEmpty -folder $to -recurse )) ;
 
+    # 10:58 AM 10/11/2023: issue $Psd1filelistFull is pathed into the source $moddirpath, not the $to path.
+    # so we need to loop the ($Psd1filelist  = $Psd1filelist | select -expand name) ; 
+    # locate each file in the local $to tree, store it's current path and move the set to root
+    $smsg = "Move/Flatten Resource etc files into root of temp Build dir..." ; 
+    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } 
+    else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+    #Levels:Error|Warn|Info|H1|H2|H3|H4|H5|Debug|Verbose|Prompt|Success
+    foreach($fl in $Psd1filelist){
+        if($ffile = gci -path "$($to)\$($fl)" -recurse){
+            TRY{
+                # should be in the verb-dev\verb-dev, .psd1|.psm1 dir
+                move-item -Path $ffile -Destination (join-path -path $to -childpath $ModuleName) -verbose:$($VerbosePreference -eq "Continue") ; 
+            } CATCH {
+                $ErrTrapd = $Error[0] ;
+                $smsg = "$('*'*5)`nFailed processing $($ErrTrapd.Exception.ItemName). `nError Message: $($ErrTrapd.Exception.Message)`nError Details: `n$(($ErrTrapd|out-string).trim())`n$('-'*5)" ;
+                if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN } 
+                else{ write-WARNING "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; 
+                CONTINUE ;        
+            } ;
+        } else {
+            $smsg = "UNABLE TO LOCATE A TEMP MOD DIR $($to) COPY of $($fl)!" ; 
+            if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN -Indent} 
+            else{ write-WARNING "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; 
+        } ;  
+    } ; 
     if(!$whatif){
         if($localMod=Get-Module -ListAvailable -Name $($ModPsmName.replace('.psm1',''))){
 
