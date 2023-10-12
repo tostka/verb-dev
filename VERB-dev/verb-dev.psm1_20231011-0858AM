@@ -5,7 +5,7 @@
 .SYNOPSIS
 VERB-dev - Development PS Module-related generic functions
 .NOTES
-Version     : 1.5.26
+Version     : 1.5.30
 Author      : Todd Kadrie
 Website     :	https://www.toddomation.com
 Twitter     :	@tostka
@@ -1502,6 +1502,722 @@ Function convertFrom-EscapedPSText {
 }
 
 #*------^ convertFrom-EscapedPSText.ps1 ^------
+
+
+#*------v Convert-HelpToHtmlFile.ps1 v------
+function Convert-HelpToHtmlFile {
+    <#
+    .SYNOPSIS
+    Convert-HelpToHtmlFile.ps1 - Create a HTML help file for a PowerShell module.
+    .NOTES
+    Version     : 1.2.1
+    Author      : Todd Kadrie
+    Website     : http://www.toddomation.com
+    Twitter     : @tostka / http://twitter.com/tostka
+    CreatedDate : 2023-10-02
+    FileName    : Convert-HelpToHtmlFile.ps1
+    License     : (None Asserted)
+    Copyright   : (None Asserted)
+    Github      : https://github.com/tostka/verb-dev
+    Tags        : Powershell, development, html, markdown, conversion
+    AddedCredit : Øyvind Kallstad @okallstad
+    AddedWebsite: https://communary.net/
+    AddedTwitter: @okallstad / https://twitter.com/okallstad
+    REVISIONS
+    * 9:50 AM 10/3/2023 add: -markdownhelp echos ; add:CBH expl that demos capture & recycle of output filename through convert-HtmlToMarkdown equivelent markdown .md doc. The CBH -> markdown via PlattyPS New-MarkdownHelp yields decent leaf cmdlet docs, but doesn't create the same holistic module nav-menued .html doc (which can be manually created with convert-htmlToMarkdown, tho the menues don't work)
+    * 3:58 PM 10/2/2023 added -MarkdownHelp and simple call branching each commandlet process into plattyps to output quick markdown .md files in the parent dir of -Destination ; 
+    Moving this into verb-dev, no reason it should sit in it's own repo (renaming Invoke-CreateModuleHelpFile -> Convert-HelpToHtmlFile) ; 
+    ren & alias ModuleName -> CodeObject ;
+    Rounded out -script/non-module support by splicing in my verb-dev:get-HelpParsed() which parses the CBH content (via get-help) and returns metadata I routinely populate in the Notes CBH block.
+    This provided more details to use in the resulting output html, to make it *closer* to the native module data; 
+    Also updated html output - wasn't displaying key:value side by side, so I spliced in prehistoric html tables to force them into adjacency
+    And finally fixed the NOTES CBH output, expanding the line return -><br> replacements to cover three different line return variant formats: Notes now comes out as a properly line-returned block, similar to the CBH appearance in the source script.
+    * 9:17 AM 9/29/2023 rewrote to support conversion for scripts as well; added 
+    -script & -nopreview params (as it now also auto-previews in default browser);  
+    ould be to move the html building code into a function, and leave the module /v script logic external to that common process.
+    expanded CBH; put into OTB & advanced function format; split trycatch into beg & proc blocks
+    10/18/2014 OK's posted rev 1.1
+    .DESCRIPTION
+    Convert-HelpToHtmlFile.ps1 - Create a HTML help file for a PowerShell module or script.
+    
+    - For modules, generates a full HTML help file for all commands in the module, with a nav menu at the top.
+    - For scripts it generates same for the script's CBH content. 
+
+    Updated variant of Øyvind Kallstad's Invoke-CreateModuleHelpFile() function. 
+
+    Dependancies:
+    - Rendered html uses jquery, the bootstrap framework & jasny bootstrap add-on (and following .css files):
+            jasny-bootstrap.min.css
+            jasny-bootstrap.min.js
+            jquery-1.11.1.min.js
+            navmenu.css
+            bootstrap.min.css
+            bootstrap.min.js
+    - my verb-dev:get-HelpParsed() (to parse script CBH into rough equivelent's of get-module metadata outputs, drops missing details from output if unavailable).
+
+    .PARAMETER CodeObject
+    Name of module or path to script [-CodeObject myMod]
+    .PARAMETER Destination
+    Directoy into which 'genericly-named output files should be written, or the full path to a specified output file[-Destination c:\pathto\MyModuleHelp.html]
+    .PARAMETER SkipDependencyCheck
+    Skip dependency check[-SkipDependencyCheck] 
+    .PARAMETER Script
+    Switch for processing target Script files (vs Modules, overrides natural blocks on processing scripts)[-Script]
+    .PARAMETER MarkdownHelp
+    Switch to use PlatyPS to output markdown help variants[-MarkdownHelp]
+    .PARAMETER NoPreview
+    Switch to suppress trailing preview of html in default browser[-NoPreview]
+    .INPUTS
+    None. Does not accepted piped input.
+    .OUTPUTS
+    System.Object.string converted file path(s) returned to pipeline
+    System.Boolean
+    [| get-member the output to see what .NET obj TypeName is returned, to use here]
+    .EXAMPLE
+    PS> Convert-HelpToHtmlFile -CodeObject 'verb-text' -Destination 'c:\temp\verb-text_HLP.html' -verbose ; 
+    Generate Html Help file for 'verb-text' module and save it as explicit filename 'c:\temp\verb-text_HLP.html' with verbose output.
+    .EXAMPLE
+    PS> Convert-HelpToHtmlFile -CodeObject 'c:\usr\work\ps\scripts\move-ConvertedVidFiles.ps1' -Script -destination 'c:\temp\'  -verbose ; 
+    Generate Html Help file for the 'move-ConvertedVidFiles.ps1' script and save it as with a generated default name (move-ConvertedVidFiles_HELP.html) to the 'c:\temp\' directory with verbose output.
+    .EXAMPLE
+    PS> Convert-HelpToHtmlFile -CodeObject 'verb-text' -Destination 'c:\temp\' -verbose ; 
+    Generate Html Help file for 'verb-text' module and save it as specified directory, with generated xxx_HELP.html filename, and verbose output.
+    .EXAMPLE
+    PS> write-verbose "convert CBH for the verb-text module into html & assign the returned output path(s) to $ifile" ; 
+    PS> $ifile = Convert-HelpToHtmlFile -ModuleName 'verb-text' -destination 'c:\temp\' ; 
+    PS> write-verbose "then convert the .html output files to markdown using the convert-html-ToMarkdown module/command (recycling the input file names)" ; 
+    PS> $ifile | ?{$_ -match '\.html$'} | %{$ofile = $_.replace('/','\').replace('.html','.md') ; write-host "==$($ifile)->$($ofile):" ; get-content $_ -raw -force | Convert-HtmlToMarkdown -UnknownTags bypass | Set-Content -path $ofile -enc utf8 -force} ; 
+    Demo conversion of a module's CBH help to first html, and then the .html to markdown .md equivelent (via Brian Lalonde's seperate convert-HtmlToMarkdown binary module)
+    .LINK
+    https://github.com/tostka/Invoke-CreateModuleHelpFile
+    https://github.com/tostka/verb-dev
+    .LINK
+    https://github.com/gravejester/Invoke-CreateModuleHelpFile
+    .LINK
+    #>
+    [CmdletBinding()]
+    [Alias('Invoke-CreateModuleHelpFile')]
+    PARAM(
+        # Name of module. Note! The module must be imported before running this function.
+        [Parameter(Mandatory = $true,HelpMessage="Name of module or path to script [-CodeObject myMod]")]
+            [ValidateNotNullOrEmpty()]
+            [Alias('ModuleName','Name')]
+            [string] $CodeObject,
+        # Full path and filename to the generated html helpfile.
+        [Parameter(Mandatory = $true,HelpMessage="Full path and filename to the generated html helpfile[-Path c:\pathto\MyModuleHelp.html]")]
+            [ValidateScript({Test-Path $_ })]
+            [string] $Destination,
+        [Parameter(HelpMessage="Skip dependency check[-SkipDependencyCheck]")]
+            [switch] $SkipDependencyCheck,
+        [Parameter(HelpMessage="Switch for processing target Script files (vs Modules)[-Script]")]
+            [switch] $Script,
+        [Parameter(HelpMessage="Switch to use PlatyPS to output markdown help variants[-MarkdownHelp]")]
+            [switch]$MarkdownHelp,
+        [Parameter(HelpMessage="Switch to suppress trailing preview of html in default browser[-NoPreview]")]
+            [switch] $NoPreview
+    ) ; 
+    BEGIN{
+        #region CONSTANTS-AND-ENVIRO #*======v CONSTANTS-AND-ENVIRO v======
+        # function self-name (equiv to script's: $MyInvocation.MyCommand.Path) ;
+        ${CmdletName} = $PSCmdlet.MyInvocation.MyCommand.Name ;
+        $PSParameters = New-Object -TypeName PSObject -Property $PSBoundParameters ;
+        write-verbose "`$PSBoundParameters:`n$(($PSBoundParameters|out-string).trim())" ;
+        $Verbose = ($VerbosePreference -eq 'Continue') ; 
+        #region ENVIRO_DISCOVER ; #*------v ENVIRO_DISCOVER v------
+        #if ($PSScriptRoot -eq "") {
+        # 8/29/2023 fix logic break on psv2 ISE (doesn't test PSScriptRoot -eq '' properly, needs $null test).
+        #if( -not (get-variable -name PSScriptRoot -ea 0) -OR ($PSScriptRoot -eq '')){
+        if( -not (get-variable -name PSScriptRoot -ea 0) -OR ($PSScriptRoot -eq '') -OR ($PSScriptRoot -eq $null)){
+            if ($psISE) { $ScriptName = $psISE.CurrentFile.FullPath } 
+            elseif($psEditor){
+                if ($context = $psEditor.GetEditorContext()) {$ScriptName = $context.CurrentFile.Path } 
+            } elseif ($host.version.major -lt 3) {
+                $ScriptName = $MyInvocation.MyCommand.Path ;
+                $PSScriptRoot = Split-Path $ScriptName -Parent ;
+                $PSCommandPath = $ScriptName ;
+            } else {
+                if ($MyInvocation.MyCommand.Path) {
+                    $ScriptName = $MyInvocation.MyCommand.Path ;
+                    $PSScriptRoot = Split-Path $MyInvocation.MyCommand.Path -Parent ;
+                } else {throw "UNABLE TO POPULATE SCRIPT PATH, EVEN `$MyInvocation IS BLANK!" } ;
+            };
+            if($ScriptName){
+                $ScriptDir = Split-Path -Parent $ScriptName ;
+                $ScriptBaseName = split-path -leaf $ScriptName ;
+                $ScriptNameNoExt = [system.io.path]::GetFilenameWithoutExtension($ScriptName) ;
+            } ; 
+        } else {
+            if($PSScriptRoot){$ScriptDir = $PSScriptRoot ;}
+            else{
+                write-warning "Unpopulated `$PSScriptRoot!" ; 
+                $ScriptDir=(Split-Path -parent $MyInvocation.MyCommand.Definition) + "\" ;
+            }
+            if ($PSCommandPath) {$ScriptName = $PSCommandPath } 
+            else {
+                $ScriptName = $myInvocation.ScriptName
+                $PSCommandPath = $ScriptName ;
+            } ;
+            $ScriptBaseName = (Split-Path -Leaf ((& { $myInvocation }).ScriptName))  ;
+            $ScriptNameNoExt = [system.io.path]::GetFilenameWithoutExtension($MyInvocation.InvocationName) ;
+        } ;
+        if(-not $ScriptDir){
+            write-host "Failed `$ScriptDir resolution on PSv$($host.version.major): Falling back to $MyInvocation parsing..." ; 
+            $ScriptDir=(Split-Path -parent $MyInvocation.MyCommand.Definition) + "\" ;
+            $ScriptBaseName = (Split-Path -Leaf ((&{$myInvocation}).ScriptName))  ; 
+            $ScriptNameNoExt = [system.io.path]::GetFilenameWithoutExtension($MyInvocation.InvocationName) ;     
+        } else {
+            if(-not $PSCommandPath ){
+                $PSCommandPath  = $ScriptName ; 
+                if($PSCommandPath){ write-host "(Derived missing `$PSCommandPath from `$ScriptName)" ; } ;
+            } ; 
+            if(-not $PSScriptRoot  ){
+                $PSScriptRoot   = $ScriptDir ; 
+                if($PSScriptRoot){ write-host "(Derived missing `$PSScriptRoot from `$ScriptDir)" ; } ;
+            } ; 
+        } ; 
+        if(-not ($ScriptDir -AND $ScriptBaseName -AND $ScriptNameNoExt)){ 
+            throw "Invalid Invocation. Blank `$ScriptDir/`$ScriptBaseName/`ScriptNameNoExt" ; 
+            BREAK ; 
+        } ; 
+
+        $smsg = "`$ScriptDir:$($ScriptDir)" ;
+        $smsg += "`n`$ScriptBaseName:$($ScriptBaseName)" ;
+        $smsg += "`n`$ScriptNameNoExt:$($ScriptNameNoExt)" ;
+        $smsg += "`n`$PSScriptRoot:$($PSScriptRoot)" ;
+        $smsg += "`n`$PSCommandPath:$($PSCommandPath)" ;  ;
+        write-verbose $smsg ; 
+        #endregion ENVIRO_DISCOVER ; #*------^ END ENVIRO_DISCOVER ^------
+
+        # jquery filename - remember to update if you update jquery to a newer version
+        $jqueryFileName = 'jquery-1.11.1.min.js'
+
+        # define dependencies
+        $dependencies = @('bootstrap.min.css','jasny-bootstrap.min.css','navmenu.css',$jqueryFileName,'bootstrap.min.js','jasny-bootstrap.min.js')
+
+        TRY {
+            # check dependencies - revise pathing to $ScriptDir (don't have to run pwd the mod dir)
+            if (-not($SkipDependencyCheck)) {
+                $missingDependency = $false
+                foreach($dependency in $dependencies) {
+                    #if(-not(Test-Path -Path ".\$($dependency)")) {
+                    if(-not(Test-Path -Path (join-path -path $scriptdir -ChildPath $dependency))) {
+                        Write-Warning "Missing: $($dependency)"
+                        $missingDependency = $true
+                    }
+                }
+                if($missingDependency) { break }
+                Write-Verbose 'Dependency check OK'
+            } ; 
+
+            # add System.Web - used for html encoding
+            Add-Type -AssemblyName System.Web ; 
+        } CATCH {
+            Write-Warning $_.Exception.Message ; 
+        } ; 
+
+        if($MarkdownHelp){
+            $smsg = "-MarkdownHelp specified: Loading PlatyPS module & will generate leaf commandlet '[cmdlet name].md' output files in specified destination dir"
+            write-host -ForegroundColor yellow $smsg  ;
+            write-verbose "Test platyPS dependancy..." ; 
+            TRY{Import-Module platyPS -ea STOP} CATCH {
+                $ErrTrapd=$Error[0] ;
+                $smsg = "`n$(($ErrTrapd | fl * -Force|out-string).trim())" ;
+                write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" ;
+            } ; 
+        } ; 
+    }  ;  # BEG-E
+    PROCESS {
+        $Error.Clear() ; 
+    
+        foreach($ModName in $CodeObject) {
+            $smsg = $sBnrS="`n#*------v PROCESSING : $($ModName) v------" ; 
+            if($Script){
+                $smsg = $smsg.replace(" v------", " (PS1 scriptfile) v------")
+            } ; 
+            write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" ;
+
+            # if $modName is pathed, split it to the leaf
+            if( (split-path $modName -ea 0) -OR ([uri]$modName).isfile){
+                write-verbose "converting pathed $($modname) to leaf..." ; 
+                #$leafFilename = split-path $modname -leaf ; 
+                $leaffilename = (get-childitem -path $modname).basename ; 
+            } else {
+                $leafFilename = $modname ; 
+            }; 
+
+            #if(test-path -path $Destination -PathType container -ErrorAction SilentlyContinue){
+            # test-path has a registry differentiating issue, safer to use gi!
+            if( (get-item -path $Destination -ea 0).PSIsContainer){
+                $smsg = "-Destination specified - $($Destination) - is a container" ; 
+                $smsg += "`nconstructing output file as 'Name' $($leafFilename )_HELP.html..." ; 
+                write-host -ForegroundColor Yellow $smsg ; 
+                [System.IO.DirectoryInfo[]]$Destination = $Destination ; 
+                [system.io.fileinfo]$ofile = join-path -path $Destination.fullname -ChildPath "$($leafFilename)_HELP.html" ; 
+                $outMD = split-path $ofile ; 
+            }elseif( -not (get-item -path $Destination -ea 0).PSIsContainer){
+                [system.io.fileinfo]$Destination = $Destination ; 
+                if($Destination.extension -eq '.html'){
+                    [system.io.fileinfo]$ofile = $Destination ; 
+                    $outMD = split-path $ofile ; 
+                } else { 
+                    throw "$($Destination) does *not* appear to have a suitable extension (.html):$($Destination.extension)" ; 
+                } ; 
+            } else{
+                # not an existing dir (target) & not an existing file, so treat it as a full path
+                if($Destination.extension -eq 'html'){
+                    [system.io.fileinfo]$ofile = $Destination ; 
+                    $outMD = split-path $ofile ; 
+                } else { 
+                    throw "$($Destination) does *not* appear to have a suitable extension (.html):$($Destination.extension)" ; 
+                } ; 
+            } ; 
+            write-host -ForegroundColor Yellow "Out-File -FilePath $($Ofile) -Encoding 'UTF8'" ; 
+
+            if($Script){
+                TRY{
+                    $gcmInfo = get-command -Name $ModName -ea STOP ;
+                    # post convert after finished adding keys
+                    #$moduleData = [ordered]@{
+                    $moduleData = [pscustomobject]@{
+                        #Name = $gcminfo.name ; 
+                        Name = $gcminfo.Source ; 
+                        description = $null ;  
+                        ModuleBase = $null ; 
+                        # $moduleData.Version is semversion, not something I generally keep updated in CBH
+                        Version = $null ; 
+                        Author = $null ; 
+                        CompanyName = $null ; 
+                        Copyright = $null ; 
+                    } ; 
+                        
+                } CATCH {
+                    Write-Warning $_.Exception.Message ;
+                    Continue ; 
+                } ;  
+
+                if(-not (get-command get-HelpParsed -ea STOP)){
+                    $smsg = "-Script specified & unable to GCM get-HelpParsed!" ; 
+                    $smsg += "`noutput html will lack details that are normally parsed from metadata I store in the CBH NOTES in the target script" ; 
+                    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN -Indent} 
+                    else{ write-WARNING "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; 
+                } else {
+                    $CBHParsedHelp = get-HelpParsed -Path $gcminfo.source -verbose:$VerbosePreference ; 
+                } ; 
+            } else { 
+                # 9:51 AM 9/29/2023 silly, try to find & forceload the mod:
+                 # try to get module info from imported modules first
+                 <# there's a risk of ipmo/import-module'ing scripts, as they execute when run through it. 
+                    but gmo checks for a path on the -Name spec and throws:
+                    Get-Module : Running the Get-Module cmdlet without ListAvailable parameter is not supported for module names that include a path. Name parameter has this 
+                    which prevents running scripts - if most scripts would include a path to their target. 
+                    if loading a scripot in the path, how do we detect it's not a functional module?
+                    can detect path by running split-path
+                #>
+                if( (split-path $modName -ea 0) -OR ([uri]$modName).isfile){
+                    # pathed module, this will throw an error in gmo and exit
+                    # or string that evalutes as a uri IsFile
+                    $smsg = "specified -CodeObject $($modname) is a pathed specification,"
+                    $smsg += "`nand -Script parameter *has not been specified*!" ;
+                    $smsg += "`nget-module will *refuse* to execute against a pathed Module -Name specification, and will abort this script!"
+                    $smsg += "`nif the intent is to process a _script_, rather than a module, please include the -script parameter!" ; 
+                    write-warning $smsg ; 
+                    throw $smsg ; 
+                    Continue ; 
+                } else {
+                    # unpathed spec, doesn't eval as [uri].isfile
+                    # check for function def's in the target file?                     
+                    <#$rgxFuncDef = 'function\s+\w+\s+\{'
+                    if(get-childitem $modName -ea 0 | select-string | -pattern $rgxFuncDef){
+                    
+                    } ; 
+                    #>
+                    # of course a lot of scripts have internal functions, and still execute on iflv...
+                    # *better! does it have an extension!
+                    # insufficient, periods are permitted in module names (MS powershell modules frequently are dot-delimtied fq names).
+                    # just in case do a gcm and check for result.source value
+                    # test the .psd1, if it's derivable from the gmo, this is a module, not a script
+                    
+                    if(($xgcm = get-command -Name $modName -ea 0).source){
+                        # it's possible to have scripts with same name as modules
+                        # and in most cases modules should have .psm1 extension
+                        # tho my old back-load module copies were named .ps1
+                        # check for path-hosted file with gcm on the name
+                        # below false-positives against the uwes back-load module fallbacks. (which are named verb-xxx.ps1). 
+                        # then check if the file's extension is .ps1, and hard block any work with it
+
+                        if($LModData = get-Module -Name $ModName -ListAvailable -ErrorAction Stop){
+                            if($LModData.path.replace('.psm1','.psd1') | Test-ModuleManifest -ErrorAction STOP ){
+                                $smsg = "specified module has a like-named script in the path" ; 
+                                $smsg += "`n$($xgcm.source)" ; 
+                                $smsg += "`nbut successfully gmo resolves to, and passes, a manifest using Test-ModuleManifest" ; 
+                                $smsg += "`nmoving on with conversion..." ; 
+                                if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } 
+                                else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                                #Levels:Error|Warn|Info|H1|H2|H3|H4|H5|Debug|Verbose|Prompt|Success
+                            }elseif((get-childitem -path $xgcm.source).extension -eq '.ps1'){
+                                $smsg = "specified -CodeObject $($modname) resolves to a pathed .ps1 file, and -Script parameter *has not been specified*!" ;
+                                $smsg += "`nto avoid risk of ipmo'ing scripts (which will execute them, rather than load a target module), this item is being skipped" ; 
+                                $smsg += "`nif the intent is to process a _script_, rather than a module, please include the -script parameter when using this specification!" ; 
+                                write-warning $smsg ; 
+                                throw $smsg ; 
+                                Continue ; 
+                            } ;
+                        } ; 
+
+                    } ; 
+                }
+                if($moduleData = Get-Module -Name $ModName -ErrorAction Stop){} else { 
+                    write-verbose "unable to gmo $ModName : Attempting ipmo..." ; 
+                    if($tmod = Get-Module $modname -ListAvailable){
+                        TRY{import-module -force -Name $ModName -ErrorAction Stop
+                        } CATCH {
+                            Write-Warning $_.Exception.Message ;
+                            Continue ; 
+                        } ; 
+                        if($moduleData = Get-Module -Name $ModName -ErrorAction Stop){} else { 
+                            throw "Unable to gmo or ipmo $ModName!" ; 
+                        } ; 
+                    } else { 
+                        throw "Unable to gmo -list $ModName!" ; 
+                    } ; 
+                } ; 
+            }
+            TRY{
+                # abort if no module data returned
+                if(-not ($moduleData)) {
+                    Write-Warning "The module '$($ModName)' was not found. Make sure that the module is imported before running this function." ; 
+                    break ; 
+                } ; 
+
+                # abort if return type is wrong
+                #if(($moduleData.GetType()).Name -ne 'PSModuleInfo') {
+                if($Script){
+                    <# data that is pop'd for a module
+                        $([System.Web.HttpUtility]::HtmlEncode($moduleData.Description))<br>
+                        $([System.Web.HttpUtility]::HtmlEncode($moduleData.ModuleBase))<br>
+                        $([System.Web.HttpUtility]::HtmlEncode($moduleData.Version))<br>
+                        $([System.Web.HttpUtility]::HtmlEncode($moduleData.Author))<br>
+                        $([System.Web.HttpUtility]::HtmlEncode($moduleData.CompanyName))<br>
+                        $([System.Web.HttpUtility]::HtmlEncode($moduleData.Copyright))
+
+                        $MODDATA | FL 'Description','ModuleBase','Version','Author','CompanyName','Copyright'
+                        Description : Powershell Input/Output generic functions module
+                        ModuleBase  : C:\Users\kadrits\OneDrive - The Toro Company\Documents\WindowsPowerShell\Modules\verb-IO\11.0.1
+                        Version     : 11.0.1
+                        Author      : Todd Kadrie
+                        CompanyName : toddomation.com
+                        Copyright   : (c) 2020 Todd Kadrie. All rights reserved.
+                        
+                        We can harvest a lot out of CBH
+                        $ret = get-commentblocks -Path C:\usr\work\ps\scripts\move-ConvertedVidFiles.ps1
+                        $ret.cbhblock ; 
+                        Need to parse the .[keyword]`ninfor combos 
+                    #>
+                    if($CBHParsedHelp){
+                        if($CBHParsedHelp.HelpParsed.description){$ModuleData.description = $CBHParsedHelp.HelpParsed.description  | out-string } ; 
+                        if($gcminfo.Source){$ModuleData.ModuleBase = $gcminfo.Source  | out-string }
+                        # $moduleData.Version is semversion, not something I generally keep updated in CBH
+                        #Author
+                        if($CBHParsedHelp.NotesHash.author){$ModuleData.Author = $CBHParsedHelp.NotesHash.author  | out-string } ; 
+                        #CompanyName
+                        if($CBHParsedHelp.NotesHash.CompanyName){$ModuleData.CompanyName = $CBHParsedHelp.NotesHash.CompanyName  | out-string } ; 
+                        #Copyright
+                        if($CBHParsedHelp.NotesHash.Copyright){$ModuleData.Copyright = $CBHParsedHelp.NotesHash.Copyright  | out-string } ; 
+                    } ; 
+                    if($gcminfo.CommandType -eq 'ExternalScript'){
+                        $moduleCommands = $gcminfo.source ; 
+                    }else {
+                        Write-Warning "The 'Script' specified - '$($ModName)' - did not return an gcm CommandType of 'ExternalScript'." ; 
+                        continue ; 
+                    } ; 
+                } else { 
+                    if(($moduleData.GetType()).Name -ne 'PSModuleInfo') {
+                        Write-Warning "The module '$($ModName)' did not return an object of type PSModuleInfo." ; 
+                        continue ; 
+                    } ; 
+                    # get module commands
+                    $moduleCommands = $moduleData.ExportedCommands | Select-Object -ExpandProperty 'Keys'
+                    Write-Verbose 'Got Module Commands OK' ; 
+                } ; 
+
+                # start building html
+                $html = @"
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <title>$($ModName)</title>
+    <link href="bootstrap.min.css" rel="stylesheet">
+    <link href="jasny-bootstrap.min.css" rel="stylesheet">
+    <link href="navmenu.css" rel="stylesheet">
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+      <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="navmenu navmenu-default navmenu-fixed-left offcanvas-sm hidden-print">
+      <nav class="sidebar-nav" role="complementary">
+      <a class="navmenu-brand visible-md visible-lg" href="#" data-toggle="tooltip" title="$($ModName)">$($ModName)</a>
+      <ul class="nav navmenu-nav">
+        <li><a href="#About">About</a></li>
+
+"@ ; 
+
+                # loop through the commands to build the menu structure
+                $count = 0 ; 
+                foreach($command in $moduleCommands) {
+                    $count++ ; 
+                    Write-Progress -Activity "Creating HTML for $($command)" -PercentComplete ($count/$moduleCommands.count*100) ; 
+                    $html += @"
+          <!-- $($command) Menu -->
+          <li class="dropdown">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown">$($command) <b class="caret"></b></a>
+          <ul class="dropdown-menu navmenu-nav">
+            <li><a href="#$($command)-Synopsis">Synopsis</a></li>
+            <li><a href="#$($command)-Syntax">Syntax</a></li>
+            <li><a href="#$($command)-Description">Description</a></li>
+            <li><a href="#$($command)-Parameters">Parameters</a></li>
+            <li><a href="#$($command)-Inputs">Inputs</a></li>
+            <li><a href="#$($command)-Outputs">Outputs</a></li>
+            <li><a href="#$($command)-Examples">Examples</a></li>
+            <li><a href="#$($command)-RelatedLinks">RelatedLinks</a></li>
+            <li><a href="#$($command)-Notes">Notes</a></li>
+          </ul>
+        </li>
+        <!-- End $($command) Menu -->
+
+"@ ; 
+                } ; 
+
+                # finishing up the menu and starting on the main content
+
+                # orig, had no table, the metadata didn't line up with the fields
+                # subbed the above into a table that puts them in key:value
+                $html += @"
+        <li><a class="back-to-top" href="#top"><small>Back to top</small></a></li>
+      </ul>
+    </nav>
+    </div>
+    <div class="navbar navbar-default navbar-fixed-top hidden-md hidden-lg hidden-print">
+      <button type="button" class="navbar-toggle" data-toggle="offcanvas" data-target=".navmenu">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="#">$($ModName)</a>
+    </div>
+    <div class="container">
+      <div class="page-content">
+        <!-- About $($ModName) -->
+        <h1 id="About" class="page-header">About $($ModName)</h1>
+        <br>
+        <table border="0" cellpadding="3" cellspacing="3">
+        <tbody>
+        <tr><td>Description</td><td>$([System.Web.HttpUtility]::HtmlEncode($moduleData.Description))</td></tr>
+        <tr><td>ModuleBase</td><td>$([System.Web.HttpUtility]::HtmlEncode($moduleData.ModuleBase))</td></tr>
+        <tr><td>Version</td><td>$([System.Web.HttpUtility]::HtmlEncode($moduleData.Version))</td></tr>
+        <tr><td>Author</td><td>$([System.Web.HttpUtility]::HtmlEncode($moduleData.Author))</td></tr>
+        <tr><td>CompanyName</td><td>$([System.Web.HttpUtility]::HtmlEncode($moduleData.CompanyName))</td></tr>
+        <tr><td>Copyright</td><td>$([System.Web.HttpUtility]::HtmlEncode($moduleData.Copyright))</td></tr>
+        </tbody>
+        </table>
+
+        <br>
+        <!-- End About -->
+
+"@ ; 
+
+                # loop through the commands again to build the main content
+                foreach($command in $moduleCommands) {
+                    $commandHelp = Get-Help $command ; 
+
+                    # platyps markdownhelp
+                    if($MarkdownHelp){
+                        $meta = @{
+                            'layout' = 'pshelp';
+                            #'author' = 'tto';
+                            Author = $null # $moduleData.Author ; 
+                            'title' = $null #$($commandHelp.Name);
+                            #'category' = $($commandHelp.ModuleName.ToLower());
+                            category = $null ; 
+                            'excerpt' = $null # "`"$($commandHelp.Synopsis)`"";
+                            'date' = $(Get-Date -Format yyyy-MM-dd);
+                            'redirect_from' = $null #"[`"/PowerShell/$($commandHelp.ModuleName)/$($commandHelp.Name)/`", `"/PowerShell/$($commandHelp.ModuleName)/$($commandHelp.Name.ToLower())/`", `"/PowerShell/$($commandHelp.Name.ToLower())/`"]" ; 
+                        } ; 
+                        if($moduleData.Author){$meta.Author = $moduleData.Author} ; 
+                        if($commandHelp.Name){$meta.title = $commandHelp.Name} ; 
+                        if($commandHelp.ModuleName){
+                            $meta.category = $($commandHelp.ModuleName.ToLower()) ; 
+                            $meta.'redirect_from' = "[`"/PowerShell/$($commandHelp.ModuleName)/$($commandHelp.Name)/`", `"/PowerShell/$($commandHelp.ModuleName)/$($commandHelp.Name.ToLower())/`", `"/PowerShell/$($commandHelp.Name.ToLower())/`"]" ; 
+                        } ; 
+                        if($commandHelp.Synopsis){$meta.excerpt = "`"$($commandHelp.Synopsis)`""} ; 
+                        if($moduleData.Author){$meta.Author = $moduleData.Author} ; 
+
+
+                        if($commandHelp.Synopsis -notmatch "\[|\]") {
+                            #New-MarkdownHelp -Command $command -OutputFolder (join-path -path $Destination -childpath '\_OnlineHelp\a') -Metadata $meta -Force ; 
+                            New-MarkdownHelp -Command $command -OutputFolder $outmd -Metadata $meta -Force ; 
+                        } ;     
+                    } ;
+
+
+
+                    $html += @"
+        <!-- $($command) -->
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <h2 id="$($command)-Header">$($command)</h1>
+          </div>
+          <div class="panel-body">
+            <h3 id="$($command)-Synopsis">Synopsis</h3>
+            <p>$([System.Web.HttpUtility]::HtmlEncode($commandHelp.Synopsis))</p>
+            <h3 id="$($command)-Syntax">Syntax</h3>
+
+"@ ; 
+                    # get and format the command syntax
+                    $syntaxString = '' ; 
+                    foreach($syntax in ($commandHelp.syntax.syntaxItem)) {
+                        $syntaxString += "$($syntax.name)" ; 
+                        foreach ($syntaxParameter in ($syntax.parameter)) {
+                            $syntaxString += ' ' ; 
+                            # parameter is required
+                            if(($syntaxParameter.required) -eq 'true') {
+                                $syntaxString += "-$($syntaxParameter.name)" ; 
+                                if($syntaxParameter.parameterValue) { $syntaxString += " <$($syntaxParameter.parameterValue)>" } ; 
+                            } else {
+                                # parameter is not required
+                                $syntaxString += "[-$($syntaxParameter.name)" ; 
+                                if($syntaxParameter.parameterValue) { $syntaxString += " <$($syntaxParameter.parameterValue)>]" }
+                                elseif($syntaxParameter.parameterValueGroup) { $syntaxString += " {$($syntaxParameter.parameterValueGroup.parameterValue -join ' | ')}]" } 
+                                else { $syntaxString += ']' } ; 
+                            } ; 
+                        } ; 
+                        $html += @"
+            <pre>$([System.Web.HttpUtility]::HtmlEncode($syntaxString))</pre>
+
+"@ ; 
+                        Remove-Variable -Name 'syntaxString' ; 
+                    } ; 
+
+                    $html += @"
+            <h3 id="$($command)-Description">Description</h3>
+            <p>$([System.Web.HttpUtility]::HtmlEncode($commandHelp.Description.Text -join [System.Environment]::NewLine) -replace([System.Environment]::NewLine, '<br>'))</p>
+            <h3 id="$($command)-Parameters">Parameters</h3>
+            <dl class="dl-horizontal">
+
+"@ ; 
+                    # get all parameter data
+                    foreach($parameter in ($commandHelp.parameters.parameter)) {
+                        $parameterValueText = "<$($parameter.parameterValue)>" ; 
+                        $html += @" 
+              <dt data-toggle="tooltip" title="$($parameter.name)">-$($parameter.name)</dt>
+              <dd>$([System.Web.HttpUtility]::HtmlEncode($parameterValueText))<br>
+                $($parameter.description.Text)<br><br>
+                <div class="row">
+                  <div class="col-md-4 col-xs-4">
+                    Required?<br>
+                    Position?<br>
+                    Default value<br>
+                    Accept pipeline input?<br>
+                    Accept wildchard characters?
+                  </div>
+                  <div class="col-md-6 col-xs-6">
+                    $([System.Web.HttpUtility]::HtmlEncode($parameter.required))<br>
+                    $([System.Web.HttpUtility]::HtmlEncode($parameter.position))<br>
+                    $([System.Web.HttpUtility]::HtmlEncode($parameter.defaultValue))<br>
+                    $([System.Web.HttpUtility]::HtmlEncode($parameter.pipelineInput))<br>
+                    $([System.Web.HttpUtility]::HtmlEncode($parameter.globbing))
+                  </div>
+                </div>
+                <br>
+              </dd>
+
+"@ ; 
+                    } ; 
+
+                    $html += @"
+            </dl>
+            <h3 id="$($command)-Inputs">Inputs</h3>
+            <p>$([System.Web.HttpUtility]::HtmlEncode($commandHelp.inputTypes.inputType.type.name))</p>
+            <h3 id="$($command)-Outputs">Outputs</h3>
+            <p>$([System.Web.HttpUtility]::HtmlEncode($commandHelp.returnTypes.returnType.type.name))</p>
+            <h3 id="$($command)-Examples">Examples</h3>
+
+"@ ; 
+                    # get all examples
+                    $exampleCount = 0 ; 
+                    foreach($commandExample in ($commandHelp.examples.example)) {
+                        $exampleCount++ ; 
+                        $html += @"
+            <b>Example $($exampleCount.ToString())</b>
+            <pre>$([System.Web.HttpUtility]::HtmlEncode($commandExample.code))</pre>
+            <p>$([System.Web.HttpUtility]::HtmlEncode($commandExample.remarks.text -join [System.Environment]::NewLine) -replace([System.Environment]::NewLine, '<br>'))</p>
+            <br>
+
+"@ ; 
+                    } ; 
+
+                    # orig, notes were unwrapped
+                    # notes/.alertSet.alert.text was one big unwrapped block the line wrap above wasn't  working; revised to target 3 variants of crlfs
+                    $html += @"
+            <h3 id="$($command)-RelatedLinks">RelatedLinks</h3>
+            <p><a href="$([System.Web.HttpUtility]::HtmlEncode($commandHelp.relatedLinks.navigationLink.uri -join ''))">$([System.Web.HttpUtility]::HtmlEncode($commandHelp.relatedLinks.navigationLink.uri -join ''))</a></p>
+            <h3 id="$($command)-Notes">Notes</h3>
+            <p>$([System.Web.HttpUtility]::HtmlEncode($commandHelp.alertSet.alert.text -join [System.Environment]::NewLine) -replace([system.environment]::newLine, '<br>') -replace("`r`n",'<br>') -replace("`r",'<br>') -replace("`n",'<br>')))</p>
+            <br>
+          </div>
+        </div>
+        <!-- End ConvertFrom-HexIP -->
+
+"@ ; 
+                } ; 
+
+                # finishing up the html
+                $html += @"
+        </div>
+    </div><!-- /.container -->
+    <script src="$($jqueryFileName)"></script>
+"@ ; 
+            $html += @'
+    <script src="bootstrap.min.js"></script>
+    <script src="jasny-bootstrap.min.js"></script>
+    <script>$('body').scrollspy({ target: '.sidebar-nav' })</script>
+    <script>
+      $('[data-spy="scroll"]').on("load", function () {
+        var $spy = $(this).scrollspy('refresh')
+    })
+    </script>
+  </body>
+</html>
+'@ ; 
+
+                Write-Verbose 'Generated HTML OK' ; 
+
+                # write html file
+                $html | Out-File -FilePath $ofile.fullname -Force -Encoding 'UTF8' ; 
+                Write-Verbose "$($ofile.fullname) written OK" ; 
+                write-verbose "returning output path to pipeline" ; 
+                $ofile.fullname | write-output ;
+                if(-not $NoPreview){
+                    write-host "Previewing $($ofile.fullname) in default browser..." ; 
+                    Invoke-Item -Path $ofile.fullname ; 
+                } ; 
+            } CATCH {
+                Write-Warning $_.Exception.Message ; 
+            } ; 
+
+            $smsg = "$($sBnrS.replace('-v','-^').replace('v-','^-'))" ;
+            write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" ;
+        } ;  # loop-E
+    } ;  # PROC-E
+}
+
+#*------^ Convert-HelpToHtmlFile.ps1 ^------
 
 
 #*------v convert-ISEOpenSession.ps1 v------
@@ -4771,6 +5487,470 @@ function get-FunctionBlocks {
 #*------^ get-FunctionBlocks.ps1 ^------
 
 
+#*------v get-HelpParsed.ps1 v------
+function get-HelpParsed {
+    <#
+    .SYNOPSIS
+    get-HelpParsed - Parse Script CBH with get-help -full, return System.Object with Helpparsed property PSCustomObject (as parsed by get-help); hasExistingCBH boolean, and NotesHash OrderedDictionary reflecting a fully parsed NOTES block into hashtable of key:value combos (as split on colon's per line)
+    .NOTES
+    Version     : 1.1.0
+    Author      : Todd Kadrie
+    Website     : https://www.toddomation.com
+    Twitter     : @tostka / http://twitter.com/tostka
+    CreatedDate : 3:45 PM 11/16/2019
+    FileName    :
+    License     : MIT License
+    Copyright   : (c) 2019 Todd Kadrie
+    Github      : https://github.com/tostka
+    AddedCredit :
+    AddedWebsite:
+    AddedTwitter:
+    REVISIONS
+    10:43 AM 10/2/2023 ren to std verb-noun, alias orig name parseHelp -> parse-Help; No use real verb -> get-HelpParsed;
+    added incrementing names to non-unique NOTES block key names (duplicates of Author, Website, Twitter etc, become Author1, Website1, ...) 
+    fliped the hash returned to [ordered] - important where you have duplicated blocks of author,website,twitter to ensure the assoicated tags are contiguous in the output, and reflect the order from the source CBH block.
+    * 3:45 PM 4/14/2020 added pretest of $path extension, get-help only works with .ps1/.psm1 script files (misnamed temp files fail to parse)
+    * 7:50 AM 1/29/2020 added Cmdletbinding
+    * 9:11 AM 12/30/2019 get-HelpParsed(): added CBH .INPUTS & .OUTPUTS, specifying returns hash of get-help parsed output, and presence of CBH in the file
+    * 10:03 PM 12/2/201919 INIT
+    .DESCRIPTION
+    get-HelpParsed - Parse Script CBH with get-help -full, return System.Object with Helpparsed property PSCustomObject (as parsed by get-help); hasExistingCBH boolean, and NotesHash OrderedDictionary reflecting a fully parsed NOTES block into hashtable of key:value combos (as split on colon's per line)
+
+    Between get-HelpParsed/parse-Help and get-VersionInfo, both do largely the same thing, but this uses a more flexible get-help call syntax less likely to mis-parse CBH out of a given target. This variant has also been continuosly updated, get-VersionInfo has been static since 4/2020.
+    
+    The NotesHash hashtable returned is aimed parsing out and returning usable metadata from my personal system of populating the NOTES block with standardized colon-delimited metadata:
+    Version     : 1.1.0
+    Author      : Todd Kadrie
+    Website     : https://www.toddomation.com
+    Twitter     : @tostka / http://twitter.com/tostka
+    CreatedDate : 3:45 PM 11/16/2019
+    FileName    :
+    License     : MIT License
+    Copyright   : (c) 2019 Todd Kadrie
+    Github      : https://github.com/verb-dev
+    AddedCredit :
+    AddedWebsite:
+    AddedTwitter:
+    (the tags above are not standard but I find them useful none the less, especitally where using this type of parsing to assemble and reuse canned settings with a given script or function).
+
+    My trailing entry in the notes block is the REVISION tag, which reflects solely the stack of updates on the code (The line following the REVISIONS lines should be part of another CBH keyword block)
+    Where a given key value in a notes block is non-unique, subsequent instances of the same key have an incrementing integer appended to render them unique, for inclusion in the hash.
+
+    Note, if using temp files, you *can't* pull get-help on anything but script/module files, with the proper extension (.e.g if you've got temp's named .TMP, get-help won't parse them)
+
+    .PARAMETER  Path
+    Path to script
+    .PARAMETER ShowDebug
+    Parameter to display Debugging messages [-ShowDebug switch]
+    .PARAMETER Whatif
+    Parameter to run a Test no-change pass [-Whatif switch]
+    .INPUTS
+    None
+    .OUTPUTS
+    Outputs a hashtable with following content/objects:
+    * HelpParsed : Raw object output of a get-help -full [path] against the specified $Path
+    * hasExistingCBH : Boolean indicating if a functional CBH was detected
+    * NotesHash
+    * RevisionsText
+    .EXAMPLE
+    $bRet = get-HelpParsed -Path $oSrc.fullname -showdebug:$($showdebug) -verbose:$VerbosePreference -whatif:$($whatif) ;
+    if($bRet.HelpParsed){
+        $HelpParsed = $bRet.HelpParsed
+    } ;
+    if($bRet.hasExistingCBH){
+        $hasExistingCBH = $bRet.hasExistingCBH
+    } ;
+    .EXAMPLE
+    PS> $prpHP = @{name="alertSet";expression={$_.alertSet | out-string}},'Category','description', @{name="description";expression={$_.description | out-string}}, @{name="details";expression={$_.details | out-string}}, @{name="examples";expression={$_.examples | out-string}}, @{name="inputTypes";expression={$_.inputTypes | out-string}}, 'ModuleName','Name', @{name="parameters";expression={$_.parameters | out-string}}, @{name="returnValues";expression={$_.returnValues | out-string}}, 'Synopsis', @{name="syntax";expression={$_.syntax | out-string}} ;
+    PS> $bRet | fl $prpHP ; 
+
+    alertSet     :
+
+                       Author: Todd Kadrie
+                       Website:	http://tinstoys.blogspot.com
+                       Twitter:	http://twitter.com/tostka
+                       Additional Credits: [REFERENCE]
+                       Website:	[URL]
+                       Twitter:	[URL]
+                       REVISIONS   :
+                       # 1:54 PM 7/26/2023 updated 'jpg' thumbnail image seeking code to target both .jpg & .webp (YT has shifted to the latter on recent dl), driven by 
+                        $rgxYTCoverExts constant;
+                       fixed inaccur helpmessage/param for $inputobject; ren'd all $*jpg vari refs to $*thumb, to reflect the image files are thumbs of either .jpg or webp type, 
+                       using postfilter match on extension rgx; updated CBH desc/synopsis for accuracy
+                       ....
+                   
+
+    Category     : ExternalScript
+    description  : 
+                   move-ConvertedVidFiles.ps1 - Post youtube vid-conversion-toMp3 script that collects mp4|mkv|webm files, checks for matching mp3 files -gt 1MB, and mathing 
+                   jpg|webp files, and 
+                   then collects the vid & jpg|webp files and moves them to C:\vidtmp\_vids-done\ & C:\vidtmp\_jpgs-done\ respectively
+
+    details      : 
+                   NAME
+                       C:\usr\work\ps\scripts\move-ConvertedVidFiles.ps1
+                   
+                   SYNOPSIS
+                       move-ConvertedVidFiles.ps1 - Post vid-conversion-toMp3 script that collects mp4|mkv|webm files, checks for matching mp3 files -gt 1MB, and mathing 
+                   jpg|webp thumbnail 
+                       files, and then collects the vid & jpg|webp files and moves them to C:\vidtmp\_vids-done\ & C:\vidtmp\_jpgs-done\ respectively
+
+    examples     : 
+                   -------------------------- EXAMPLE 1 --------------------------
+               
+                   PS C:\>.\move-ConvertedVidFiles.ps1
+               
+                   Default settings running from current path
+
+                   -------------------------- EXAMPLE 2 --------------------------
+               
+                   PS C:\>.\move-ConvertedVidFiles.ps1 -InputObject "C:\vidtmp\" -showdebug -whatif ;
+               
+                   Whatif & showdebug pass specifying a specific path to check.
+
+    inputTypes   : 
+                   Accepts piped input.
+
+    ModuleName   : 
+    Name         : C:\usr\work\ps\scripts\move-ConvertedVidFiles.ps1
+    parameters   : 
+                       -InputObject <Object>
+                           Path to be checked for transcod to mp3 (and matching .jpg|webp)
+                       
+                           Required?                    false
+                           Position?                    1
+                           Default value                
+                           Accept pipeline input?       true (ByValue, ByPropertyName)
+                           Accept wildcard characters?  false
+                       
+                       -showDebug [<SwitchParameter>]
+                           Parameter to display Debugging messages [-ShowDebug switch]
+                       
+                           Required?                    false
+                           Position?                    named
+                           Default value                False
+                           Accept pipeline input?       false
+                           Accept wildcard characters?  false
+                       
+                       -whatIf [<SwitchParameter>]
+                       
+                           Required?                    false
+                           Position?                    named
+                           Default value                False
+                           Accept pipeline input?       false
+                           Accept wildcard characters?  false
+                       
+                       <CommonParameters>
+                           This cmdlet supports the common parameters: Verbose, Debug,
+                           ErrorAction, ErrorVariable, WarningAction, WarningVariable,
+                           OutBuffer, PipelineVariable, and OutVariable. For more information, see 
+                           about_CommonParameters (https:/go.microsoft.com/fwlink/?LinkID=113216).
+
+    returnValues : 
+                   Returns an object with uptime data to the pipeline.
+
+    Synopsis     : move-ConvertedVidFiles.ps1 - Post youtube vid-conversion-toMp3 script that collects mp4|mkv|webm files, checks for matching mp3 files -gt 1MB, and mathing 
+                   jpg|webp thumbnail files, and then collects the vid & jpg|webp files and moves them to C:\vidtmp\_vids-done\ & C:\vidtmp\_jpgs-done\ respectively
+    syntax       : 
+                   C:\usr\work\ps\scripts\move-ConvertedVidFiles.ps1 [[-InputObject] <Object>] [-showDebug] [-whatIf] [<CommonParameters>]    
+
+    Builds on first expl: Demos expressed properties that outline the default data returned pre-parsed by get-help. 
+    .EXAMPLE
+    PS> $bret.Noteshash
+
+    Name                           Value                                                                                                                                              
+    ----                           -----                                                                                                                                              
+    Author                         Todd Kadrie                                                                                                                                        
+    Website                        http://tinstoys.blogspot.com                                                                                                                       
+    Twitter                        http://twitter.com/tostka                                                                                                                          
+    Website1                       [URL]                                                                                                                                              
+    Twitter1                       [URL]                                                                                                                                              
+    LastRevision                   # 1:54 PM 7/26/2023 updated 'jpg' thumbnail image seeking code to target both .jpg & .webp (YT has shifted to the latter on recent dl), driven b...
+
+    
+    Also builds on first expl: Demo contents of the returned NotesHash ordered hashtable property of the return
+    .EXAMPLE
+    PS> $bret.RevisionsText
+
+    # 1:54 PM 7/26/2023 updated 'jpg' thumbnail image seeking code to target both .jpg & .webp (YT has shifted to the latter on recent dl), driven by $rgxYTCoverExts constant;
+    fixed inaccur helpmessage/param for $inputobject; ren'd all $*jpg vari refs to $*thumb, to reflect the image files are thumbs of either .jpg or webp type, 
+    using postfilter match on extension rgx; updated CBH desc/synopsis for accuracy
+    # 11:17 AM 7/21/2023 working fully; ...
+
+    Also builds on first expl: Demo contents of the returned RevisionsText property.
+
+    .LINK
+    https://github.com/verb-dev
+    #>
+    # [ValidateScript({Test-Path $_})], [ValidateScript({Test-Path $_})]
+    [CmdletBinding()]
+    [Alias('parse-Help','parseHelp')]
+    PARAM(
+        [Parameter(Position = 0, Mandatory = $True, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true, HelpMessage = "Path to script[-Path path-to\script.ps1]")]
+        [ValidateScript( { Test-Path $_ })]$Path,
+        [Parameter(HelpMessage = "Debugging Flag [-showDebug]")]
+        [switch] $showDebug,
+        [Parameter(HelpMessage = "Whatif Flag  [-whatIf]")]
+        [switch] $whatIf
+    ) ;
+    $Verbose = ($VerbosePreference -eq "Continue") ; 
+    if ($Path.GetType().FullName -ne 'System.IO.FileInfo') {
+        $Path = get-childitem -path $Path ;
+    } ;
+    # Collect existing HelpParsed
+    $error.clear() ;
+    if($Path.Extension -notmatch '\.PS((M)*)1'){
+        $smsg = "Specified -Path is *INVALID* for processing with Get-Help`nMust specify a file with valid .PS1/.PSM1 extensions.`nEXITING" ; 
+        if($verbose){ if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
+        else{ write-error -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; } ; 
+        Exit ; 
+    } ; 
+    TRY {
+        $HelpParsed = Get-Help -Full $Path.fullname
+    }
+    CATCH {
+        Write-Error "$(get-date -format 'HH:mm:ss'): Failed processing $($_.Exception.ItemName). `nError Message: $($_.Exception.Message)`nError Details: $($_)" ;
+        Continue #Opts: STOP(debug)|EXIT(close)|Continue(move on in loop cycle)
+    } ;
+
+    $objReturn = [ordered]@{
+        HelpParsed     = $HelpParsed  ;
+        hasExistingCBH = $false ;
+        NotesHash = $null ; 
+        RevisionsText = $null ; 
+    } ;
+
+    <# CBH keywords to use to detect CBH blocks
+        SYNOPSIS
+        DESCRIPTION
+        PARAMETER
+        EXAMPLE
+        INPUTS
+        OUTPUTS
+        NOTES
+        LINK
+        COMPONENT
+        ROLE
+        FUNCTIONALITY
+        FORWARDHELPTARGETNAME
+        FORWARDHELPCATEGORY
+        REMOTEHELPRUNSPACE
+        EXTERNALHELP
+    #>
+    $rgxCBHKeywords = "\.(SYNOPSIS|DESCRIPTION|PARAMETER|EXAMPLE|INPUTS|OUTPUTS|NOTES|LINK|COMPONENT|ROLE|FUNCTIONALITY|FORWARDHELPTARGETNAME|FORWARDHELPCATEGORY|REMOTEHELPRUNSPACE|EXTERNALHELP)"
+
+    # 4) determine if target already has CBH:
+    if ($showDebug) {
+        $smsg = "`$Path.FullName:$($Path.FullName):`n$(($helpparsed | select Category,Name,Synopsis, param*,alertset,details,examples |out-string).trim())" ;
+        if($verbose){ if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
+        else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; } ; 
+    } ;
+
+
+    if ( ( ($HelpParsed.Category -eq 'ExternalScript') -AND ($HelpParsed.Name -eq $Path.Name) ) ) {
+        <# weird, helpparsed.synopsis is 3 lines long (has word wraps), although the first looks like the $Path.name, it still doesn't match
+            pull Synopsis out - it's always populated but matching it is a PITA
+            -AND ($HelpParsed.Synopsis -ne $Path.FullName)
+        #>
+        if ( -not($HelpParsed.examples) -AND -not($HelpParsed.examples) -AND -not($HelpParsed.examples) -AND -not($HelpParsed.examples) -AND -not($HelpParsed.examples) -AND -not($HelpParsed.examples) -AND -not($HelpParsed.examples) -AND ($HelpParsed.Synopsis -ne $Path.FullName ) ) {
+            #  non-cbh/non-meta script
+            <# completey non-cbh/non-meta script get-help -fulls as:
+                #-=-=-=-=-=-=-=-=
+                Name          : get-NonUserMbxsByOU.ps1
+                Category      : ExternalScript
+                Synopsis      : get-NonUserMbxsByOU.ps1
+                Component     :
+                Role          :
+                Functionality :
+                ModuleName    :
+                Length        : 26
+                #-=-=-=-=-=-=-=-=
+            #>
+            $objReturn.hasExistingCBH = $false ;
+        }
+        else {
+            # partially configured CBH, at least one of the above are populated
+            $objReturn.hasExistingCBH = $true ;
+        } ;
+
+    }
+    elseif ( ( ($HelpParsed.Category -eq 'ExternalScript') -AND ($HelpParsed.Name -eq $Path.FullName) ) ) {
+        if ( ($HelpParsed.examples) -OR ($HelpParsed.examples) -OR ($HelpParsed.examples) -OR ($HelpParsed.examples) -OR ($HelpParsed.examples) -OR ($HelpParsed.examples) -OR ($HelpParsed.examples) -OR ($HelpParsed.Synopsis -ne $Path.FullName ) ) {
+            <# weird, helpparsed.synopsis is 3 lines long (has word wraps), although the first looks like the $Path.name, it still doesn't match
+            pull Synopsis out - it's always populated but matching it is a PITA
+            -AND ($HelpParsed.Synopsis -ne $Path.FullName)
+            #>
+            <#
+            # script with cbh, no meta get-help -fulls as:
+                #-=-=-=-=-=-=-=-=
+                examples      : @{example=System.Management.Automation.PSObject[]}
+                alertSet      : @{alert=System.Management.Automation.PSObject[]}
+                parameters    :
+                details       : @{name=C:\usr\work\exch\scripts\get-NonUserMbxsByOU.ps1; description=System.Management.Automation.PSObject[]}
+                description   : {@{Text=get-NonUserMbxsByOU.ps1 - Get non-user mailboxes by OU}}
+                relatedLinks  : @{navigationLink=@{linkText=}}
+                syntax        : @{syntaxItem=@{name=C:\usr\work\exch\scripts\get-NonUserMbxsByOU.ps1}}
+                xmlns:maml    : http://schemas.microsoft.com/maml/2004/10
+                xmlns:command : http://schemas.microsoft.com/maml/dev/command/2004/10
+                xmlns:dev     : http://schemas.microsoft.com/maml/dev/2004/10
+                Name          : C:\usr\work\exch\scripts\get-NonUserMbxsByOU.ps1
+                Category      : ExternalScript
+                Synopsis      : get-NonUserMbxsByOU.ps1 - Get non-user mailboxes by OU
+                Component     :
+                Role          :
+                Functionality :
+                ModuleName    :
+                #-=-=-=-=-=-=-=-=
+        #>
+            $objReturn.hasExistingCBH = $true ;
+        }
+        else {
+            throw "Error: This script has an undefined mixture of CBH values!"
+        } ;
+        <# # script with cbh & meta get-help -fulls as:
+            #-=-=-=-=-=-=-=-=
+            examples      : @{example=System.Management.Automation.PSObject[]}
+            relatedLinks  : @{navigationLink=@{linkText=}}
+            details       : @{name=C:\usr\work\exch\scripts\get-NonUserMbxsByOU.ps1; description=System.Management.Automation.PSObject[]}
+            description   : {@{Text=get-NonUserMbxsByOU.ps1 - Get non-user mailboxes by OU}}
+            parameters    :
+            syntax        : @{syntaxItem=@{name=C:\usr\work\exch\scripts\get-NonUserMbxsByOU.ps1}}
+            xmlns:maml    : http://schemas.microsoft.com/maml/2004/10
+            xmlns:command : http://schemas.microsoft.com/maml/dev/command/2004/10
+            xmlns:dev     : http://schemas.microsoft.com/maml/dev/2004/10
+            Name          : C:\usr\work\exch\scripts\get-NonUserMbxsByOU.ps1
+            Category      : ExternalScript
+            Synopsis      : get-NonUserMbxsByOU.ps1 - Get non-user mailboxes by OU
+                            Version     : 1.0.1
+                            Author      : Todd Kadrie
+                            Website     : https://www.toddomation.com
+                            Twitter     : @tostka / http://twitter.com/tostka
+                            CreatedDate : 2019-11-25
+                            FileName    : C:\usr\work\exch\scripts\get-NonUserMbxsByOU.ps1
+                            License     : MIT License
+                            Copyright   : (c)  2019 Todd Kadrie. All rights reserved.
+                            Github      : https://github.com/tostka
+                            AddedCredit : REFERENCE
+                            AddedWebsite:	URL
+                            AddedTwitter:	URL
+                            REVISIONS
+                            * 21:53 PM 11/25/2019 Added default CBH
+            Component     :
+            Role          :
+            Functionality :
+            ModuleName    :
+    #>
+
+        <# interesting point, even with NO CBH, get-help returns content (nuts)
+
+        An non-CBH script will return at minimum:
+        #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+        $HelpParsed
+        Move-MultMbxsToExo.ps1
+
+
+        #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+        #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+        $HelpParsed.Synopsis
+        Move-MultMbxsToExo.ps1
+
+
+        #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+        which rgx escape reveals as:
+        #-=-=-=-=-=-=-=-=
+        [regex]::Escape($($HelpParsed.Synopsis))
+        Move-MultMbxsToExo\.ps1\ \r\n
+        #-=-=-=-=-=-=-=-=
+        But attempts to build a regex to match the above haven't been successful
+        So, we go to explicitly testing the highpoints to fail a non-CBH:
+        ($HelpParsed.Category -eq 'ExternalScript') -AND ($HelpParsed.Name -eq $Path.Name) -AND (!$HelpParsed.parameters) -AND (!($HelpParsed.alertSet)) -AND (!($HelpParsed.details)) -AND (!($HelpParsed.examples))
+    #>
+
+
+    } elseif ($HelpParsed.Name -eq 'default') {
+        # failed to properly parse CBH
+        $objReturn.helpparsed = $null ; 
+        $objReturn.hasExistingCBH = $false ;
+        $objReturn.NotesHash = $null ; 
+    } ;  
+
+    # 12:24 PM 4/13/2020 splice in the get-VersionInfo notes processing code
+    $notes = $null ; 
+    if($host.version.major -lt 3){
+        $notes = @{ } ;
+    } else { 
+        $notes = [ordered]@{ } ;
+    } ; 
+
+    $notesLines = $null ; $notesLineCount = $null ;
+    $revText = $null ; $CurrLine = 0 ; 
+    $rgxNoteMeta = '^((\s)*)\w{3,}((\s*)*)\:((\s*)*)*.*' ; 
+    if ( ($notesLines = $HelpParsed.alertSet.alert.Text -split '\r?\n').Trim() ) {
+        $notesLineCount = ($notesLines | measure).count ;
+        foreach ($line in $notesLines) {
+            $CurrLine++ ; 
+            if (!$line) { continue } ;
+            if($line -match $rgxNoteMeta ){
+                $name = $null ; $value = $null ;
+                if ($line -match '(?i:REVISIONS((\s*)*)((\:)*))') { 
+                    # at this point, from here down should be rev data
+                    $revText = $notesLines[$($CurrLine)..$($notesLineCount)] ;  
+                    $notes.Add("LastRevision", $notesLines[$currLine]) ;
+                    Continue ;
+                    #break ; 
+                    # no don't break, parse the entire stack, there's could be a range of keywords below REVISIONS
+                } ;
+                if ($line.Contains(':')) {
+                    $nameValue = $null ;
+                    $nameValue = @() ;
+                    # Split line by the first colon (:) character.
+                    $nameValue = ($line -split ':', 2).Trim() ;
+                    $name = $nameValue[0] ;
+                    if ($name) {
+                        $value = $nameValue[1] ;
+                        if ($value) { $value = $value.Trim() } ;
+                        #if (!($notes.ContainsKey($name))) { $notes.Add($name, $value) } ;
+                        # incremnent the keyname to continue adding additional same-keyed items
+                        # ordered has .conains method, non ordered has containskey method
+                        if($host.version.major -lt 3){
+                            if (-not ($notes.ContainsKey($name))) { 
+                                $notes.Add($name, $value) 
+                            } else {
+                                $incr = 1 ; 
+                                $nameN = "$($name)$($incr)"
+                                while ($notes.ContainsKey($nameN)) {
+                                    $incr++ ; 
+                                    write-verbose "incrementing hash key clash:$($incr)" ; 
+                                } ; 
+                                $notes.Add($nameN, $value) ; 
+                            } ;
+                        } else { 
+                            if (-not ($notes.Contains($name))) { 
+                                $notes.Add($name, $value) 
+                            } else {
+                                $incr = 1 ; 
+                                $nameN = "$($name)$($incr)"
+                                while ($notes.Contains($nameN)) {
+                                    $incr++ ; 
+                                    write-verbose "incrementing hash key clash:$($incr)" ; 
+                                } ; 
+                                $notes.Add($nameN, $value) ; 
+                            } ;
+                        } ; 
+                    } ;
+                } ;
+            } ; 
+        } ;
+        $objReturn.NotesHash = $notes ;
+        $objReturn.RevisionsText = $revText ; 
+    } ; 
+
+    $objReturn | Write-Output ;
+}
+
+#*------^ get-HelpParsed.ps1 ^------
+
+
 #*------v get-ISEOpenFilesExported.ps1 v------
 function get-ISEOpenFilesExported {
     <#
@@ -4788,6 +5968,7 @@ function get-ISEOpenFilesExported {
     Github      : https://github.com/tostka/verb-dev
     Tags        : Powershell,ISE,development,debugging
     REVISIONS
+    * 9:24 AM 9/14/2023 CBH add:demo of pulling lastwritetime and using to make automatd decisions, or comparison reporting (as this returns a fullname, not a file object)
     * 1:55 PM 3/29/2023 flipped alias (clashed) iIseOpen -> gIseOpen
     * 8:51 AM 3/8/2023 init
     .DESCRIPTION
@@ -4804,6 +5985,12 @@ function get-ISEOpenFilesExported {
     .EXAMPLE
     PS> get-ISEOpenFilesExported -Tag MFA | import-ISEOpenFiles ; 
     Example pipelining the outputs into import-ISEOPenFiles() (via pipeline support for it's -FilePath param)
+    .EXAMPLE
+    PS> get-ISEOpenFilesExported | %{gci $_} | sort LastWriteTime | ft -a fullname,lastwritetime ; 
+    Example finding the 'latest' (newest LastWritTime) and echoing for review
+    .EXAMPLE
+    get-ISEOpenFilesExported | %{gci $_} | sort LastWriteTime | select -last 1 | select -expand fullname | import-ISEOpenFiles ; 
+    Example finding the 'latest' (newest LastWritTime), and then importing into ISE.
     .LINK
     https://github.com/tostka/verb-dev
     #>
@@ -6328,6 +7515,7 @@ Function Initialize-PSModuleDirectories {
     Github      : https://github.com/tostka/verb-dev
     Tags        : Powershell,Parser,Risk
     REVISIONS
+    * 11:21 AM 10/3/2023 added LICENSES & LIBS & RESOURCES to DefaultModDirs
    * 9:35 AM 5/9/2022 init, split out from merge/unmerge-module, have a single maintainable func, rather than trying to sync the variants
     .DESCRIPTION
     Initialize-PSModuleDirectories.ps1 - Initialize PS Module Directories
@@ -6373,8 +7561,8 @@ Function Initialize-PSModuleDirectories {
         [Parameter(Mandatory = $True, HelpMessage = "Directory path in which the final .psm1 file should be constructed [-ModuleDestinationPath c:\path-to\module\module.psm1]")]
         [string] $ModuleDestinationPath,
         [Parameter(HelpMessage = "Array of new module subdirectory names to be created")]
-        [ValidateScript( {Test-Path $_})]
-        [string[]]$DefaultModDirs = @('Public','Internal','Classes','Tests','Docs','Docs\Cab','Docs\en-US','Docs\Markdown'),
+            [ValidateScript( {Test-Path $_})]
+            [string[]]$DefaultModDirs = @('Public','Internal','Classes','Libs','Tests','Licenses','Resources','Docs','Docs\Cab','Docs\en-US','Docs\Markdown'),
         [Parameter(HelpMessage = "Whatif Flag  [-whatIf]")]
         [switch] $whatIf
         <#
@@ -6831,288 +8019,6 @@ Function New-GitHubGist {
 }
 
 #*------^ New-GitHubGist.ps1 ^------
-
-
-#*------v parseHelp.ps1 v------
-function parseHelp {
-    <#
-    .SYNOPSIS
-    parseHelp - Parse Script CBH with get-help -full, return parseHelp obj & $hasExistingCBH boolean
-    .NOTES
-    Version     : 1.1.0
-    Author      : Todd Kadrie
-    Website     : https://www.toddomation.com
-    Twitter     : @tostka / http://twitter.com/tostka
-    CreatedDate : 3:45 PM 11/16/2019
-    FileName    :
-    License     : MIT License
-    Copyright   : (c) 2019 Todd Kadrie
-    Github      : https://github.com/tostka
-    AddedCredit :
-    AddedWebsite:
-    AddedTwitter:
-    REVISIONS
-    * 3:45 PM 4/14/2020 added pretest of $path extension, get-help only works with .ps1/.psm1 script files (misnamed temp files fail to parse)
-    * 7:50 AM 1/29/2020 added Cmdletbinding
-    * 9:11 AM 12/30/2019 parseHelp(): added CBH .INPUTS & .OUTPUTS, specifying returns hash of get-help parsed output, and presence of CBH in the file
-    * 10:03 PM 12/2/201919 INIT
-    .DESCRIPTION
-    parseHelp - Parse Script and prepend new Comment-based-Help keyed to existing contents
-    Note, if using temp files, you *can't* pull get-help on anything but script/module files, with the proper extension
-    .PARAMETER  Path
-    Path to script
-    .PARAMETER ShowDebug
-    Parameter to display Debugging messages [-ShowDebug switch]
-    .PARAMETER Whatif
-    Parameter to run a Test no-change pass [-Whatif switch]
-    .INPUTS
-    None
-    .OUTPUTS
-    Outputs a hashtable with following content/objects:
-    * HelpParsed : Raw object output of a get-help -full [path] against the specified $Path
-    * hasExistingCBH : Boolean indicating if a functional CBH was detected
-    .EXAMPLE
-    $bRet = parseHelp -Path $oSrc.fullname -showdebug:$($showdebug) -verbose:$VerbosePreference -whatif:$($whatif) ;
-    if($bRet.parseHelp){
-        $parseHelp = $bRet.parseHelp
-    } ;
-    if($bRet.hasExistingCBH){
-        $hasExistingCBH = $bRet.hasExistingCBH
-    } ;
-    .LINK
-    #>
-    # [ValidateScript({Test-Path $_})], [ValidateScript({Test-Path $_})]
-    [CmdletBinding()]
-    PARAM(
-        [Parameter(Position = 0, Mandatory = $True, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true, HelpMessage = "Path to script[-Path path-to\script.ps1]")]
-        [ValidateScript( { Test-Path $_ })]$Path,
-        [Parameter(HelpMessage = "Debugging Flag [-showDebug]")]
-        [switch] $showDebug,
-        [Parameter(HelpMessage = "Whatif Flag  [-whatIf]")]
-        [switch] $whatIf
-    ) ;
-    $Verbose = ($VerbosePreference -eq "Continue") ; 
-    if ($Path.GetType().FullName -ne 'System.IO.FileInfo') {
-        $Path = get-childitem -path $Path ;
-    } ;
-    # Collect existing HelpParsed
-    $error.clear() ;
-    if($Path.Extension -notmatch '\.PS((M)*)1'){
-        $smsg = "Specified -Path is *INVALID* for processing with Get-Help`nMust specify a file with valid .PS1/.PSM1 extensions.`nEXITING" ; 
-        if($verbose){ if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
-        else{ write-error -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; } ; 
-        Exit ; 
-    } ; 
-    TRY {
-        $HelpParsed = Get-Help -Full $Path.fullname
-    }
-    CATCH {
-        Write-Error "$(get-date -format 'HH:mm:ss'): Failed processing $($_.Exception.ItemName). `nError Message: $($_.Exception.Message)`nError Details: $($_)" ;
-        Continue #Opts: STOP(debug)|EXIT(close)|Continue(move on in loop cycle)
-    } ;
-
-    $objReturn = [ordered]@{
-        HelpParsed     = $HelpParsed  ;
-        hasExistingCBH = $false ;
-        NotesHash = $null ; 
-        RevisionsText = $null ; 
-    } ;
-
-    <# CBH keywords to use to detect CBH blocks
-        SYNOPSIS
-        DESCRIPTION
-        PARAMETER
-        EXAMPLE
-        INPUTS
-        OUTPUTS
-        NOTES
-        LINK
-        COMPONENT
-        ROLE
-        FUNCTIONALITY
-        FORWARDHELPTARGETNAME
-        FORWARDHELPCATEGORY
-        REMOTEHELPRUNSPACE
-        EXTERNALHELP
-    #>
-    $rgxCBHKeywords = "\.(SYNOPSIS|DESCRIPTION|PARAMETER|EXAMPLE|INPUTS|OUTPUTS|NOTES|LINK|COMPONENT|ROLE|FUNCTIONALITY|FORWARDHELPTARGETNAME|FORWARDHELPCATEGORY|REMOTEHELPRUNSPACE|EXTERNALHELP)"
-
-    # 4) determine if target already has CBH:
-    if ($showDebug) {
-        $smsg = "`$Path.FullName:$($Path.FullName):`n$(($helpparsed | select Category,Name,Synopsis, param*,alertset,details,examples |out-string).trim())" ;
-        if($verbose){ if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
-        else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; } ; 
-    } ;
-
-
-    if ( ( ($HelpParsed.Category -eq 'ExternalScript') -AND ($HelpParsed.Name -eq $Path.Name) ) ) {
-        <# weird, helpparsed.synopsis is 3 lines long (has word wraps), although the first looks like the $Path.name, it still doesn't match
-            pull Synopsis out - it's always populated but matching it is a PITA
-            -AND ($HelpParsed.Synopsis -ne $Path.FullName)
-        #>
-        if ( -not($HelpParsed.examples) -AND -not($HelpParsed.examples) -AND -not($HelpParsed.examples) -AND -not($HelpParsed.examples) -AND -not($HelpParsed.examples) -AND -not($HelpParsed.examples) -AND -not($HelpParsed.examples) -AND ($HelpParsed.Synopsis -ne $Path.FullName ) ) {
-            #  non-cbh/non-meta script
-            <# completey non-cbh/non-meta script get-help -fulls as:
-                #-=-=-=-=-=-=-=-=
-                Name          : get-NonUserMbxsByOU.ps1
-                Category      : ExternalScript
-                Synopsis      : get-NonUserMbxsByOU.ps1
-                Component     :
-                Role          :
-                Functionality :
-                ModuleName    :
-                Length        : 26
-                #-=-=-=-=-=-=-=-=
-            #>
-            $objReturn.hasExistingCBH = $false ;
-        }
-        else {
-            # partially configured CBH, at least one of the above are populated
-            $objReturn.hasExistingCBH = $true ;
-        } ;
-
-    }
-    elseif ( ( ($HelpParsed.Category -eq 'ExternalScript') -AND ($HelpParsed.Name -eq $Path.FullName) ) ) {
-        if ( ($HelpParsed.examples) -OR ($HelpParsed.examples) -OR ($HelpParsed.examples) -OR ($HelpParsed.examples) -OR ($HelpParsed.examples) -OR ($HelpParsed.examples) -OR ($HelpParsed.examples) -OR ($HelpParsed.Synopsis -ne $Path.FullName ) ) {
-            <# weird, helpparsed.synopsis is 3 lines long (has word wraps), although the first looks like the $Path.name, it still doesn't match
-            pull Synopsis out - it's always populated but matching it is a PITA
-            -AND ($HelpParsed.Synopsis -ne $Path.FullName)
-            #>
-            <#
-            # script with cbh, no meta get-help -fulls as:
-                #-=-=-=-=-=-=-=-=
-                examples      : @{example=System.Management.Automation.PSObject[]}
-                alertSet      : @{alert=System.Management.Automation.PSObject[]}
-                parameters    :
-                details       : @{name=C:\usr\work\exch\scripts\get-NonUserMbxsByOU.ps1; description=System.Management.Automation.PSObject[]}
-                description   : {@{Text=get-NonUserMbxsByOU.ps1 - Get non-user mailboxes by OU}}
-                relatedLinks  : @{navigationLink=@{linkText=}}
-                syntax        : @{syntaxItem=@{name=C:\usr\work\exch\scripts\get-NonUserMbxsByOU.ps1}}
-                xmlns:maml    : http://schemas.microsoft.com/maml/2004/10
-                xmlns:command : http://schemas.microsoft.com/maml/dev/command/2004/10
-                xmlns:dev     : http://schemas.microsoft.com/maml/dev/2004/10
-                Name          : C:\usr\work\exch\scripts\get-NonUserMbxsByOU.ps1
-                Category      : ExternalScript
-                Synopsis      : get-NonUserMbxsByOU.ps1 - Get non-user mailboxes by OU
-                Component     :
-                Role          :
-                Functionality :
-                ModuleName    :
-                #-=-=-=-=-=-=-=-=
-        #>
-            $objReturn.hasExistingCBH = $true ;
-        }
-        else {
-            throw "Error: This script has an undefined mixture of CBH values!"
-        } ;
-        <# # script with cbh & meta get-help -fulls as:
-            #-=-=-=-=-=-=-=-=
-            examples      : @{example=System.Management.Automation.PSObject[]}
-            relatedLinks  : @{navigationLink=@{linkText=}}
-            details       : @{name=C:\usr\work\exch\scripts\get-NonUserMbxsByOU.ps1; description=System.Management.Automation.PSObject[]}
-            description   : {@{Text=get-NonUserMbxsByOU.ps1 - Get non-user mailboxes by OU}}
-            parameters    :
-            syntax        : @{syntaxItem=@{name=C:\usr\work\exch\scripts\get-NonUserMbxsByOU.ps1}}
-            xmlns:maml    : http://schemas.microsoft.com/maml/2004/10
-            xmlns:command : http://schemas.microsoft.com/maml/dev/command/2004/10
-            xmlns:dev     : http://schemas.microsoft.com/maml/dev/2004/10
-            Name          : C:\usr\work\exch\scripts\get-NonUserMbxsByOU.ps1
-            Category      : ExternalScript
-            Synopsis      : get-NonUserMbxsByOU.ps1 - Get non-user mailboxes by OU
-                            Version     : 1.0.1
-                            Author      : Todd Kadrie
-                            Website     : https://www.toddomation.com
-                            Twitter     : @tostka / http://twitter.com/tostka
-                            CreatedDate : 2019-11-25
-                            FileName    : C:\usr\work\exch\scripts\get-NonUserMbxsByOU.ps1
-                            License     : MIT License
-                            Copyright   : (c)  2019 Todd Kadrie. All rights reserved.
-                            Github      : https://github.com/tostka
-                            AddedCredit : REFERENCE
-                            AddedWebsite:	URL
-                            AddedTwitter:	URL
-                            REVISIONS
-                            * 21:53 PM 11/25/2019 Added default CBH
-            Component     :
-            Role          :
-            Functionality :
-            ModuleName    :
-    #>
-
-        <# interesting point, even with NO CBH, get-help returns content (nuts)
-
-        An non-CBH script will return at minimum:
-        #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-        $HelpParsed
-        Move-MultMbxsToExo.ps1
-
-
-        #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-        #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-        $HelpParsed.Synopsis
-        Move-MultMbxsToExo.ps1
-
-
-        #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-        which rgx escape reveals as:
-        #-=-=-=-=-=-=-=-=
-        [regex]::Escape($($HelpParsed.Synopsis))
-        Move-MultMbxsToExo\.ps1\ \r\n
-        #-=-=-=-=-=-=-=-=
-        But attempts to build a regex to match the above haven't been successful
-        So, we go to explicitly testing the highpoints to fail a non-CBH:
-        ($HelpParsed.Category -eq 'ExternalScript') -AND ($HelpParsed.Name -eq $Path.Name) -AND (!$HelpParsed.parameters) -AND (!($HelpParsed.alertSet)) -AND (!($HelpParsed.details)) -AND (!($HelpParsed.examples))
-    #>
-
-
-    } elseif ($HelpParsed.Name -eq 'default') {
-        # failed to properly parse CBH
-        $objReturn.helpparsed = $null ; 
-        $objReturn.hasExistingCBH = $false ;
-        $objReturn.NotesHash = $null ; 
-    } ;  
-
-    # 12:24 PM 4/13/2020 splice in the get-VersionInfo notes processing code
-    $notes = $null ; $notes = @{ } ;
-    $notesLines = $null ; $notesLineCount = $null ;
-    $revText = $null ; $CurrLine = 0 ; 
-    $rgxNoteMeta = '^((\s)*)\w{3,}((\s*)*)\:((\s*)*)*.*' ; 
-    if ( ($notesLines = $HelpParsed.alertSet.alert.Text -split '\r?\n').Trim() ) {
-        $notesLineCount = ($notesLines | measure).count ;
-        foreach ($line in $notesLines) {
-            $CurrLine++ ; 
-            if (!$line) { continue } ;
-            if($line -match $rgxNoteMeta ){
-                $name = $null ; $value = $null ;
-                if ($line -match '(?i:REVISIONS((\s*)*)((\:)*))') { 
-                    # at this point, from here down should be rev data
-                    $revText = $notesLines[$($CurrLine)..$($notesLineCount)] ;  
-                    $notes.Add("LastRevision", $notesLines[$currLine]) ;
-                    #Continue ;
-                    break ; 
-                } ;
-                if ($line.Contains(':')) {
-                    $nameValue = $null ;
-                    $nameValue = @() ;
-                    # Split line by the first colon (:) character.
-                    $nameValue = ($line -split ':', 2).Trim() ;
-                    $name = $nameValue[0] ;
-                    if ($name) {
-                        $value = $nameValue[1] ;
-                        if ($value) { $value = $value.Trim() } ;
-                        if (!($notes.ContainsKey($name))) { $notes.Add($name, $value) } ;
-                    } ;
-                } ;
-            } ; 
-        } ;
-        $objReturn.NotesHash = $notes ;
-        $objReturn.RevisionsText = $revText ; 
-    } ; 
-
-    $objReturn | Write-Output ;
-}
-
-#*------^ parseHelp.ps1 ^------
 
 
 #*------v restore-ISEConsoleColors.ps1 v------
@@ -7633,6 +8539,7 @@ function Step-ModuleVersionCalculated {
     AddedWebsite: www.thesurlyadmin.com
     AddedTwitter: @thesurlyadm1n
     REVISIONS
+    * 8:02 AM 6/23/2023 fix: #433: # 2:20 PM 6/22/2023 if you're going to use a param with boolean, they have to be colon'd: -PassThru:$true (built into v1.5.26)
     * 2:18 PM 6/2/2023 added: Try/Catch around all critical items; added test for .psm1 diverge <<<<<< HEAD tags; expanded ipmo -fo -verb tests to include ErrorVariable and Passthru, capture into variable, for info tracking down compile fails.
     * 11:20 AM 12/12/2022 completely purged verb-* require stmts too risky w recursive load triggers:,verb-IO, verb-logging, verb-Mods, verb-Text
     * 3:57 PM 5/26/2022 backstop profile rgxs ; implment pre-cache & post-reload of installed modules ; 
@@ -9107,29 +10014,31 @@ function update-NewModule {
     [Alias('process-NewModule')]
     PARAM(
         [Parameter(Position=0,Mandatory=$True,ValueFromPipeline=$true,HelpMessage="ModuleName[-ModuleName verb-AAD]")]
-        [ValidateNotNullOrEmpty()]
-        [string]$ModuleName,
+            [ValidateNotNullOrEmpty()]
+            [string]$ModuleName,
         [Parameter(Mandatory=$True,HelpMessage="ModDirPath[-ModDirPath C:\sc\verb-ADMS]")]
-        [ValidateNotNullOrEmpty()]
-        [ValidateScript({Test-Path $_ -PathType 'Container'})]
+            [ValidateNotNullOrEmpty()]
+            [ValidateScript({Test-Path $_ -PathType 'Container'})]
         [system.io.fileinfo]$ModDirPath,
         [Parameter(Position=0,Mandatory=$True,ValueFromPipeline=$true,ValueFromPipelineByPropertyName=$true,HelpMessage="Target local Repo[-Repository lyncRepo]")]
-        [ValidateNotNullOrEmpty()]
-        [string]$Repository,
+            [ValidateNotNullOrEmpty()]
+            [string]$Repository,
         [Parameter(HelpMessage="Flag that indicates Module should be Merged into a monoolithic .psm1 [-Merge]")]
-        [switch] $Merge,
+            [switch] $Merge,
         [Parameter(HelpMessage="Flag that indicates Module should be republished into local Repo (skips ConvertTo-ModuleDynamicTDO & Sign-file steps) [-Republish]")]
-        [switch] $Republish,
+            [switch] $Republish,
         [Parameter(HelpMessage="Flag that indicates Pester test script should be run, at end of processing [-RunTest]")]
-        [switch] $RunTest,
+            [switch] $RunTest,
         [Parameter(HelpMessage="Skip BuildInfo use (workaround for hangs in that module)[-NoBuildInfo]")]
-        [switch] $NoBuildInfo,
+            [switch] $NoBuildInfo,
         [Parameter(HelpMessage="Optional Explicit 3-digit RequiredVersion specification (as contrasts with using current Manifest .psd1 ModuleVersion value)[-Version 2.0.3]")]
-        [version]$RequiredVersion,
+            [version]$RequiredVersion,
+        [Parameter(HelpMessage="regex reflecting an array of file extension strings to identify 'external' dependancy files in the module directory structure that are to be included in the distributed module(provided to provide run-time override)")]
+            [string[]]$rgxModExtIncl='\.(cab|cat|cmd|config|cscfg|csdef|css|dll|dylib|gif|html|ico|jpg|js|json|map|Materialize|MaterialUI|md|pdb|php|png|ps1|ps1xml|psd1|psm1|rcs|reg|snippet|so|txt|vscode|wixproj|wxi|xaml|xml|yml|zip)',
         [Parameter(HelpMessage="Debugging Flag [-showDebug]")]
-        [switch] $showDebug,
+            [switch] $showDebug,
         [Parameter(HelpMessage="Whatif Flag  [-whatIf]")]
-        [switch] $whatIf
+            [switch] $whatIf
     ) ;
     # function self-name (equiv to script's: $MyInvocation.MyCommand.Path) ;
     ${CmdletName} = $PSCmdlet.MyInvocation.MyCommand.Name ;
@@ -9181,6 +10090,23 @@ function update-NewModule {
     $backInclDir = "c:\usr\work\exch\scripts\" ;
     $Retries = 4 ;
     $RetrySleep = 5 ;
+
+    # constants relocated centrally
+    # exts for files that are bundled into final build pkg (and get copied to profile)
+    $ModExtIncl='*.cab','*.cat','*.cmd','*.config','*.cscfg','*.csdef','*.css','*.dll','*.dylib','*.gif','*.html','*.ico','*.jpg','*.js','*.json','*.map','*.Materialize','*.MaterialUI','*.md','*.pdb','*.php','*.png','*.ps1','*.ps1xml','*.psd1','*.psm1','*.rcs','*.reg','*.snippet','*.so','*.txt','*.vscode','*.wixproj','*.wxi','*.xaml','*.xml','*.yml','*.zip' ;
+    # rgx equiv of above
+    if(-not $rgxModExtIncl){
+        # should come down from parameter
+        $rgxModExtIncl='\.(cab|cat|cmd|config|cscfg|csdef|css|dll|dylib|gif|html|ico|jpg|js|json|map|Materialize|MaterialUI|md|pdb|php|png|ps1|ps1xml|psd1|psm1|rcs|reg|snippet|so|txt|vscode|wixproj|wxi|xaml|xml|yml|zip)' ;
+    } ; 
+    # trim down above into the manifest.psd1 FileList - non native module exec code files from the rgxModExtIncl
+    $rgxPsd1FileList = $rgxModExtIncl.replace('ps1|','').replace('psm1|','').replace('psd1|','') ; 
+    # files that are explicitly excluded from build/pkg/filelist by name
+    # gci -exclude spec:
+    $exclude = @('main.js','rebuild-module.ps1') ; 
+    # gci post-filtered excludes from build/pkg
+    $excludeMatch = @('.git','.vscode') ;
+    [regex] $excludeMatchRegEx = '(?i)' + (($excludeMatch |ForEach-Object {[regex]::escape($_)}) -join "|") + '' ;
 
     #*======v FUNCTIONS v======
 
@@ -9427,7 +10353,7 @@ function update-NewModule {
     # "C:\sc\verb-AAD" ; C:\sc\verb-AAD\Tests\verb-AAD.tests.ps1
     $TestScriptPath = "$($ModDirPath)\Tests\$($ModuleName).tests.ps1" ;
     $rgxSignFiles='\.(CAT|MSI|JAR,OCX|PS1|PSM1|PSD1|PS1XML|PSC1|MSP|CMD|BAT|VBS)$' ;
-    # expand to cover External & Private variant names as well
+    # expand to cover External & Private variant names as well - this is used solely to exclude signing of component files that will be signed as a monolithic .psm1
     $rgxIncludeDirs='\\(Public|Internal|External|Private|Classes)\\' ;
     $rgxOldFingerprint = 'fingerprint\._\d{8}-\d{4}(A|P)M' ; 
 
@@ -9942,7 +10868,87 @@ $(if($Merge){'MERGE parm specified as well:`n-Merge Public|Internal|Classes incl
         Break ;
     } ;    
 
-    # Update the psd1 FunctionsToExport : (moved to ConvertTo-ModuleDynamicTDO, after the export-modulemember code)
+    # ==Update the psd1 FunctionsToExport : (moved to ConvertTo-ModuleDynamicTDO, after the export-modulemember code)
+
+    <# ==Update the psd1 FileList (external non-code files resources (normally in Resources) that need to be bundled in pkg: 
+        - only included in pkg/installed, if in the psd1.filelist key:value 
+        - have to resolve and access dynamically them using gmo
+        # this approach stocks an indexed hash with the associated path of each
+        $myModule = Get-Module YourModule ;
+        $ResFiles = @{} ;
+        foreach ($file in $myModule.FileList){
+            $path = Join-Path $myModule.ModuleBase $file ;
+            $ResFiles[$file] = $path ;
+        } ;
+        $myCsspath = $resfiles['bootstrap.min.css'] ; 
+        # they'll all be tossed into the module root dir/$myModule.ModuleBase dir unorganized when installed
+    #>
+    # 1) assemble the list of non-code/class module resourcs:
+    # $moddirpath: C:\sc\verb-dev
+    $pltGci=[ordered]@{Path=$moddirpath ;Recurse=$true ;File = $true ; Exclude=$exclude; ErrorAction="Stop" ; } ;
+    $Psd1filelist = Get-ChildItem @pltGci | ?{($_.extension -match $rgxPsd1FileList -and $_.fullname -notmatch $rgxPsd1FileListExcl) -OR $_.fullname -match $rgxPsd1FileListDirs} | select -expand name ; 
+    # export the list extensionless xml, to let it drop off of the Psd1filelist 
+    $rgxPsd1FileListLine = '((#\s)*)FileList((\s)*)=((\s)*).*' ;
+    if($Psd1filelist){
+        $smsg = "`$Psd1filelist populated: xXML:$($ModDirPath)\Psd1filelist" ; 
+        if($verbose){if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level VERBOSE } 
+        else{ write-verbose "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; } ; $smsg = "" ; 
+        $Psd1filelist | sort | export-clixml -path "$($ModDirPath)\Psd1filelist" ;
+    
+        # 2) then update the psd1.filelist prop into an array of the unpathed name's of each file found
+        # looks like by #906, we're using $ModPsdPath - finished, rather than the temp file? 
+        $smsg = "Updating the Psd1 FileList to with populated `$Psd1filelist..." ;
+        if($verbose){ if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug
+        else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; } ;
+
+        #$tf = $PsdNameTmp ;
+        $tf = $ModPsdPath ; 
+        # switch back to manual local updates
+        $pltSCFE=[ordered]@{Path = $tf ; PassThru=$true ;Verbose=$($verbose) ;whatif= $($whatif) ; }
+        $psd1ExpMatch = $null ; 
+        if($psd1ExpMatch = Get-ChildItem $tf | select-string -Pattern $rgxPsd1FileListLine ){
+            # 2-step it, we're getting only $value[-1] through the pipeline
+            # add | out-string to collapse object arrays
+            $newContent = (Get-Content $tf) | Foreach-Object {
+                $_ -replace $rgxPsd1FileListLine , ("FileList = " + "@('" + $($Psd1filelist -join "','") + "')")
+            } | out-string ;
+            # this writes to $PsdNameTmp
+            $bRet = Set-ContentFixEncoding @pltSCFE -Value $newContent ;
+            if(-not $bRet -AND -not $whatif){throw "Set-ContentFixEncoding $($tf)!" } ;
+            $PassStatus += ";Set-Content:UPDATED";
+        } else {
+            $smsg = "UNABLE TO Regex out $($rgxPsd1FileListLine) from $($tf)`nFileList CAN'T BE UPDATED!" ;
+            if($verbose){ if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN } #Error|Warn|Debug
+            else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; } ;
+        } ;
+    } else {
+        # unpopulated, default it rem'd: # FileList = @()
+        $smsg = "Updating the Psd1 FileList to with populated `$Psd1filelist..." ;
+        if($verbose){ if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug
+        else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; } ;
+
+        #$tf = $PsdNameTmp ;
+        $tf = $ModPsdPath ; 
+        # switch back to manual local updates
+        $pltSCFE=[ordered]@{Path = $tf ; PassThru=$true ;Verbose=$($verbose) ;whatif= $($whatif) ; }
+        $psd1ExpMatch = $null ; 
+        if($psd1ExpMatch = Get-ChildItem $tf | select-string -Pattern $rgxPsd1FileListLine ){
+            # 2-step it, we're getting only $value[-1] through the pipeline
+            # add | out-string to collapse object arrays
+            $newContent = (Get-Content $tf) | Foreach-Object {
+                $_ -replace $rgxPsd1FileListLine , ("# FileList = @()")
+            } | out-string ;
+            # this writes to $PsdNameTmp
+            $bRet = Set-ContentFixEncoding @pltSCFE -Value $newContent ;
+            if(-not $bRet -AND -not $whatif){throw "Set-ContentFixEncoding $($tf)!" } ;
+            $PassStatus += ";Set-Content:UPDATED";
+        } else {
+            $smsg = "UNABLE TO Regex out $($rgxPsd1FileListLine) from $($tf)`nFileList CAN'T BE UPDATED!" ;
+            if($verbose){ if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN } #Error|Warn|Debug
+            else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; } ;
+        } ;
+    }; 
+    
     write-verbose "Get-ChildItem $($ModDirPath)\* -recur | where-object {$_.name -match `$rgxGuidModFiles}"
     $rgxGuidModFiles = "[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}\.ps(d|m)1"
     $testfiles = Get-ChildItem "$($ModDirPath)\*" -recur | where-object {$_.name -match $rgxGuidModFiles} ; 
@@ -10002,54 +11008,7 @@ $(if($Merge){'MERGE parm specified as well:`n-Merge Public|Internal|Classes incl
     $smsg= "Removing existing profile $($ModuleName) content..." ;
     if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info }  #Error|Warn|Debug
     else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
-    <# rem defer to new Uninstall-ModuleForce()
-    if($PsGInstalled=Get-InstalledModule -name $($ModuleName) -AllVersions -ea 0 ){
-        foreach($PsGMod in $PsGInstalled){
-            $sBnrS="`n#*------v Uninstall PSGet Mod:$($PsGMod.name):v$($PsGMod.version) v------" ;
-            $smsg= $sBnrS ;
-            if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info }  #Error|Warn|Debug
-            else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
-            $pltRmv = [ordered]@{
-                force=$true ;
-                whatif=$($whatif) ;
-            } ;
-            $error.clear() ;
-            TRY {
-                if($showDebug){
-                    $sMsg = "Uninstall-Script w`n$(($pltRmv|out-string).trim())" ;
-                    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info }  #Error|Warn|Debug
-                    else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
-                } ;
-                get-module $PsGMod.installedlocation -listavailable |uninstall-module @pltRmv
-            } CATCH {
-                $ErrorTrapped = $Error[0] ;
-                $PassStatus += ";ERROR";
-                $smsg= "Failed processing $($ErrorTrapped.Exception.ItemName). `nError Message: $($ErrorTrapped.Exception.Message)`nError Details: $($ErrorTrapped)" ;
-                if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Error } #Error|Warn
-                else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
-                #Exit #Opts: STOP(debug)|EXIT(close)|Continue(move on in loop cycle)
-            } ;
-            $smsg="$($sBnrS.replace('-v','-^').replace('v-','^-'))" ;
-            if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info }  #Error|Warn|Debug
-            else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
-        } ;
-    } ;
-    # installed mods have PSGetModuleInfo.xml files
     
-    # 12:20 PM 1/14/2020 #438: surviving conflicts locking install-module: need to check everywhere, loop the entire $env:psprofilepath list
-    $modpaths = $env:PSModulePath.split(';') ;
-    foreach($modpath in $modpaths){
-        #"==$($modpath):"
-        $smsg= "Checking: $($ModuleName) below: $($modpath)..." ;
-        if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info }  #Error|Warn|Debug
-        else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
-        #$bRet = remove-ItemRetry -Path "$($env:userprofile)\Documents\WindowsPowerShell\Modules\$($ModuleName)\*.*" -Recurse -showdebug:$($showdebug) -whatif:$($whatif) ;
-        $searchPath = join-path -path $modpath -ChildPath "$($ModuleName)\*.*" ;
-        # 2:25 PM 4/21/2021 adding -GracefulFail to get past locked verb-dev cmdlets
-        $bRet = remove-ItemRetry -Path $searchPath -Recurse -showdebug:$($showdebug) -whatif:$($whatif) -GracefulFail ;
-        if (!$bRet) {throw "FAILURE" ; Break ; } ;
-    } ;
-    #>
     $pltUMF=[ordered]@{
         ModuleName = $ModuleName ;
         #ErrorAction="Stop" ;
@@ -10081,13 +11040,28 @@ $(if($Merge){'MERGE parm specified as well:`n-Merge Public|Internal|Classes incl
     $smsg= "Copying module to profile (net of .git & .vscode dirs, and backed up content)..." ;
     if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info }  #Error|Warn|Debug
     else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+    
+    <# move these constants up top, they're used for psd1.FileList population discovery as well (up around #965)
+    # exts for files that are bundled into final build pkg (and get copied to profile)
     $ModExtIncl='*.cab','*.cat','*.cmd','*.config','*.cscfg','*.csdef','*.css','*.dll','*.dylib','*.gif','*.html','*.ico','*.jpg','*.js','*.json','*.map','*.Materialize','*.MaterialUI','*.md','*.pdb','*.php','*.png','*.ps1','*.ps1xml','*.psd1','*.psm1','*.rcs','*.reg','*.snippet','*.so','*.txt','*.vscode','*.wixproj','*.wxi','*.xaml','*.xml','*.yml','*.zip' ;
-    $rgxModExtIncl='\.(cab|cat|cmd|config|cscfg|csdef|css|dll|dylib|gif|html|ico|jpg|js|json|map|Materialize|MaterialUI|md|pdb|php|png|ps1|ps1xml|psd1|psm1|rcs|reg|snippet|so|txt|vscode|wixproj|wxi|xaml|xml|yml|zip)' ;
+    # rgx equiv of above
+    if(-not $rgxModExtIncl){
+        # should come down from parameter
+        $rgxModExtIncl='\.(cab|cat|cmd|config|cscfg|csdef|css|dll|dylib|gif|html|ico|jpg|js|json|map|Materialize|MaterialUI|md|pdb|php|png|ps1|ps1xml|psd1|psm1|rcs|reg|snippet|so|txt|vscode|wixproj|wxi|xaml|xml|yml|zip)' ;
+    } ; 
+    # trim down above into the manifest.psd1 FileList - non native module exec code files from the rgxModExtIncl
+    $rgxPsd1FileList = $rgxmodextincl.replace('ps1|','').replace('psm1|','').replace('psd1|','') ; 
+    # files that are explicitly excluded from build/pkg/filelist by name
+    # gci -exclude spec:
+    $exclude = @('main.js','rebuild-module.ps1') ; 
+    # gci post-filtered excludes from build/pkg
+    $excludeMatch = @('.git','.vscode') ;
+    [regex] $excludeMatchRegEx = '(?i)' + (($excludeMatch |ForEach-Object {[regex]::escape($_)}) -join "|") + '' ;
+    #>
+
     $from="$($ModDirPath)" ;
     $to = "$([Environment]::GetFolderPath("MyDocuments"))\WindowsPowerShell\Modules\$($ModuleName)" ;
-    $exclude = @('main.js','rebuild-module.ps1') ; $excludeMatch = @('.git','.vscode') ;
 
-    [regex] $excludeMatchRegEx = '(?i)' + (($excludeMatch |ForEach-Object {[regex]::escape($_)}) -join "|") + '' ;
     # below is original copy-all gci
     $pltGci=[ordered]@{Path=$from ;Recurse=$true ;Exclude=$exclude; ErrorAction="Stop" ; } ;
     # explicitly only go after the common module component, by type, via -include -
@@ -10103,7 +11077,7 @@ $(if($Merge){'MERGE parm specified as well:`n-Merge Public|Internal|Classes incl
             # below is original copy-all gci
             #Get-ChildItem @pltGci | Where-Object { $excludeMatch -eq $null -or $_.FullName.Replace($from, '') -notmatch $excludeMatchRegEx} | Copy-Item -Destination {  if ($_.PSIsContainer) { Join-Path $to $_.Parent.FullName.Substring($from.length) }   else { Join-Path $to $_.FullName.Substring($from.length) }    } -Force -Exclude $exclude -whatif:$($whatif) ;
             # two stage it anyway
-            $srcFiles = Get-ChildItem @pltGci | Where-Object { $excludeMatch -eq $null -or $_.FullName.Replace($from, '') -notmatch $excludeMatchRegEx} ;
+            $srcFiles = Get-ChildItem @pltGci | Where-Object { $excludeMatch -eq $null -OR $_.FullName.Replace($from, '') -notmatch $excludeMatchRegEx} ;
             $srcFiles | Copy-Item -Destination {
                     if ($_.PSIsContainer) {
                         Join-Path $to $_.Parent.FullName.Substring($from.length)
@@ -10625,33 +11599,7 @@ $($logfile)
 
 #*======^ END FUNCTIONS ^======
 
-Export-ModuleMember -Function backup-ModuleBuild,check-PsLocalRepoRegistration,confirm-ModuleBuildSync,confirm-ModulePsd1Version,confirm-ModulePsm1Version,confirm-ModuleTestPs1Guid,convert-CommandLine2VSCDebugJson,convertFrom-EscapedPSText,convert-ISEOpenSession,converto-VSCConfig,ConvertTo-Breakpoint,_extractBreakpoint,convertTo-EscapedPSText,ConvertTo-ModuleDynamicTDO,ConvertTo-ModuleMergedTDO,convertTo-UnwrappedPS,convertTo-WrappedPS,export-ISEBreakPoints,export-ISEBreakPointsALL,export-ISEOpenFiles,get-AliasAssignsAST,get-CodeProfileAST,get-CodeRiskProfileAST,Get-CommentBlocks,get-FunctionBlock,get-FunctionBlocks,get-ISEOpenFilesExported,get-ModuleRevisedCommands,get-ProjectNameTDO,Get-PSBreakpointSorted,Get-PSModuleFile,get-StrictMode,Version,ToString,get-VariableAssignsAST,get-VersionInfo,import-ISEBreakPoints,import-ISEBreakPointsALL,import-ISEConsoleColors,import-ISEOpenFiles,Initialize-ModuleFingerprint,Get-PSModuleFile,Initialize-PSModuleDirectories,move-ISEBreakPoints,new-CBH,New-GitHubGist,parseHelp,restore-ISEConsoleColors,restore-ModuleBuild,save-ISEConsoleColors,show-Verbs,Split-CommandLine,Step-ModuleVersionCalculated,Get-PSModuleFile,Test-ModuleTMPFiles,test-VerbStandard,Uninstall-ModuleForce,update-NewModule -Alias *
+Export-ModuleMember -Function backup-ModuleBuild,check-PsLocalRepoRegistration,confirm-ModuleBuildSync,confirm-ModulePsd1Version,confirm-ModulePsm1Version,confirm-ModuleTestPs1Guid,convert-CommandLine2VSCDebugJson,convertFrom-EscapedPSText,Convert-HelpToHtmlFile,convert-ISEOpenSession,converto-VSCConfig,ConvertTo-Breakpoint,_extractBreakpoint,convertTo-EscapedPSText,ConvertTo-ModuleDynamicTDO,ConvertTo-ModuleMergedTDO,convertTo-UnwrappedPS,convertTo-WrappedPS,export-ISEBreakPoints,export-ISEBreakPointsALL,export-ISEOpenFiles,get-AliasAssignsAST,get-CodeProfileAST,get-CodeRiskProfileAST,Get-CommentBlocks,get-FunctionBlock,get-FunctionBlocks,get-HelpParsed,get-ISEOpenFilesExported,get-ModuleRevisedCommands,get-ProjectNameTDO,Get-PSBreakpointSorted,Get-PSModuleFile,get-StrictMode,Version,ToString,get-VariableAssignsAST,get-VersionInfo,import-ISEBreakPoints,import-ISEBreakPointsALL,import-ISEConsoleColors,import-ISEOpenFiles,Initialize-ModuleFingerprint,Get-PSModuleFile,Initialize-PSModuleDirectories,move-ISEBreakPoints,new-CBH,New-GitHubGist,restore-ISEConsoleColors,restore-ModuleBuild,save-ISEConsoleColors,show-Verbs,Split-CommandLine,Step-ModuleVersionCalculated,Get-PSModuleFile,Test-ModuleTMPFiles,test-VerbStandard,Uninstall-ModuleForce,update-NewModule -Alias *
 
 
 
-
-# SIG # Begin signature block
-# MIIELgYJKoZIhvcNAQcCoIIEHzCCBBsCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
-# gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUGGi+BX+SCMYWVYo04iemXbak
-# LbegggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
-# MCwxKjAoBgNVBAMTIVBvd2VyU2hlbGwgTG9jYWwgQ2VydGlmaWNhdGUgUm9vdDAe
-# Fw0xNDEyMjkxNzA3MzNaFw0zOTEyMzEyMzU5NTlaMBUxEzARBgNVBAMTClRvZGRT
-# ZWxmSUkwgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBALqRVt7uNweTkZZ+16QG
-# a+NnFYNRPPa8Bnm071ohGe27jNWKPVUbDfd0OY2sqCBQCEFVb5pqcIECRRnlhN5H
-# +EEJmm2x9AU0uS7IHxHeUo8fkW4vm49adkat5gAoOZOwbuNntBOAJy9LCyNs4F1I
-# KKphP3TyDwe8XqsEVwB2m9FPAgMBAAGjdjB0MBMGA1UdJQQMMAoGCCsGAQUFBwMD
-# MF0GA1UdAQRWMFSAEL95r+Rh65kgqZl+tgchMuKhLjAsMSowKAYDVQQDEyFQb3dl
-# clNoZWxsIExvY2FsIENlcnRpZmljYXRlIFJvb3SCEGwiXbeZNci7Rxiz/r43gVsw
-# CQYFKw4DAh0FAAOBgQB6ECSnXHUs7/bCr6Z556K6IDJNWsccjcV89fHA/zKMX0w0
-# 6NefCtxas/QHUA9mS87HRHLzKjFqweA3BnQ5lr5mPDlho8U90Nvtpj58G9I5SPUg
-# CspNr5jEHOL5EdJFBIv3zI2jQ8TPbFGC0Cz72+4oYzSxWpftNX41MmEsZkMaADGC
-# AWAwggFcAgEBMEAwLDEqMCgGA1UEAxMhUG93ZXJTaGVsbCBMb2NhbCBDZXJ0aWZp
-# Y2F0ZSBSb290AhBaydK0VS5IhU1Hy6E1KUTpMAkGBSsOAwIaBQCgeDAYBgorBgEE
-# AYI3AgEMMQowCKACgAChAoAAMBkGCSqGSIb3DQEJAzEMBgorBgEEAYI3AgEEMBwG
-# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBTw4mi8
-# 3DUPh1icbHY3uCcDRQDezDANBgkqhkiG9w0BAQEFAASBgG1eZKy50cewRH/q/9rj
-# vOOg8Mfp+uUDJ1cSNM4hz+lSy0O3VAvuFGGljnd7vWMsT2JQAngGT+ntbz9JQf40
-# dSSUzqXUaVOdbCzLmykQ9vfo3a3iUxtQ8TbfTZL7JX5ZBvcmP08sCcpuVLCeUE5H
-# h3ted2BH3N4/rtJMWvCgsbDs
-# SIG # End signature block
