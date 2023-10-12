@@ -18,6 +18,7 @@ function Convert-HelpToHtmlFile {
     AddedWebsite: https://communary.net/
     AddedTwitter: @okallstad / https://twitter.com/okallstad
     REVISIONS
+    * 12:59 PM 10/12/2023 add dep chk, defer to $scriptdir, avoids need to run pwd in the module, for loc of resource incl files (which don't actually work; should create a browesr left pane menu for nav, it never appears on modern browsers).
     * 9:50 AM 10/3/2023 add: -markdownhelp echos ; add:CBH expl that demos capture & recycle of output filename through convert-HtmlToMarkdown equivelent markdown .md doc. The CBH -> markdown via PlattyPS New-MarkdownHelp yields decent leaf cmdlet docs, but doesn't create the same holistic module nav-menued .html doc (which can be manually created with convert-htmlToMarkdown, tho the menues don't work)
     * 3:58 PM 10/2/2023 added -MarkdownHelp and simple call branching each commandlet process into plattyps to output quick markdown .md files in the parent dir of -Destination ; 
     Moving this into verb-dev, no reason it should sit in it's own repo (renaming Invoke-CreateModuleHelpFile -> Convert-HelpToHtmlFile) ; 
@@ -190,6 +191,18 @@ function Convert-HelpToHtmlFile {
 
         TRY {
             # check dependencies - revise pathing to $ScriptDir (don't have to run pwd the mod dir)
+            if($hostedModule = get-command $CmdletName | select -expand ModuleName){
+                if($ModGMO = Get-Module -list -name $hostedModule){
+                    $deppath = $ModGMO.ModuleBase ; 
+                } else { 
+                    #$deppath = $scriptdir
+                    throw "Unable to Get-Module -list -name $($hostedModule!)" ; 
+                    break ; 
+                } ;  
+
+            } else { 
+                $deppath = $scriptdir
+            } ; 
             if (-not($SkipDependencyCheck)) {
                 $missingDependency = $false
                 foreach($dependency in $dependencies) {
