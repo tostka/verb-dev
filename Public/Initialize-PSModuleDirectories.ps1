@@ -6,16 +6,21 @@ Function Initialize-PSModuleDirectories {
     Initialize-PSModuleDirectories.ps1 - Initialize PS Module Directories
     .NOTES
     Version     : 3.4.1
-    Author      : Jeff Hicks
-    Website     : https://www.powershellgallery.com/packages/ISEScriptingGeek/3.4.1
-    Twitter     : 
+    Author      : Todd Kadrie
+    Website     : http://www.toddomation.com
+    Twitter     : @tostka / http://twitter.com/tostka
     CreatedDate : 2022-04-26
     FileName    : Initialize-PSModuleDirectories.ps1
-    License     : 
-    Copyright   : 
+    License     : (None Asserted)
+    Copyright   : (None Asserted)
     Github      : https://github.com/tostka/verb-dev
-    Tags        : Powershell,Parser,Risk
+    Tags        : Powershell, development, Module
+    AddedCredit : Jeff Hicks
+    AddedWebsite: https://www.powershellgallery.com/packages/ISEScriptingGeek/3.4.1
+    AddedTwitter: 
     REVISIONS
+    * 12:18 PM 10/12/2023 correct .\Resources -> Resource that's in use 
+    * 11:21 AM 10/3/2023 added LICENSES & LIBS & RESOURCES to DefaultModDirs
    * 9:35 AM 5/9/2022 init, split out from merge/unmerge-module, have a single maintainable func, rather than trying to sync the variants
     .DESCRIPTION
     Initialize-PSModuleDirectories.ps1 - Initialize PS Module Directories
@@ -61,8 +66,8 @@ Function Initialize-PSModuleDirectories {
         [Parameter(Mandatory = $True, HelpMessage = "Directory path in which the final .psm1 file should be constructed [-ModuleDestinationPath c:\path-to\module\module.psm1]")]
         [string] $ModuleDestinationPath,
         [Parameter(HelpMessage = "Array of new module subdirectory names to be created")]
-        [ValidateScript( {Test-Path $_})]
-        [string[]]$DefaultModDirs = @('Public','Internal','Classes','Tests','Docs','Docs\Cab','Docs\en-US','Docs\Markdown'),
+            [ValidateScript( {Test-Path $_})]
+            [string[]]$DefaultModDirs = @('Public','Internal','Classes','Libs','Tests','Licenses','Resource','Docs','Docs\Cab','Docs\en-US','Docs\Markdown'),
         [Parameter(HelpMessage = "Whatif Flag  [-whatIf]")]
         [switch] $whatIf
         <#
