@@ -15,7 +15,7 @@ function update-NewModule {
     Github      : https://github.com/tostka/verb-dev
     Tags        : Powershell,Module,Build,Development
     REVISIONS
-    # 1:03 PM 10/12/2023 updated cached copy of get-foldertmpty, to latest; subst update to accomodate included non-psm1/psd1 
+    # 1:18 PM 10/12/2023 cleaned out old block comment'd regions ; updated cached copy of get-foldertmpty, to latest; subst update to accomodate included non-psm1/psd1 
     resource files (in new Resource subdir); *12:29 PM 10/12/2023 add: 
     get-folderempty(), and code to loop out and remove empty folders in the module 
     tree; code to flatten move resources to the verb-MOD\verb-MOD root from 
@@ -463,16 +463,6 @@ function update-NewModule {
         } ;
     } ;
 
-    <# breaking runs
-    [array]$reqMods = $null ; # force array, otherwise single first makes it a [string]
-    $reqMods += "Test-TranscriptionSupported;Test-Transcribing;Stop-TranscriptLog;Start-IseTranscript;Start-TranscriptLog;get-ArchivePath;Archive-Log;Start-TranscriptLog;Write-Log;Start-Log".split(";") ;
-    $reqMods+="Get-CommentBlocks;parseHelp;get-ScriptProfileAST;build-VSCConfig;ConvertTo-ModuleDynamicTDO;get-VersionInfo".split(";") ;
-    # verb-IO reqMods
-    $reqMods+="Set-FileContent;backup-File;Set-FileContent;backup-File;remove-ItemRetry".split(";") ;
-    $reqMods = $reqMods | Select-Object -Unique ;
-
-    if ( !(check-ReqMods $reqMods) ) { write-error "$((get-date).ToString("yyyyMMdd HH:mm:ss")):Missing function. EXITING." ; throw "FAILURE" ; }  ;
-    #>
     # 2:32 PM 9/27/2021 updated start-log code
     if(!(get-variable LogPathDrives -ea 0)){$LogPathDrives = 'd','c' };
     foreach($budrv in $LogPathDrives){if(test-path -path "$($budrv):\scripts" -ea 0 ){break} } ;
@@ -939,65 +929,7 @@ $(if($Merge){'MERGE parm specified as well:`n-Merge Public|Internal|Classes incl
         if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info }  #Error|Warn|Debug
         else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
 
-        <#
-        $rgxTestScriptNOGuid = "Please\sPaste\shere\syour\smodule\sGuid\s-\sTest-ModuleManifest\s'<ModulePath>'\s\|\sSelect-Object\s-ExpandProperty\sGuid"
-        #$rgxTestScriptGuid = '\.Guid((\s)*)\|((\s)*)Should((\s)*)-Be((\s)*)"[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}"'
-        # cap grp
-        $rgxTestScriptGuid = '\.Guid((\s)*)\|((\s)*)Should((\s)*)-Be((\s)*)"([0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12})"'
-        $rgxGuid = "[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}" ;
-        # also maintain encoding (set-content defaults ascii)
-        $tf = $TestScriptPath;
-        $pltSCFE=[ordered]@{Path=$tf ; PassThru=$true ;Verbose=$($verbose) ;whatif= $($whatif) ; }
-        if($psd1ExpMatch = gci $tf |select-string -Pattern $rgxTestScriptNOGuid ){
-            $newContent = (Get-Content $tf) | Foreach-Object {
-                $_ -replace $rgxTestScriptNOGuid, "$($psd1guid)"
-            } | out-string ;
-            $bRet = Set-ContentFixEncoding @pltSCFE -Value $newContent ; 
-            if(-not $bRet -AND -not $whatif){throw "Set-ContentFixEncoding $($tf)!" } ;
-        } elseif($psd1ExpMatch = gci $tf |select-string -Pattern $rgxTestScriptGuid ){
-            $testGuid = $psd1ExpMatch.matches[0].Groups[9].value.tostring() ;  ;
-            if($testGuid -eq $psd1guid){
-                $smsg = "(Guid  already updated to match)" ;
-                if($verbose){ if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level INFO } #Error|Warn|Debug
-                else{ write-host -foregroundcolor gray "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; } ;
-            } else {
-                $smsg = "In:$($tf)`nGuid present:($testGuid)`n*does not* properly match:$($psd1guid)`nFORCING MATCHING UPDATE!" ;
-                if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN } #Error|Warn|Debug
-                else{ write-WARNING "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
-                $newContent = (Get-Content $tf) | Foreach-Object {
-                    $_ -replace $testGuid, "$($psd1guid)"
-                } | out-string ;
-                $bRet = Set-ContentFixEncoding @pltSCFE -Value $newContent ; 
-                if(-not $bRet -AND -not $whatif){throw "Set-ContentFixEncoding $($tf)!" } ;
-            } ;
-        } else {
-            $smsg = "UNABLE TO Regex out...`n$($rgxTestScriptNOGuid)`n...from $($tf)`nTestScript hasn't been UPDATED!" ;
-            if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN } #Error|Warn|Debug
-            else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
-        } ;
-        #>
-        <# 2:36 PM 6/1/2022 defer into confirm-ModuleBuildSync, further down)
-        $pltCMTPG=[ordered]@{
-            Path = $TestScriptPath ;
-            RequiredGuid = $psd1guid ;
-            whatif = $($whatif) ;
-            verbose = $($verbose) ;
-        } ; 
-        $smsg = "confirm-ModuleTestPs1Guid w`n$(($pltCMTPG|out-string).trim())" ; 
-        if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
-        else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
-        $bRet = confirm-ModuleTestPs1Guid @pltCMTPG ;
-        if ($bRet.valid -AND $bRet.GUID){
-            $smsg = "(confirm-ModuleTestPs1Guid:Success)" ;
-            if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info }
-            else{ write-verbose "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
-        } else {
-            $smsg = "confirm-ModuleTestPs1Guid:FAIL! Aborting!" ;
-            if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info }
-            else{ write-verbose "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
-            Break ;
-        } ;
-        #>
+        # 2:36 PM 6/1/2022 defer into confirm-ModuleBuildSync, further down)
 
     } else {
         $smsg = "Unable to locate `$TestScriptPath:$($TestScriptPath)" ;
@@ -1005,63 +937,10 @@ $(if($Merge){'MERGE parm specified as well:`n-Merge Public|Internal|Classes incl
         else{ write-verbose -verbose:$true "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
     } ;
 
-    <# ----------- defer psd1/psm1/pester-ps1 sync confirm into: confirm-ModuleBuildSync
+    # ----------- defer psd1/psm1/pester-ps1 sync confirm into: confirm-ModuleBuildSync
     # Verify and re-sync psd version to the input newbuild incremented version (in case it got lost in the rebuild)
     # could use new confirm-ModulePsd1Version (rgx based, for .psd1_TMP file work), but below is safer/more-holistic solution - although update-modulemanifest would also write a new ModuleVersion into the psd1 as well
-    # $psd1Vers came out of the test-modulemanifest above, use it here.
-    if($psd1Vers -ne $psd1UpdatedVers){
-        $smsg = "$($ModPsdPath):ModuleVersion`n*does not* properly match the Step-ModuleVersion modified ModuleVersion:$($psd1UpdatedVers)`nFORCING MATCHING UPDATE!" ;
-        if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN } #Error|Warn|Debug
-        else{ write-WARNING "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
-        $pltUMD=[ordered]@{
-            Path = $ModPsdPath ;
-            Value = $psd1UpdatedVers 
-            whatif = $($whatif);    
-            verbose = ($VerbosePreference -eq "Continue") ;
-        } ; 
-        $smsg = "Update-Metadata w`n$(($pltUMD|out-string).trim())" ;
-        if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug
-        else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
-        Update-Metadata @pltUMD ; 
-        # pull back the updated psd1.ModuleVersion
-        $smsg = "Pull back the updated Psd1.ModuleVersion..." ; 
-        if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
-        else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
-        TRY{
-            $psd1Vers = (Import-PowerShellDataFile -path $ModPsdPath).ModuleVersion.tostring() ;
-        } CATCH {
-            $PassStatus += ";ERROR";
-            $smsg = "Failed processing $($_.Exception.ItemName). `nError Message: $($_.Exception.Message)`nError Details: $($_)" ;
-            if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN }  #Error|Warn|Debug
-            else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
-            bREAK ;
-        } ;
-    } ; 
-
-    # sync Psd Version to psm1
-    # regex approach - necc for psm1 version updates (lacks a ps cmdlet to parse)
-    $rgxPsM1Version='Version((\s*)*):((\s*)*)(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?' ;
-    $ModPsmPath = $ModPsdPath.replace('.psd1','.psm1')
-    $psm1Profile = gci $ModPsmPath |select-string -Pattern $rgxPsM1Version ;
-    $psm1Vers = $psm1Profile.matches[0].captures.groups[0].value.split(':')[1].trim() ;
-    if($psm1Vers -ne $psd1Vers){
-        $smsg = "Psd1<>Psm1 version mis-match ($($psd1Vers)<>$($Psm1Vers)):`nUpdating $($ModPsmPath) to *match*`n$($ModPsdPath)" ;
-        if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN } #Error|Warn|Debug
-        else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
-        $tf = $ModPsmPath;
-        $pltSCFE=[ordered]@{Path=$tf ; PassThru=$true ;Verbose=$($verbose) ;whatif= $($whatif) ; }
-        $newContent =  (Get-Content $tf) | Foreach-Object {
-            $_ -replace $psm1Profile.matches[0].captures.groups[0].value.tostring(), "Version     : $($psd1Vers)"
-        } | out-string  ;
-        $bRet = Set-ContentFixEncoding @pltSCFE -Value $newContent ; 
-        if(-not $bRet -AND -not $whatif){throw "Set-ContentFixEncoding $($tf)!" } ;
-    } else {
-        $smsg = "(Psd1:Psm1 versions match)" ;
-        if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug
-        else{ write-host -foregroundcolor gray "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
-    } ;
-    # -----------
-    #>
+    
     # shift to wrapper confirm-ModuleBuildSync() -NoTest, as only update-NewModule needs that step
     # $bRet = confirm-ModuleBuildSync -ModPsdPath 'C:\sc\verb-IO\verb-IO\verb-IO.psd1_TMP' -RequiredVersion '2.0.3' -whatif -verbose
     $pltCMBS=[ordered]@{
@@ -1266,24 +1145,8 @@ $(if($Merge){'MERGE parm specified as well:`n-Merge Public|Internal|Classes incl
     if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info }  #Error|Warn|Debug
     else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
     
-    <# move these constants up top, they're used for psd1.FileList population discovery as well (up around #965)
-    # exts for files that are bundled into final build pkg (and get copied to profile)
-    $ModExtIncl='*.cab','*.cat','*.cmd','*.config','*.cscfg','*.csdef','*.css','*.dll','*.dylib','*.gif','*.html','*.ico','*.jpg','*.js','*.json','*.map','*.Materialize','*.MaterialUI','*.md','*.pdb','*.php','*.png','*.ps1','*.ps1xml','*.psd1','*.psm1','*.rcs','*.reg','*.snippet','*.so','*.txt','*.vscode','*.wixproj','*.wxi','*.xaml','*.xml','*.yml','*.zip' ;
-    # rgx equiv of above
-    if(-not $rgxModExtIncl){
-        # should come down from parameter
-        $rgxModExtIncl='\.(cab|cat|cmd|config|cscfg|csdef|css|dll|dylib|gif|html|ico|jpg|js|json|map|Materialize|MaterialUI|md|pdb|php|png|ps1|ps1xml|psd1|psm1|rcs|reg|snippet|so|txt|vscode|wixproj|wxi|xaml|xml|yml|zip)' ;
-    } ; 
-    # trim down above into the manifest.psd1 FileList - non native module exec code files from the rgxModExtIncl
-    $rgxPsd1FileList = $rgxmodextincl.replace('ps1|','').replace('psm1|','').replace('psd1|','') ; 
-    # files that are explicitly excluded from build/pkg/filelist by name
-    # gci -exclude spec:
-    $exclude = @('main.js','rebuild-module.ps1') ; 
-    # gci post-filtered excludes from build/pkg
-    $excludeMatch = @('.git','.vscode') ;
-    [regex] $excludeMatchRegEx = '(?i)' + (($excludeMatch |ForEach-Object {[regex]::escape($_)}) -join "|") + '' ;
-    #>
-
+    # move the constants up top, they're used for psd1.FileList population discovery as well (up around #965)
+    
     $from="$($ModDirPath)" ;
     $to = "$([Environment]::GetFolderPath("MyDocuments"))\WindowsPowerShell\Modules\$($ModuleName)" ;
 
@@ -1292,7 +1155,6 @@ $(if($Merge){'MERGE parm specified as well:`n-Merge Public|Internal|Classes incl
     # explicitly only go after the common module component, by type, via -include -
     #issue is -include causes it to collect only leaf files, doesn't include dir
     #creation, and if no pre-exist on the dir, causes a hard error on copy attempt.
-    #$pltGci=[ordered]@{Path=$from ;Recurse=$true ;Exclude=$exclude; include =$ModExtIncl ; ErrorAction="Stop" ; } ;
     # 2:34 PM 3/15/2020 reset to copy all, and then post-purge non-$ModExtIncl
 
     # use a retry
@@ -1420,7 +1282,7 @@ $(if($Merge){'MERGE parm specified as well:`n-Merge Public|Internal|Classes incl
     if(!$whatif){
         if($localMod=Get-Module -ListAvailable -Name $($ModPsmName.replace('.psm1',''))){
 
-            <# 9:59 AM 12/28/2019 check for an existing repo pkg that will conflict with the version of the local copy
+            <# check for an existing repo pkg that will conflict with the version of the local copy
             $localMod.version : 1.2.0
             $trepo.PublishLocation
             \\REPOSERVER\lync_fs\scripts\sc
@@ -1464,20 +1326,10 @@ $(if($Merge){'MERGE parm specified as well:`n-Merge Public|Internal|Classes incl
                 } ;  
 
                 $rgxPsd1Version="ModuleVersion\s=\s'\d*\.\d*\.\d*((\.\d*)*)'" ;
-                # 12:47 PM 1/14/2020 move the psdv1Vers detect code to always - need it for installs, as install-module doesn't prioritize, just throws up.
-                <# regx
-                $psd1Profile = gci $ModPsdPath |select-string -Pattern $rgxPsd1Version ;
-                $psd1Vers = $psd1Profile.matches.captures.groups[0].value.split('=').replace("'","")[1].trim() ;
-                #$psd1Vers = $psd1Vers.split('=').replace("'","")[1].trim() ;
-                #>
+                # move the psdv1Vers detect code to always - need it for installs, as install-module doesn't prioritize, just throws up.
                 # another way to pull version & guid is with get-module command, -name [path-to.psd1]
                 # moved $psd1Vers & $psd1guid upstream , need the material *before* signing files
                 if($tExistingPkg=gci "$($tRepo.ScriptPublishLocation)\$($ModuleName).$($localMod.version).nupkg" -ea 0){
-                    # pull the source psd1 ModuleVersion line
-                    #(gci C:\sc\verb-dev\verb-dev\verb-dev.psd1 |select-string -Pattern $rgxPsd1Version).matches.captures.groups[0].value ;
-                    # "$($ModDirPath)\$($ModuleName)"
-                    # if localvers being publ matches the $tExistingPkg version, twig
-                    #if($psd1Vers.split('=').replace("'","")[1].trim() -eq $localmod.Version.tostring().trim()){
                     if($psd1Vers -eq $localmod.Version.tostring().trim()){
 
                         $blkMsg=@"
