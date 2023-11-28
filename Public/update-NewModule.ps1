@@ -822,6 +822,13 @@ function update-NewModule {
         $psd1Vers = $psd1UpdatedVers.tostring() ;
     } ;
 
+    $smsg = "Run: reset-ModulePublishingDirectory -ModuleName $($ModuleName)" ; 
+    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } 
+    else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+    #Levels:Error|Warn|Info|H1|H2|H3|H4|H5|Debug|Verbose|Prompt|Success
+    reset-ModulePublishingDirectory.ps1 -ModuleName $ModuleName -whatif:$($whatif) -verbose:$($VerbosePreference -eq "Continue") ; 
+    
+
     if(!$Republish){
         $sHS=@"
 NON-Republish pass detected:
