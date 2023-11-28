@@ -2,7 +2,7 @@
 function pop-FunctionDev {
     <#
     .SYNOPSIS
-    pop-FunctionDev.ps1 - Copy a given c:\sc\[repo]\Public\function.ps1 file from prod editing dir back to source function .ps1 file
+    pop-FunctionDev.ps1 - Copy a given c:\sc\[repo]\Public\function.ps1 file from prod editing dir (as function_func.ps1) back to source function .ps1 file
     .NOTES
     Version     : 1.2.1
     Author      : Todd Kadrie
@@ -18,13 +18,15 @@ function pop-FunctionDev {
     AddedWebsite: https://communary.net/
     AddedTwitter: @okallstad / https://twitter.com/okallstad
     REVISIONS
-    * 8:19 AM 11/28/2023 tested, works; add: fixed mod discovery typo; a few echo details, confirmed -ea stop on all cmds
+    * 8:27 AM 11/28/2023 updated CBH; tested, works; add: fixed mod discovery typo; a few echo details, confirmed -ea stop on all cmds
     * 12:30 PM 11/22/2023 init
     .DESCRIPTION
-    pop-FunctionDev.ps1 - Copy a given c:\sc\[repo]\Public\function.ps1 file from prod editing dir back to source function .ps1 file
+    pop-FunctionDev.ps1 - Copy a given c:\sc\[repo]\Public\function.ps1 file from prod editing dir (as function_func.ps1) back to source function .ps1 file
 
-    Concept is to use this to quickly 'push' a module source .ps1 into the dev dir, suffixed as _func.ps1, so that it can be ipmo -fo -verb'd and debugged/edited for updates. 
-    On completion the matching function pop-FunctionDev.ps1 would be used to pull the updated file back into place, overwriting the original source.
+    Concept is to use this to quickly 'pop' a debugging module source _func.ps1 back to the dev dir, de-suffixed from _func.ps1, so that it can be commited & rebuilt into the module. 
+    
+    On iniital debugging the matching function push-FunctionDev() would be used to push the .\public\function.ps1 file to the c:\usr\work\ps\scripts\ default dev destnation (or wherever it's -destination param specifies on run).
+    
     .PARAMETER Path
     Source module funciton .ps1 file to be staged for editing (to uwps\Name_func.ps1)[-path 'C:\sc\verb-dev\Public\export-ISEBreakPoints.ps1']
     .PARAMETER Destination
@@ -40,9 +42,7 @@ function pop-FunctionDev {
     .INPUTS
     None. Does not accepted piped input.
     .OUTPUTS
-    System.Object.string converted file path(s) returned to pipeline
-    System.Boolean
-    [| get-member the output to see what .NET obj TypeName is returned, to use here]
+    None. Does not return output to pipeline.
     .EXAMPLE
     PS> pop-FunctionDev -Path "C:\sc\powershell\PSScripts\export-ISEBreakPoints_func.ps1" -Verbose -whatIf ;
     Demo duping uwps\xxx_func.ps1 debugging code back to source discovered module \public dir

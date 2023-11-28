@@ -2,7 +2,7 @@
 function push-FunctionDev {
     <#
     .SYNOPSIS
-    push-FunctionDev.ps1 - Stage a given c:\sc\[repo]\Public\function.ps1 file to prod editing dir
+    push-FunctionDev.ps1 - Stage a given c:\sc\[repo]\Public\function.ps1 file to prod editing dir as function_func.ps1
     .NOTES
     Version     : 1.2.1
     Author      : Todd Kadrie
@@ -18,10 +18,10 @@ function push-FunctionDev {
     AddedWebsite: https://communary.net/
     AddedTwitter: @okallstad / https://twitter.com/okallstad
     REVISIONS
-    * 8:19 AM 11/28/2023 tested, works; add: a few echo details, confirmed -ea stop on all cmds
+    * 8:27 AM 11/28/2023 updated CBH; tested, works; add: a few echo details, confirmed -ea stop on all cmds
     * 12:30 PM 11/22/2023 init
     .DESCRIPTION
-    push-FunctionDev.ps1 - Stage a given c:\sc\[repo]\Public\function.ps1 file to prod editing dir
+    push-FunctionDev.ps1 - Stage a given c:\sc\[repo]\Public\function.ps1 file to prod editing dir as function_func.ps1
 
     Concept is to use this to quickly 'push' a module source .ps1 into the dev dir, suffixed as _func.ps1, so that it can be ipmo -fo -verb'd and debugged/edited for updates. 
     On completion the matching function pop-FunctionDev.ps1 would be used to pull the updated file back into place, overwriting the original source.
@@ -40,9 +40,7 @@ function push-FunctionDev {
     .INPUTS
     None. Does not accepted piped input.
     .OUTPUTS
-    System.Object.string converted file path(s) returned to pipeline
-    System.Boolean
-    [| get-member the output to see what .NET obj TypeName is returned, to use here]
+    None. Does not return output to pipeline.
     .EXAMPLE
     PS> push-functiondev -Path 'C:\sc\verb-dev\Public\export-ISEBreakPoints.ps1' -verbose -whatif ;
     Typical run
