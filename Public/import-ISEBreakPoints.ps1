@@ -38,7 +38,7 @@ function import-ISEBreakPoints {
     Github      : https://github.com/tostka
     #>
     [CmdletBinding()]
-    [Alias('iIseBp')]
+    [Alias('iIseBp','ipbp')]
 
     #[ValidateScript({Test-Path $_})]
     PARAM(
