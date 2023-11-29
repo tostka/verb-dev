@@ -18,6 +18,7 @@ function pop-FunctionDev {
     AddedWebsite: https://communary.net/
     AddedTwitter: @okallstad / https://twitter.com/okallstad
     REVISIONS
+    * 3:09 PM 11/29/2023 added missing test on $sMod - gcm comes back with empty mod, when the item has been iflv'd in console, so prompt for a dest mod
     * 8:27 AM 11/28/2023 updated CBH; tested, works; add: fixed mod discovery typo; a few echo details, confirmed -ea stop on all cmds
     * 12:30 PM 11/22/2023 init
     .DESCRIPTION
@@ -46,12 +47,11 @@ function pop-FunctionDev {
     .EXAMPLE
     PS> pop-FunctionDev -Path "C:\sc\powershell\PSScripts\export-ISEBreakPoints_func.ps1" -Verbose -whatIf ;
     Demo duping uwps\xxx_func.ps1 debugging code back to source discovered module \public dir
+    .EXAMPLE
+    PS> $psise.powershelltabs.files.fullpath |?{$_ -match '_func\.ps1$'} | %{pop-FunctionDev -path $_ -whatif:$true -verbose } ; 
+    Push back *all* _func.ps1 tabs currently open in ISE
     .LINK
-    https://github.com/tostka/Invoke-CreateModuleHelpFile
     https://github.com/tostka/verb-dev
-    .LINK
-    https://github.com/gravejester/Invoke-CreateModuleHelpFile
-    .LINK
     #>
     [CmdletBinding()]
     #[Alias('Invoke-CreateModuleHelpFile')]
@@ -203,10 +203,29 @@ function pop-FunctionDev {
                     $sfile = $_ ; 
                     $error.clear() ;
   
-                    $sMod = get-command (split-path $sfile -leaf).replace('_func.ps1','') -ea STOP | select -expand module ; 
-                    $smsg =  "==:$($sfile):discovered hosted in module:$($sMod.name)" ; 
-                    if($verbose){if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level VERBOSE } 
-                    else{ write-verbose "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; } ;  
+                    if($sMod = get-command (split-path $sfile -leaf).replace('_func.ps1','') -ea STOP | select -expand module){
+                        $smsg =  "==:$($sfile):discovered hosted in module:$($sMod.name)" ; 
+                        if($verbose){if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level VERBOSE } 
+                        else{ write-verbose "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; } ;  
+                    } ELSE { 
+                        # gcm comes back with empty mod, when the item has been iflv'd in console, so prompt for a solution
+                        $smsg = "Unable to locate a matching Module for:`n$($sfile)!" ; 
+                        if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN -Indent} 
+                        else{ write-WARNING "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; 
+                        #Continue
+                        # recover with manual prompt
+                        if($sMod =get-module -name (Read-Host "Enter the proper locally-installed Module name to contuine:") -ListAvailable -ErrorAction STOP){
+                            $smsg = "Resolve input to: $($sMod.Name)" ; 
+                            if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } 
+                            else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                            #Levels:Error|Warn|Info|H1|H2|H3|H4|H5|Debug|Verbose|Prompt|Success
+                        } else { 
+                            $smsg = "Unable to locate a matching Module for:`n$($sfile)!" ; 
+                            if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN -Indent} 
+                            else{ write-WARNING "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; 
+                            Continue
+                        } ;
+                    } ;
 
                     if($sModDir = get-item -path "c:\sc\$($sMod.name)" -ea STOP){
                         
@@ -222,7 +241,7 @@ function pop-FunctionDev {
                                 if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } 
                                 else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
                             } else {
-                                 $smsg = "Invalid response. Exiting" ; 
+                                    $smsg = "Invalid response. Exiting" ; 
                                 if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN } 
                                 else{ write-WARNING "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; 
                                 #exit 1
@@ -249,7 +268,7 @@ function pop-FunctionDev {
                         if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
                         copy-item @pltCI ; 
 
-$hsMsg = @"
+                        $hsMsg = @"
 
 # To stage a branch for new work:
 cd $($smoddir.fullname) ; 
