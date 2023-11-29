@@ -15,6 +15,8 @@ function update-NewModule {
     Github      : https://github.com/tostka/verb-dev
     Tags        : Powershell,Module,Build,Development
     REVISIONS
+    * 4:19 PM 11/29/2023 still debugging through, works all the way to the publish- command, and dies, can't resolve the FileList entries against the temp build dir... those errors ccause pkg repo pub to fail, and the subsequent install-module can't find the missing unpub'd -requiredversion
+    * 9:59 AM 11/28/2023 add: test-ModuleManifest error capture and analysis, and abort on errors (stock test just returns the parsed xml content, even if errors thrown)
     * 11:03 AM 10/13/2023:  expanded gci's;  code to  buffer to verb-mod\verb-mod on the source as well as the temp build loc (gets it through prebuild test-modulemanifest; verb-mod\verb-mod needs to be complete self-contained copy, just like final installed); also needed to pre-remove any conflicts on the move & copy's.
     # 2:59 PM 10/12/2023 add:$rgxTargExcl, code to exclude verb-mod\verb-mod from flatten, and code to copy-flatten source verb-mod dir to it's verb-mod\verb-mod (which must be a fully fleshed working copy to pass initial test-modulemanifest())
     add: block to buffer res/lics to verb-mod\verb-mod - initial test-modulemanifest against existing psd1 won't pass if they're not there in source as well as temp build mod loc; 
@@ -435,7 +437,7 @@ function update-NewModule {
     #*------^ get-FolderEmpty.ps1 ^------
 
     #*------v Function reset-ModulePublishingDirectory v------
-    if(-not(get-command reset-ModulePublishingDirectory -ea 0)){
+    #if(-not(get-command reset-ModulePublishingDirectory -ea 0)){
         function reset-ModulePublishingDirectory {
             <#
             .SYNOPSIS
@@ -549,7 +551,7 @@ function update-NewModule {
 
             } ;  # PROC-E
         } ; 
-    } ; 
+    #} ; 
     #*------^ END Function reset-ModulePublishingDirectory ^------
 
     #*======^ END FUNCTIONS ^======
@@ -713,13 +715,51 @@ function update-NewModule {
             else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
 
             # $ModPsdPath
-            $psd1Profile = Test-ModuleManifest -path $ModPsdPath  ;
+            if($psd1Profile = Test-ModuleManifest -path $ModPsdPath -errorVariable ttmm_Err -WarningVariable ttmm_Wrn -InformationVariable ttmm_Inf){
+                if($ttmm_Err){
+                    $smsg = "`nFOUND `$ttmm_Err: test-ModuleManifest HAD ERRORS!" ;
+                    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN -Indent}
+                    else{ write-WARNING "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                    foreach($errExcpt in $ttmm_Err.Exception){
+                        switch -regex ($errExcpt){
+                            "The\sspecified\sFileList\sentry\s'.*'\sin\sthe\smodule\smanifest\s'.*.psd1'\sis\sinvalid\." {
+                                $smsg = "`nPSD1 Manifest has FileList specification, with no matching file found in $($modroot)\$($ModuleName)\!" ;
+                                $smsg += "`nThe PSD MUST be edited or rolled back to # FileList = @()  spec, to properly build"
+                                $smsg += "`n(build update-NewModule will detect and re-add the FileList from scratch, fr files in \\(Docs|Licenses|Resource)\ or named (Resource|Licenses) (extensionless)" ;
+                                $smsg += "`n`n to find the last psd1/.psd1_ with the empty spec:" ; 
+                                $smsg += "`ngci C:\sc\$($ModuleName)\$($ModuleName)\*.psd1* | sort LastWriteTime |  sls -pattern `"#\sFileList\s=\s@\(\)`" | select -last 1; `n" ;  
+                                $smsg += "`n$($errExcpt)" ;
+                                if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN -Indent}
+                                else{ write-WARNING "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                            }
+                            default {
+                                $smsg = "`nPSD1 MANIFEST UNDEFINED TESTING ERROR!" ;
+                                $smsg += "`nThe PSD MUST be edited or rolled back to a functional revision to properly build!"
+                                $smsg += "`n(build update-NewModule will detect and re-add the FileList from scratch, fr files in \\(Docs|Licenses|Resource)\ or named (Resource|Licenses) (extensionless)" ;
+                                $smsg += "`n$($errExcpt)" ;
+                                if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN -Indent}
+                                else{ write-WARNING "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                            }
+                        } ;
+                    } ;
+                    # abort build here
+                    BREAK ; 
+                } else {
+                    $smsg = "(no `$ttmm_Err: test-ModuleManifest had no errors)" ;
+                    if($verbose){if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level VERBOSE }
+                    else{ write-verbose "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; } ;
+                } ; 
+                # ...
+            } else { write-warning "$((get-date).ToString('HH:mm:ss')):Unable to locate psd1:$($ModPsdPath)" } ;
+
+
             # check for failure of last command
             if($? ){
                 $smsg= "(Test-ModuleManifest:PASSED)" ;
                 if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info }  #Error|Warn|Debug
                 else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
             }
+
         } CATCH {
             $ErrTrapd=$Error[0] ;
             $PassStatus += ";ERROR";
@@ -826,7 +866,7 @@ function update-NewModule {
     if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } 
     else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
     #Levels:Error|Warn|Info|H1|H2|H3|H4|H5|Debug|Verbose|Prompt|Success
-    reset-ModulePublishingDirectory.ps1 -ModuleName $ModuleName -whatif:$($whatif) -verbose:$($VerbosePreference -eq "Continue") ; 
+    reset-ModulePublishingDirectory -ModuleName $ModuleName -whatif:$($whatif) -verbose:$($VerbosePreference -eq "Continue") ; 
     
 
     if(!$Republish){
@@ -1032,7 +1072,42 @@ $(if($Merge){'MERGE parm specified as well:`n-Merge Public|Internal|Classes incl
     $error.clear() ;
     TRY {
         # $ModPsdPath
-        $psd1Profile = Test-ModuleManifest -path $ModPsdPath  ;
+        if($psd1Profile = Test-ModuleManifest -path $ModPsdPath -errorVariable ttmm_Err -WarningVariable ttmm_Wrn -InformationVariable ttmm_Inf){
+            if($ttmm_Err){
+                $smsg = "`nFOUND `$ttmm_Err: test-ModuleManifest HAD ERRORS!" ;
+                if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN -Indent}
+                else{ write-WARNING "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                foreach($errExcpt in $ttmm_Err.Exception){
+                    switch -regex ($errExcpt){
+                        "The\sspecified\sFileList\sentry\s'.*'\sin\sthe\smodule\smanifest\s'.*.psd1'\sis\sinvalid\." {
+                            $smsg = "`nPSD1 Manifest has FileList specification, with no matching file found in $($modroot)\$($ModuleName)\!" ;
+                            $smsg += "`nThe PSD MUST be edited or rolled back to # FileList = @()  spec, to properly build"
+                            $smsg += "`n(build update-NewModule will detect and re-add the FileList from scratch, fr files in \\(Docs|Licenses|Resource)\ or named (Resource|Licenses) (extensionless)" ;
+                            $smsg += "`n`n to find the last psd1/.psd1_ with the empty spec:" ; 
+                            $smsg += "`ngci C:\sc\$($ModuleName)\$($ModuleName)\*.psd1* | sort LastWriteTime |  sls -pattern `"#\sFileList\s=\s@\(\)`" | select -last 1; `n" ;  
+                            $smsg += "`n$($errExcpt)" ;
+                            if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN -Indent}
+                            else{ write-WARNING "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                        }
+                        default {
+                            $smsg = "`nPSD1 MANIFEST UNDEFINED TESTING ERROR!" ;
+                            $smsg += "`nThe PSD MUST be edited or rolled back to a functional revision to properly build!"
+                            $smsg += "`n(build update-NewModule will detect and re-add the FileList from scratch, fr files in \\(Docs|Licenses|Resource)\ or named (Resource|Licenses) (extensionless)" ;
+                            $smsg += "`n$($errExcpt)" ;
+                            if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN -Indent}
+                            else{ write-WARNING "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                        }
+                    } ;
+                } ;
+                # abort build here
+                BREAK ; 
+            } else {
+                $smsg = "(no `$ttmm_Err: test-ModuleManifest had no errors)" ;
+                if($verbose){if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level VERBOSE }
+                else{ write-verbose "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; } ;
+            } ; 
+            # ...
+        } else { write-warning "$((get-date).ToString('HH:mm:ss')):Unable to locate psd1:$($ModPsdPath)" } ;
         # check for failure of last command
         if($? ){
             $smsg= "(Test-ModuleManifest:PASSED)" ;
@@ -1482,7 +1557,43 @@ $(if($Merge){'MERGE parm specified as well:`n-Merge Public|Internal|Classes incl
                 $smsg = "Running pre-Publish-Module .psd1 test:`nTest-ModuleManifest -path $($ModPsdPath)" ;
                 if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug
                 else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
-                $psd1Profile = Test-ModuleManifest -path $ModPsdPath  ;
+                if($psd1Profile = Test-ModuleManifest -path $ModPsdPath  -errorVariable ttmm_Err -WarningVariable ttmm_Wrn -InformationVariable ttmm_Inf){
+                    if($ttmm_Err){
+                        $smsg = "`nFOUND `$ttmm_Err: test-ModuleManifest HAD ERRORS!" ;
+                        if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN -Indent}
+                        else{ write-WARNING "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                        foreach($errExcpt in $ttmm_Err.Exception){
+                            switch -regex ($errExcpt){
+                                "The\sspecified\sFileList\sentry\s'.*'\sin\sthe\smodule\smanifest\s'.*.psd1'\sis\sinvalid\." {
+                                    $smsg = "`nPSD1 Manifest has FileList specification, with no matching file found in $($modroot)\$($ModuleName)\!" ;
+                                    $smsg += "`nThe PSD MUST be edited or rolled back to # FileList = @()  spec, to properly build"
+                                    $smsg += "`n(build update-NewModule will detect and re-add the FileList from scratch, fr files in \\(Docs|Licenses|Resource)\ or named (Resource|Licenses) (extensionless)" ;
+                                    $smsg += "`n`n to find the last psd1/.psd1_ with the empty spec:" ; 
+                                    $smsg += "`ngci C:\sc\$($ModuleName)\$($ModuleName)\*.psd1* | sort LastWriteTime |  sls -pattern `"#\sFileList\s=\s@\(\)`" | select -last 1; `n" ;  
+                                    $smsg += "`n$($errExcpt)" ;
+                                    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN -Indent}
+                                    else{ write-WARNING "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                                }
+                                default {
+                                    $smsg = "`nPSD1 MANIFEST UNDEFINED TESTING ERROR!" ;
+                                    $smsg += "`nThe PSD MUST be edited or rolled back to a functional revision to properly build!"
+                                    $smsg += "`n(build update-NewModule will detect and re-add the FileList from scratch, fr files in \\(Docs|Licenses|Resource)\ or named (Resource|Licenses) (extensionless)" ;
+                                    $smsg += "`n$($errExcpt)" ;
+                                    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN -Indent}
+                                    else{ write-WARNING "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                                }
+                            } ;
+                        } ;
+                        # abort build here
+                        BREAK ; 
+                    } else {
+                        $smsg = "(no `$ttmm_Err: test-ModuleManifest had no errors)" ;
+                        if($verbose){if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level VERBOSE }
+                        else{ write-verbose "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; } ;
+                    } ; 
+                    # ...
+                } else { write-warning "$((get-date).ToString('HH:mm:ss')):Unable to locate psd1:$($ModPsdPath)" } ;
+
                 # check for failure of last command
                 if($? ){
                     $smsg= "(Test-ModuleManifest:PASSED)" ;
