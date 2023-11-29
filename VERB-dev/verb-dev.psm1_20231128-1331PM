@@ -5,7 +5,7 @@
 .SYNOPSIS
 VERB-dev - Development PS Module-related generic functions
 .NOTES
-Version     : 1.5.33
+Version     : 1.5.39
 Author      : Todd Kadrie
 Website     :	https://www.toddomation.com
 Twitter     :	@tostka
@@ -9921,7 +9921,9 @@ function update-NewModule {
     Github      : https://github.com/tostka/verb-dev
     Tags        : Powershell,Module,Build,Development
     REVISIONS
-    # 2:15 PM 10/12/2023 add: block to buffer res/lics to verb-mod\verb-mod - initial test-modulemanifest against existing psd1 won't pass if they're not there in source as well as temp build mod loc; 
+    * 11:03 AM 10/13/2023:  expanded gci's;  code to  buffer to verb-mod\verb-mod on the source as well as the temp build loc (gets it through prebuild test-modulemanifest; verb-mod\verb-mod needs to be complete self-contained copy, just like final installed); also needed to pre-remove any conflicts on the move & copy's.
+    # 2:59 PM 10/12/2023 add:$rgxTargExcl, code to exclude verb-mod\verb-mod from flatten, and code to copy-flatten source verb-mod dir to it's verb-mod\verb-mod (which must be a fully fleshed working copy to pass initial test-modulemanifest())
+    add: block to buffer res/lics to verb-mod\verb-mod - initial test-modulemanifest against existing psd1 won't pass if they're not there in source as well as temp build mod loc; 
     cleaned out old block comment'd regions ; updated cached copy of get-foldertmpty, to latest; subst update to accomodate included non-psm1/psd1 
     resource files (in new Resource subdir); *12:29 PM 10/12/2023 add: 
     get-folderempty(), and code to loop out and remove empty folders in the module 
@@ -10159,6 +10161,8 @@ function update-NewModule {
     # rgx to exclude exported temp breakpoint files from inclusion in module build
     $rgxPsd1BPExcl = "\\(Public|Internal|Private)\\.*-ps1-BP\.xml$" ; 
     $MergeBuildExcl = "\\(Public|Internal|External|Private)\\.*.ps1$" ; 
+    # rgx to exclude target verb-mod\verb-mod from efforts to flatten (it's the dest, shouldn't be a source)
+    $rgxTargExcl = [regex]::escape("\$($ModuleName)\$($ModuleName)") ; 
     #*======v FUNCTIONS v======
 
     # suppress VerbosePreference:Continue, if set, during mod loads (VERY NOISEY)
@@ -10481,7 +10485,7 @@ function update-NewModule {
         # so use psd1version and manually increment, skipping BuildHelper mod use entirely
         write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):(-NoBuildInfo specified:Skipping use of buggy BuildHelpers module)" ;
         TRY {
-            if($ModPsdPath = (gci "$($modroot)\$($ModuleName)\$($ModuleName).psd1" -ea 0).FullName){
+            if($ModPsdPath = (get-childitem "$($modroot)\$($ModuleName)\$($ModuleName).psd1" -ea 0).FullName){
 
             } elseif ($ModPsdPath = Get-PSModuleFile -path $ModRoot -Extension .psd1){
 
@@ -11185,10 +11189,20 @@ $(if($Merge){'MERGE parm specified as well:`n-Merge Public|Internal|Classes incl
     if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } 
     else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
     #Levels:Error|Warn|Info|H1|H2|H3|H4|H5|Debug|Verbose|Prompt|Success
+    #$rgxTargExcl = [regex]::escape("\$($ModuleName)\$($ModuleName)") ; 
     foreach($fl in $Psd1filelist){
-        if($ffile = gci -path "$($to)\$($fl)" -recurse){
+        #if($ffile = gci -path "$($to)\$($fl)" -recurse){
+        # there's now one in dev .\docs|resource|licenses dir, and one in the verb-mod\verb-mod, which can't be moved (it's the dest, should be overwritten by the other), exclude the existing
+        if($ffile = get-childitem -path "$($to)\$($fl)" -recurse | ?{$_.fullname -notmatch $rgxTargExcl } ){
             TRY{
                 # should be in the verb-dev\verb-dev, .psd1|.psm1 dir
+                # have to pretest & pre-remove conflicts, or it throws an error (w -ea0 non-impactful, but fugly output)
+                if(test-path (join-path -path (join-path -path $to -childpath $ModuleName) -ChildPath $ffile.name)){
+                    $smsg = "pre-remove existing$((join-path -path (join-path -path $to -childpath $ModuleName) -ChildPath $ffile.name))" ;
+                    if($verbose){if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level VERBOSE } 
+                    else{ write-verbose "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; } ; 
+                    get-childitem -path (join-path -path (join-path -path $to -childpath $ModuleName) -ChildPath $ffile.name) | remove-item -force -verbose -ea CONTINUE ; 
+                } ; 
                 move-item -Path $ffile -Destination (join-path -path $to -childpath $ModuleName) -verbose:$($VerbosePreference -eq "Continue") ; 
             } CATCH {
                 $ErrTrapd = $Error[0] ;
@@ -11208,9 +11222,16 @@ $(if($Merge){'MERGE parm specified as well:`n-Merge Public|Internal|Classes incl
     if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } 
     else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
     #Levels:Error|Warn|Info|H1|H2|H3|H4|H5|Debug|Verbose|Prompt|Success
-    foreach($fl in $Psd1filelistFull){
+    # need to prefilter out verb-mod\verb-mod items from $Psd1filelistFull
+    foreach($fl in ($Psd1filelistFull | ?{$_ -notmatch $rgxTargExcl })){
         TRY{
             # should be in the verb-dev\verb-dev, .psd1|.psm1 dir $($ModDirPath)\$($ModuleName)
+            if($rfile = get-childitem -path (join-path -path (join-path -path $to -childpath $ModuleName) -ChildPath (split-path $fl -leaf)) -ea 0){
+                $smsg = "(pre-remove existing$($rfile.fullname))" ; 
+                if($verbose){if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level VERBOSE } 
+                else{ write-verbose "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; } ; 
+                $rfile | remove-item -force -verbose -ea CONTINUE ; 
+            } ; 
             COPY-item -Path $fl -Destination (join-path -path $ModDirPath -childpath $ModuleName) -force -verbose:$($VerbosePreference -eq "Continue") ;
         } CATCH {
             $ErrTrapd = $Error[0] ;
@@ -11231,7 +11252,7 @@ $(if($Merge){'MERGE parm specified as well:`n-Merge Public|Internal|Classes incl
             $tRepo.ScriptPublishLocation
             \\REPOSERVER\lync_fs\scripts\sc
 
-            gci "$($tRepo.ScriptPublishLocation)\verb-dev.1.2.0.nupkg"
+            get-childitem "$($tRepo.ScriptPublishLocation)\verb-dev.1.2.0.nupkg"
                 Directory: \\REPOSERVER\lync_fs\scripts\sc
             Mode                LastWriteTime         Length Name
             ----                -------------         ------ ----
@@ -11271,7 +11292,7 @@ $(if($Merge){'MERGE parm specified as well:`n-Merge Public|Internal|Classes incl
                 # move the psdv1Vers detect code to always - need it for installs, as install-module doesn't prioritize, just throws up.
                 # another way to pull version & guid is with get-module command, -name [path-to.psd1]
                 # moved $psd1Vers & $psd1guid upstream , need the material *before* signing files
-                if($tExistingPkg=gci "$($tRepo.ScriptPublishLocation)\$($ModuleName).$($localMod.version).nupkg" -ea 0){
+                if($tExistingPkg=get-childitem "$($tRepo.ScriptPublishLocation)\$($ModuleName).$($localMod.version).nupkg" -ea 0){
                     if($psd1Vers -eq $localmod.Version.tostring().trim()){
 
                         $blkMsg=@"
@@ -11422,7 +11443,7 @@ And then re-run update-NewModule.
                 } ;
 
                 # finally, lets grab the .nukpg that was created on the repo, and cached it in the sc dir (for direct copying to stock other repos, home etc)
-                #if($tNewPkg = gci "$($tRepo.ScriptPublishLocation)\$($ModuleName).$($psd1Vers).nupkg" -ea 0){
+                #if($tNewPkg = get-childitem "$($tRepo.ScriptPublishLocation)\$($ModuleName).$($psd1Vers).nupkg" -ea 0){
                 # revise: use $tMod.version instead of $psd1Vers
                 # when publishing 4-digit n.n.n.n semvers, if revision (4th digit) is 0, the .nupkg gets only a 3-digit semvar string in the filename.
                 # The returned $tMod.version reflects the string actually used in the .nupkg, and is what you use to find the .nupkg for caching, from the repo.
@@ -11430,7 +11451,7 @@ And then re-run update-NewModule.
                 if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug
                 else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
 
-                if($tNewPkg = gci "$($tRepo.ScriptPublishLocation)\$($ModuleName).$($tMod.version).nupkg" -ea 0){
+                if($tNewPkg = get-childitem "$($tRepo.ScriptPublishLocation)\$($ModuleName).$($tMod.version).nupkg" -ea 0){
                     $smsg= "Proper updated .nupkg file found:$($tNewPkg.name), copying to local Pkg directory." ;
                     if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug
                     else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
@@ -11672,29 +11693,3 @@ Export-ModuleMember -Function backup-ModuleBuild,check-PsLocalRepoRegistration,c
 
 
 
-
-# SIG # Begin signature block
-# MIIELgYJKoZIhvcNAQcCoIIEHzCCBBsCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
-# gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUgNkTeFGYtG1ao4dvD0DxMhip
-# l0ugggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
-# MCwxKjAoBgNVBAMTIVBvd2VyU2hlbGwgTG9jYWwgQ2VydGlmaWNhdGUgUm9vdDAe
-# Fw0xNDEyMjkxNzA3MzNaFw0zOTEyMzEyMzU5NTlaMBUxEzARBgNVBAMTClRvZGRT
-# ZWxmSUkwgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBALqRVt7uNweTkZZ+16QG
-# a+NnFYNRPPa8Bnm071ohGe27jNWKPVUbDfd0OY2sqCBQCEFVb5pqcIECRRnlhN5H
-# +EEJmm2x9AU0uS7IHxHeUo8fkW4vm49adkat5gAoOZOwbuNntBOAJy9LCyNs4F1I
-# KKphP3TyDwe8XqsEVwB2m9FPAgMBAAGjdjB0MBMGA1UdJQQMMAoGCCsGAQUFBwMD
-# MF0GA1UdAQRWMFSAEL95r+Rh65kgqZl+tgchMuKhLjAsMSowKAYDVQQDEyFQb3dl
-# clNoZWxsIExvY2FsIENlcnRpZmljYXRlIFJvb3SCEGwiXbeZNci7Rxiz/r43gVsw
-# CQYFKw4DAh0FAAOBgQB6ECSnXHUs7/bCr6Z556K6IDJNWsccjcV89fHA/zKMX0w0
-# 6NefCtxas/QHUA9mS87HRHLzKjFqweA3BnQ5lr5mPDlho8U90Nvtpj58G9I5SPUg
-# CspNr5jEHOL5EdJFBIv3zI2jQ8TPbFGC0Cz72+4oYzSxWpftNX41MmEsZkMaADGC
-# AWAwggFcAgEBMEAwLDEqMCgGA1UEAxMhUG93ZXJTaGVsbCBMb2NhbCBDZXJ0aWZp
-# Y2F0ZSBSb290AhBaydK0VS5IhU1Hy6E1KUTpMAkGBSsOAwIaBQCgeDAYBgorBgEE
-# AYI3AgEMMQowCKACgAChAoAAMBkGCSqGSIb3DQEJAzEMBgorBgEEAYI3AgEEMBwG
-# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBTlkl+R
-# RtYov0iEt3xCR0rBpjgWMjANBgkqhkiG9w0BAQEFAASBgDFAuAWqQ6E8jXAfmWDh
-# ZayhiC5tB3aYTLqq/Ta7VDYfa78vmZybX/33fqD4W7DLXRHXozHSRQ0Dcoum9I7I
-# StisElvDfCN4CivEt9D0JRj36TjdsFopmCmvSIa0Ji1IVDit5Bu8BG8xRjo40F+a
-# DOOulRN2VcLMvQ8QGNs84/qj
-# SIG # End signature block
