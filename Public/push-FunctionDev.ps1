@@ -18,6 +18,7 @@ function push-FunctionDev {
     AddedWebsite: https://communary.net/
     AddedTwitter: @okallstad / https://twitter.com/okallstad
     REVISIONS
+    * 3:09 PM 11/29/2023 added missing test on $sMod - gcm comes back with empty mod, when the item has been iflv'd in console, so prompt for a dest mod
     * 8:27 AM 11/28/2023 updated CBH; tested, works; add: a few echo details, confirmed -ea stop on all cmds
     * 12:30 PM 11/22/2023 init
     .DESCRIPTION
@@ -197,23 +198,41 @@ function push-FunctionDev {
                         $smsg =  "==:$($sfile):discovered module:$($sMod.name)" ; 
                         if($verbose){if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level VERBOSE } 
                         else{ write-verbose "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; } ;  
-
-                        if($sModDir = get-item -path "c:\sc\$($sMod.name)" -ea STOP){
-                            #Set-Location $sModDir.fullname ; 
+                    } ELSE { 
+                        # gcm comes back with empty mod, when the item has been iflv'd in console, so prompt for a solution
+                        $smsg = "Unable to locate a matching Module for:`n$($sfile)!" ; 
+                        if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN -Indent} 
+                        else{ write-WARNING "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; 
+                        #Continue
+                        # recover with manual prompt
+                        if($sMod =get-module -name (Read-Host "Enter the proper locally-installed Module name to contuine:") -ListAvailable -ErrorAction STOP){
+                            $smsg = "Resolve input to: $($sMod.Name)" ; 
+                            if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } 
+                            else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                            #Levels:Error|Warn|Info|H1|H2|H3|H4|H5|Debug|Verbose|Prompt|Success
+                        } else { 
+                            $smsg = "Unable to locate a matching Module for:`n$($sfile)!" ; 
+                            if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN -Indent} 
+                            else{ write-WARNING "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; 
+                            Continue
+                        } ;
+                    } ;
+                    if($sModDir = get-item -path "c:\sc\$($sMod.name)" -ea STOP){
+                        #Set-Location $sModDir.fullname ; 
                         
-                            $pltCI=[ordered]@{
-                                path  = $sfile.fullname ;
-                                destination  = (join-path -path $Destination -childpath $sfile.name.replace('.ps1','_func.ps1') -ea STOP) ;
-                                force = $($force) ; 
-                                verbose  = $($VerbosePreference -eq 'Continue') ;
-                                erroraction = 'STOP' ;
-                                whatif = $($whatif) ;
-                            } ;
-                            $smsg = "Staging for Editing:copy-item w`n$(($pltCI|out-string).trim())" ; 
-                            if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
-                            copy-item @pltCI ; 
+                        $pltCI=[ordered]@{
+                            path  = $sfile.fullname ;
+                            destination  = (join-path -path $Destination -childpath $sfile.name.replace('.ps1','_func.ps1') -ea STOP) ;
+                            force = $($force) ; 
+                            verbose  = $($VerbosePreference -eq 'Continue') ;
+                            erroraction = 'STOP' ;
+                            whatif = $($whatif) ;
+                        } ;
+                        $smsg = "Staging for Editing:copy-item w`n$(($pltCI|out-string).trim())" ; 
+                        if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                        copy-item @pltCI ; 
 
-                            $hsMsg = @"
+                        $hsMsg = @"
 
 # To stage a branch for new work:
 cd $($smoddir.fullname) ; 
@@ -256,19 +275,13 @@ git branch -d tostka/BRANCHNAME
 git push -u origin tostka/BRANCHNAME
 
 "@ ; 
-                            #---
-                            $smsg = $hsMsg  ; 
-                            if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } 
-                            else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
-                            #Levels:Error|Warn|Info|H1|H2|H3|H4|H5|Debug|Verbose|Prompt|Success
-                        } ELSE { 
-                            $smsg = "Unable to locate a local c:\sc directory Module tree for:`n$($sfile)!" ; 
-                            if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN -Indent} 
-                            else{ write-WARNING "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; 
-                            Continue
-                        } ;
+                        #---
+                        $smsg = $hsMsg  ; 
+                        if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } 
+                        else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                        #Levels:Error|Warn|Info|H1|H2|H3|H4|H5|Debug|Verbose|Prompt|Success
                     } ELSE { 
-                        $smsg = "Unable to locate a matching Module for:`n$($sfile)!" ; 
+                        $smsg = "Unable to locate a local c:\sc directory Module tree for:`n$($sfile)!" ; 
                         if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN -Indent} 
                         else{ write-WARNING "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; 
                         Continue
