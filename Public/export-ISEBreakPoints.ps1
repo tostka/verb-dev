@@ -40,7 +40,7 @@ function export-ISEBreakPoints {
     Github      : https://github.com/tostka
     #>
     [CmdletBinding()]
-    [Alias('eIseBp')]
+    [Alias('eIseBp','epBP')]
     PARAM(
         [Parameter(HelpMessage="Default Path for export (when `$Script directory is unavailable)[-PathDefault c:\path-to\]")]
         [ValidateScript({Test-Path $_ -PathType 'Container'})]
