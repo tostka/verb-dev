@@ -15,6 +15,12 @@ function update-NewModule {
     Github      : https://github.com/tostka/verb-dev
     Tags        : Powershell,Module,Build,Development
     REVISIONS
+    * 5:12 PM 12/1/2023: major fixes, tracked down source of issues: you need to 
+        build vdev\vdev as intact _flat_ files complete mludle; then COPY IT to the 
+        CU\Docs\Modules\verb-dev\verb-dev, and test-manifest the result. From there if 
+        it's fully purged all CU and other installs of the tmod, publish-module will only find the flat file complete (even psd1.filelist array content is resolvable if they're in the vdev\vdev\ root, and the CU dupe). 
+        d Reset-*(), and added populate-*(), handling the purge out of all res\lic\docs content from vdev\vdev, and then copying back fresh source copes of same from the res\lic\docs storage dirs.
+        ing [fingerscrossed] with the new wacky psd1.FileList support (which though it "isn't used" by modules per MS, fails hard on test-modulemanifest passes, if the cited files aren't in same dir as you .psd1/psm1.
     * 4:19 PM 11/29/2023 still debugging through, works all the way to the publish- command, and dies, can't resolve the FileList entries against the temp build dir... those errors ccause pkg repo pub to fail, and the subsequent install-module can't find the missing unpub'd -requiredversion
     * 9:59 AM 11/28/2023 add: test-ModuleManifest error capture and analysis, and abort on errors (stock test just returns the parsed xml content, even if errors thrown)
     * 11:03 AM 10/13/2023:  expanded gci's;  code to  buffer to verb-mod\verb-mod on the source as well as the temp build loc (gets it through prebuild test-modulemanifest; verb-mod\verb-mod needs to be complete self-contained copy, just like final installed); also needed to pre-remove any conflicts on the move & copy's.
@@ -252,6 +258,7 @@ function update-NewModule {
     $rgxPsd1FileListDirs = "\\(Docs|Licenses|Resource)\\" ;  # dirs of files to be included in the manifest FileList key
     $rgxPsd1FileListExcl = "\\(\.vscode|ScriptAnalyzer-Results-|logs\\)|-LOG-BATCH-EXEC-" ; # file filter to exclude from mani FilList key
     $rgxLicFileFilter = '\\(Resource|Licenses)\\' ; # exempt extensionless license files from removal in temp profile copy
+    $rgxRootFilesBuild = "(CHANGELOG|README)\.md$" ;
     # # post filter excludes regex, dir names in fullname path that should never be included in build, logs, and temp versions of .ps[md]1 files.
     $rgxSrcFilesPostExcl = "\\(Package|Tests|logs)\\|(\.ps[dm]1_(\d+-\d+[AP]M|TMP)|-LOG-BATCH-EXEC-\d+-\d+[AP]M-log\.txt|\\(fingerprint|Psd1filelist))$" ; 
     # rgx to exclude exported temp breakpoint files from inclusion in module build
@@ -259,6 +266,7 @@ function update-NewModule {
     $MergeBuildExcl = "\\(Public|Internal|External|Private)\\.*.ps1$" ; 
     # rgx to exclude target verb-mod\verb-mod from efforts to flatten (it's the dest, shouldn't be a source)
     $rgxTargExcl = [regex]::escape("\$($ModuleName)\$($ModuleName)") ; 
+    $rgxGuidModFiles = "[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}\.ps(d|m)1" ; # identifies temp psd|m1 files named for guids
     #*======v FUNCTIONS v======
 
     # suppress VerbosePreference:Continue, if set, during mod loads (VERY NOISEY)
@@ -457,6 +465,7 @@ function update-NewModule {
             AddedWebsite: URL
             AddedTwitter: URL
             REVISIONS
+            * 4:37 PM 12/1/2023 add try/catches, wlt support
             * 3:08 PM 10/27/2023 refactor into func():works, adding it to update-NewModule.ps1 ; init
             .DESCRIPTION
             reset-ModulePublishingDirectory.ps1 - To fully ensure only current resources are in the modulename\modulename dir (the "Module Publishing Dir" that is built into the published module), this code removes any Resource files from the dir. Intent is to ensure the combo of processbulk-NewModule.ps1 & update-NewModule fully stock the dir each pass
@@ -511,7 +520,181 @@ function update-NewModule {
                 $PSParameters = New-Object -TypeName PSObject -Property $PSBoundParameters ;
                 write-verbose "`$PSBoundParameters:`n$(($PSBoundParameters|out-string).trim())" ;
                 $Verbose = ($VerbosePreference -eq 'Continue') ; 
-                
+                $PurgeSources = 'Resource','Licenses','Docs' ;
+                $rgxRootFilesBuild = "(CHANGELOG|README)\.md$" ;
+            } ;  # BEGIN-E
+            PROCESS {
+                $Error.Clear() ; 
+    
+                foreach($item in $ModuleName) {
+                    $smsg = $sBnrS="`n#*------v PROCESSING : $($item) v------" ; 
+                    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level H2 } else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+       
+                    TRY{
+                        $ModPubPath = (get-item "c:\sc\$($item)\$($item)\" -ea STOP).FullName ; 
+                    } CATCH {
+                        $ErrTrapd=$Error[0] ;
+                        $smsg = "`n$(($ErrTrapd | fl * -Force|out-string).trim())" ;
+                        if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN } #Error|Warn|Debug
+                        else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                    } ; 
+                    # aggreg targets incrementally
+                    [array]$ModPurgeFiles = @() ; 
+
+                    $smsg = "Pre-purge $($rgxRootFilesBuild) Root dir matches from :" ; 
+                    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } 
+                    else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                    #Levels:Error|Warn|Info|H1|H2|H3|H4|H5|Debug|Verbose|Prompt|Success
+                    TRY{
+                        if($rootPurgeable = get-childitem -path "c:\sc\$($item)\*" -ea STOP | ? {$_.name -match $rgxRootFilesBuild } | select -expand fullname){
+                            $ModPurgeFiles += $rootPurgeable  ; 
+                        } ;
+                    } CATCH {
+                        $ErrTrapd=$Error[0] ;
+                        $smsg = "`n$(($ErrTrapd | fl * -Force|out-string).trim())" ;
+                        if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN } #Error|Warn|Debug
+                        else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                    } ; 
+
+                    #purge dirs directly below c:\sc\modname\, with files that should be removed from c:\sc\modname\modname\
+                    #$PurgeSources = 'Resource','Licenses','Docs' ;
+                    
+                    foreach($ModSourceDir in $PurgeSources){ 
+                        write-host "processing:$($ModSourceDir)..." ; 
+                        TRY{
+                            IF($ModResPath = (get-item "c:\sc\$($item)\$($ModSourceDir)\" -ea 0).FullName){
+                                $smsg = "$($item) resolved `$ModPubPath:$($ModPubPath)`n`$ModResPath:$($ModResPath)" ; 
+                                if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } 
+                                else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                                #Levels:Error|Warn|Info|H1|H2|H3|H4|H5|Debug|Verbose|Prompt|Success
+                                $smsg = "Reset module $($ModSourceDir) files (purge from $($ModPubPath))" ; 
+                                if($verbose){if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level VERBOSE } 
+                                else{ write-verbose "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; } ; 
+                                if($SubPurgeFiles = get-childitem -recurse -path $ModResPath -file -EA stop| select -expand fullname){
+                                    $ModPurgeFiles += $SubPurgeFiles ; 
+                                } ; 
+                            } else { 
+                                $smsg = "(no matching 'c:\sc\$($item)\$($ModSourceDir)\' content found" ; 
+                                if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } 
+                                else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                                #Levels:Error|Warn|Info|H1|H2|H3|H4|H5|Debug|Verbose|Prompt|Success
+                            } ; 
+                        } CATCH {
+                            $ErrTrapd=$Error[0] ;
+                            $smsg = "`n$(($ErrTrapd | fl * -Force|out-string).trim())" ;
+                            if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN } #Error|Warn|Debug
+                            else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                        } ; 
+                    } ; 
+
+                    # cycle purge the targets
+                    foreach( $file in $ModPurgeFiles){
+                        TRY{
+                            $smsg = "==$($file):" ;
+                            if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } 
+                            else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                            #Levels:Error|Warn|Info|H1|H2|H3|H4|H5|Debug|Verbose|Prompt|Success
+                            if($tf = get-childitem -path $file -ea STOP){
+                                if($rf = get-childitem $(join-path $ModPubPath $tf.name ) -ea 0 ){
+                                    write-warning "removing matched $($rf.fullname)..."
+                                    remove-item $rf.fullname -whatif:$($whatif) -verbose -ea STOP;
+                                }else{write-host "no conflicting $($ModPubPath)\$($tf.name) found" }
+                            } ; 
+                        } CATCH {
+                            $ErrTrapd=$Error[0] ;
+                            $smsg = "`n$(($ErrTrapd | fl * -Force|out-string).trim())" ;
+                            if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN } #Error|Warn|Debug
+                            else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                            CONTINUE ; 
+                        } ; 
+                    } ;
+
+                    $smsg = "$($sBnrS.replace('-v','-^').replace('v-','^-'))" ;
+                    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level H2 } else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                } ;  # loop-E
+    
+            } ;  # PROC-E
+        } ; 
+    #} ; 
+    #*------^ END Function reset-ModulePublishingDirectory ^------
+
+    #*------v Function populate-ModulePublishingDirectory v------
+    #if(-not(get-command populate-ModulePublishingDirectory -ea 0)){
+        function populate-ModulePublishingDirectory {
+            <#
+            .SYNOPSIS
+            populate-ModulePublishingDirectory.ps1 - after reset-*, this repopulates the REsource/License/root files back into a modules c:\sc\[modulename]\[modulename]\ to create an intact complete flattened source copy for duplication into CU\Docs\Modules, as the target of the Publish-Module command (under the combo of processbulk-NewModule.ps1 & update-NewModule)
+            .NOTES
+            Version     : 0.0.1
+            Author      : Todd Kadrie
+            Website     : http://www.toddomation.com
+            Twitter     : @tostka / http://twitter.com/tostka
+            CreatedDate : 2023-12-01
+            FileName    : populate-ModulePublishingDirectory.ps1
+            License     : MIT License
+            Copyright   : (c) 2023 Todd Kadrie
+            Github      : https://github.com/tostka/verb-dev
+            Tags        : Powershell,Module,Development
+            AddedCredit : REFERENCE
+            AddedWebsite: URL
+            AddedTwitter: URL
+            REVISIONS
+            * 4:24 PM 12/1/2023 convert reset-, to it's populate equv init
+            .DESCRIPTION
+            populate-ModulePublishingDirectory.ps1 - after reset-*, this repopulates the REsource/License/root files back into a modules c:\sc\[modulename]\[modulename]\ to create an intact complete flattened source copy for duplication into CU\Docs\Modules, as the target of the Publish-Module command (under the combo of processbulk-NewModule.ps1 & update-NewModule)
+            .PARAMETER  ModuleName
+            The name of the module to be processed
+            .PARAMETER whatIf
+            Whatif Flag  [-whatIf]
+            .INPUTS
+            None. Does not accepted piped input.(.NET types, can add description)
+            .OUTPUTS
+            None. Returns no objects or output (.NET types)
+            System.Boolean
+            [| get-member the output to see what .NET obj TypeName is returned, to use here]
+            .EXAMPLE
+            PS> cls ; eisebp ; .\populate-ModulePublishingDirectory.ps1 -ModuleName verb-dev -whatif -verbose 
+            EXSAMPLEOUTPUT
+            Run with whatif & verbose
+            .LINK
+            https://github.com/tostka/verb-dev
+            .LINK
+            https://bitbucket.org/tostka/powershell/
+            .LINK
+            [ name related topic(one keyword per topic), or http://|https:// to help, or add the name of 'paired' funcs in the same niche (enable/disable-xxx)]
+            #>
+            ##Requires -Version 2.0
+            ##Requires -Version 3
+            ##requires -PSEdition Desktop
+            ##requires -PSEdition Core
+            #Requires -RunasAdministrator
+            ##Requires -PSSnapin Microsoft.Exchange.Management.PowerShell.E2010
+            # VALIDATORS: [ValidateNotNull()][ValidateNotNullOrEmpty()][AllowEmptyString()][ValidateLength(24,25)][ValidateLength(5)][ValidatePattern("some\sregex\sexpr")][ValidateSet("US","GB","AU")]#existFolder:[ValidateScript({Test-Path $_ -PathType 'Container'})]#existFile:[ValidateScript({Test-Path $_})]#matchExt:[ValidateScript({$_ -match '\.EXT$'})]#matchExt:[ValidateScript({ if([IO.Path]::GetExtension($_) -ne ".psd1") { throw "Path must point to a .psd1 file" } $true })]#IsDate:[ValidateScript({(($_ -as [DateTime]) -ne $null)})]#isDateInFuture:[ValidateScript({$_ -gt (Get-Date)})][ValidateRange(21,65)]#wholeNum:[ValidateScript({(!($($_) -eq 0)) -and ($($_) -eq $($_ -as [int]))})] $number="1")#positiveInt:[ValidateRange(0,[int]::MaxValue)]#negativeInt:[ValidateRange([int]::MinValue,0)][ValidateCount(1,3)]
+            ## PULL REGEX VALIDATOR FROM GLOBAL VARI, w friendly errs: [ValidateScript({if(-not $rgxPermittedUserRoles){$rgxPermittedUserRoles = '(SID|CSID|UID|B2BI|CSVC|ESVC|LSVC|ESvcCBA|CSvcCBA|SIDCBA)'} ; if(-not ($_ -match $rgxPermittedUserRoles)){throw "UserRole: '$($_)' doesn't match `$rgxPermittedUserRoles:`n$($rgxPermittedUserRoles.tostring())" ; } ; return $true ; })]
+            ## FANCY MULTI CLAUS VALIDATESCRIPT W BETTER ERRS: [ValidateScript({ if(-Not ($_ | Test-Path) ){throw "File or folder does not exist"} ; if(-Not ($_ | Test-Path -PathType Leaf) ){ throw "The Path argument must be a file. Folder paths are not allowed."} ; if($_ -notmatch "(\.msi|\.exe)"){throw "The file specified in the path argument must be either of type msi or exe"} ; return $true ; })]
+            ## [OutputType('bool')] # optional specified output type
+            [CmdletBinding()]
+            ## PSV3+ whatif support:[CmdletBinding(SupportsShouldProcess)]
+            ###[Alias('Alias','Alias2')]
+            PARAM(
+
+                [Parameter(Position=0,Mandatory=$True,ValueFromPipeline=$true,ValueFromPipelineByPropertyName=$true,HelpMessage="The name of the module to be processed[-ModuleName verb-dev]")]
+                    [ValidateNotNullOrEmpty()]
+                    $ModuleName,
+                # don't use explicit param v, if using [CmdletBinding(SupportsShouldProcess)] + -WhatIf:$($WhatIfPreference)
+                [Parameter(HelpMessage="Whatif Flag  [-whatIf]")]
+                    [switch] $whatIf=$true
+
+            ) ;
+            BEGIN { 
+                #region CONSTANTS-AND-ENVIRO #*======v CONSTANTS-AND-ENVIRO v======
+                # function self-name (equiv to script's: $MyInvocation.MyCommand.Path) ;
+                ${CmdletName} = $PSCmdlet.MyInvocation.MyCommand.Name ;
+                $PSParameters = New-Object -TypeName PSObject -Property $PSBoundParameters ;
+                write-verbose "`$PSBoundParameters:`n$(($PSBoundParameters|out-string).trim())" ;
+                $Verbose = ($VerbosePreference -eq 'Continue') ; 
+                $PurgeSources = 'Resource','Licenses','Docs' ;
+                $rgxRootFilesBuild = "(CHANGELOG|README)\.md$" ;
             } ;  # BEGIN-E
             PROCESS {
                 $Error.Clear() ; 
@@ -521,38 +704,86 @@ function update-NewModule {
                     if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level H2 } else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
        
                     $ModPubPath = (get-item "c:\sc\$($item)\$($item)\" -ea 0).FullName ; 
-                    # dirs directly below c:\verb\dev, with files that should be removed from verb-dev\verb-dev\
-                    $PurgeSources = 'Resource','Licenses' ;
+                    # aggreg targets incrementally
+                    [array]$ModSourceFiles = @() ; 
+
+                    $smsg = "Locating $($rgxRootFilesBuild) Root dir matches from :" ; 
+                    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } 
+                    else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                    #Levels:Error|Warn|Info|H1|H2|H3|H4|H5|Debug|Verbose|Prompt|Success
+                    if($rootPurgeable = get-childitem -path "c:\sc\$($item)\*" | ? {$_.name -match $rgxRootFilesBuild } | select -expand fullname){
+                        $ModSourceFiles += $rootPurgeable  ; 
+                    } ;
+
+                    #copy dirs directly below c:\sc\modname\, with files that should be removed from c:\sc\modname\modname\
+                    #$PurgeSources = 'Resource','Licenses','Docs' ;
+
                     foreach($ModSourceDir in $PurgeSources){ 
                         write-host "processing:$($ModSourceDir)..." ; 
-                        $ModResPath = (get-item "c:\sc\$($item)\$($ModSourceDir)\" -ea 0).FullName ; 
-                        $smsg = "$($item) resolved `$ModPubPath:$($ModPubPath)`n`$ModResPath:$($ModResPath)" ; 
-                        if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } 
-                        else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
-                        #Levels:Error|Warn|Info|H1|H2|H3|H4|H5|Debug|Verbose|Prompt|Success
-                        if($ModPurgeFiles = gci -recurse -path $ModResPath -file | select -expand fullname){
-                            write-verbose "Reset module $($ModSourceDir) files (purge from $($ModPubPath))" ; 
-                            foreach( $file in $ModPurgeFiles){
-                                write-host "==$($file):" ;
-                                if($tf = gci $file -ea STOP){
-                                    if($rf = gci $(join-path $ModPubPath $tf.name ) -ea 0 ){
-                                        write-warning "removing matched $($rf.fullname)..."
-                                        remove-item $rf.fullname -whatif:$($whatif) -verbose -ea STOP;
-                                    }else{write-host "no conflicting $($ModPubPath)\$($tf.name) found" }
-                                } ; 
-                            } ;
+                        if($ModResPath = (get-item "c:\sc\$($item)\$($ModSourceDir)\" -ea 0).FullName){
+                            $smsg = "$($item) resolved `$ModPubPath:$($ModPubPath)`n`$ModResPath:$($ModResPath)" ; 
+                            if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } 
+                            else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                            #Levels:Error|Warn|Info|H1|H2|H3|H4|H5|Debug|Verbose|Prompt|Success
+                            $smsg = "Recopy module $($ModSourceDir) files (copy from $($ModPubPath))" ; 
+                            if($verbose){if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level VERBOSE } 
+                            else{ write-verbose "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; } ; 
+                            if($SubcopyFiles = get-childitem -recurse -path $ModResPath -file | select -expand fullname){
+                                $ModSourceFiles += $SubcopyFiles ; 
+                            } ; 
+                        } else { 
+                            $smsg = "(no matching 'c:\sc\$($item)\$($ModSourceDir)\' content found" ; 
+                            if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } 
+                            else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                            #Levels:Error|Warn|Info|H1|H2|H3|H4|H5|Debug|Verbose|Prompt|Success
                         } ; 
-                   } ; 
+                   } ;  # loop-E
+
+                   $pltCI=[ordered]@{
+                        #path = $null ;
+                        path = $ModSourceFiles ;
+                        destination = $ModPubPath ; 
+                        force = $true ; 
+                        erroraction = 'STOP' ;
+                        verbose = $($VerbosePreference -eq "Continue") ; 
+                        whatif = $($whatif) ;
+                    } ;
+                    #$smsg = "copy-item w`n$(($pltCI|out-string).trim())" ; 
+                    #if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+
+                   <# cycle copy the targets
+                   foreach( $file in $ModSourceFiles){
+                        write-host "==$($file):" ;
+                        if($tf = get-childitem -path $file -ea STOP){
+                            #write-warning "removing matched $($rf.fullname)..."
+                            #remove-item $rf.fullname -whatif:$($whatif) -verbose -ea STOP;
+                            $pltCI.path = $tf.fullname ; 
+                            $smsg = "copy-item w`n$(($pltCI|out-string).trim())" ; 
+                            if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                            copy-item @pltCI ; 
+                        } ; 
+                    } ;
+                    #>
+                    $smsg = "copy-item w`n$(($pltCI|out-string).trim())" ; 
+                    #if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                    # it's flat file coying, just single-line it verbose
+                    TRY{
+                        copy-item @pltCI ;
+                    } CATCH {
+                        $ErrTrapd=$Error[0] ;
+                        $smsg = "`n$(($ErrTrapd | fl * -Force|out-string).trim())" ;
+                        if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN } #Error|Warn|Debug
+                        else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                    } ; 
+
                     $smsg = "$($sBnrS.replace('-v','-^').replace('v-','^-'))" ;
                     if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level H2 } else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
                 } ;  # loop-E
     
-    
-
             } ;  # PROC-E
         } ; 
     #} ; 
-    #*------^ END Function reset-ModulePublishingDirectory ^------
+    #*------^ END Function populate-ModulePublishingDirectory ^------
 
     #*======^ END FUNCTIONS ^======
 
@@ -868,6 +1099,49 @@ function update-NewModule {
     #Levels:Error|Warn|Info|H1|H2|H3|H4|H5|Debug|Verbose|Prompt|Success
     reset-ModulePublishingDirectory -ModuleName $ModuleName -whatif:$($whatif) -verbose:$($VerbosePreference -eq "Continue") ; 
     
+    $smsg = "Run: populate-ModulePublishingDirectory -ModuleName $($ModuleName)" ; 
+    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } 
+    else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+    #Levels:Error|Warn|Info|H1|H2|H3|H4|H5|Debug|Verbose|Prompt|Success
+    #reset-ModulePublishingDirectory -ModuleName $ModuleName -whatif:$($whatif) -verbose:$($VerbosePreference -eq "Continue") ; 
+    populate-ModulePublishingDirectory -ModuleName $ModuleName -whatif:$($whatif) -verbose:$($VerbosePreference -eq "Continue") ; 
+
+    $smsg = "Validate updated $($ModuleName)\$($ModuleName) dir contents against Manifest:`nRun: test-modulemanifest -Path $($ModPsdPath)" ;
+    if($TestReport = test-modulemanifest -Path $ModPsdPath -errorVariable ttmm_Err -WarningVariable ttmm_Wrn -InformationVariable ttmm_Inf){
+        if($ttmm_Err){
+            $smsg = "`nFOUND `$ttmm_Err: test-ModuleManifest HAD ERRORS!" ;
+            if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN -Indent}
+            else{ write-WARNING "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+            foreach($errExcpt in $ttmm_Err.Exception){
+                switch -regex ($errExcpt){
+                    "The\sspecified\sFileList\sentry\s'.*'\sin\sthe\smodule\smanifest\s'.*.psd1'\sis\sinvalid\." {
+                        $smsg = "`nPSD1 Manifest has FileList specification, with no matching file found in $($modroot)\$($ModuleName)\!" ;
+                        $smsg += "`nThe PSD MUST be edited or rolled back to # FileList = @()  spec, to properly build"
+                        $smsg += "`n(build update-NewModule will detect and re-add the FileList from scratch, fr files in \\(Docs|Licenses|Resource)\ or named (Resource|Licenses) (extensionless)" ;
+                        $smsg += "`n`n to find the last psd1/.psd1_ with the empty spec:" ; 
+                        $smsg += "`ngci C:\sc\$($ModuleName)\$($ModuleName)\*.psd1* | sort LastWriteTime |  sls -pattern `"#\sFileList\s=\s@\(\)`" | select -last 1; `n" ;  
+                        $smsg += "`n$($errExcpt)" ;
+                        if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN -Indent}
+                        else{ write-WARNING "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                    }
+                    default {
+                        $smsg = "`nPSD1 MANIFEST UNDEFINED TESTING ERROR!" ;
+                        $smsg += "`nThe PSD MUST be edited or rolled back to a functional revision to properly build!"
+                        $smsg += "`n(build update-NewModule will detect and re-add the FileList from scratch, fr files in \\(Docs|Licenses|Resource)\ or named (Resource|Licenses) (extensionless)" ;
+                        $smsg += "`n$($errExcpt)" ;
+                        if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN -Indent}
+                        else{ write-WARNING "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                    }
+                } ;
+            } ;
+            # abort build here
+            BREAK ; 
+        } else {
+            $smsg = "(no `$ttmm_Err: test-ModuleManifest had no errors)" ;
+            if($verbose){if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level VERBOSE }
+            else{ write-verbose "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; } ;
+        } ; 
+    } ;
 
     if(!$Republish){
         $sHS=@"
@@ -1259,7 +1533,7 @@ $(if($Merge){'MERGE parm specified as well:`n-Merge Public|Internal|Classes incl
     }; 
     
     write-verbose "Get-ChildItem $($ModDirPath)\* -recur | where-object {$_.name -match `$rgxGuidModFiles}"
-    $rgxGuidModFiles = "[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}\.ps(d|m)1"
+    #$rgxGuidModFiles = "[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}\.ps(d|m)1"
     $testfiles = Get-ChildItem "$($ModDirPath)\*" -recur | where-object {$_.name -match $rgxGuidModFiles} ; 
     if($testfiles){
         $smsg= "(Purging left-over test files...)" ;
@@ -1352,11 +1626,14 @@ $(if($Merge){'MERGE parm specified as well:`n-Merge Public|Internal|Classes incl
     
     # move the constants up top, they're used for psd1.FileList population discovery as well (up around #965)
     
-    $from="$($ModDirPath)" ;
-    $to = "$([Environment]::GetFolderPath("MyDocuments"))\WindowsPowerShell\Modules\$($ModuleName)" ;
+    #$from="$($ModDirPath)" ;
+    $from = "$(join-path -path $moddirpath.fullname -childpath $ModuleName)\" ; 
+    #$to = "$([Environment]::GetFolderPath("MyDocuments"))\WindowsPowerShell\Modules\$($ModuleName)" ;
+    $to = "$([Environment]::GetFolderPath("MyDocuments"))\WindowsPowerShell\Modules\$($ModuleName)\$($ModuleName)" ;
 
     # below is original copy-all gci
-    $pltGci=[ordered]@{Path=$from ;Recurse=$true ;Exclude=$exclude; ErrorAction="Stop" ; } ;
+    #$pltGci=[ordered]@{Path=$from ;Recurse=$true ;Exclude=$exclude; ErrorAction="Stop" ; } ;
+    $pltGci=[ordered]@{Path=$from ;Recurse=$false ;Exclude=$exclude; ErrorAction="Stop" ; } ;
     # explicitly only go after the common module component, by type, via -include -
     #issue is -include causes it to collect only leaf files, doesn't include dir
     #creation, and if no pre-exist on the dir, causes a hard error on copy attempt.
@@ -1374,7 +1651,8 @@ $(if($Merge){'MERGE parm specified as well:`n-Merge Public|Internal|Classes incl
             if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } 
             else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
             #Levels:Error|Warn|Info|H1|H2|H3|H4|H5|Debug|Verbose|Prompt|Success
-            $srcFiles = $srcFiles | ?{$_.fullname -notmatch $rgxSrcFilesPostExcl} ; 
+            #$srcFiles = $srcFiles | ?{$_.fullname -notmatch $rgxSrcFilesPostExcl} ; 
+            $srcFiles = $srcFiles | ?{$_.fullname -notmatch $rgxSrcFilesPostExcl -AND -not($_.PsIsContainer)} ; 
             if($Merge){
                 $smsg = "-Merge:exclude `$MergeBuildExcl $($MergeBuildExcl) files from temp build copy" ; 
                 if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } 
