@@ -15,6 +15,15 @@ function update-NewModule {
     Github      : https://github.com/tostka/verb-dev
     Tags        : Powershell,Module,Build,Development
     REVISIONS
+    * 12:24 PM 12/4/2023 Last pass on curr fixes, with inline debugging fixes, ran to completion, first time since October 12 2023. It now properly supports psd1 manifest FileList and (Docs|Licenses|Resource) dir build-in components through that setting.
+        cleanup, typo fix, splice over final updates:
+        - add: $rgxInclOutLicFileName = '^LICENSE' ; # id's local extensionless vdev\vdev lic files that *should* remain
+        - flip ww to wl on non-impacting obsolete test
+        - update bannedfiles logic to pass/permit non-extension LICENSE files in modname\modname build/output dir
+        - add verbose output to the file cleanup removals, to record what went when
+        - block rem newly redundant flatten resources to modname\modname code (already complete further up the function)
+        - add -errorvariable & analysis to ipmo post-build test
+        - genericize strings
     * 5:12 PM 12/1/2023: major fixes, tracked down source of issues: you need to 
         build vdev\vdev as intact _flat_ files complete mludle; then COPY IT to the 
         CU\Docs\Modules\verb-dev\verb-dev, and test-manifest the result. From there if 
@@ -109,9 +118,18 @@ function update-NewModule {
     .DESCRIPTION
     update-NewModule - dyanmic include/dot-stourced post-module conversion or component update: sign - all files (this vers), publish to repo, and install back script
     Note: -Merge drivese logic to build Monolithic .psm1 (-Merge), vs Dynamic-include .psm1 (-not -Merge)
+
+    v1.5.33+, it now properly supports psd1 manifest FileList and 
+    (Docs|Licenses|Resource) dir build-in components through that setting 
+    (place  relevent 3rd party non-executing files/data sources, you don't want to put into 
+    a data psd1 hash, into these dirs, and they'll be autoadded as psd1.FileList 
+    array members, and will be autocopied to the output modname\modname\dir on build).
+    
     I've hit an insurmoutable bug in psv2, when using psGet to install psv3+ modules into older legacy machines. Verb-IO *won't* properly parse and load my ConvertFrom-SourceTable function at all. So we need the ability to conditionally load module functions, skipping psv2-incompatibles when running that rev
+    
     Preqeq Installs:
     Install-Module BuildHelpers -scope currentuser # buildhelpers metadata handling https://github.com/RamblingCookieMonster/BuildHelpers
+
     * To uninstall all but latest:
     #-=-=-=-=-=-=-=-=
     $modules = Get-Module -ListAvailable AzureRm* | Select-Object -ExpandProperty Name -Unique ;
@@ -122,7 +140,7 @@ function update-NewModule {
     .PARAMETER  ModDirPath
     ModDirPath[-ModDirPath C:\sc\verb-ADMS]
     .PARAMETER  Repository
-    Target local Repo[-Repository lyncRepo
+    Target local Repo[-Repository someRepoName]
     .PARAMETER Merge
     Flag that indicates Module should be Merged into a monoolithic .psm1 (otherwise, a Dynamic-Include version is built)[-Merge]
     .PARAMETER RunTest
@@ -150,11 +168,17 @@ function update-NewModule {
     PS> update-NewModule -ModuleName "verb-AAD" -ModDirPath "C:\sc\verb-AAD" -Repository $localPSRepo  -showdebug -whatif ;
     Non-Merge pass: Re-sign specified module & Publish/Install/Test specified module, with debug messages, and whatif pass.
     .EXAMPLE
-    # pre-remove installed module
-    # re-increment the psd1 file ModuleVersion (unique new val req'd to publish)
+    PS> write-verbose "pre-remove installed module" ; 
+    PS> write-verbose "re-increment the psd1 file ModuleVersion (unique new val req'd to publish)" ; 
     PS> update-NewModule -ModuleName "verb-AAD" -ModDirPath "C:\sc\verb-AAD" -Repository $localPSRepo -Merge -Republish -showdebug -whatif ;
     Merge & Republish pass: Only Publish/Install/Test specified module, with debug messages, and whatif pass.
+    .EXAMPLE
+    PS> write-verbose "Module, uninstall all but latest"
+    PS> $modules = Get-Module -ListAvailable ModuleName* | Select-Object -ExpandProperty Name -Unique ;
+    PS> foreach ($module in $modules) {$Latest = Get-InstalledModule $module; Get-InstalledModule $module -AllVersions | ? {$_.Version -ne $Latest.Version} | Uninstall-Module ;} ;
+    Util code to uninstall all but latest version of a given module.
     .LINK
+    https://github.com/tostka/verb-dev
     #>
     #Requires -Modules BuildHelpers
     [CmdletBinding()]
@@ -167,7 +191,7 @@ function update-NewModule {
             [ValidateNotNullOrEmpty()]
             [ValidateScript({Test-Path $_ -PathType 'Container'})]
         [system.io.fileinfo]$ModDirPath,
-        [Parameter(Position=0,Mandatory=$True,ValueFromPipeline=$true,ValueFromPipelineByPropertyName=$true,HelpMessage="Target local Repo[-Repository lyncRepo]")]
+        [Parameter(Position=0,Mandatory=$True,ValueFromPipeline=$true,ValueFromPipelineByPropertyName=$true,HelpMessage="Target local Repo[-Repository someRepoName]")]
             [ValidateNotNullOrEmpty()]
             [string]$Repository,
         [Parameter(HelpMessage="Flag that indicates Module should be Merged into a monoolithic .psm1 [-Merge]")]
@@ -267,6 +291,7 @@ function update-NewModule {
     # rgx to exclude target verb-mod\verb-mod from efforts to flatten (it's the dest, shouldn't be a source)
     $rgxTargExcl = [regex]::escape("\$($ModuleName)\$($ModuleName)") ; 
     $rgxGuidModFiles = "[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}\.ps(d|m)1" ; # identifies temp psd|m1 files named for guids
+    $rgxInclOutLicFileName = '^LICENSE' ; # id's local extensionless vdev\vdev lic files that *should* remain
     #*======v FUNCTIONS v======
 
     # suppress VerbosePreference:Continue, if set, during mod loads (VERY NOISEY)
@@ -765,7 +790,8 @@ function update-NewModule {
                     } ;
                     #>
                     $smsg = "copy-item w`n$(($pltCI|out-string).trim())" ; 
-                    #if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                    $smsg += "`n--`$pltCI.path:`n$(($pltCI.path|out-string).trim())" ; 
+                    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
                     # it's flat file coying, just single-line it verbose
                     TRY{
                         copy-item @pltCI ;
@@ -1702,10 +1728,13 @@ $(if($Merge){'MERGE parm specified as well:`n-Merge Public|Internal|Classes incl
     # $to = "$([Environment]::GetFolderPath("MyDocuments"))\WindowsPowerShell\Modules\$($ModuleName)" ;
     #$bannedFiles = get-childitem -path $to -recurse |?{$_.extension -notmatch $rgxModExtIncl -AND !$_.PSIsContainer} ;
     # post filter the new licenses dir out (they're req extensionless files)
-    $bannedFiles = get-childitem -path $to -recurse |?{$_.extension -notmatch $rgxModExtIncl -AND !$_.PSIsContainer} | ?{$_.fullname -notmatch $rgxLicFileFilter}
+    #$bannedFiles = get-childitem -path $to -recurse |?{$_.extension -notmatch $rgxModExtIncl -AND !$_.PSIsContainer} | ?{$_.fullname -notmatch $rgxLicFileFilter}
+    #$rgxInclOutLicFileName = '^LICENSE' ; 
+    $bannedFiles = get-childitem -path $to -recurse |?{$_.extension -notmatch $rgxModExtIncl -AND !$_.PSIsContainer} | ?{$_.fullname -notmatch $rgxLicFileFilter} 
     # Remove-Item -Path -Filter -Include -Exclude -Recurse -Force -Credential -WhatIf
     $pltRItm = [ordered]@{
         path=$bannedFiles.fullname ;
+        verbose = $true ;  # add verbose
         whatif=$($whatif) ;
     } ;
     if($bannedFiles){
@@ -1784,11 +1813,14 @@ $(if($Merge){'MERGE parm specified as well:`n-Merge Public|Internal|Classes incl
                 CONTINUE ;        
             } ;
         } else {
-            $smsg = "UNABLE TO LOCATE A TEMP MOD DIR $($to) COPY of $($fl)!" ; 
-            if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN -Indent} 
-            else{ write-WARNING "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; 
+            $smsg = "Unable to locate a problematic temp mod dir $($to) COPY of $($fl)" ; 
+            if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } 
+            else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+            #Levels:Error|Warn|Info|H1|H2|H3|H4|H5|Debug|Verbose|Prompt|Success
         } ;  
     } ; 
+    <# 12:06 PM 12/4/2023 this is now redundant; already completed during prior buffer from res/lic etc files to vdev\vdev
+
     # buffer to verb-mod\verb-mod on the source as well - psd1.filelist entries won't pass a test-modulemanifest if still in .\RESOURCE|LICENSES
     $smsg = "copy/Flatten Resource etc files into source root $($ModDirPath)\$($ModuleName) dir..." ; 
     if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } 
@@ -1813,6 +1845,7 @@ $(if($Merge){'MERGE parm specified as well:`n-Merge Public|Internal|Classes incl
             CONTINUE ;        
         } ;
     } ; 
+    #>
 
     if(!$whatif){
         if($localMod=Get-Module -ListAvailable -Name $($ModPsmName.replace('.psm1',''))){
@@ -2070,9 +2103,11 @@ And then re-run update-NewModule.
                 } ;
 
                 # test import-module with ea, force (hard reload curr version) & verbose output
+                # 11:45 am 12/4/2023:should update ipmo w -errorvariable
                 $pltImportMod=[ordered]@{
                     Name=$pltInstallModule.Name ;
                     ErrorAction="Stop" ;
+                    errorVariable = ipmo_Err
                     force = $true ;
                     verbose = $true ;
                 } ;
@@ -2081,7 +2116,27 @@ And then re-run update-NewModule.
                 else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
                 TRY {
                     Import-Module @pltImportMod ;
-
+                    if($ipmo_Err){
+                        $smsg = "`nFOUND `$ipmo_Err: import-module HAD ERRORS!" ;
+                        if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN -Indent}
+                        else{ write-WARNING "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                        foreach($errExcpt in $ipmo_Err.Exception){
+                            switch -regex ($errExcpt){
+                                default {
+                                    $smsg = "`ninstalled IPMO .PSM1  UNDEFINED ERROR!" ;
+                                    $smsg += "`n$($errExcpt)" ;
+                                    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN -Indent}
+                                    else{ write-WARNING "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                                }
+                            } ;
+                        } ;
+                        # abort here
+                        BREAK ; 
+                    } else {
+                        $smsg = "(no `$ttmm_Err: test-ModuleManifest had no errors)" ;
+                        if($verbose){if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level VERBOSE }
+                        else{ write-verbose "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; } ;
+                    } ; 
                 } CATCH {
                     $ErrorTrapped = $Error[0] ;
                     $PassStatus += ";ERROR";
