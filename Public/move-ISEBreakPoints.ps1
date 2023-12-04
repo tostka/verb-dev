@@ -15,6 +15,7 @@ function move-ISEBreakPoints {
     Github      : https://github.com/tostka
     Tags        : Powershell,ISE,development,debugging
     REVISIONS
+    * 3:29 PM 12/4/2023 new alias using proper std suffix for move == 'm': mIseBP. Technically it should be mbp (like sbp), but that's too short to be safe; too likely to accidentlaly trigger on console.
     * 3:05 PM 9/7/2022 ren & alias orig name shift-ISEBreakPoints -> move-ISEBreakPoints
     * 10:49 AM 8/25/2020 init, added to verb-dev module
     .DESCRIPTION
@@ -31,7 +32,7 @@ function move-ISEBreakPoints {
     Github      : https://github.com/tostka
     #>
     [CmdletBinding()]
-    [Alias('sIseBp','shift-ISEBreakPoints')]
+    [Alias('sIseBp','shift-ISEBreakPoints','mIseBp')]
     PARAM(
         [Parameter(Position=0,Mandatory=$True,HelpMessage="Enter lines +/- to shift breakpoints on current script[-lines -3]")]
         [int]$lines
