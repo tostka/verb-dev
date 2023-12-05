@@ -7,7 +7,8 @@ function update-NewModule {
     Version     : 1.1.0
     Author      : Todd Kadrie
     Website     :	http://www.toddomation.com
-    Twitter     :	@tostka / http://twitter.com/tostka
+    Twitter     :	@tostka / http://twittegbpgcm gbp
+r.com/tostka
     CreatedDate : 2020-02-24
     FileName    : update-NewModule.ps1
     License     : MIT License
@@ -15,6 +16,7 @@ function update-NewModule {
     Github      : https://github.com/tostka/verb-dev
     Tags        : Powershell,Module,Build,Development
     REVISIONS
+    * 4:44 PM 12/5/2023 psd1.Filelist: select uniques, showing mults in the resulting array in psd1.filelist; added -errorvariable to all ipmo's w validation; added -errvari & validation to the Publish-module as well (blows through, wo killing build otherwise)
     * 3:20 PM 12/4/2023 
         removed all [#]requires stmts (main, and populate-ModulePublishingDirectory(), had runasadmin, blocking install as UID)
         Prior:
@@ -370,6 +372,7 @@ function update-NewModule {
     #$tMods+="verb-Teams;C:\sc\verb-Teams\verb-Teams\verb-Teams.psm1;Connect-Teams";
     #$tMods+="verb-SOL;C:\sc\verb-SOL\verb-SOL\verb-SOL.psm1;Connect-SOL" ;
     #$tMods+="verb-Azure;C:\sc\verb-Azure\verb-Azure\verb-Azure.psm1;get-AADBearToken" ;
+    # 9:33 AM 12/5/2023 this is still doing archaic loadmod...
     foreach($tMod in $tMods){
         $tModName = $tMod.split(';')[0] ;
         $tModFile = $tMod.split(';')[1] ;
@@ -384,14 +387,60 @@ function update-NewModule {
         if($lVers){
             $lVers=($lVers | sort version)[-1];
             try {
-                import-module -name $tModName -RequiredVersion $lVers.Version.tostring() -force -DisableNameChecking
+                # add errvari:
+                import-module -name $tModName -RequiredVersion $lVers.Version.tostring() -force -DisableNameChecking -errorVariable 'ipmo_Err' ;
+                    if($ipmo_Err){
+                        $smsg = "`nFOUND `$ipmo_Err: import-module HAD ERRORS!" ;
+                        if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN -Indent}
+                        else{ write-WARNING "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                        foreach($errExcpt in $ipmo_Err.Exception){
+                            switch -regex ($errExcpt){
+                                default {
+                                    $smsg = "`nInstall-Module ISMO .PSM1  UNDEFINED ERROR!" ;
+                                    $smsg += "`n$($errExcpt)" ;
+                                    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN -Indent}
+                                    else{ write-WARNING "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                                }
+                            } ;
+                        } ;
+                        #BREAK ; # should we break, or let it backload in the catch?
+                        throw $smsg ; # force into catch instead
+                    } else {
+                        $smsg = "(no `$ipmo_Err: test-ModuleManifest had no errors)" ;
+                        if($verbose){if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level VERBOSE }
+                        else{ write-verbose "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; } ;
+                    } ;
             }   catch {
-                 write-warning "*BROKEN INSTALLED MODULE*:$($tModName)`nBACK-LOADING DCOPY@ $($tModDFile)" ;import-module -name $tModDFile -force -DisableNameChecking
+                write-warning "*BROKEN INSTALLED MODULE*:$($tModName)`nBACK-LOADING DCOPY@ $($tModDFile)" ;
+                import-module -name $tModDFile -force -DisableNameChecking
             } ;
         } elseif (test-path $tModFile) {
             write-warning "*NO* INSTALLED MODULE*:$($tModName)`nBACK-LOADING DCOPY@ $($tModDFile)" ;
-            try {import-module -name $tModDFile -force -DisableNameChecking}
-            catch {
+            TRY {
+                # add errovari tests
+                import-module -name $tModDFile -force -DisableNameChecking -errorVariable 'ipmo_Err' ;
+                if($ipmo_Err){
+                    $smsg = "`nFOUND `$ipmo_Err: import-module HAD ERRORS!" ;
+                    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN -Indent}
+                    else{ write-WARNING "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                    foreach($errExcpt in $ipmo_Err.Exception){
+                        switch -regex ($errExcpt){
+                            default {
+                                $smsg = "`nInstall-Module ISMO .PSM1  UNDEFINED ERROR!" ;
+                                $smsg += "`n$($errExcpt)" ;
+                                if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN -Indent}
+                                else{ write-WARNING "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                            }
+                        } ;
+                    } ;
+                    #BREAK ; # should we break, or let it backload in the catch?
+                    throw $smsg ; # force into catch instead
+                } else {
+                    $smsg = "(no `$ipmo_Err: test-ModuleManifest had no errors)" ;
+                    if($verbose){if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level VERBOSE }
+                    else{ write-verbose "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; } ;
+                } ;
+            }CATCH {
                 write-error "*FAILED* TO LOAD MODULE*:$($tModName) VIA $(tModFile) !" ;
                 $tModFile = "$($tModName).ps1" ;
                 $sLoad = (join-path -path $LocalInclDir -childpath $tModFile) ;
@@ -412,6 +461,7 @@ function update-NewModule {
                 } ;
             } ;
         } ;
+        # validate loaded, test for cmdlet avail
         if(!(test-path function:$tModCmdlet)){
             write-warning -verbose:$true  "UNABLE TO VALIDATE PRESENCE OF $tModCmdlet`nfailing through to `$backInclDir .ps1 version" ;
             $sLoad = (join-path -path $backInclDir -childpath "$($tModName).ps1") ;
@@ -1530,7 +1580,8 @@ $(if($Merge){'MERGE parm specified as well:`n-Merge Public|Internal|Classes incl
     # add fullname variant for flatten copying resources
     $Psd1filelistFull =  $Psd1filelist | select -expand fullname ; 
     # and name only for the manifest FileList key
-    $Psd1filelist  = $Psd1filelist | select -expand name ; 
+    # 4:44 PM 12/5/2023 select uniques, showing mults in the resulting array in psd1.filelist
+    $Psd1filelist  = $Psd1filelist | select -expand name | select -unique ; 
     # export the list extensionless xml, to let it drop off of the Psd1filelist 
     $rgxPsd1FileListLine = '((#\s)*)FileList((\s)*)=((\s)*).*' ;
     if($Psd1filelist){
@@ -2068,13 +2119,14 @@ And then re-run update-NewModule.
                 } ;
             } ;
 
-            # added required version, to permit mult versions pre-reinstall
+            # added errvari - clearly doesn't Catch on publish fails, so post test; required version, to permit mult versions pre-reinstall
             $pltPublishModule=[ordered]@{
                 Name=$($ModuleName) ;
                 Repository=$($Repository) ;
                 RequiredVersion=$($psd1Vers) ;
                 Verbose=$true ;
                 ErrorAction="Stop" ;
+                errorVariable = 'pbmo_Err' ;
                 whatif=$($whatif);
             } ;
             $smsg= "`nPublish-Module w`n$(($pltPublishModule|out-string).trim())" ;
@@ -2082,6 +2134,27 @@ And then re-run update-NewModule.
             else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
             TRY {
                 Publish-Module @pltPublishModule ;
+                if($pbmo_Err){
+                    $smsg = "`nFOUND `$pbmo_Err: import-module HAD ERRORS!" ;
+                    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN -Indent}
+                    else{ write-WARNING "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                    foreach($errExcpt in $pbmo_Err.Exception){
+                        switch -regex ($errExcpt){
+                            default {
+                                $smsg = "`nPublish-Module PBMO UNDEFINED ERROR!" ;
+                                $smsg += "`n$($errExcpt)" ;
+                                if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN -Indent}
+                                else{ write-WARNING "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                            }
+                        } ;
+                    } ;
+                    #BREAK ;
+                    throw $smsg ;
+                } else {
+                    $smsg = "(no `$pbmo_Err: Publish-Module had no errors)" ;
+                    if($verbose){if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level VERBOSE }
+                    else{ write-verbose "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; } ;
+                } ;
             } CATCH {
                 $ErrorTrapped = $Error[0] ;
                 $PassStatus += ";ERROR";
@@ -2191,7 +2264,7 @@ And then re-run update-NewModule.
                         foreach($errExcpt in $ipmo_Err.Exception){
                             switch -regex ($errExcpt){
                                 default {
-                                    $smsg = "`ninstalled IPMO .PSM1  UNDEFINED ERROR!" ;
+                                    $smsg = "`nInstall-Module ISMO .PSM1  UNDEFINED ERROR!" ;
                                     $smsg += "`n$($errExcpt)" ;
                                     if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN -Indent}
                                     else{ write-WARNING "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
