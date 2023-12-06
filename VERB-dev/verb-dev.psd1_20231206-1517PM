@@ -87,7 +87,7 @@ AliasesToExport = '*'
 # ModuleList = @()
 
 # List of all files packaged with this module
-# FileList = @()
+FileList = @('Quick-Start-Installation-and-Example.md','LICENSE.txt','LICENSE_BOOTSTRAP','LICENSE_INVOKE-CREATEMODULEHELPFILE','LICENSE_JASNY-BOOTSTRAP','LICENSE_JQUERY','bootstrap.min.css','bootstrap.min.js','jasny-bootstrap.min.css','jasny-bootstrap.min.js','jquery-1.11.1.min.js','navmenu.css','screenshot.png','bootstrap.min.css','bootstrap.min.js','CHANGELOG.md','jasny-bootstrap.min.css','jasny-bootstrap.min.js','jquery-1.11.1.min.js','LICENSE.txt','navmenu.css','Quick-Start-Installation-and-Example.md','README.md','screenshot.png','CHANGELOG.md','README.md')
 
 # Private data to pass to the module specified in RootModule/ModuleToProcess. This may also contain a PSData hashtable with additional module metadata used by PowerShell.
 PrivateData = @{
@@ -126,8 +126,8 @@ PrivateData = @{
 # SIG # Begin signature block
 # MIIELgYJKoZIhvcNAQcCoIIEHzCCBBsCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUBubBrERg66acKNFuRnJOoYoh
-# zeygggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQU2wGUs7UMcx2+l6QmmP7CjFF8
+# OQWgggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
 # MCwxKjAoBgNVBAMTIVBvd2VyU2hlbGwgTG9jYWwgQ2VydGlmaWNhdGUgUm9vdDAe
 # Fw0xNDEyMjkxNzA3MzNaFw0zOTEyMzEyMzU5NTlaMBUxEzARBgNVBAMTClRvZGRT
 # ZWxmSUkwgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBALqRVt7uNweTkZZ+16QG
@@ -142,53 +142,9 @@ PrivateData = @{
 # AWAwggFcAgEBMEAwLDEqMCgGA1UEAxMhUG93ZXJTaGVsbCBMb2NhbCBDZXJ0aWZp
 # Y2F0ZSBSb290AhBaydK0VS5IhU1Hy6E1KUTpMAkGBSsOAwIaBQCgeDAYBgorBgEE
 # AYI3AgEMMQowCKACgAChAoAAMBkGCSqGSIb3DQEJAzEMBgorBgEEAYI3AgEEMBwG
-# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBS+s6UV
-# V8ev5kIyThK2m2zgEHY9/TANBgkqhkiG9w0BAQEFAASBgLqKCLxwwe7QldI5ZwZN
-# kmBJM2gRWgXrgrcOPIxLBHIJncYfqy3lz/I22ftL+4BH8zalfwN2NMehg5Q4MbPr
-# TnY7bwjkNXvW6wDRJdmyA6rSCtb+uE728FARFnHMOHahqxRJ3vQeI+ulJR5jaG9F
-# ja3gZbRBQVIqd2ZBBTmkbuxi
+# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBSI1xOS
+# EG2mBiangPcD+2yCzfL01DANBgkqhkiG9w0BAQEFAASBgDY1JDbN3UGSXJUbbI8h
+# iA4XzzNtpYHcYht3OS22/bYU//LTgj9l3QlNB+h3L3UaCDT3/8JioiLpUH/JWNkI
+# a8JvfpexXQSX0J2lf31Y8uKMAlCELiFXYQq9KNl9QzbnP2UvHSgvRCEIMD/0Yj1r
+# w5ziHPaRf1AKl05qhgMKcqGM
 # SIG # End signature block
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

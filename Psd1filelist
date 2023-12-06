@@ -1,28 +1,17 @@
 ﻿<Objs Version="1.1.0.1" xmlns="http://schemas.microsoft.com/powershell/2004/04">
   <S>bootstrap.min.css</S>
-  <S>bootstrap.min.css</S>
-  <S>bootstrap.min.js</S>
   <S>bootstrap.min.js</S>
   <S>CHANGELOG.md</S>
-  <S>CHANGELOG.md</S>
-  <S>jasny-bootstrap.min.css</S>
   <S>jasny-bootstrap.min.css</S>
   <S>jasny-bootstrap.min.js</S>
-  <S>jasny-bootstrap.min.js</S>
   <S>jquery-1.11.1.min.js</S>
-  <S>jquery-1.11.1.min.js</S>
-  <S>LICENSE.txt</S>
   <S>LICENSE.txt</S>
   <S>LICENSE_BOOTSTRAP</S>
   <S>LICENSE_INVOKE-CREATEMODULEHELPFILE</S>
   <S>LICENSE_JASNY-BOOTSTRAP</S>
   <S>LICENSE_JQUERY</S>
   <S>navmenu.css</S>
-  <S>navmenu.css</S>
-  <S>Quick-Start-Installation-and-Example.md</S>
   <S>Quick-Start-Installation-and-Example.md</S>
   <S>README.md</S>
-  <S>README.md</S>
-  <S>screenshot.png</S>
   <S>screenshot.png</S>
 </Objs>

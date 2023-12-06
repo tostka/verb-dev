@@ -12,7 +12,7 @@
 RootModule = 'VERB-dev.psm1'
 
 # Version number of this module.
-ModuleVersion = '1.5.39'
+ModuleVersion = '1.5.40'
 
 # Supported PSEditions
 # CompatiblePSEditions = @()
@@ -87,7 +87,7 @@ AliasesToExport = '*'
 # ModuleList = @()
 
 # List of all files packaged with this module
-FileList = @('Quick-Start-Installation-and-Example.md','LICENSE.txt','LICENSE_BOOTSTRAP','LICENSE_INVOKE-CREATEMODULEHELPFILE','LICENSE_JASNY-BOOTSTRAP','LICENSE_JQUERY','bootstrap.min.css','bootstrap.min.js','jasny-bootstrap.min.css','jasny-bootstrap.min.js','jquery-1.11.1.min.js','navmenu.css','screenshot.png','bootstrap.min.css','bootstrap.min.js','CHANGELOG.md','jasny-bootstrap.min.css','jasny-bootstrap.min.js','jquery-1.11.1.min.js','LICENSE.txt','navmenu.css','Quick-Start-Installation-and-Example.md','README.md','screenshot.png','CHANGELOG.md','README.md')
+FileList = @('Quick-Start-Installation-and-Example.md','LICENSE.txt','LICENSE_BOOTSTRAP','LICENSE_INVOKE-CREATEMODULEHELPFILE','LICENSE_JASNY-BOOTSTRAP','LICENSE_JQUERY','bootstrap.min.css','bootstrap.min.js','jasny-bootstrap.min.css','jasny-bootstrap.min.js','jquery-1.11.1.min.js','navmenu.css','screenshot.png','CHANGELOG.md','README.md')
 
 # Private data to pass to the module specified in RootModule/ModuleToProcess. This may also contain a PSData hashtable with additional module metadata used by PowerShell.
 PrivateData = @{
@@ -126,8 +126,8 @@ PrivateData = @{
 # SIG # Begin signature block
 # MIIELgYJKoZIhvcNAQcCoIIEHzCCBBsCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQU2wGUs7UMcx2+l6QmmP7CjFF8
-# OQWgggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUKWAg7eS9H27GameBvJvMaA2D
+# ibmgggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
 # MCwxKjAoBgNVBAMTIVBvd2VyU2hlbGwgTG9jYWwgQ2VydGlmaWNhdGUgUm9vdDAe
 # Fw0xNDEyMjkxNzA3MzNaFw0zOTEyMzEyMzU5NTlaMBUxEzARBgNVBAMTClRvZGRT
 # ZWxmSUkwgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBALqRVt7uNweTkZZ+16QG
@@ -142,9 +142,9 @@ PrivateData = @{
 # AWAwggFcAgEBMEAwLDEqMCgGA1UEAxMhUG93ZXJTaGVsbCBMb2NhbCBDZXJ0aWZp
 # Y2F0ZSBSb290AhBaydK0VS5IhU1Hy6E1KUTpMAkGBSsOAwIaBQCgeDAYBgorBgEE
 # AYI3AgEMMQowCKACgAChAoAAMBkGCSqGSIb3DQEJAzEMBgorBgEEAYI3AgEEMBwG
-# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBSI1xOS
-# EG2mBiangPcD+2yCzfL01DANBgkqhkiG9w0BAQEFAASBgDY1JDbN3UGSXJUbbI8h
-# iA4XzzNtpYHcYht3OS22/bYU//LTgj9l3QlNB+h3L3UaCDT3/8JioiLpUH/JWNkI
-# a8JvfpexXQSX0J2lf31Y8uKMAlCELiFXYQq9KNl9QzbnP2UvHSgvRCEIMD/0Yj1r
-# w5ziHPaRf1AKl05qhgMKcqGM
+# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBQkx/Eo
+# U8dqLhH+subTSm7J92fnhDANBgkqhkiG9w0BAQEFAASBgJyp/ltZrJQ3VzNb8FMJ
+# vb/jMeVmxc0Hmz2f0HsV3tFEdZo+a7vCSfOEoAR69ob89B3SpShasqhKRS2+/Lnh
+# PPt7EUCo3GiWdoi6dXXgp+qcDC0lwgHEpaHmdLzc0vZNnbYIHbWSE0zutPWfRZRU
+# NUCl1L0RBRPnIr/1dyk0x9r7
 # SIG # End signature block
