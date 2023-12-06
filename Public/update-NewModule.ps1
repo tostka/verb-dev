@@ -16,7 +16,9 @@ r.com/tostka
     Github      : https://github.com/tostka/verb-dev
     Tags        : Powershell,Module,Build,Development
     REVISIONS
-    * 2:01 PM 12/6/2023 ADD:
+    * 4:34 PM 12/6/2023
+        ADD:
+        - finding $Modroot blank, so coercing it from the inbound $sModDirPath
         - $rgxModExtIncl: added trailing '$' to test to end of ext, as wo it was matching on extensions that *start* with the above, even if named .xml_TMP.
         - $iSkipAutomaticTagsThreshold = 2000 ; # number of chars of comma-quote-delim'd public function names, as a string array, to establish a threshold to use SkipAutomaticTags with publish-module (NugGet bug workaround)
             # issue is: powershellget automatic tags all exported function and hangs when u go over 4000 characters can be avoided by SkipAutomaticTags on publish-module
@@ -284,49 +286,131 @@ r.com/tostka
         [Parameter(HelpMessage="Whatif Flag  [-whatIf]")]
             [switch] $whatIf
     ) ;
-    # function self-name (equiv to script's: $MyInvocation.MyCommand.Path) ;
-    ${CmdletName} = $PSCmdlet.MyInvocation.MyCommand.Name ;
-    # Get parameters this function was invoked with
-    # Get parameters this function was invoked with
-    $PSParameters = New-Object -TypeName PSObject -Property $PSBoundParameters ;
-    write-verbose  "`$PSBoundParameters:`n$(($PSBoundParameters|out-string).trim())" ;
-    $verbose = ($VerbosePreference -eq "Continue") ;
-
-    if ($psISE){
-            $ScriptDir = Split-Path -Path $psISE.CurrentFile.FullPath ;
-            $ScriptBaseName = split-path -leaf $psise.currentfile.fullpath ;
-            $ScriptNameNoExt = [system.io.path]::GetFilenameWithoutExtension($psise.currentfile.fullpath) ;
-            $PSScriptRoot = $ScriptDir ;
-            if($PSScriptRoot -ne $ScriptDir){ write-warning "UNABLE TO UPDATE BLANK `$PSScriptRoot TO CURRENT `$ScriptDir!"} ;
-            $PSCommandPath = $psise.currentfile.fullpath ;
-            if($PSCommandPath -ne $psise.currentfile.fullpath){ write-warning "UNABLE TO UPDATE BLANK `$PSCommandPath TO CURRENT `$psise.currentfile.fullpath!"} ;
-    } else {
-        if($host.version.major -lt 3){
-            $PSScriptRoot = Split-Path $MyInvocation.MyCommand.Path -Parent ;
-            $PSCommandPath = $myInvocation.ScriptName ;
-            $ScriptBaseName = (Split-Path -Leaf ((&{$myInvocation}).ScriptName))  ;
-            $ScriptNameNoExt = [system.io.path]::GetFilenameWithoutExtension($MyInvocation.InvocationName) ;
-        } elseif($PSScriptRoot) {
-            $ScriptDir = $PSScriptRoot ;
-            if($PSCommandPath){
-                $ScriptBaseName = split-path -leaf $PSCommandPath ;
-                $ScriptNameNoExt = [system.io.path]::GetFilenameWithoutExtension($PSCommandPath) ;
-            } else {
-                $PSCommandPath = $myInvocation.ScriptName ;
-                $ScriptBaseName = (Split-Path -Leaf ((&{$myInvocation}).ScriptName))  ;
-                $ScriptNameNoExt = [system.io.path]::GetFilenameWithoutExtension($MyInvocation.InvocationName) ;
-            } ;
+    #region CONSTANTS-AND-ENVIRO #*======v CONSTANTS-AND-ENVIRO v======
+    # Debugger:proxy automatic variables that aren't directly accessible when debugging (must be assigned and read back from another vari) ; 
+    $rPSCmdlet = $PSCmdlet ; 
+    $rPSScriptRoot = $PSScriptRoot ; 
+    $rPSCommandPath = $PSCommandPath ; 
+    $rMyInvocation = $MyInvocation ; 
+    $rPSBoundParameters = $PSBoundParameters ; 
+    [array]$score = @() ; 
+    if($rPSCmdlet.MyInvocation.InvocationName -match '\.ps1$'){$score+= 'ExternalScript' } else {$score+= 'Function' }
+    if($rPSCmdlet.CommandRuntime.tostring() -match '\.ps1$'){$score+= 'ExternalScript' } else {$score+= 'Function' }
+    $score+= $rMyInvocation.MyCommand.commandtype.tostring() ; 
+    $grpSrc = $score | group-object -NoElement | sort count ;
+    if( ($grpSrc |  measure | select -expand count) -gt 1){
+        write-warning  "$score mixed results:$(($grpSrc| ft -a count,name | out-string).trim())" ;
+        if($grpSrc[-1].count -eq $grpSrc[-2].count){
+            write-warning "Deadlocked non-majority results!" ;
         } else {
-            if($MyInvocation.MyCommand.Path) {
-                $PSCommandPath = $myInvocation.ScriptName ;
-                $PSScriptRoot = Split-Path $MyInvocation.MyCommand.Path -Parent ;
-                $ScriptBaseName = (Split-Path -Leaf ((&{$myInvocation}).ScriptName))  ;
-                $ScriptNameNoExt = [system.io.path]::GetFilenameWithoutExtension($MyInvocation.InvocationName) ;
-            } else {throw "UNABLE TO POPULATE SCRIPT PATH, EVEN `$MyInvocation IS BLANK!" } ;
+            $runSource = $grpSrc | select -last 1 | select -expand name ;
         } ;
-    } ;
-    if($showDebug){write-verbose -verbose:$true "`$ScriptDir:$($ScriptDir)`n`$ScriptBaseName:$($ScriptBaseName)`n`$ScriptNameNoExt:$($ScriptNameNoExt)`n`$PSScriptRoot:$($PSScriptRoot)`n`$PSCommandPath:$($PSCommandPath)" ; } ;
+    } else {
+        write-verbose "consistent results" ;
+        $runSource = $grpSrc | select -last 1 | select -expand name ;
+    };
+    write-host "Calculated `$runSource:$($runSource)" ;
+    'score','grpSrc' | get-variable | remove-variable ; # cleanup temp varis
 
+    # function self-name (equiv to script's: $MyInvocation.MyCommand.Path) ;
+    ${CmdletName} = $rPSCmdlet.MyInvocation.MyCommand.Name ;
+    $PSParameters = New-Object -TypeName PSObject -Property $rPSBoundParameters ;
+    write-verbose "`$rPSBoundParameters:`n$(($rPSBoundParameters|out-string).trim())" ;
+    $Verbose = ($VerbosePreference -eq 'Continue') ; 
+    # pre psv2, no $rPSBoundParameters autovari to check, so back them out:
+    write-verbose 'Collect all non-default Params (works back to psv2 w CmdletBinding)'
+    $ParamsNonDefault = (Get-Command $rPSCmdlet.MyInvocation.InvocationName).parameters | Select-Object -expand keys | Where-Object{$_ -notmatch '(Verbose|Debug|ErrorAction|WarningAction|ErrorVariable|WarningVariable|OutVariable|OutBuffer)'} ;
+    #region ENVIRO_DISCOVER ; #*------v ENVIRO_DISCOVER v------
+    <#
+    # Debugger:proxy automatic variables that aren't directly accessible when debugging ; 
+    $rPSScriptRoot = $PSScriptRoot ; 
+    $rPSCommandPath = $PSCommandPath ; 
+    $rMyInvocation = $MyInvocation ; 
+    $rPSBoundParameters = $PSBoundParameters ; 
+    #>
+    $ScriptDir = $scriptName = '' ;     
+    if($ScriptDir -eq '' -AND ( (get-variable -name rPSScriptRoot -ea 0) -AND (get-variable -name rPSScriptRoot).value.length)){
+        $ScriptDir = $rPSScriptRoot
+    } ; # populated rPSScriptRoot
+    if( (get-variable -name rPSCommandPath -ea 0) -AND (get-variable -name rPSCommandPath).value.length){
+        $ScriptName = $rPSCommandPath
+    } ; # populated rPSCommandPath
+    if($ScriptDir -eq '' -AND $runSource -eq 'ExternalScript'){$ScriptDir = (Split-Path -Path $rMyInvocation.MyCommand.Source -Parent)} # Running from File
+    # when $runSource:'Function', $rMyInvocation.MyCommand.Source is empty,but on functions also tends to pre-hit from the rPSCommandPath entFile.FullPath ;
+    if( $scriptname -match '\.psm1$' -AND $runSource -eq 'Function'){
+        write-host "MODULE-HOMED FUNCTION:Use `$CmdletName to reference the running function name for transcripts etc (under a .psm1 `$ScriptName will reflect the .psm1 file  fullname)"
+        if(-not $CmdletName){write-warning "MODULE-HOMED FUNCTION with BLANK `$CmdletNam:$($CmdletNam)" } ;
+    } # Running from .psm1 module
+    if($ScriptDir -eq '' -AND (Test-Path variable:psEditor)) {
+        write-verbose "Running from VSCode|VS" ; 
+        $ScriptDir = (Split-Path -Path $psEditor.GetEditorContext().CurrentFile.Path -Parent) ; 
+            if($ScriptName -eq ''){$ScriptName = $psEditor.GetEditorContext().CurrentFile.Path }; 
+    } ;
+    if ($ScriptDir -eq '' -AND $host.version.major -lt 3 -AND $rMyInvocation.MyCommand.Path.length -gt 0){
+        $ScriptDir = $rMyInvocation.MyCommand.Path ; 
+        write-verbose "(backrev emulating `$rPSScriptRoot, `$rPSCommandPath)"
+        $ScriptName = split-path $rMyInvocation.MyCommand.Path -leaf ;
+        $rPSScriptRoot = Split-Path $ScriptName -Parent ;
+        $rPSCommandPath = $ScriptName ;
+    } ;
+    if ($ScriptDir -eq '' -AND $rMyInvocation.MyCommand.Path.length){
+        if($ScriptName -eq ''){$ScriptName = $rMyInvocation.MyCommand.Path} ;
+        $ScriptDir = $rPSScriptRoot = Split-Path $rMyInvocation.MyCommand.Path -Parent ;
+    }
+    if ($ScriptDir -eq ''){throw "UNABLE TO POPULATE SCRIPT PATH, EVEN `$rMyInvocation IS BLANK!" } ;
+    if($ScriptName){
+        if(-not $ScriptDir ){$ScriptDir = Split-Path -Parent $ScriptName} ; 
+        $ScriptBaseName = split-path -leaf $ScriptName ;
+        $ScriptNameNoExt = [system.io.path]::GetFilenameWithoutExtension($ScriptName) ;
+    } ; 
+    # last ditch patch the values in if you've got a $ScriptName
+    if($rPSScriptRoot.Length -ne 0){}else{ 
+        if($ScriptName){$rPSScriptRoot = Split-Path $ScriptName -Parent }
+        else{ throw "Unpopulated, `$rPSScriptRoot, and no populated `$ScriptName from which to emulate the value!" } ; 
+    } ; 
+    if($rPSCommandPath.Length -ne 0){}else{ 
+        if($ScriptName){$rPSCommandPath = $ScriptName }
+        else{ throw "Unpopulated, `$rPSCommandPath, and no populated `$ScriptName from which to emulate the value!" } ; 
+    } ; 
+    if(-not ($ScriptDir -AND $ScriptBaseName -AND $ScriptNameNoExt  -AND $rPSScriptRoot  -AND $rPSCommandPath )){ 
+        throw "Invalid Invocation. Blank `$ScriptDir/`$ScriptBaseName/`ScriptNameNoExt" ; 
+        BREAK ; 
+    } ; 
+    # echo results dyn aligned:
+    $tv = 'runSource','CmdletName','ScriptName','ScriptBaseName','ScriptNameNoExt','ScriptDir','PSScriptRoot','PSCommandPath','rPSScriptRoot','rPSCommandPath' ; 
+    $tvmx = ($tv| Measure-Object -Maximum -Property Length).Maximum * -1 ; 
+    $tv | get-variable | %{  write-host -fore yellow ("`${0,$tvmx} : {1}" -f $_.name,$_.value) } ; 
+    'tv','tvmx'|get-variable | remove-variable ; # cleanup temp varis
+    
+    #endregion ENVIRO_DISCOVER ; #*------^ END ENVIRO_DISCOVER ^------
+
+    if(-not $DoRetries){$DoRetries = 4 } ;    # # times to repeat retry attempts
+    if(-not $RetrySleep){$RetrySleep = 10 } ; # wait time between retries
+    if(-not $RetrySleep){$DawdleWait = 30 } ; # wait time (secs) between dawdle checks
+    if(-not $DirSyncInterval){$DirSyncInterval = 30 } ; # AADConnect dirsync interval
+    if(-not $ThrottleMs){$ThrottleMs = 50 ;}
+    if(-not $rgxDriveBanChars){$rgxDriveBanChars = '[;~/\\\.:]' ; } ; # ;~/\.:,
+    if(-not $rgxCertThumbprint){$rgxCertThumbprint = '[0-9a-fA-F]{40}' } ; # if it's a 40char hex string -> cert thumbprint  
+    if(-not $rgxSmtpAddr){$rgxSmtpAddr = "^([0-9a-zA-Z]+[-._+&'])*[0-9a-zA-Z]+@([-0-9a-zA-Z]+[.])+[a-zA-Z]{2,63}$" ; } ; # email addr/UPN
+    if(-not $rgxDomainLogon){$rgxDomainLogon = '^[a-zA-Z][a-zA-Z0-9\-\.]{0,61}[a-zA-Z]\\\w[\w\.\- ]+$' } ; # DOMAIN\samaccountname 
+    if(-not $exoMbxGraceDays){$exoMbxGraceDays = 30} ; 
+
+    #$ComputerName = $env:COMPUTERNAME ;
+    #$NoProf = [bool]([Environment]::GetCommandLineArgs() -like '-noprofile'); # if($NoProf){# do this};
+    # XXXMeta derived constants:
+    # - AADU Licensing group checks
+    # calc the rgxLicGrpName fr the existing $xxxmeta.rgxLicGrpDN: (get-variable tormeta).value.rgxLicGrpDN.split(',')[0].replace('^','').replace('CN=','')
+    #$rgxLicGrpName = (get-variable -name "$($tenorg)meta").value.rgxLicGrpDN.split(',')[0].replace('^','').replace('CN=','')
+    # use the dn vers LicGrouppDN = $null ; # | ?{$_ -match $tormeta.rgxLicGrpDN}
+    #$rgxLicGrpDN = (get-variable -name "$($tenorg)meta").value.rgxLicGrpDN
+
+    # email trigger vari, it will be semi-delimd list of mail-triggering events
+    $script:PassStatus = $null ;
+    [array]$SmtpAttachment = $null ;
+
+    # local Constants:
+
+    #endregion CONSTANTS-AND-ENVIRO #*======^ END CONSTANTS-AND-ENVIRO ^======
 
     $DomainWork = $tormeta.legacydomain ;
     #$ProgInterval= 500 ; # write-progress wait interval in ms
@@ -1027,6 +1111,14 @@ r.com/tostka
     $smsg= "$($sBnr)" ;
     if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug
     else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+
+    # code further in deps on $modRoot which is undefined, so coerce it from the mandetory $ModDirPath 
+    if(-not $modRoot -AND $ModDirPath){
+        $smsg = "`$modRoot is blank, assigning from mandetory param:`$ModDirPath" ; 
+        if($verbose){if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level VERBOSE } 
+        else{ write-verbose "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; } ; 
+        $modRoot = $ModDirPath ; 
+    } ; 
 
     $ModPsmName = "$($ModuleName).psm1" ;
     # C:\sc\verb-AAD\verb-AAD\verb-AAD.psd1
