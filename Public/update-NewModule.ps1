@@ -16,6 +16,15 @@ r.com/tostka
     Github      : https://github.com/tostka/verb-dev
     Tags        : Powershell,Module,Build,Development
     REVISIONS
+    * 2:01 PM 12/6/2023 ADD:
+        - $rgxModExtIncl: added trailing '$' to test to end of ext, as wo it was matching on extensions that *start* with the above, even if named .xml_TMP.
+        - $iSkipAutomaticTagsThreshold = 2000 ; # number of chars of comma-quote-delim'd public function names, as a string array, to establish a threshold to use SkipAutomaticTags with publish-module (NugGet bug workaround)
+            # issue is: powershellget automatic tags all exported function and hangs when u go over 4000 characters can be avoided by SkipAutomaticTags on publish-module
+        - code to guestimate function-array as tags, and dyn add -SkipAutomaticTags  to publish-module, to suppress bug above, for mods with large # of functions.
+        - echo Discovered mod-copy files
+        - capture the mkdir output (pipeline spam)
+        - as Publish-Module returns a garbage string-array -errorvariable, even when it passes and doesn't trigger CATCH, I just flipped the post errorvariable test to echo it's content, with no action. Insuff info returned to have the result acted upon. (garbage)
+        added CBH demo of code to review repo's below c:\sc\verb-* root, for errantly includable files (you'd want to remove to avoid publishing).
     * 4:44 PM 12/5/2023 psd1.Filelist: select uniques, showing mults in the resulting array in psd1.filelist; added -errorvariable to all ipmo's w validation; added -errvari & validation to the Publish-module as well (blows through, wo killing build otherwise)
     * 3:20 PM 12/4/2023 
         removed all [#]requires stmts (main, and populate-ModulePublishingDirectory(), had runasadmin, blocking install as UID)
@@ -224,6 +233,18 @@ r.com/tostka
     PS> $modules = Get-Module -ListAvailable ModuleName* | Select-Object -ExpandProperty Name -Unique ;
     PS> foreach ($module in $modules) {$Latest = Get-InstalledModule $module; Get-InstalledModule $module -AllVersions | ? {$_.Version -ne $Latest.Version} | Uninstall-Module ;} ;
     Util code to uninstall all but latest version of a given module.
+    .EXAMPLE
+    PS> $rgxModExtIncl='\.(cab|cat|cmd|config|cscfg|csdef|css|dll|dylib|gif|html|ico|jpg|js|json|map|Materialize|MaterialUI|md|pdb|php|png|ps1|ps1xml|psd1|psm1|rcs|reg|snippet|so|txt|vscode|wixproj|wxi|xaml|xml|yml|zip)$' ;
+    PS> $rgxPsd1FileListDirs = "\\(Docs|Licenses|Resource)\\" ;
+    PS> foreach($pth in (resolve-path c:\sc\verb-* )){
+    PS>   write-host -fore yellow "`n===$($pth.path)" ;
+    PS>   $tpth = (join-path $pth.path ($pth.path.tostring().replace('C:\sc\',''))) ;
+    PS>   write-host "`$tpth:$($tpth)" ;
+    PS>   if($mfiles = gci -path $tpth -recur | ?{$_.extension -match $rgxModExtIncl -AND $_.fullname -notmatch $rgxPsd1FileListDirs}) {
+    PS>       write-warning "Found following potential errant includes in dir:`n$(($mfiles.fullname|out-string).trim())" ;
+    PS>   } ;
+    PS> } ; 
+    Code for weeding a stack of repo's for inappropriate files in the heirarchy that could wind up unexpectedly published, with newly-functional psd1.FileList support (publishable extensions, *not* in Resource\Docs\License subdirs that explicitly source FileList includes). Review the output, and remove any files you don't want published.
     .LINK
     https://github.com/tostka/verb-dev
     #>
@@ -252,7 +273,8 @@ r.com/tostka
         [Parameter(HelpMessage="Optional Explicit 3-digit RequiredVersion specification (as contrasts with using current Manifest .psd1 ModuleVersion value)[-Version 2.0.3]")]
             [version]$RequiredVersion,
         [Parameter(HelpMessage="regex reflecting an array of file extension strings to identify 'external' dependancy files in the module directory structure that are to be included in the distributed module(provided to provide run-time override)")]
-            [string[]]$rgxModExtIncl='\.(cab|cat|cmd|config|cscfg|csdef|css|dll|dylib|gif|html|ico|jpg|js|json|map|Materialize|MaterialUI|md|pdb|php|png|ps1|ps1xml|psd1|psm1|rcs|reg|snippet|so|txt|vscode|wixproj|wxi|xaml|xml|yml|zip)',
+            [string[]]$rgxModExtIncl='\.(cab|cat|cmd|config|cscfg|csdef|css|dll|dylib|gif|html|ico|jpg|js|json|map|Materialize|MaterialUI|md|pdb|php|png|ps1|ps1xml|psd1|psm1|rcs|reg|snippet|so|txt|vscode|wixproj|wxi|xaml|xml|yml|zip)$',
+            # added trailing '$' to test to end of ext, as wo it was matching on extensions that *start* with the above, even if named .xml_TMP.
         [Parameter(HelpMessage="Debugging Flag [-showDebug]")]
             [switch] $showDebug,
         [Parameter(HelpMessage="Whatif Flag  [-whatIf]")]
@@ -339,6 +361,8 @@ r.com/tostka
     $rgxTargExcl = [regex]::escape("\$($ModuleName)\$($ModuleName)") ; 
     $rgxGuidModFiles = "[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}\.ps(d|m)1" ; # identifies temp psd|m1 files named for guids
     $rgxInclOutLicFileName = '^LICENSE' ; # id's local extensionless vdev\vdev lic files that *should* remain
+    $iSkipAutomaticTagsThreshold = 2000 ; # number of chars of comma-quote-delim'd public function names, as a string array, to establish a threshold to use SkipAutomaticTags with publish-module (NugGet bug workaround)
+    # issue is: powershellget automatic tags all exported function and hangs when u go over 4000 characters can be avoided by SkipAutomaticTags on publish-module
     #*======v FUNCTIONS v======
 
     # suppress VerbosePreference:Continue, if set, during mod loads (VERY NOISEY)
@@ -1766,13 +1790,23 @@ $(if($Merge){'MERGE parm specified as well:`n-Merge Public|Internal|Classes incl
             #$srcFiles = $srcFiles | ?{$_.fullname -notmatch $rgxSrcFilesPostExcl} ; 
             $srcFiles = $srcFiles | ?{$_.fullname -notmatch $rgxSrcFilesPostExcl -AND -not($_.PsIsContainer)} ; 
 
+            $smsg = "Discovered mod-copy files (`$srcFiles.fullname):w`n$(($srcFiles.fullname|out-string).trim())" ; 
+            if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
+            else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+            #Levels:Error|Warn|Info|H1|H2|H3|H4|H5|Debug|Verbose|Prompt|Success
+
             if(-not(test-path $to)){  
                 $smsg = "Non-Pre-existing:`$to:$($to)" ; 
                 $smsg +="`nPre-creating before copy..." ; 
                 if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } 
                 else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
                 #Levels:Error|Warn|Info|H1|H2|H3|H4|H5|Debug|Verbose|Prompt|Success
-                mkdir -path $to -whatif:$($whatif) -verbose 
+                # capture the output, keep it from spamming the pipeline
+                if($omsg = mkdir -path $to -whatif:$($whatif) -verbose){
+                    $smsg = "$(($omsg | ft -a Mode,LastWriteTime,Length,Name|out-string).trim())" ; 
+                    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
+                    else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                } ; 
             } else { 
                 $smsg = "(`$to build output dir is confirmed pre-existing)" ;
                 if($verbose){if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level VERBOSE } 
@@ -2129,32 +2163,101 @@ And then re-run update-NewModule.
                 errorVariable = 'pbmo_Err' ;
                 whatif=$($whatif);
             } ;
+            <# 12:20 PM 12/6/2023 vio: it echo'd: VERBOSE: Calling New-NuspecFile
+                WARNING: Tag list exceeded 4000 characters and may not be accepted by some Nuget feeds.
+                VERBOSE: Calling New-NugetPackage
+            ... which per here:
+            "Publish-Module creates an invalid nuspec file when a large number of functions 
+                are exported in a powershell module. The problem is that down in 
+                Publish-PSArtifactUtility, it brute forces all of the exported function names 
+                into the tags. My particular case resulted in a tag field around 11000 
+                characters, way over the 4000 limit. I am publishing to a self-hosted nuget 
+                gallery, but it is based upon the current production branch." 
+
+            -- PowerShell/PowerShellGetv2 on Mar 22, 2019 Add SkipAutomaticTags Parameter to Publish-Module #452 When using a generic NuGet Server there is a hard coded 4000 character limit. Publish… 
+            -- edyoung commented May 22, 2019 Pass -SkipAutomaticTags as introduced in PowerShellGet 2.1.4
+            #>
+            # so we now need to chekk the function names as an array and if they're sizable, add -SkipAutomaticTags to the publish-module params:
+            # guestimate by creating a dummy array of comma-quote delimited function names: 
+            #$tagdemo = "'$((gci C:\sc\verb-io\public\*.ps1 | select -expand name ).replace('.ps1','') -join "','")'"
+            # on vio that's only 2846chars, so clearly the tag add process is adding a lot of wrapper tags (html-style?). So we need to target a much lower threshold. 
+            #$from = "$(join-path -path $moddirpath.fullname -childpath $ModuleName)\" ;
+            #$pltGci=[ordered]@{Path=$from ;Recurse=$false ;Exclude=$exclude; ErrorAction="Stop" ; } ;
+            #$srcFiles = Get-ChildItem @pltGci | Where-Object { $excludeMatch -eq $null -OR $_.FullName.Replace($from, '') -notmatch $excludeMatchRegEx} ;
+            #$srcFiles = $srcFiles | ?{$_.fullname -notmatch $rgxSrcFilesPostExcl -AND -not($_.PsIsContainer)} ; 
+
+            # number of chars of raw function names as a comma-quote-delim'd string, beyond which publish-module gets the -SkipAutomaticTags param added (to suppress bug from nuget's attempt to force all func names in a module into the 4k char-limited tag array)J.
+            #$iSkipAutomaticTagsThreshold = 2000 ;
+            $tagdemo = "'$((get-childitem "$(join-path -path $moddirpath.fullname -childpath 'Public')\*.ps1" -ea 0 | select -expand name).replace('.ps1','') -join "','")'" ; 
+            if($tagdemo.length -gt $iSkipAutomaticTagsThreshold){
+                $smsg = "Large # of funcitons: array of function names char length ($$tagdemo.length) -gt `$iSkipAutomaticTagsThreshold:$($iSkipAutomaticTagsThreshold)" ; 
+                $smsg += "`nAdding -SkipAutomaticTags param to Publish-Module call, to work around NuGit bug #344" ;
+                if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level PROMPT } 
+                else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                #Levels:Error|Warn|Info|H1|H2|H3|H4|H5|Debug|Verbose|Prompt|Success
+
+                $pltPublishModule.add('SkipAutomaticTags',$true) ; 
+            } ;
+            #
+            <# 1:43 PM 12/6/2023 publish-module produces a *garbage* errorvariable:
+                $pbmo_Err
+                    System error.
+                 $pbmo_Err | fl *
+                    System error.
+                 $PBMO_ERR.gettype().fullname
+                    System.Collections.ArrayList
+                 $PBMO_ERR.gettype()
+                    IsPublic IsSerial Name                                     BaseType
+                    -------- -------- ----                                     --------
+                    True     True     ArrayList                                System.Object
+                 $pbmo_Err.Exception
+                 [blank, no property]
+                #-=-=-=-=-=-=-=-=
+            => it doesn't even have an Exception, it's an array of strings
+            So testing it doesn't do squat. Publish-Module gets through without TRY/Catch triggering, 
+                There's aNuGet warning in the output:
+                VERBOSE: Calling New-NuspecFile
+                WARNING: Tag list exceeded 4000 characters and may not be accepted by some Nuget feeds.
+                VERBOSE: Calling New-NugetPackage            
+            which is *whining* and a product of a bug in NuGet. System error isn't enough info to decide to crash an entire build, esp where it's an innocuous whine from NuGet. 
+            #>
             $smsg= "`nPublish-Module w`n$(($pltPublishModule|out-string).trim())" ;
             if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info }  #Error|Warn|Debug
             else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
             TRY {
                 Publish-Module @pltPublishModule ;
-                if($pbmo_Err){
-                    $smsg = "`nFOUND `$pbmo_Err: import-module HAD ERRORS!" ;
-                    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN -Indent}
-                    else{ write-WARNING "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
-                    foreach($errExcpt in $pbmo_Err.Exception){
-                        switch -regex ($errExcpt){
-                            default {
-                                $smsg = "`nPublish-Module PBMO UNDEFINED ERROR!" ;
-                                $smsg += "`n$($errExcpt)" ;
-                                if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN -Indent}
-                                else{ write-WARNING "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
-                            }
+                    if($pbmo_Err){
+                        $smsg = "`nFOUND `$pbmo_Err: import-module HAD ERRORS! (no action, could be non-impacting)" ;
+                        if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN -Indent}
+                        else{ write-WARNING "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                        <# 
+                        note: publish-module doesn't return a proper Error object, just a string array. So there's no normal .Exception to process or analyze.
+                         and it appears on the tag bug warning, the error returned is nothing more than 'System error.'
+                         you can't even -eq compare it, have to use -match: 
+                        $pbmo_Err -match 'System error.'
+                            System error.
+                        #>
+                        foreach($errExcpt in $pbmo_Err){
+                            write-warning "===:$($errExcpt)" ; 
+                            switch -regex ($errExcpt){
+                                default {
+                                    $smsg = "`nPublish-Module PBMO UNDEFINED ERROR!" ;
+                                    $smsg += "`n$($errExcpt)" ;
+                                    $smsg += "`n(But PublishModule doesn't bother to return a functional Error object with an Exception, so we can't trust/parse or act on it. Just echo)" ; 
+                                    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN -Indent}
+                                    else{ write-WARNING "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                                }
+                            } ;
                         } ;
-                    } ;
-                    #BREAK ;
-                    throw $smsg ;
-                } else {
-                    $smsg = "(no `$pbmo_Err: Publish-Module had no errors)" ;
-                    if($verbose){if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level VERBOSE }
-                    else{ write-verbose "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; } ;
-                } ;
+                        # can't trust to interpret the return: 'System Error.' WTF is that? Just echo, don't break or throw 
+                        # esp in context of this possibly being a procut of newget pushing all function names into the Tag array, and generating spurious errors if the list is -gt 4k!
+                        #BREAK ;
+                        #throw $smsg ;
+                    } else {
+                        $smsg = "(no `$pbmo_Err: Publish-Module had no errors)" ;
+                        if($verbose){if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level VERBOSE }
+                        else{ write-verbose "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; } ;
+                    } ;                
             } CATCH {
                 $ErrorTrapped = $Error[0] ;
                 $PassStatus += ";ERROR";
@@ -2343,7 +2446,9 @@ And then re-run update-NewModule.
                     } ;
 
                 } else {
-                    # no nupkg file found to cache locally
+                    $smsg = "No Nupkg File Found To Cache Locally!" ; 
+                    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN -Indent} 
+                    else{ write-WARNING "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; 
                 } ;
 
                 # cleanout old pkg files prior to today and 2 gens old
