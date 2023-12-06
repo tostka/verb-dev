@@ -12,7 +12,7 @@
 RootModule = 'VERB-dev.psm1'
 
 # Version number of this module.
-ModuleVersion = '1.5.40'
+ModuleVersion = '1.5.41'
 
 # Supported PSEditions
 # CompatiblePSEditions = @()
@@ -148,6 +148,8 @@ PrivateData = @{
 # TnY7bwjkNXvW6wDRJdmyA6rSCtb+uE728FARFnHMOHahqxRJ3vQeI+ulJR5jaG9F
 # ja3gZbRBQVIqd2ZBBTmkbuxi
 # SIG # End signature block
+
+
 
 
 
