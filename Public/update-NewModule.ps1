@@ -190,7 +190,11 @@ r.com/tostka
         |-- rebuild-module.ps1 [module rebuild script]
         `-- requirements.psd1 [psdep module specification file]
 
-    
+    Where builds fail, you may want to leverage my uwps\.\reset-ModuleBuildFail.ps1 -Name verb-io script:
+
+    ... to reset a given failed dir & profile back to rebuildable state (locates and reinstalls the most recent publsiehd module vers from the pslocalRepo, clears modname\modname dir, reports on last vpublsiehd vers#, and echo's the current psm1 & psd1 version specs (for hand editing to reroll build).
+    (leaving it out of verb-dev, as I want it to recover and function even when verb-dev is borked).
+
     .PARAMETER  ModuleName
     ModuleName[-ModuleName verb-AAD]
     .PARAMETER  ModDirPath
