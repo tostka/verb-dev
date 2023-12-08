@@ -16,6 +16,8 @@ r.com/tostka
     Github      : https://github.com/tostka/verb-dev
     Tags        : Powershell,Module,Build,Development
     REVISIONS
+    * 3:40 PM 12/8/2023 WIP: dbging #2017, just fixed typo, intent is to loop out and preverif the modname\modname has the files in the cu mods modname.psd1, before the next step test-modulemanifest, and the followon pbmod, that has been bombing for verb-network.
+        - added code pre pbmod, & test-mani, to pull the cached CUMods\modname\modname\psd1, loop the scModNameModname psd1.filelist, and verify that the CUMods copy has each filelist entry present.
     * 4:34 PM 12/6/2023
         ADD:
         - finding $Modroot blank, so coercing it from the inbound $sModDirPath
@@ -2094,6 +2096,37 @@ $(if($Merge){'MERGE parm specified as well:`n-Merge Public|Internal|Classes incl
                 if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug
                 else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
                 # $ModPsdPath
+
+                # 2:42 PM 12/8/2023 do wone more confirm on the psd1.filelist to files copied into the target: as the publish-module is failing for verb-network on a missing filelist entry.
+                # $ModPsdPath: C:\sc\verb-network\verb-network\verb-network.psd1
+                if($psd1 = Import-PowerShellDataFile -Path $modpsdpath -ErrorAction STOP){
+                    $smsg = "resolve-path the CUMods $($modulename).psd1 location" ; 
+                    if($verbose){if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level VERBOSE } 
+                    else{ write-verbose "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; } ; 
+                    $CUpsd1 = "$([Environment]::GetFolderPath("MyDocuments"))\WindowsPowerShell\Modules\$($ModuleName)\$($ModuleName)\$($modulename).psd1" ; 
+                    $CUModTestPath = (split-path $CUpsd1) ;
+                    foreach($fl in $psd1.filelist){
+                        $smsg = "`n==Verifying CU:Mods\$($modulename)\$($modulename)\$($fl):" ; 
+                        if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } 
+                        else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                        #Levels:Error|Warn|Info|H1|H2|H3|H4|H5|Debug|Verbose|Prompt|Success
+                        if(test-path -path (join-path $CUModTestPath $fl )){
+                            write-host -fore green "validated $($fl) is found in $((join-path $CUModTestPath $fl ))" ; 
+                        } else {
+                            $smsg = "FAILED TO LOCATE $($fl) AT EXPECTED:$((join-path $CUModTestPath $fl ))" ; 
+                            if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN -Indent} 
+                            else{ write-WARNING "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; 
+                            throw $smsg ;
+                        } ; 
+                    } ; 
+                } else { 
+                    $smsg = "Unable to:Import-PowerShellDataFile -Path $($modpsdpath)!'" ; 
+                    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN -Indent} 
+                    else{ write-WARNING "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; 
+                    throw $smsg ;
+                } ; 
+
+
                 $smsg = "Running pre-Publish-Module .psd1 test:`nTest-ModuleManifest -path $($ModPsdPath)" ;
                 if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug
                 else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
