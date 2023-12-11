@@ -16,7 +16,7 @@ r.com/tostka
     Github      : https://github.com/tostka/verb-dev
     Tags        : Powershell,Module,Build,Development
     REVISIONS
-    * 1:22 PM 12/11/2023: confirmed, vnet finally built, with the pass pre-conffirming the CUMods\modname\modname contained all files cited in the psd1.filelist (not sure what diff that makes, it didn't actually copy them if missing...)
+    * 1:36 PM 12/11/2023 (this was all built into vdev v1.5.42, didn't error out, but didn't fire the new re-copy-item code either) ; ammended fail of test, to re-copy missing file into cumods\modname\modname, prior to pbmo run (testing w vdev rebuild) ;confirmed, vnet finally built, with the pass pre-conffirming the CUMods\modname\modname contained all files cited in the psd1.filelist (not sure what diff that makes, it didn't actually copy them if missing...); 
     * 3:40 PM 12/8/2023 WIP: dbging #2017, just fixed typo, intent is to loop out and preverif the modname\modname has the files in the cu mods modname.psd1, before the next step test-modulemanifest, and the followon pbmod, that has been bombing for verb-network.
         - added code pre pbmod, & test-mani, to pull the cached CUMods\modname\modname\psd1, loop the scModNameModname psd1.filelist, and verify that the CUMods copy has each filelist entry present.
     * 4:34 PM 12/6/2023
