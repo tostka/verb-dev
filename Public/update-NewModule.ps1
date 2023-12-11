@@ -16,6 +16,7 @@ r.com/tostka
     Github      : https://github.com/tostka/verb-dev
     Tags        : Powershell,Module,Build,Development
     REVISIONS
+    * 1:22 PM 12/11/2023: confirmed, vnet finally built, with the pass pre-conffirming the CUMods\modname\modname contained all files cited in the psd1.filelist (not sure what diff that makes, it didn't actually copy them if missing...)
     * 3:40 PM 12/8/2023 WIP: dbging #2017, just fixed typo, intent is to loop out and preverif the modname\modname has the files in the cu mods modname.psd1, before the next step test-modulemanifest, and the followon pbmod, that has been bombing for verb-network.
         - added code pre pbmod, & test-mani, to pull the cached CUMods\modname\modname\psd1, loop the scModNameModname psd1.filelist, and verify that the CUMods copy has each filelist entry present.
     * 4:34 PM 12/6/2023
@@ -2116,7 +2117,32 @@ $(if($Merge){'MERGE parm specified as well:`n-Merge Public|Internal|Classes incl
                             $smsg = "FAILED TO LOCATE $($fl) AT EXPECTED:$((join-path $CUModTestPath $fl ))" ; 
                             if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN -Indent} 
                             else{ write-WARNING "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; 
-                            throw $smsg ;
+                            #throw $smsg ;
+                            # mebbe remediate instead of crashing?
+                            #$f1 is a path string, build it from the sc\modname\modname\ dir orig, and copy it to the CUModTestPath
+                            <#$ModPsdPath
+                            C:\sc\verb-network\verb-network\verb-network.psd1
+                            #>
+                            $pltCI=[ordered]@{
+                                path = (join-path -path $ModPsdPath -childpath $fl -ea STOP) ; ;
+                                destination = $CUModTestPath ; 
+                                force = $true ; 
+                                erroraction = 'STOP' ;
+                                verbose = $($VerbosePreference -eq "Continue") ; 
+                                whatif = $($whatif) ;
+                            } ;
+                            $smsg = "RE-copy-item w`n$(($pltCI|out-string).trim())" ; 
+                            $smsg += "`n--`$pltCI.path:`n$(($pltCI.path|out-string).trim())" ; 
+                            if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                            # it's flat file coying, just single-line it verbose
+                            TRY{
+                                copy-item @pltCI ;
+                            } CATCH {
+                                $ErrTrapd=$Error[0] ;
+                                $smsg = "`n$(($ErrTrapd | fl * -Force|out-string).trim())" ;
+                                if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN } #Error|Warn|Debug
+                                else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                            } ; 
                         } ; 
                     } ; 
                 } else { 
