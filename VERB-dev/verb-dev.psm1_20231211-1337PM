@@ -1,11 +1,11 @@
-﻿# verb-dev.psm1
+﻿# verb-DEV.psm1
 
 
 <#
 .SYNOPSIS
 VERB-dev - Development PS Module-related generic functions
 .NOTES
-Version     : 1.5.37
+Version     : 1.5.41
 Author      : Todd Kadrie
 Website     :	https://www.toddomation.com
 Twitter     :	@tostka
@@ -7704,6 +7704,7 @@ function move-ISEBreakPoints {
     Github      : https://github.com/tostka
     Tags        : Powershell,ISE,development,debugging
     REVISIONS
+    * 3:29 PM 12/4/2023 new alias using proper std suffix for move == 'm': mIseBP. Technically it should be mbp (like sbp), but that's too short to be safe; too likely to accidentlaly trigger on console.
     * 3:05 PM 9/7/2022 ren & alias orig name shift-ISEBreakPoints -> move-ISEBreakPoints
     * 10:49 AM 8/25/2020 init, added to verb-dev module
     .DESCRIPTION
@@ -7720,7 +7721,7 @@ function move-ISEBreakPoints {
     Github      : https://github.com/tostka
     #>
     [CmdletBinding()]
-    [Alias('sIseBp','shift-ISEBreakPoints')]
+    [Alias('sIseBp','shift-ISEBreakPoints','mIseBp')]
     PARAM(
         [Parameter(Position=0,Mandatory=$True,HelpMessage="Enter lines +/- to shift breakpoints on current script[-lines -3]")]
         [int]$lines
@@ -10600,7 +10601,8 @@ function update-NewModule {
     Version     : 1.1.0
     Author      : Todd Kadrie
     Website     :	http://www.toddomation.com
-    Twitter     :	@tostka / http://twitter.com/tostka
+    Twitter     :	@tostka / http://twittegbpgcm gbp
+r.com/tostka
     CreatedDate : 2020-02-24
     FileName    : update-NewModule.ps1
     License     : MIT License
@@ -10608,15 +10610,35 @@ function update-NewModule {
     Github      : https://github.com/tostka/verb-dev
     Tags        : Powershell,Module,Build,Development
     REVISIONS
-    * 12:24 PM 12/4/2023 Last pass on curr fixes, with inline debugging fixes, ran to completion, first time since October 12 2023. It now properly supports psd1 manifest FileList and (Docs|Licenses|Resource) dir build-in components through that setting.
+    * 4:34 PM 12/6/2023
+        ADD:
+        - finding $Modroot blank, so coercing it from the inbound $sModDirPath
+        - $rgxModExtIncl: added trailing '$' to test to end of ext, as wo it was matching on extensions that *start* with the above, even if named .xml_TMP.
+        - $iSkipAutomaticTagsThreshold = 2000 ; # number of chars of comma-quote-delim'd public function names, as a string array, to establish a threshold to use SkipAutomaticTags with publish-module (NugGet bug workaround)
+            # issue is: powershellget automatic tags all exported function and hangs when u go over 4000 characters can be avoided by SkipAutomaticTags on publish-module
+        - code to guestimate function-array as tags, and dyn add -SkipAutomaticTags  to publish-module, to suppress bug above, for mods with large # of functions.
+        - echo Discovered mod-copy files
+        - capture the mkdir output (pipeline spam)
+        - as Publish-Module returns a garbage string-array -errorvariable, even when it passes and doesn't trigger CATCH, I just flipped the post errorvariable test to echo it's content, with no action. Insuff info returned to have the result acted upon. (garbage)
+        added CBH demo of code to review repo's below c:\sc\verb-* root, for errantly includable files (you'd want to remove to avoid publishing).
+    * 4:44 PM 12/5/2023 psd1.Filelist: select uniques, showing mults in the resulting array in psd1.filelist; added -errorvariable to all ipmo's w validation; added -errvari & validation to the Publish-module as well (blows through, wo killing build otherwise)
+    * 3:20 PM 12/4/2023 
+        removed all [#]requires stmts (main, and populate-ModulePublishingDirectory(), had runasadmin, blocking install as UID)
+        Prior:
+        - expanded CBH, added dir structure
+        - add -errorvariable & analysis to ipmo post-build test
+        - genericize strings
+        - prepop missing modname\modname dir
+        - add errorvari to ipmo & ismo 
+        - * rplc !$whatif -> -not($whatif)
+        Prior:         Last pass on curr fixes, with inline debugging fixes, ran to completion, first time since October 12 2023. 
+        It now properly supports psd1 manifest FileList and (Docs|Licenses|Resource) dir build-in components through that setting.
         cleanup, typo fix, splice over final updates:
         - add: $rgxInclOutLicFileName = '^LICENSE' ; # id's local extensionless vdev\vdev lic files that *should* remain
         - flip ww to wl on non-impacting obsolete test
         - update bannedfiles logic to pass/permit non-extension LICENSE files in modname\modname build/output dir
         - add verbose output to the file cleanup removals, to record what went when
-        - block rem newly redundant flatten resources to modname\modname code (already complete further up the function)
-        - add -errorvariable & analysis to ipmo post-build test
-        - genericize strings
+        - NOPE:block rem newly redundant flatten resources to modname\modname code (already complete further up the function) (necessary to ensure populated, when no preexisting dir)
     * 5:12 PM 12/1/2023: major fixes, tracked down source of issues: you need to 
         build vdev\vdev as intact _flat_ files complete mludle; then COPY IT to the 
         CU\Docs\Modules\verb-dev\verb-dev, and test-manifest the result. From there if 
@@ -10723,11 +10745,52 @@ function update-NewModule {
     Preqeq Installs:
     Install-Module BuildHelpers -scope currentuser # buildhelpers metadata handling https://github.com/RamblingCookieMonster/BuildHelpers
 
-    * To uninstall all but latest:
-    #-=-=-=-=-=-=-=-=
-    $modules = Get-Module -ListAvailable AzureRm* | Select-Object -ExpandProperty Name -Unique ;
-    foreach ($module in $modules) {$Latest = Get-InstalledModule $module; Get-InstalledModule $module -AllVersions | ? {$_.Version -ne $Latest.Version} | Uninstall-Module ;} ;
-    #-=-=-=-=-=-=-=-=
+    See example with code to remove all but latest rev of a given module
+    
+    This is intended to work against the following module dev/git folder struction: (git repo for the c:\sc\ModName root)
+        C:\sc\MODNAME\
+        |-- CHANGELOG.md
+        |-- Classes
+        |-- Docs
+        |   |-- Cab
+        |   |-- Markdown
+        |   |-- Quick-Start-Installation-and-Example.md
+        |   `-- en-US
+        |-- Internal
+        |-- Libs
+        |-- Licenses
+        |   |-- LICENSE.txt [License terms]
+        |-- Package
+        |   |-- module.1.2.3.nupkg [buffered back copies of published .nupkg files for recording at git]
+        |-- Psd1filelist
+        |-- Public
+        |   |-- function.ps1 [one for each leaf module function to be exported, stored as separate .ps1 files, which are merged into a monolithic .psm1 using the -Merge param]
+        |-- README.md
+        |-- Resource
+        |   |-- resource.ext [non-executable resource/data files that you want published with the module, but you don't want to bother with storing in a hash in a psd1 datafile; these are auto-added to the psd1.FileList array, and are moved, flattened dir, into the modulename\modulename output build dir]
+        |-- Tests
+        |   |-- PPoShScriptingStyle.psd1 [Pester testing preferences]
+        |   |-- ToddomationScriptingStyle-medium.psd1 [Pester testing preferences]
+        |   `-- MODNAME.tests.ps1 [pester tests]
+        |-- MODNAME
+        |   |-- CHANGELOG.md
+        |   |-- LICENSE.txt
+        |   |-- Quick-Start-Installation-and-Example.md
+        |   |-- README.md
+        |   |-- logs
+        |   |   |-- MODNAME-verb-Desktop-LOG-BATCH-EXEC-20220908-1541PM-log.txt [temp logs storage, ignored for module builds]
+        |   |-- MODNAME.psd1
+        |   `-- MODNAME.psm1
+        |-- convertto-Module-LOG-BATCH-EXEC-20200114-1155AM-log.txt
+        |-- fingerprint [semversion comparision tracking file]
+        |-- rebuild-module.ps1 [module rebuild script]
+        `-- requirements.psd1 [psdep module specification file]
+
+    Where builds fail, you may want to leverage my uwps\.\reset-ModuleBuildFail.ps1 -Name verb-io script:
+
+    ... to reset a given failed dir & profile back to rebuildable state (locates and reinstalls the most recent publsiehd module vers from the pslocalRepo, clears modname\modname dir, reports on last vpublsiehd vers#, and echo's the current psm1 & psd1 version specs (for hand editing to reroll build).
+    (leaving it out of verb-dev, as I want it to recover and function even when verb-dev is borked).
+
     .PARAMETER  ModuleName
     ModuleName[-ModuleName verb-AAD]
     .PARAMETER  ModDirPath
@@ -10770,6 +10833,18 @@ function update-NewModule {
     PS> $modules = Get-Module -ListAvailable ModuleName* | Select-Object -ExpandProperty Name -Unique ;
     PS> foreach ($module in $modules) {$Latest = Get-InstalledModule $module; Get-InstalledModule $module -AllVersions | ? {$_.Version -ne $Latest.Version} | Uninstall-Module ;} ;
     Util code to uninstall all but latest version of a given module.
+    .EXAMPLE
+    PS> $rgxModExtIncl='\.(cab|cat|cmd|config|cscfg|csdef|css|dll|dylib|gif|html|ico|jpg|js|json|map|Materialize|MaterialUI|md|pdb|php|png|ps1|ps1xml|psd1|psm1|rcs|reg|snippet|so|txt|vscode|wixproj|wxi|xaml|xml|yml|zip)$' ;
+    PS> $rgxPsd1FileListDirs = "\\(Docs|Licenses|Resource)\\" ;
+    PS> foreach($pth in (resolve-path c:\sc\verb-* )){
+    PS>   write-host -fore yellow "`n===$($pth.path)" ;
+    PS>   $tpth = (join-path $pth.path ($pth.path.tostring().replace('C:\sc\',''))) ;
+    PS>   write-host "`$tpth:$($tpth)" ;
+    PS>   if($mfiles = gci -path $tpth -recur | ?{$_.extension -match $rgxModExtIncl -AND $_.fullname -notmatch $rgxPsd1FileListDirs}) {
+    PS>       write-warning "Found following potential errant includes in dir:`n$(($mfiles.fullname|out-string).trim())" ;
+    PS>   } ;
+    PS> } ; 
+    Code for weeding a stack of repo's for inappropriate files in the heirarchy that could wind up unexpectedly published, with newly-functional psd1.FileList support (publishable extensions, *not* in Resource\Docs\License subdirs that explicitly source FileList includes). Review the output, and remove any files you don't want published.
     .LINK
     https://github.com/tostka/verb-dev
     #>
@@ -10798,55 +10873,138 @@ function update-NewModule {
         [Parameter(HelpMessage="Optional Explicit 3-digit RequiredVersion specification (as contrasts with using current Manifest .psd1 ModuleVersion value)[-Version 2.0.3]")]
             [version]$RequiredVersion,
         [Parameter(HelpMessage="regex reflecting an array of file extension strings to identify 'external' dependancy files in the module directory structure that are to be included in the distributed module(provided to provide run-time override)")]
-            [string[]]$rgxModExtIncl='\.(cab|cat|cmd|config|cscfg|csdef|css|dll|dylib|gif|html|ico|jpg|js|json|map|Materialize|MaterialUI|md|pdb|php|png|ps1|ps1xml|psd1|psm1|rcs|reg|snippet|so|txt|vscode|wixproj|wxi|xaml|xml|yml|zip)',
+            [string[]]$rgxModExtIncl='\.(cab|cat|cmd|config|cscfg|csdef|css|dll|dylib|gif|html|ico|jpg|js|json|map|Materialize|MaterialUI|md|pdb|php|png|ps1|ps1xml|psd1|psm1|rcs|reg|snippet|so|txt|vscode|wixproj|wxi|xaml|xml|yml|zip)$',
+            # added trailing '$' to test to end of ext, as wo it was matching on extensions that *start* with the above, even if named .xml_TMP.
         [Parameter(HelpMessage="Debugging Flag [-showDebug]")]
             [switch] $showDebug,
         [Parameter(HelpMessage="Whatif Flag  [-whatIf]")]
             [switch] $whatIf
     ) ;
-    # function self-name (equiv to script's: $MyInvocation.MyCommand.Path) ;
-    ${CmdletName} = $PSCmdlet.MyInvocation.MyCommand.Name ;
-    # Get parameters this function was invoked with
-    # Get parameters this function was invoked with
-    $PSParameters = New-Object -TypeName PSObject -Property $PSBoundParameters ;
-    write-verbose  "`$PSBoundParameters:`n$(($PSBoundParameters|out-string).trim())" ;
-    $verbose = ($VerbosePreference -eq "Continue") ;
-
-    if ($psISE){
-            $ScriptDir = Split-Path -Path $psISE.CurrentFile.FullPath ;
-            $ScriptBaseName = split-path -leaf $psise.currentfile.fullpath ;
-            $ScriptNameNoExt = [system.io.path]::GetFilenameWithoutExtension($psise.currentfile.fullpath) ;
-            $PSScriptRoot = $ScriptDir ;
-            if($PSScriptRoot -ne $ScriptDir){ write-warning "UNABLE TO UPDATE BLANK `$PSScriptRoot TO CURRENT `$ScriptDir!"} ;
-            $PSCommandPath = $psise.currentfile.fullpath ;
-            if($PSCommandPath -ne $psise.currentfile.fullpath){ write-warning "UNABLE TO UPDATE BLANK `$PSCommandPath TO CURRENT `$psise.currentfile.fullpath!"} ;
-    } else {
-        if($host.version.major -lt 3){
-            $PSScriptRoot = Split-Path $MyInvocation.MyCommand.Path -Parent ;
-            $PSCommandPath = $myInvocation.ScriptName ;
-            $ScriptBaseName = (Split-Path -Leaf ((&{$myInvocation}).ScriptName))  ;
-            $ScriptNameNoExt = [system.io.path]::GetFilenameWithoutExtension($MyInvocation.InvocationName) ;
-        } elseif($PSScriptRoot) {
-            $ScriptDir = $PSScriptRoot ;
-            if($PSCommandPath){
-                $ScriptBaseName = split-path -leaf $PSCommandPath ;
-                $ScriptNameNoExt = [system.io.path]::GetFilenameWithoutExtension($PSCommandPath) ;
-            } else {
-                $PSCommandPath = $myInvocation.ScriptName ;
-                $ScriptBaseName = (Split-Path -Leaf ((&{$myInvocation}).ScriptName))  ;
-                $ScriptNameNoExt = [system.io.path]::GetFilenameWithoutExtension($MyInvocation.InvocationName) ;
-            } ;
+    #region CONSTANTS-AND-ENVIRO #*======v CONSTANTS-AND-ENVIRO v======
+    # Debugger:proxy automatic variables that aren't directly accessible when debugging (must be assigned and read back from another vari) ; 
+    $rPSCmdlet = $PSCmdlet ; 
+    $rPSScriptRoot = $PSScriptRoot ; 
+    $rPSCommandPath = $PSCommandPath ; 
+    $rMyInvocation = $MyInvocation ; 
+    $rPSBoundParameters = $PSBoundParameters ; 
+    [array]$score = @() ; 
+    if($rPSCmdlet.MyInvocation.InvocationName -match '\.ps1$'){$score+= 'ExternalScript' } else {$score+= 'Function' }
+    if($rPSCmdlet.CommandRuntime.tostring() -match '\.ps1$'){$score+= 'ExternalScript' } else {$score+= 'Function' }
+    $score+= $rMyInvocation.MyCommand.commandtype.tostring() ; 
+    $grpSrc = $score | group-object -NoElement | sort count ;
+    if( ($grpSrc |  measure | select -expand count) -gt 1){
+        write-warning  "$score mixed results:$(($grpSrc| ft -a count,name | out-string).trim())" ;
+        if($grpSrc[-1].count -eq $grpSrc[-2].count){
+            write-warning "Deadlocked non-majority results!" ;
         } else {
-            if($MyInvocation.MyCommand.Path) {
-                $PSCommandPath = $myInvocation.ScriptName ;
-                $PSScriptRoot = Split-Path $MyInvocation.MyCommand.Path -Parent ;
-                $ScriptBaseName = (Split-Path -Leaf ((&{$myInvocation}).ScriptName))  ;
-                $ScriptNameNoExt = [system.io.path]::GetFilenameWithoutExtension($MyInvocation.InvocationName) ;
-            } else {throw "UNABLE TO POPULATE SCRIPT PATH, EVEN `$MyInvocation IS BLANK!" } ;
+            $runSource = $grpSrc | select -last 1 | select -expand name ;
         } ;
-    } ;
-    if($showDebug){write-verbose -verbose:$true "`$ScriptDir:$($ScriptDir)`n`$ScriptBaseName:$($ScriptBaseName)`n`$ScriptNameNoExt:$($ScriptNameNoExt)`n`$PSScriptRoot:$($PSScriptRoot)`n`$PSCommandPath:$($PSCommandPath)" ; } ;
+    } else {
+        write-verbose "consistent results" ;
+        $runSource = $grpSrc | select -last 1 | select -expand name ;
+    };
+    write-host "Calculated `$runSource:$($runSource)" ;
+    'score','grpSrc' | get-variable | remove-variable ; # cleanup temp varis
 
+    # function self-name (equiv to script's: $MyInvocation.MyCommand.Path) ;
+    ${CmdletName} = $rPSCmdlet.MyInvocation.MyCommand.Name ;
+    $PSParameters = New-Object -TypeName PSObject -Property $rPSBoundParameters ;
+    write-verbose "`$rPSBoundParameters:`n$(($rPSBoundParameters|out-string).trim())" ;
+    $Verbose = ($VerbosePreference -eq 'Continue') ; 
+    # pre psv2, no $rPSBoundParameters autovari to check, so back them out:
+    write-verbose 'Collect all non-default Params (works back to psv2 w CmdletBinding)'
+    $ParamsNonDefault = (Get-Command $rPSCmdlet.MyInvocation.InvocationName).parameters | Select-Object -expand keys | Where-Object{$_ -notmatch '(Verbose|Debug|ErrorAction|WarningAction|ErrorVariable|WarningVariable|OutVariable|OutBuffer)'} ;
+    #region ENVIRO_DISCOVER ; #*------v ENVIRO_DISCOVER v------
+    <#
+    # Debugger:proxy automatic variables that aren't directly accessible when debugging ; 
+    $rPSScriptRoot = $PSScriptRoot ; 
+    $rPSCommandPath = $PSCommandPath ; 
+    $rMyInvocation = $MyInvocation ; 
+    $rPSBoundParameters = $PSBoundParameters ; 
+    #>
+    $ScriptDir = $scriptName = '' ;     
+    if($ScriptDir -eq '' -AND ( (get-variable -name rPSScriptRoot -ea 0) -AND (get-variable -name rPSScriptRoot).value.length)){
+        $ScriptDir = $rPSScriptRoot
+    } ; # populated rPSScriptRoot
+    if( (get-variable -name rPSCommandPath -ea 0) -AND (get-variable -name rPSCommandPath).value.length){
+        $ScriptName = $rPSCommandPath
+    } ; # populated rPSCommandPath
+    if($ScriptDir -eq '' -AND $runSource -eq 'ExternalScript'){$ScriptDir = (Split-Path -Path $rMyInvocation.MyCommand.Source -Parent)} # Running from File
+    # when $runSource:'Function', $rMyInvocation.MyCommand.Source is empty,but on functions also tends to pre-hit from the rPSCommandPath entFile.FullPath ;
+    if( $scriptname -match '\.psm1$' -AND $runSource -eq 'Function'){
+        write-host "MODULE-HOMED FUNCTION:Use `$CmdletName to reference the running function name for transcripts etc (under a .psm1 `$ScriptName will reflect the .psm1 file  fullname)"
+        if(-not $CmdletName){write-warning "MODULE-HOMED FUNCTION with BLANK `$CmdletNam:$($CmdletNam)" } ;
+    } # Running from .psm1 module
+    if($ScriptDir -eq '' -AND (Test-Path variable:psEditor)) {
+        write-verbose "Running from VSCode|VS" ; 
+        $ScriptDir = (Split-Path -Path $psEditor.GetEditorContext().CurrentFile.Path -Parent) ; 
+            if($ScriptName -eq ''){$ScriptName = $psEditor.GetEditorContext().CurrentFile.Path }; 
+    } ;
+    if ($ScriptDir -eq '' -AND $host.version.major -lt 3 -AND $rMyInvocation.MyCommand.Path.length -gt 0){
+        $ScriptDir = $rMyInvocation.MyCommand.Path ; 
+        write-verbose "(backrev emulating `$rPSScriptRoot, `$rPSCommandPath)"
+        $ScriptName = split-path $rMyInvocation.MyCommand.Path -leaf ;
+        $rPSScriptRoot = Split-Path $ScriptName -Parent ;
+        $rPSCommandPath = $ScriptName ;
+    } ;
+    if ($ScriptDir -eq '' -AND $rMyInvocation.MyCommand.Path.length){
+        if($ScriptName -eq ''){$ScriptName = $rMyInvocation.MyCommand.Path} ;
+        $ScriptDir = $rPSScriptRoot = Split-Path $rMyInvocation.MyCommand.Path -Parent ;
+    }
+    if ($ScriptDir -eq ''){throw "UNABLE TO POPULATE SCRIPT PATH, EVEN `$rMyInvocation IS BLANK!" } ;
+    if($ScriptName){
+        if(-not $ScriptDir ){$ScriptDir = Split-Path -Parent $ScriptName} ; 
+        $ScriptBaseName = split-path -leaf $ScriptName ;
+        $ScriptNameNoExt = [system.io.path]::GetFilenameWithoutExtension($ScriptName) ;
+    } ; 
+    # last ditch patch the values in if you've got a $ScriptName
+    if($rPSScriptRoot.Length -ne 0){}else{ 
+        if($ScriptName){$rPSScriptRoot = Split-Path $ScriptName -Parent }
+        else{ throw "Unpopulated, `$rPSScriptRoot, and no populated `$ScriptName from which to emulate the value!" } ; 
+    } ; 
+    if($rPSCommandPath.Length -ne 0){}else{ 
+        if($ScriptName){$rPSCommandPath = $ScriptName }
+        else{ throw "Unpopulated, `$rPSCommandPath, and no populated `$ScriptName from which to emulate the value!" } ; 
+    } ; 
+    if(-not ($ScriptDir -AND $ScriptBaseName -AND $ScriptNameNoExt  -AND $rPSScriptRoot  -AND $rPSCommandPath )){ 
+        throw "Invalid Invocation. Blank `$ScriptDir/`$ScriptBaseName/`ScriptNameNoExt" ; 
+        BREAK ; 
+    } ; 
+    # echo results dyn aligned:
+    $tv = 'runSource','CmdletName','ScriptName','ScriptBaseName','ScriptNameNoExt','ScriptDir','PSScriptRoot','PSCommandPath','rPSScriptRoot','rPSCommandPath' ; 
+    $tvmx = ($tv| Measure-Object -Maximum -Property Length).Maximum * -1 ; 
+    $tv | get-variable | %{  write-host -fore yellow ("`${0,$tvmx} : {1}" -f $_.name,$_.value) } ; 
+    'tv','tvmx'|get-variable | remove-variable ; # cleanup temp varis
+    
+    #endregion ENVIRO_DISCOVER ; #*------^ END ENVIRO_DISCOVER ^------
+
+    if(-not $DoRetries){$DoRetries = 4 } ;    # # times to repeat retry attempts
+    if(-not $RetrySleep){$RetrySleep = 10 } ; # wait time between retries
+    if(-not $RetrySleep){$DawdleWait = 30 } ; # wait time (secs) between dawdle checks
+    if(-not $DirSyncInterval){$DirSyncInterval = 30 } ; # AADConnect dirsync interval
+    if(-not $ThrottleMs){$ThrottleMs = 50 ;}
+    if(-not $rgxDriveBanChars){$rgxDriveBanChars = '[;~/\\\.:]' ; } ; # ;~/\.:,
+    if(-not $rgxCertThumbprint){$rgxCertThumbprint = '[0-9a-fA-F]{40}' } ; # if it's a 40char hex string -> cert thumbprint  
+    if(-not $rgxSmtpAddr){$rgxSmtpAddr = "^([0-9a-zA-Z]+[-._+&'])*[0-9a-zA-Z]+@([-0-9a-zA-Z]+[.])+[a-zA-Z]{2,63}$" ; } ; # email addr/UPN
+    if(-not $rgxDomainLogon){$rgxDomainLogon = '^[a-zA-Z][a-zA-Z0-9\-\.]{0,61}[a-zA-Z]\\\w[\w\.\- ]+$' } ; # DOMAIN\samaccountname 
+    if(-not $exoMbxGraceDays){$exoMbxGraceDays = 30} ; 
+
+    #$ComputerName = $env:COMPUTERNAME ;
+    #$NoProf = [bool]([Environment]::GetCommandLineArgs() -like '-noprofile'); # if($NoProf){# do this};
+    # XXXMeta derived constants:
+    # - AADU Licensing group checks
+    # calc the rgxLicGrpName fr the existing $xxxmeta.rgxLicGrpDN: (get-variable tormeta).value.rgxLicGrpDN.split(',')[0].replace('^','').replace('CN=','')
+    #$rgxLicGrpName = (get-variable -name "$($tenorg)meta").value.rgxLicGrpDN.split(',')[0].replace('^','').replace('CN=','')
+    # use the dn vers LicGrouppDN = $null ; # | ?{$_ -match $tormeta.rgxLicGrpDN}
+    #$rgxLicGrpDN = (get-variable -name "$($tenorg)meta").value.rgxLicGrpDN
+
+    # email trigger vari, it will be semi-delimd list of mail-triggering events
+    $script:PassStatus = $null ;
+    [array]$SmtpAttachment = $null ;
+
+    # local Constants:
+
+    #endregion CONSTANTS-AND-ENVIRO #*======^ END CONSTANTS-AND-ENVIRO ^======
 
     $DomainWork = $tormeta.legacydomain ;
     #$ProgInterval= 500 ; # write-progress wait interval in ms
@@ -10885,6 +11043,8 @@ function update-NewModule {
     $rgxTargExcl = [regex]::escape("\$($ModuleName)\$($ModuleName)") ; 
     $rgxGuidModFiles = "[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}\.ps(d|m)1" ; # identifies temp psd|m1 files named for guids
     $rgxInclOutLicFileName = '^LICENSE' ; # id's local extensionless vdev\vdev lic files that *should* remain
+    $iSkipAutomaticTagsThreshold = 2000 ; # number of chars of comma-quote-delim'd public function names, as a string array, to establish a threshold to use SkipAutomaticTags with publish-module (NugGet bug workaround)
+    # issue is: powershellget automatic tags all exported function and hangs when u go over 4000 characters can be avoided by SkipAutomaticTags on publish-module
     #*======v FUNCTIONS v======
 
     # suppress VerbosePreference:Continue, if set, during mod loads (VERY NOISEY)
@@ -10918,6 +11078,7 @@ function update-NewModule {
     #$tMods+="verb-Teams;C:\sc\verb-Teams\verb-Teams\verb-Teams.psm1;Connect-Teams";
     #$tMods+="verb-SOL;C:\sc\verb-SOL\verb-SOL\verb-SOL.psm1;Connect-SOL" ;
     #$tMods+="verb-Azure;C:\sc\verb-Azure\verb-Azure\verb-Azure.psm1;get-AADBearToken" ;
+    # 9:33 AM 12/5/2023 this is still doing archaic loadmod...
     foreach($tMod in $tMods){
         $tModName = $tMod.split(';')[0] ;
         $tModFile = $tMod.split(';')[1] ;
@@ -10932,14 +11093,60 @@ function update-NewModule {
         if($lVers){
             $lVers=($lVers | sort version)[-1];
             try {
-                import-module -name $tModName -RequiredVersion $lVers.Version.tostring() -force -DisableNameChecking
+                # add errvari:
+                import-module -name $tModName -RequiredVersion $lVers.Version.tostring() -force -DisableNameChecking -errorVariable 'ipmo_Err' ;
+                    if($ipmo_Err){
+                        $smsg = "`nFOUND `$ipmo_Err: import-module HAD ERRORS!" ;
+                        if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN -Indent}
+                        else{ write-WARNING "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                        foreach($errExcpt in $ipmo_Err.Exception){
+                            switch -regex ($errExcpt){
+                                default {
+                                    $smsg = "`nInstall-Module ISMO .PSM1  UNDEFINED ERROR!" ;
+                                    $smsg += "`n$($errExcpt)" ;
+                                    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN -Indent}
+                                    else{ write-WARNING "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                                }
+                            } ;
+                        } ;
+                        #BREAK ; # should we break, or let it backload in the catch?
+                        throw $smsg ; # force into catch instead
+                    } else {
+                        $smsg = "(no `$ipmo_Err: test-ModuleManifest had no errors)" ;
+                        if($verbose){if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level VERBOSE }
+                        else{ write-verbose "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; } ;
+                    } ;
             }   catch {
-                 write-warning "*BROKEN INSTALLED MODULE*:$($tModName)`nBACK-LOADING DCOPY@ $($tModDFile)" ;import-module -name $tModDFile -force -DisableNameChecking
+                write-warning "*BROKEN INSTALLED MODULE*:$($tModName)`nBACK-LOADING DCOPY@ $($tModDFile)" ;
+                import-module -name $tModDFile -force -DisableNameChecking
             } ;
         } elseif (test-path $tModFile) {
             write-warning "*NO* INSTALLED MODULE*:$($tModName)`nBACK-LOADING DCOPY@ $($tModDFile)" ;
-            try {import-module -name $tModDFile -force -DisableNameChecking}
-            catch {
+            TRY {
+                # add errovari tests
+                import-module -name $tModDFile -force -DisableNameChecking -errorVariable 'ipmo_Err' ;
+                if($ipmo_Err){
+                    $smsg = "`nFOUND `$ipmo_Err: import-module HAD ERRORS!" ;
+                    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN -Indent}
+                    else{ write-WARNING "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                    foreach($errExcpt in $ipmo_Err.Exception){
+                        switch -regex ($errExcpt){
+                            default {
+                                $smsg = "`nInstall-Module ISMO .PSM1  UNDEFINED ERROR!" ;
+                                $smsg += "`n$($errExcpt)" ;
+                                if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN -Indent}
+                                else{ write-WARNING "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                            }
+                        } ;
+                    } ;
+                    #BREAK ; # should we break, or let it backload in the catch?
+                    throw $smsg ; # force into catch instead
+                } else {
+                    $smsg = "(no `$ipmo_Err: test-ModuleManifest had no errors)" ;
+                    if($verbose){if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level VERBOSE }
+                    else{ write-verbose "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; } ;
+                } ;
+            }CATCH {
                 write-error "*FAILED* TO LOAD MODULE*:$($tModName) VIA $(tModFile) !" ;
                 $tModFile = "$($tModName).ps1" ;
                 $sLoad = (join-path -path $LocalInclDir -childpath $tModFile) ;
@@ -10960,6 +11167,7 @@ function update-NewModule {
                 } ;
             } ;
         } ;
+        # validate loaded, test for cmdlet avail
         if(!(test-path function:$tModCmdlet)){
             write-warning -verbose:$true  "UNABLE TO VALIDATE PRESENCE OF $tModCmdlet`nfailing through to `$backInclDir .ps1 version" ;
             $sLoad = (join-path -path $backInclDir -childpath "$($tModName).ps1") ;
@@ -11108,12 +11316,6 @@ function update-NewModule {
             .LINK
             [ name related topic(one keyword per topic), or http://|https:// to help, or add the name of 'paired' funcs in the same niche (enable/disable-xxx)]
             #>
-            ##Requires -Version 2.0
-            ##Requires -Version 3
-            ##requires -PSEdition Desktop
-            ##requires -PSEdition Core
-            #Requires -RunasAdministrator
-            ##Requires -PSSnapin Microsoft.Exchange.Management.PowerShell.E2010
             # VALIDATORS: [ValidateNotNull()][ValidateNotNullOrEmpty()][AllowEmptyString()][ValidateLength(24,25)][ValidateLength(5)][ValidatePattern("some\sregex\sexpr")][ValidateSet("US","GB","AU")]#existFolder:[ValidateScript({Test-Path $_ -PathType 'Container'})]#existFile:[ValidateScript({Test-Path $_})]#matchExt:[ValidateScript({$_ -match '\.EXT$'})]#matchExt:[ValidateScript({ if([IO.Path]::GetExtension($_) -ne ".psd1") { throw "Path must point to a .psd1 file" } $true })]#IsDate:[ValidateScript({(($_ -as [DateTime]) -ne $null)})]#isDateInFuture:[ValidateScript({$_ -gt (Get-Date)})][ValidateRange(21,65)]#wholeNum:[ValidateScript({(!($($_) -eq 0)) -and ($($_) -eq $($_ -as [int]))})] $number="1")#positiveInt:[ValidateRange(0,[int]::MaxValue)]#negativeInt:[ValidateRange([int]::MinValue,0)][ValidateCount(1,3)]
             ## PULL REGEX VALIDATOR FROM GLOBAL VARI, w friendly errs: [ValidateScript({if(-not $rgxPermittedUserRoles){$rgxPermittedUserRoles = '(SID|CSID|UID|B2BI|CSVC|ESVC|LSVC|ESvcCBA|CSvcCBA|SIDCBA)'} ; if(-not ($_ -match $rgxPermittedUserRoles)){throw "UserRole: '$($_)' doesn't match `$rgxPermittedUserRoles:`n$($rgxPermittedUserRoles.tostring())" ; } ; return $true ; })]
             ## FANCY MULTI CLAUS VALIDATESCRIPT W BETTER ERRS: [ValidateScript({ if(-Not ($_ | Test-Path) ){throw "File or folder does not exist"} ; if(-Not ($_ | Test-Path -PathType Leaf) ){ throw "The Path argument must be a file. Folder paths are not allowed."} ; if($_ -notmatch "(\.msi|\.exe)"){throw "The file specified in the path argument must be either of type msi or exe"} ; return $true ; })]
@@ -11122,14 +11324,12 @@ function update-NewModule {
             ## PSV3+ whatif support:[CmdletBinding(SupportsShouldProcess)]
             ###[Alias('Alias','Alias2')]
             PARAM(
-
                 [Parameter(Position=0,Mandatory=$True,ValueFromPipeline=$true,ValueFromPipelineByPropertyName=$true,HelpMessage="The name of the module to be processed[-ModuleName verb-dev]")]
                     [ValidateNotNullOrEmpty()]
                     $ModuleName,
                 # don't use explicit param v, if using [CmdletBinding(SupportsShouldProcess)] + -WhatIf:$($WhatIfPreference)
                 [Parameter(HelpMessage="Whatif Flag  [-whatIf]")]
                     [switch] $whatIf=$true
-
             ) ;
             BEGIN { 
                 #region CONSTANTS-AND-ENVIRO #*======v CONSTANTS-AND-ENVIRO v======
@@ -11257,6 +11457,7 @@ function update-NewModule {
             AddedWebsite: URL
             AddedTwitter: URL
             REVISIONS
+            * 3:19 PM 12/4/2023 removed all [#]requires stmts, had runasadmin, blocking install as UID
             * 4:24 PM 12/1/2023 convert reset-, to it's populate equv init
             .DESCRIPTION
             populate-ModulePublishingDirectory.ps1 - after reset-*, this repopulates the REsource/License/root files back into a modules c:\sc\[modulename]\[modulename]\ to create an intact complete flattened source copy for duplication into CU\Docs\Modules, as the target of the Publish-Module command (under the combo of processbulk-NewModule.ps1 & update-NewModule)
@@ -11281,12 +11482,6 @@ function update-NewModule {
             .LINK
             [ name related topic(one keyword per topic), or http://|https:// to help, or add the name of 'paired' funcs in the same niche (enable/disable-xxx)]
             #>
-            ##Requires -Version 2.0
-            ##Requires -Version 3
-            ##requires -PSEdition Desktop
-            ##requires -PSEdition Core
-            #Requires -RunasAdministrator
-            ##Requires -PSSnapin Microsoft.Exchange.Management.PowerShell.E2010
             # VALIDATORS: [ValidateNotNull()][ValidateNotNullOrEmpty()][AllowEmptyString()][ValidateLength(24,25)][ValidateLength(5)][ValidatePattern("some\sregex\sexpr")][ValidateSet("US","GB","AU")]#existFolder:[ValidateScript({Test-Path $_ -PathType 'Container'})]#existFile:[ValidateScript({Test-Path $_})]#matchExt:[ValidateScript({$_ -match '\.EXT$'})]#matchExt:[ValidateScript({ if([IO.Path]::GetExtension($_) -ne ".psd1") { throw "Path must point to a .psd1 file" } $true })]#IsDate:[ValidateScript({(($_ -as [DateTime]) -ne $null)})]#isDateInFuture:[ValidateScript({$_ -gt (Get-Date)})][ValidateRange(21,65)]#wholeNum:[ValidateScript({(!($($_) -eq 0)) -and ($($_) -eq $($_ -as [int]))})] $number="1")#positiveInt:[ValidateRange(0,[int]::MaxValue)]#negativeInt:[ValidateRange([int]::MinValue,0)][ValidateCount(1,3)]
             ## PULL REGEX VALIDATOR FROM GLOBAL VARI, w friendly errs: [ValidateScript({if(-not $rgxPermittedUserRoles){$rgxPermittedUserRoles = '(SID|CSID|UID|B2BI|CSVC|ESVC|LSVC|ESvcCBA|CSvcCBA|SIDCBA)'} ; if(-not ($_ -match $rgxPermittedUserRoles)){throw "UserRole: '$($_)' doesn't match `$rgxPermittedUserRoles:`n$($rgxPermittedUserRoles.tostring())" ; } ; return $true ; })]
             ## FANCY MULTI CLAUS VALIDATESCRIPT W BETTER ERRS: [ValidateScript({ if(-Not ($_ | Test-Path) ){throw "File or folder does not exist"} ; if(-Not ($_ | Test-Path -PathType Leaf) ){ throw "The Path argument must be a file. Folder paths are not allowed."} ; if($_ -notmatch "(\.msi|\.exe)"){throw "The file specified in the path argument must be either of type msi or exe"} ; return $true ; })]
@@ -11511,6 +11706,14 @@ function update-NewModule {
     if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug
     else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
 
+    # code further in deps on $modRoot which is undefined, so coerce it from the mandetory $ModDirPath 
+    if(-not $modRoot -AND $ModDirPath){
+        $smsg = "`$modRoot is blank, assigning from mandetory param:`$ModDirPath" ; 
+        if($verbose){if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level VERBOSE } 
+        else{ write-verbose "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; } ; 
+        $modRoot = $ModDirPath ; 
+    } ; 
+
     $ModPsmName = "$($ModuleName).psm1" ;
     # C:\sc\verb-AAD\verb-AAD\verb-AAD.psd1
     # default to Public, but support External, if it pre-exists:
@@ -11726,6 +11929,9 @@ function update-NewModule {
     populate-ModulePublishingDirectory -ModuleName $ModuleName -whatif:$($whatif) -verbose:$($VerbosePreference -eq "Continue") ; 
 
     $smsg = "Validate updated $($ModuleName)\$($ModuleName) dir contents against Manifest:`nRun: test-modulemanifest -Path $($ModPsdPath)" ;
+    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } 
+    else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+    #Levels:Error|Warn|Info|H1|H2|H3|H4|H5|Debug|Verbose|Prompt|Success
     if($TestReport = test-modulemanifest -Path $ModPsdPath -errorVariable ttmm_Err -WarningVariable ttmm_Wrn -InformationVariable ttmm_Inf){
         if($ttmm_Err){
             $smsg = "`nFOUND `$ttmm_Err: test-ModuleManifest HAD ERRORS!" ;
@@ -12088,7 +12294,8 @@ $(if($Merge){'MERGE parm specified as well:`n-Merge Public|Internal|Classes incl
     # add fullname variant for flatten copying resources
     $Psd1filelistFull =  $Psd1filelist | select -expand fullname ; 
     # and name only for the manifest FileList key
-    $Psd1filelist  = $Psd1filelist | select -expand name ; 
+    # 4:44 PM 12/5/2023 select uniques, showing mults in the resulting array in psd1.filelist
+    $Psd1filelist  = $Psd1filelist | select -expand name | select -unique ; 
     # export the list extensionless xml, to let it drop off of the Psd1filelist 
     $rgxPsd1FileListLine = '((#\s)*)FileList((\s)*)=((\s)*).*' ;
     if($Psd1filelist){
@@ -12273,13 +12480,23 @@ $(if($Merge){'MERGE parm specified as well:`n-Merge Public|Internal|Classes incl
             #$srcFiles = $srcFiles | ?{$_.fullname -notmatch $rgxSrcFilesPostExcl} ; 
             $srcFiles = $srcFiles | ?{$_.fullname -notmatch $rgxSrcFilesPostExcl -AND -not($_.PsIsContainer)} ; 
 
+            $smsg = "Discovered mod-copy files (`$srcFiles.fullname):w`n$(($srcFiles.fullname|out-string).trim())" ; 
+            if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
+            else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+            #Levels:Error|Warn|Info|H1|H2|H3|H4|H5|Debug|Verbose|Prompt|Success
+
             if(-not(test-path $to)){  
                 $smsg = "Non-Pre-existing:`$to:$($to)" ; 
                 $smsg +="`nPre-creating before copy..." ; 
                 if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } 
                 else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
                 #Levels:Error|Warn|Info|H1|H2|H3|H4|H5|Debug|Verbose|Prompt|Success
-                mkdir -path $to -whatif:$($whatif) -verbose 
+                # capture the output, keep it from spamming the pipeline
+                if($omsg = mkdir -path $to -whatif:$($whatif) -verbose){
+                    $smsg = "$(($omsg | ft -a Mode,LastWriteTime,Length,Name|out-string).trim())" ; 
+                    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
+                    else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                } ; 
             } else { 
                 $smsg = "(`$to build output dir is confirmed pre-existing)" ;
                 if($verbose){if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level VERBOSE } 
@@ -12453,7 +12670,7 @@ $(if($Merge){'MERGE parm specified as well:`n-Merge Public|Internal|Classes incl
     } ; 
     #
 
-    if(!$whatif){
+    if(-not($whatif)){
         if($localMod=Get-Module -ListAvailable -Name $($ModPsmName.replace('.psm1',''))){
 
             # 2:04 PM 10/27/2023 splice in a test-modulemanifest *before* running publish module
@@ -12626,20 +12843,111 @@ And then re-run update-NewModule.
                 } ;
             } ;
 
-            # added required version, to permit mult versions pre-reinstall
+            # added errvari - clearly doesn't Catch on publish fails, so post test; required version, to permit mult versions pre-reinstall
             $pltPublishModule=[ordered]@{
                 Name=$($ModuleName) ;
                 Repository=$($Repository) ;
                 RequiredVersion=$($psd1Vers) ;
                 Verbose=$true ;
                 ErrorAction="Stop" ;
+                errorVariable = 'pbmo_Err' ;
                 whatif=$($whatif);
             } ;
+            <# 12:20 PM 12/6/2023 vio: it echo'd: VERBOSE: Calling New-NuspecFile
+                WARNING: Tag list exceeded 4000 characters and may not be accepted by some Nuget feeds.
+                VERBOSE: Calling New-NugetPackage
+            ... which per here:
+            "Publish-Module creates an invalid nuspec file when a large number of functions 
+                are exported in a powershell module. The problem is that down in 
+                Publish-PSArtifactUtility, it brute forces all of the exported function names 
+                into the tags. My particular case resulted in a tag field around 11000 
+                characters, way over the 4000 limit. I am publishing to a self-hosted nuget 
+                gallery, but it is based upon the current production branch." 
+
+            -- PowerShell/PowerShellGetv2 on Mar 22, 2019 Add SkipAutomaticTags Parameter to Publish-Module #452 When using a generic NuGet Server there is a hard coded 4000 character limit. Publish… 
+            -- edyoung commented May 22, 2019 Pass -SkipAutomaticTags as introduced in PowerShellGet 2.1.4
+            #>
+            # so we now need to chekk the function names as an array and if they're sizable, add -SkipAutomaticTags to the publish-module params:
+            # guestimate by creating a dummy array of comma-quote delimited function names: 
+            #$tagdemo = "'$((gci C:\sc\verb-io\public\*.ps1 | select -expand name ).replace('.ps1','') -join "','")'"
+            # on vio that's only 2846chars, so clearly the tag add process is adding a lot of wrapper tags (html-style?). So we need to target a much lower threshold. 
+            #$from = "$(join-path -path $moddirpath.fullname -childpath $ModuleName)\" ;
+            #$pltGci=[ordered]@{Path=$from ;Recurse=$false ;Exclude=$exclude; ErrorAction="Stop" ; } ;
+            #$srcFiles = Get-ChildItem @pltGci | Where-Object { $excludeMatch -eq $null -OR $_.FullName.Replace($from, '') -notmatch $excludeMatchRegEx} ;
+            #$srcFiles = $srcFiles | ?{$_.fullname -notmatch $rgxSrcFilesPostExcl -AND -not($_.PsIsContainer)} ; 
+
+            # number of chars of raw function names as a comma-quote-delim'd string, beyond which publish-module gets the -SkipAutomaticTags param added (to suppress bug from nuget's attempt to force all func names in a module into the 4k char-limited tag array)J.
+            #$iSkipAutomaticTagsThreshold = 2000 ;
+            $tagdemo = "'$((get-childitem "$(join-path -path $moddirpath.fullname -childpath 'Public')\*.ps1" -ea 0 | select -expand name).replace('.ps1','') -join "','")'" ; 
+            if($tagdemo.length -gt $iSkipAutomaticTagsThreshold){
+                $smsg = "Large # of funcitons: array of function names char length ($$tagdemo.length) -gt `$iSkipAutomaticTagsThreshold:$($iSkipAutomaticTagsThreshold)" ; 
+                $smsg += "`nAdding -SkipAutomaticTags param to Publish-Module call, to work around NuGit bug #344" ;
+                if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level PROMPT } 
+                else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                #Levels:Error|Warn|Info|H1|H2|H3|H4|H5|Debug|Verbose|Prompt|Success
+
+                $pltPublishModule.add('SkipAutomaticTags',$true) ; 
+            } ;
+            #
+            <# 1:43 PM 12/6/2023 publish-module produces a *garbage* errorvariable:
+                $pbmo_Err
+                    System error.
+                 $pbmo_Err | fl *
+                    System error.
+                 $PBMO_ERR.gettype().fullname
+                    System.Collections.ArrayList
+                 $PBMO_ERR.gettype()
+                    IsPublic IsSerial Name                                     BaseType
+                    -------- -------- ----                                     --------
+                    True     True     ArrayList                                System.Object
+                 $pbmo_Err.Exception
+                 [blank, no property]
+                #-=-=-=-=-=-=-=-=
+            => it doesn't even have an Exception, it's an array of strings
+            So testing it doesn't do squat. Publish-Module gets through without TRY/Catch triggering, 
+                There's aNuGet warning in the output:
+                VERBOSE: Calling New-NuspecFile
+                WARNING: Tag list exceeded 4000 characters and may not be accepted by some Nuget feeds.
+                VERBOSE: Calling New-NugetPackage            
+            which is *whining* and a product of a bug in NuGet. System error isn't enough info to decide to crash an entire build, esp where it's an innocuous whine from NuGet. 
+            #>
             $smsg= "`nPublish-Module w`n$(($pltPublishModule|out-string).trim())" ;
             if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info }  #Error|Warn|Debug
             else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
             TRY {
                 Publish-Module @pltPublishModule ;
+                    if($pbmo_Err){
+                        $smsg = "`nFOUND `$pbmo_Err: import-module HAD ERRORS! (no action, could be non-impacting)" ;
+                        if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN -Indent}
+                        else{ write-WARNING "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                        <# 
+                        note: publish-module doesn't return a proper Error object, just a string array. So there's no normal .Exception to process or analyze.
+                         and it appears on the tag bug warning, the error returned is nothing more than 'System error.'
+                         you can't even -eq compare it, have to use -match: 
+                        $pbmo_Err -match 'System error.'
+                            System error.
+                        #>
+                        foreach($errExcpt in $pbmo_Err){
+                            write-warning "===:$($errExcpt)" ; 
+                            switch -regex ($errExcpt){
+                                default {
+                                    $smsg = "`nPublish-Module PBMO UNDEFINED ERROR!" ;
+                                    $smsg += "`n$($errExcpt)" ;
+                                    $smsg += "`n(But PublishModule doesn't bother to return a functional Error object with an Exception, so we can't trust/parse or act on it. Just echo)" ; 
+                                    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN -Indent}
+                                    else{ write-WARNING "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                                }
+                            } ;
+                        } ;
+                        # can't trust to interpret the return: 'System Error.' WTF is that? Just echo, don't break or throw 
+                        # esp in context of this possibly being a procut of newget pushing all function names into the Tag array, and generating spurious errors if the list is -gt 4k!
+                        #BREAK ;
+                        #throw $smsg ;
+                    } else {
+                        $smsg = "(no `$pbmo_Err: Publish-Module had no errors)" ;
+                        if($verbose){if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level VERBOSE }
+                        else{ write-verbose "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; } ;
+                    } ;                
             } CATCH {
                 $ErrorTrapped = $Error[0] ;
                 $PassStatus += ";ERROR";
@@ -12684,6 +12992,7 @@ And then re-run update-NewModule.
 
                 # ADD -AllowClobber, to permit install command overlap (otherwise it aborts the install-module attempt)
                 # add RequiredVersion to fix: Unable to install, multiple modules matched 'VERB-dev'. Please specify an exact -Name and -RequiredVersion.
+                # add errorvariable & eval:
                 $pltInstallModule=[ordered]@{
                     Name=$($ModuleName) ;
                     Repository=$($Repository) ;
@@ -12691,6 +13000,7 @@ And then re-run update-NewModule.
                     scope="CurrentUser" ;
                     force=$true ;
                     AllowClobber=$true ;
+                    errorVariable = 'ismo_Err' ; 
                     ErrorAction="Stop" ;
                     whatif=$($whatif) ;
                 } ;
@@ -12699,13 +13009,31 @@ And then re-run update-NewModule.
                 else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
                 TRY {
                     Install-Module @pltInstallModule;
-                } CATCH {
-                    $ErrorTrapped = $Error[0] ;
-                    $PassStatus += ";ERROR";
-                    $smsg= "Failed processing $($ErrorTrapped.Exception.ItemName). `nError Message: $($ErrorTrapped.Exception.Message)`nError Details: $($ErrorTrapped)" ;
-                    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Error } #Error|Warn
-                    else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
-                    Break ;
+                    if($ismo_Err){
+                        $smsg = "`nFOUND `$ismo_Err: Install-Module HAD ERRORS!" ;
+                        if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN -Indent}
+                        else{ write-WARNING "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                        foreach($errExcpt in $ismo_Err.Exception){
+                            switch -regex ($errExcpt){
+                                default {
+                                    $smsg = "`ninstalled IPMO .PSM1  UNDEFINED ERROR!" ;
+                                    $smsg += "`n$($errExcpt)" ;
+                                    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN -Indent}
+                                    else{ write-WARNING "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                                }
+                            } ;
+                        } ;
+                        # abort here
+                        BREAK ; 
+                    } else {
+                        $smsg = "(no `$ismo_Err: Install-Module had no errors)" ;
+                        if($verbose){if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level VERBOSE }
+                        else{ write-verbose "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; } ;
+                    } ; 
+                } CATCH {$smsg = $_.Exception.Message ;
+                    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN }
+                    else{ write-WARNING "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                    BREAK ;
                 } ;
 
                 # test import-module with ea, force (hard reload curr version) & verbose output
@@ -12713,7 +13041,7 @@ And then re-run update-NewModule.
                 $pltImportMod=[ordered]@{
                     Name=$pltInstallModule.Name ;
                     ErrorAction="Stop" ;
-                    errorVariable = ipmo_Err
+                    errorVariable = 'ipmo_Err' ; 
                     force = $true ;
                     verbose = $true ;
                 } ;
@@ -12729,7 +13057,7 @@ And then re-run update-NewModule.
                         foreach($errExcpt in $ipmo_Err.Exception){
                             switch -regex ($errExcpt){
                                 default {
-                                    $smsg = "`ninstalled IPMO .PSM1  UNDEFINED ERROR!" ;
+                                    $smsg = "`nInstall-Module ISMO .PSM1  UNDEFINED ERROR!" ;
                                     $smsg += "`n$($errExcpt)" ;
                                     if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN -Indent}
                                     else{ write-WARNING "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
@@ -12739,7 +13067,7 @@ And then re-run update-NewModule.
                         # abort here
                         BREAK ; 
                     } else {
-                        $smsg = "(no `$ttmm_Err: test-ModuleManifest had no errors)" ;
+                        $smsg = "(no `$ipmo_Err: test-ModuleManifest had no errors)" ;
                         if($verbose){if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level VERBOSE }
                         else{ write-verbose "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; } ;
                     } ; 
@@ -12808,7 +13136,9 @@ And then re-run update-NewModule.
                     } ;
 
                 } else {
-                    # no nupkg file found to cache locally
+                    $smsg = "No Nupkg File Found To Cache Locally!" ; 
+                    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN -Indent} 
+                    else{ write-WARNING "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; 
                 } ;
 
                 # cleanout old pkg files prior to today and 2 gens old
@@ -13007,8 +13337,8 @@ Export-ModuleMember -Function backup-ModuleBuild,check-PsLocalRepoRegistration,c
 # SIG # Begin signature block
 # MIIELgYJKoZIhvcNAQcCoIIEHzCCBBsCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUms0t2HKQ9j35+8DQbP4Gm2Qm
-# JRygggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUsbbsaVf1izfttA2miDO4h6T+
+# mGagggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
 # MCwxKjAoBgNVBAMTIVBvd2VyU2hlbGwgTG9jYWwgQ2VydGlmaWNhdGUgUm9vdDAe
 # Fw0xNDEyMjkxNzA3MzNaFw0zOTEyMzEyMzU5NTlaMBUxEzARBgNVBAMTClRvZGRT
 # ZWxmSUkwgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBALqRVt7uNweTkZZ+16QG
@@ -13023,9 +13353,9 @@ Export-ModuleMember -Function backup-ModuleBuild,check-PsLocalRepoRegistration,c
 # AWAwggFcAgEBMEAwLDEqMCgGA1UEAxMhUG93ZXJTaGVsbCBMb2NhbCBDZXJ0aWZp
 # Y2F0ZSBSb290AhBaydK0VS5IhU1Hy6E1KUTpMAkGBSsOAwIaBQCgeDAYBgorBgEE
 # AYI3AgEMMQowCKACgAChAoAAMBkGCSqGSIb3DQEJAzEMBgorBgEEAYI3AgEEMBwG
-# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBSUgcKG
-# 5qjqWL0PN8NjfZ/xQ+PxOTANBgkqhkiG9w0BAQEFAASBgAEcsHq1NnvE0/IgPsE/
-# TLs9fF/65uFlRf3xMo66d2kt4iCXO0jlxeiXElOwZMWwDpiYBGCOIcmr3zJ49jIr
-# WwdPTeCnAJ/Y8JdluFldGGT+hiXC3IEfvn7pjRKVweilPIa7Rcg6x70n9pghcF0a
-# OZpUWcqdGG+d9yfO7dgW7r7V
+# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBQFDQrg
+# dLlwq07374D/niK1njdg/TANBgkqhkiG9w0BAQEFAASBgGerRsM3f/tKFdrhu15S
+# PPYhZ1peW/3I34nfjHGpVgQqnacoFZB6aVwXaxTq0+XXLwB3KobMn0zUSrQs9ohN
+# 7uG9Nq2g3Wnx6BRBicsU3deOrbJ1FLk5hWRRReUstsTWOBhbqFkewn4AULyO/coh
+# GEf5LtEike2xciI2yYFPt2CU
 # SIG # End signature block
