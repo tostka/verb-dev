@@ -1,0 +1,1170 @@
+﻿**********************
+Windows PowerShell transcript start
+Start time: 20231211140506
+Username: TORO\kadriTSS
+RunAs User: TORO\kadriTSS
+Configuration Name: 
+Machine: LYN-8DCZ1G2 (Microsoft Windows NT 10.0.17134.0)
+Host Application: C:\Windows\System32\WindowsPowerShell\v1.0\powershell_ise.exe
+Process ID: 10836
+PSVersion: 5.1.17134.858
+PSEdition: Desktop
+PSCompatibleVersions: 1.0, 2.0, 3.0, 4.0, 5.0, 5.1.17134.858
+Platform: Win32NT
+BuildVersion: 10.0.17134.858
+CLRVersion: 4.0.30319.42000
+WSManStackVersion: 3.0
+OS: Microsoft Windows NT 10.0.17134.0
+PSRemotingProtocolVersion: 2.3
+SerializationVersion: 1.1.0.1
+**********************
+Transcript started, output file is C:\sc\verb-dev\verb-dev\logs\VERB-dev-verb-Azure-Transcript-BATCH-EXEC-20231211-1405PM-trans-log.txt
+14:05:07: INFO:  #*======v VERB-dev.psm1:verb-Azure v======
+14:05:07: VERBOSE:  ($modRoot is blank, assigning from mandetory param:$ModDirPath)
+14:05:07:(executing:Get-BuildEnvironment -Path c:\sc\verb-Azure 
+(use -NoBuildInfo if hangs))
+14:05:09: INFO:  Run: reset-ModulePublishingDirectory -ModuleName verb-Azure
+VERBOSE: $PSBoundParameters:
+Key        Value     
+---        -----     
+ModuleName verb-Azure
+whatIf     False     
+Verbose    True
+14:05:10: ##  
+#*------v PROCESSING : verb-Azure v------
+14:05:10: INFO:  Pre-purge (CHANGELOG|README)\.md$ Root dir matches from :
+processing:Resource...
+14:05:10: INFO:  (no matching 'c:\sc\verb-Azure\Resource\' content found
+processing:Licenses...
+14:05:10: INFO:  (no matching 'c:\sc\verb-Azure\Licenses\' content found
+processing:Docs...
+14:05:10: INFO:  verb-Azure resolved $ModPubPath:C:\sc\verb-Azure\verb-Azure\
+$ModResPath:C:\sc\verb-Azure\Docs\
+14:05:10: VERBOSE:  (Reset module Docs files (purge from C:\sc\verb-Azure\verb-Azure\))
+14:05:10: INFO:  ==C:\sc\verb-Azure\CHANGELOG.md:
+no conflicting C:\sc\verb-Azure\verb-Azure\\CHANGELOG.md found
+14:05:11: INFO:  ==C:\sc\verb-Azure\README.md:
+no conflicting C:\sc\verb-Azure\verb-Azure\\README.md found
+14:05:11: INFO:  ==C:\sc\verb-Azure\Docs\Quick-Start-Installation-and-Example.md:
+no conflicting C:\sc\verb-Azure\verb-Azure\\Quick-Start-Installation-and-Example.md found
+14:05:11: ##  
+#*------^ PROCESSING : verb-Azure ^------
+14:05:11: INFO:  Run: populate-ModulePublishingDirectory -ModuleName verb-Azure
+VERBOSE: $PSBoundParameters:
+Key        Value     
+---        -----     
+ModuleName verb-Azure
+whatIf     False     
+Verbose    True
+14:05:11: ##  
+#*------v PROCESSING : verb-Azure v------
+14:05:11: INFO:  Locating (CHANGELOG|README)\.md$ Root dir matches from :
+processing:Resource...
+14:05:11: INFO:  (no matching 'c:\sc\verb-Azure\Resource\' content found
+processing:Licenses...
+14:05:11: INFO:  (no matching 'c:\sc\verb-Azure\Licenses\' content found
+processing:Docs...
+14:05:11: INFO:  verb-Azure resolved $ModPubPath:C:\sc\verb-Azure\verb-Azure\
+$ModResPath:C:\sc\verb-Azure\Docs\
+14:05:12: VERBOSE:  (Recopy module Docs files (copy from C:\sc\verb-Azure\verb-Azure\))
+14:05:12: INFO:  copy-item w
+Name                           Value                                                                                                                                                                                                                  
+----                           -----                                                                                                                                                                                                                  
+path                           {C:\sc\verb-Azure\CHANGELOG.md, C:\sc\verb-Azure\README.md, C:\sc\verb-Azure\Docs\Quick-Start-Installation-and-Example.md}                                                                                             
+destination                    C:\sc\verb-Azure\verb-Azure\                                                                                                                                                                                           
+force                          True                                                                                                                                                                                                                   
+erroraction                    STOP                                                                                                                                                                                                                   
+verbose                        True                                                                                                                                                                                                                   
+whatif                         False
+--$pltCI.path:
+C:\sc\verb-Azure\CHANGELOG.md
+C:\sc\verb-Azure\README.md
+C:\sc\verb-Azure\Docs\Quick-Start-Installation-and-Example.md
+VERBOSE: Performing the operation "Copy File" on target "Item: C:\sc\verb-Azure\CHANGELOG.md Destination: C:\sc\verb-Azure\verb-Azure\CHANGELOG.md".
+VERBOSE: Performing the operation "Copy File" on target "Item: C:\sc\verb-Azure\README.md Destination: C:\sc\verb-Azure\verb-Azure\README.md".
+VERBOSE: Performing the operation "Copy File" on target "Item: C:\sc\verb-Azure\Docs\Quick-Start-Installation-and-Example.md Destination: C:\sc\verb-Azure\verb-Azure\Quick-Start-Installation-and-Example.md".
+14:05:12: ##  
+#*------^ PROCESSING : verb-Azure ^------
+14:05:12: INFO:  Validate updated verb-Azure\verb-Azure dir contents against Manifest:
+Run: test-modulemanifest -Path C:\sc\verb-Azure\verb-Azure\verb-Azure.psd1
+VERBOSE: Loading module from path 'C:\sc\verb-Azure\verb-Azure\verb-Azure.psm1'.
+14:05:12: VERBOSE:  ((no $ttmm_Err: test-ModuleManifest had no errors))
+14:05:13: INFO:  NON-Republish pass detected:
+MERGE parm specified as well:`n-Merge Public|Internal|Classes include subdirs module content into updated .psm1
+-Sign updated files.
+-Uninstall/Remove existing profile module
+-Copy new module to profile
+-Confirm: Get-Module -ListAvailable
+-Check/Update existing Psd1 Version
+-Publish-Module
+-Remove existing installed profile module
+-Test Install-Module
+-Test Import-Module
+14:05:13: INFO:  -Merge specified...
+14:05:13: INFO:  ConvertTo-ModuleMergedTDO w
+Name                           Value                                                                                                                                                                                                                  
+----                           -----                                                                                                                                                                                                                  
+ModuleName                     verb-Azure                                                                                                                                                                                                             
+ModuleSourcePath               {c:\sc\verb-Azure\Public, c:\sc\verb-Azure\Internal}                                                                                                                                                                   
+ModuleDestinationPath          c:\sc\verb-Azure\verb-Azure                                                                                                                                                                                            
+RequiredVersion                1.0.2                                                                                                                                                                                                                  
+LogSpec                        {logging, logfile, transcript}                                                                                                                                                                                         
+NoAliasExport                                                                                                                                                                                                                                         
+ErrorAction                    Stop                                                                                                                                                                                                                   
+showdebug                      False                                                                                                                                                                                                                  
+whatif                         False
+VERBOSE: $PSBoundParameters:
+Key                   Value                                               
+---                   -----                                               
+ModuleName            verb-Azure                                          
+ModuleSourcePath      {c:\sc\verb-Azure\Public, c:\sc\verb-Azure\Internal}
+ModuleDestinationPath c:\sc\verb-Azure\verb-Azure                         
+RequiredVersion       1.0.2                                               
+LogSpec               {logging, logfile, transcript}                      
+NoAliasExport         False                                               
+ErrorAction           Stop                                                
+showDebug             False                                               
+whatIf                False
+14:05:13: INFO:  ConvertTo-ModuleMergedTDO w
+Name                           Value                                                                                                                                                                                                                  
+----                           -----                                                                                                                                                                                                                  
+ModuleName                     verb-Azure                                                                                                                                                                                                             
+ModuleSourcePath               {c:\sc\verb-Azure\Public, c:\sc\verb-Azure\Internal}                                                                                                                                                                   
+ModuleDestinationPath          c:\sc\verb-Azure\verb-Azure                                                                                                                                                                                            
+RequiredVersion                1.0.2                                                                                                                                                                                                                  
+LogSpec                        {logging, logfile, transcript}                                                                                                                                                                                         
+NoAliasExport                                                                                                                                                                                                                                         
+ErrorAction                    Stop                                                                                                                                                                                                                   
+showdebug                      False                                                                                                                                                                                                                  
+whatif                         False
+VERBOSE: (backup-FileTDO -path c:\sc\verb-Azure\verb-Azure\verb-Azure.psm1)
+VERBOSE: (backup-FileTDO -path c:\sc\verb-Azure\verb-Azure\verb-Azure.psd1)
+DEADWOOD REMOVAL:remove-UnneededFileVariants w
+Name                           Value                                                                                                                                                                                                                  
+----                           -----                                                                                                                                                                                                                  
+Path                           c:\sc\verb-Azure\verb-Azure                                                                                                                                                                                            
+Include                        verb-Azure.psm1_*                                                                                                                                                                                                      
+Pattern                        \.ps(m|d)1_\d{8}-\d{3,4}(A|P)M$                                                                                                                                                                                        
+FilterOn                       CreationTime                                                                                                                                                                                                           
+Keep                           2                                                                                                                                                                                                                      
+KeepToday                      True                                                                                                                                                                                                                   
+verbose                        True                                                                                                                                                                                                                   
+whatif                         False
+14:05:14:gci w
+Name                           Value                                                                                                                                                                                                                  
+----                           -----                                                                                                                                                                                                                  
+path                           c:\sc\verb-Azure\verb-Azure\*                                                                                                                                                                                          
+include                        verb-Azure.psm1_*                                                                                                                                                                                                      
+ErrorAction                    Stop
+VERBOSE: $cuttime:12/11/2023 00:00:00
+VERBOSE: post-filtering on pattern:\.ps(m|d)1_\d{8}-\d{3,4}(A|P)M$
+(2 in set *before* filtering)
+(1 in set *after* filtering)
+VERBOSE: filtering on files prior to $cuttime:12/11/2023 00:00:00 AM, on CreationTime property
+(1 in set *before* filtering)
+(0 in set *after* filtering)
+VERBOSE: attempting to retain remaining 2 generations net of prior filtering
+(0 in set *before* filtering)
+(0 in set *after* filtering)
+(Note:net population is *below* target -Keep:2 spec - insufficient older files available)
+14:05:15:Reducing matched population from 2 to 0 files via:
+post-filtered files with regex pattern:\.ps(m|d)1_\d{8}-\d{3,4}(A|P)M$
+filtered files on CreationTime prior to 12/11/2023 00:00:00 AM
+14:05:15:There are *no* files to be removed, as per the specified inputs. ($population:0)
+14:05:15: INFO:  (NON-dyn psm1 detected - purging existing non-CBH content...)
+VERBOSE: L14:05:15:(doesn't appear to be an inter meta-CBH block)
+VERBOSE: adding $PostCBHBlock
+VERBOSE: $PSBoundParameters:
+Key      Value                                                                                                                                                                                                                                        
+---      -----                                                                                                                                                                                                                                        
+Value    {# verb-Azure.psm1...                                                                                                                                                                                                                        
+Path     c:\sc\verb-Azure\verb-Azure\verb-Azure.psm1_TMP                                                                                                                                                                                              
+PassThru True                                                                                                                                                                                                                                         
+Verbose  True                                                                                                                                                                                                                                         
+whatIf   False
+VERBOSE: 14:05:15:(Set-ContentFixEncoding:c:\sc\verb-Azure\verb-Azure\verb-Azure.psm1_TMP)
+VERBOSE: 14:05:15:Set-Content w
+Name                           Value                                                                                                                                                                                                                  
+----                           -----                                                                                                                                                                                                                  
+PassThru                       True                                                                                                                                                                                                                   
+Path                           c:\sc\verb-Azure\verb-Azure\verb-Azure.psm1_TMP                                                                                                                                                                        
+whatif                         False                                                                                                                                                                                                                  
+encoding                       UTF8                                                                                                                                                                                                                   
+ErrorAction                    STOP
+-Value[0,2]:
+# verb-Azure.psm1
+<#
+14:05:16: INFO:  Initialize-PSModuleDirectories w
+Name                           Value                                                                                                                                                                                                                  
+----                           -----                                                                                                                                                                                                                  
+ModuleSourcePath               {c:\sc\verb-Azure\Public, c:\sc\verb-Azure\Internal}                                                                                                                                                                   
+ModuleDestinationPath          c:\sc\verb-Azure\verb-Azure                                                                                                                                                                                            
+ErrorAction                    Stop                                                                                                                                                                                                                   
+whatif                         False
+VERBOSE: $PSBoundParameters:
+Key                   Value                                               
+---                   -----                                               
+ModuleSourcePath      {c:\sc\verb-Azure\Public, c:\sc\verb-Azure\Internal}
+ModuleDestinationPath c:\sc\verb-Azure\verb-Azure                         
+ErrorAction           Stop                                                
+whatIf                False
+VERBOSE: (non-pipeline - param - input)
+14:05:16: INFO:  Creating missing dir:new-Item w
+Name                           Value                                                                                                                                                                                                                  
+----                           -----                                                                                                                                                                                                                  
+path                           c:\sc\verb-Azure\Libs                                                                                                                                                                                                  
+ItemType                       Directory                                                                                                                                                                                                              
+ErrorAction                    Stop                                                                                                                                                                                                                   
+whatif                         False
+14:05:16: INFO:  Creating missing dir:new-Item w
+Name                           Value                                                                                                                                                                                                                  
+----                           -----                                                                                                                                                                                                                  
+path                           c:\sc\verb-Azure\Licenses                                                                                                                                                                                              
+ItemType                       Directory                                                                                                                                                                                                              
+ErrorAction                    Stop                                                                                                                                                                                                                   
+whatif                         False
+14:05:17: INFO:  Creating missing dir:new-Item w
+Name                           Value                                                                                                                                                                                                                  
+----                           -----                                                                                                                                                                                                                  
+path                           c:\sc\verb-Azure\Resource                                                                                                                                                                                              
+ItemType                       Directory                                                                                                                                                                                                              
+ErrorAction                    Stop                                                                                                                                                                                                                   
+whatif                         False
+14:05:17: INFO:  
+#*------v (1/2):C:\sc\verb-Azure\Public v------
+14:05:18: INFO:  Processing 3 $ComponentScripts files through Remove-AuthenticodeSignature...
+14:05:18: INFO:  Remove-AuthenticodeSignature w
+Name                           Value                                                                                                                                                                                                                  
+----                           -----                                                                                                                                                                                                                  
+Path                           {C:\sc\verb-Azure\Public\Build-AADSignErrorsHash.ps1, C:\sc\verb-Azure\Public\get-AADBearerTokenHeaders.ps1, C:\sc\verb-Azure\Public\get-AADBearToken.ps1}                                                             
+whatif                         False                                                                                                                                                                                                                  
+verbose                        True
+VERBOSE: 14:05:18:((1/3):C:\sc\verb-Azure\Public\Build-AADSignErrorsHash.ps1:has no existing Authenticode signature)
+VERBOSE: 14:05:18:((2/3):C:\sc\verb-Azure\Public\get-AADBearerTokenHeaders.ps1:has no existing Authenticode signature)
+VERBOSE: 14:05:18:((3/3):C:\sc\verb-Azure\Public\get-AADBearToken.ps1:has no existing Authenticode signature)
+14:05:18: INFO:  Processing (1/3):C:\sc\verb-Azure\Public\Build-AADSignErrorsHash.ps1...
+VERBOSE: $PSBoundParameters:
+Key      Value                                                                                                                                                                                                                                        
+---      -----                                                                                                                                                                                                                                        
+Path     {c:\sc\verb-Azure\verb-Azure\verb-Azure.psm1_TMP}                                                                                                                                                                                            
+PassThru True                                                                                                                                                                                                                                         
+Verbose  True                                                                                                                                                                                                                                         
+whatIf   False                                                                                                                                                                                                                                        
+Value    ...
+VERBOSE: 14:05:18:(Add-ContentFixEncoding:)
+VERBOSE: 14:05:18:Set-Content w
+Name                           Value                                                                                                                                                                                                                  
+----                           -----                                                                                                                                                                                                                  
+encoding                       UTF8                                                                                                                                                                                                                   
+Path                           c:\sc\verb-Azure\verb-Azure\verb-Azure.psm1_TMP                                                                                                                                                                        
+whatif                         False                                                                                                                                                                                                                  
+PassThru                       True                                                                                                                                                                                                                   
+ErrorAction                    STOP
+-Value[0,2]:
+#*------v Build-AADSignErrorsHash.ps1 v------
+function Build-AADSignErrorsHash {
+14:05:22: INFO:  Processing (2/3):C:\sc\verb-Azure\Public\get-AADBearerTokenHeaders.ps1...
+VERBOSE: $PSBoundParameters:
+Key      Value                                                                                                                                                                                                                                        
+---      -----                                                                                                                                                                                                                                        
+Path     {c:\sc\verb-Azure\verb-Azure\verb-Azure.psm1_TMP}                                                                                                                                                                                            
+PassThru True                                                                                                                                                                                                                                         
+Verbose  True                                                                                                                                                                                                                                         
+whatIf   False                                                                                                                                                                                                                                        
+Value    ...
+VERBOSE: 14:05:22:(Add-ContentFixEncoding:)
+VERBOSE: 14:05:22:Set-Content w
+Name                           Value                                                                                                                                                                                                                  
+----                           -----                                                                                                                                                                                                                  
+encoding                       UTF8                                                                                                                                                                                                                   
+Path                           c:\sc\verb-Azure\verb-Azure\verb-Azure.psm1_TMP                                                                                                                                                                        
+whatif                         False                                                                                                                                                                                                                  
+PassThru                       True                                                                                                                                                                                                                   
+ErrorAction                    STOP
+-Value[0,2]:
+#*------v get-AADBearerTokenHeaders.ps1 v------
+Function get-AADBearerTokenHeaders {
+14:05:22: INFO:  Processing (3/3):C:\sc\verb-Azure\Public\get-AADBearToken.ps1...
+VERBOSE: $PSBoundParameters:
+Key      Value                                                                                                                                                                                                                                        
+---      -----                                                                                                                                                                                                                                        
+Path     {c:\sc\verb-Azure\verb-Azure\verb-Azure.psm1_TMP}                                                                                                                                                                                            
+PassThru True                                                                                                                                                                                                                                         
+Verbose  True                                                                                                                                                                                                                                         
+whatIf   False                                                                                                                                                                                                                                        
+Value    ...
+VERBOSE: 14:05:23:(Add-ContentFixEncoding:)
+VERBOSE: 14:05:23:Set-Content w
+Name                           Value                                                                                                                                                                                                                  
+----                           -----                                                                                                                                                                                                                  
+encoding                       UTF8                                                                                                                                                                                                                   
+Path                           c:\sc\verb-Azure\verb-Azure\verb-Azure.psm1_TMP                                                                                                                                                                        
+whatif                         False                                                                                                                                                                                                                  
+PassThru                       True                                                                                                                                                                                                                   
+ErrorAction                    STOP
+-Value[0,2]:
+#*------v get-AADBearToken.ps1 v------
+function get-AADBearToken {
+14:05:23: INFO:  
+#*------^ (1/2):C:\sc\verb-Azure\Public ^------
+14:05:23: INFO:  
+#*------v (2/2):C:\sc\verb-Azure\Internal v------
+14:05:23: INFO:  Processing 0 $ComponentScripts files through Remove-AuthenticodeSignature...
+14:05:24: INFO:  Remove-AuthenticodeSignature w
+Name                           Value                                                                                                                                                                                                                  
+----                           -----                                                                                                                                                                                                                  
+Path                                                                                                                                                                                                                                                  
+whatif                         False                                                                                                                                                                                                                  
+verbose                        True
+14:05:24: INFO:  
+#*------^ (2/2):C:\sc\verb-Azure\Internal ^------
+VERBOSE: (no Public\_CommonCode.ps1)
+14:05:24: INFO:  (Updating Psm1 Export-ModuleMember -Function to reflect Public modules)
+14:05:25: INFO:  Adding:FooterBlock...
+VERBOSE: $PSBoundParameters:
+Key      Value                                                                                                                                             
+---      -----                                                                                                                                             
+Path     {c:\sc\verb-Azure\verb-Azure\verb-Azure.psm1_TMP}                                                                                                 
+PassThru True                                                                                                                                              
+Verbose  True                                                                                                                                              
+whatIf   False                                                                                                                                             
+Value    ...
+VERBOSE: 14:05:25:(Add-ContentFixEncoding:)
+VERBOSE: 14:05:25:Set-Content w
+Name                           Value                                                                                                                                                                                                                  
+----                           -----                                                                                                                                                                                                                  
+encoding                       UTF8                                                                                                                                                                                                                   
+Path                           c:\sc\verb-Azure\verb-Azure\verb-Azure.psm1_TMP                                                                                                                                                                        
+whatif                         False                                                                                                                                                                                                                  
+PassThru                       True                                                                                                                                                                                                                   
+ErrorAction                    STOP
+-Value[0,2]:
+#*======^ END FUNCTIONS ^======
+Export-ModuleMember -Function Build-AADSignErrorsHash,get-AADBearerTokenHeaders,get-AADBearToken -Alias *
+14:05:25: INFO:  Updating the Psd1 FunctionsToExport to match
+VERBOSE: $PSBoundParameters:
+Key      Value                                                                                                                                                                                                                                        
+---      -----                                                                                                                                                                                                                                        
+Path     c:\sc\verb-Azure\verb-Azure\verb-Azure.psd1_TMP                                                                                                                                                                                              
+PassThru True                                                                                                                                                                                                                                         
+Verbose  True                                                                                                                                                                                                                                         
+whatIf   False                                                                                                                                                                                                                                        
+Value    {#...
+VERBOSE: 14:05:26:(Set-ContentFixEncoding:c:\sc\verb-Azure\verb-Azure\verb-Azure.psd1_TMP)
+VERBOSE: 14:05:26:Set-Content w
+Name                           Value                                                                                                                                                                                                                  
+----                           -----                                                                                                                                                                                                                  
+PassThru                       True                                                                                                                                                                                                                   
+Path                           c:\sc\verb-Azure\verb-Azure\verb-Azure.psd1_TMP                                                                                                                                                                        
+whatif                         False                                                                                                                                                                                                                  
+encoding                       UTF8                                                                                                                                                                                                                   
+ErrorAction                    STOP
+-Value[0,2]:
+#
+# Module manifest for module 'verb-Azure'
+14:05:26: INFO:  confirm-ModuleBuildSync w
+Name                           Value                                                                                                                                                                                                                  
+----                           -----                                                                                                                                                                                                                  
+ModPsdPath                     c:\sc\verb-Azure\verb-Azure\verb-Azure.psd1_TMP                                                                                                                                                                        
+RequiredVersion                1.0.2                                                                                                                                                                                                                  
+NoTest                         True                                                                                                                                                                                                                   
+whatif                         False                                                                                                                                                                                                                  
+verbose                        True
+VERBOSE: $PSBoundParameters:
+Key             Value                                            
+---             -----                                            
+ModPsdPath      {c:\sc\verb-Azure\verb-Azure\verb-Azure.psd1_TMP}
+RequiredVersion 1.0.2                                            
+NoTest          True                                             
+whatIf          False                                            
+Verbose         True
+14:05:26: INFO:  #*======v confirm-ModuleBuildSync:  v======
+VERBOSE: (non-pipeline - param - input)
+14:05:27: INFO:  (test-path confirms $ModPsm1 & $ModTestPs1)
+14:05:27: INFO:  Import-PowerShellDataFile w
+Name                           Value                                                                                                                                                                                                                  
+----                           -----                                                                                                                                                                                                                  
+Path                           c:\sc\verb-Azure\verb-Azure\verb-Azure.psd1_TMP                                                                                                                                                                        
+ErrorAction                    Stop                                                                                                                                                                                                                   
+verbose                        True
+14:05:27: INFO:  (resolved Module attributes:
+$ModuleName:	verb-Azure
+$ModRoot:	c:\sc\verb-Azure
+$ModPsd1:	c:\sc\verb-Azure\verb-Azure\verb-Azure.psd1_TMP
+$ModPsm1:	c:\sc\verb-Azure\verb-Azure\verb-Azure.psm1_TMP
+$ModTestPs1:	c:\sc\verb-Azure\Tests\verb-Azure.tests.ps1
+$psd1Vers:	1.0.1
+$psd1guid:	4e2bd346-b78a-48de-a66f-c0ed2940483d)
+14:05:27: INFO:  confirm-ModulePsd1Version w
+Name                           Value                                                                                                                                                                                                                  
+----                           -----                                                                                                                                                                                                                  
+Path                           c:\sc\verb-Azure\verb-Azure\verb-Azure.psd1_TMP                                                                                                                                                                        
+RequiredVersion                1.0.2                                                                                                                                                                                                                  
+whatif                         False                                                                                                                                                                                                                  
+verbose                        True
+VERBOSE: $PSBoundParameters:
+Key             Value                                            
+---             -----                                            
+Path            {c:\sc\verb-Azure\verb-Azure\verb-Azure.psd1_TMP}
+RequiredVersion 1.0.2                                            
+whatIf          False                                            
+Verbose         True
+14:05:28: INFO:  #*======v confirm-ModulePsd1Version: c:\sc\verb-Azure\verb-Azure\verb-Azure.psd1_TMP v======
+VERBOSE: (non-pipeline - param - input)
+14:05:28: WARNING:  In:c:\sc\verb-Azure\verb-Azure\verb-Azure.psd1_TMP
+Version present:(1.0.1)
+*does not* properly match:1.0.2
+FORCING MATCHING UPDATE!
+VERBOSE: $PSBoundParameters:
+Key      Value                                                                                                                                                                                                                                        
+---      -----                                                                                                                                                                                                                                        
+Path     c:\sc\verb-Azure\verb-Azure\verb-Azure.psd1_TMP                                                                                                                                                                                              
+PassThru True                                                                                                                                                                                                                                         
+Verbose  True                                                                                                                                                                                                                                         
+whatIf   False                                                                                                                                                                                                                                        
+Value    {#...
+VERBOSE: 14:05:29:(Set-ContentFixEncoding:c:\sc\verb-Azure\verb-Azure\verb-Azure.psd1_TMP)
+VERBOSE: 14:05:29:Set-Content w
+Name                           Value                                                                                                                                                                                                                  
+----                           -----                                                                                                                                                                                                                  
+PassThru                       True                                                                                                                                                                                                                   
+Path                           c:\sc\verb-Azure\verb-Azure\verb-Azure.psd1_TMP                                                                                                                                                                        
+whatif                         False                                                                                                                                                                                                                  
+encoding                       UTF8                                                                                                                                                                                                                   
+ErrorAction                    STOP
+-Value[0,2]:
+#
+# Module manifest for module 'verb-Azure'
+14:05:29: INFO:  $objReport
+Name                           Value                                                                                                                                                                                                                  
+----                           -----                                                                                                                                                                                                                  
+Version                        1.0.2                                                                                                                                                                                                                  
+Valid                          False
+14:05:29: INFO:  (SET:$objReport.Valid = $true ;)
+14:05:29: INFO:  (PIPELINE:New-Object PSObject -Property $objReport | write-output)
+$objReport
+Name                           Value                                                                                                                                                                                                                  
+----                           -----                                                                                                                                                                                                                  
+Version                        1.0.2                                                                                                                                                                                                                  
+Valid                          True
+14:05:29: INFO:  #*======^ confirm-ModulePsd1Version: c:\sc\verb-Azure\verb-Azure\verb-Azure.psd1_TMP ^======
+14:05:30: INFO:  (confirm-ModulePsd1Version:Success)
+14:05:30: INFO:  confirm-ModulePsm1Version w
+Name                           Value                                                                                                                                                                                                                  
+----                           -----                                                                                                                                                                                                                  
+Path                           c:\sc\verb-Azure\verb-Azure\verb-Azure.psm1_TMP                                                                                                                                                                        
+RequiredVersion                1.0.2                                                                                                                                                                                                                  
+whatif                         False                                                                                                                                                                                                                  
+verbose                        True
+VERBOSE: $PSBoundParameters:
+Key             Value                                            
+---             -----                                            
+Path            {c:\sc\verb-Azure\verb-Azure\verb-Azure.psm1_TMP}
+RequiredVersion 1.0.2                                            
+whatIf          False                                            
+Verbose         True
+14:05:30: INFO:  #*======v confirm-ModulePsm1Version: c:\sc\verb-Azure\verb-Azure\verb-Azure.psm1_TMP v======
+VERBOSE: (non-pipeline - param - input)
+14:05:30: WARNING:  In:c:\sc\verb-Azure\verb-Azure\verb-Azure.psm1_TMP
+Version present:(1.0.1)
+*does not* properly match:1.0.2
+FORCING MATCHING UPDATE!
+VERBOSE: $PSBoundParameters:
+Key      Value                                                                                                                                                                                                                                        
+---      -----                                                                                                                                                                                                                                        
+Path     c:\sc\verb-Azure\verb-Azure\verb-Azure.psm1_TMP                                                                                                                                                                                              
+PassThru True                                                                                                                                                                                                                                         
+Verbose  True                                                                                                                                                                                                                                         
+whatIf   False                                                                                                                                                                                                                                        
+Value    {# verb-Azure.psm1...
+VERBOSE: 14:05:33:(Set-ContentFixEncoding:c:\sc\verb-Azure\verb-Azure\verb-Azure.psm1_TMP)
+VERBOSE: 14:05:33:Set-Content w
+Name                           Value                                                                                                                                                                                                                  
+----                           -----                                                                                                                                                                                                                  
+PassThru                       True                                                                                                                                                                                                                   
+Path                           c:\sc\verb-Azure\verb-Azure\verb-Azure.psm1_TMP                                                                                                                                                                        
+whatif                         False                                                                                                                                                                                                                  
+encoding                       UTF8                                                                                                                                                                                                                   
+ErrorAction                    STOP
+-Value[0,2]:
+# verb-Azure.psm1
+<#
+14:05:33: INFO:  $objReport
+Name                           Value                                                                                                                                                                                                                  
+----                           -----                                                                                                                                                                                                                  
+Version                        1.0.2                                                                                                                                                                                                                  
+Valid                          False
+14:05:33: INFO:  (SET:$objReport.Valid = $true ;)
+14:05:34: INFO:  (PIPELINE:New-Object PSObject -Property $objReport | write-output)
+$objReport
+Name                           Value                                                                                                                                                                                                                  
+----                           -----                                                                                                                                                                                                                  
+Version                        1.0.2                                                                                                                                                                                                                  
+Valid                          True
+14:05:34: INFO:  #*======^ confirm-ModulePsm1Version: c:\sc\verb-Azure\verb-Azure\verb-Azure.psm1_TMP ^======
+14:05:34: INFO:  (confirm-ModulePsm1Version:Success)
+14:05:34: INFO:  (-NoTest: skipping confirm-ModuleTestPs1Guid)
+14:05:34: INFO:  $objReport
+Name                           Value                                                                                                                                                                                                                  
+----                           -----                                                                                                                                                                                                                  
+Manifest                       c:\sc\verb-Azure\verb-Azure\verb-Azure.psd1_TMP                                                                                                                                                                        
+Module                         c:\sc\verb-Azure\verb-Azure\verb-Azure.psm1_TMP                                                                                                                                                                        
+Pester                         (SKIPPED)                                                                                                                                                                                                              
+Guid                           (SKIPPED)                                                                                                                                                                                                              
+Version                        1.0.2                                                                                                                                                                                                                  
+Valid                          False
+14:05:34: INFO:  (SET:$objReport.Valid = $true ;)
+14:05:34: INFO:  (PIPELINE:New-Object PSObject -Property $objReport | write-output)
+$objReport
+Name                           Value                                                                                                                                                                                                                  
+----                           -----                                                                                                                                                                                                                  
+Manifest                       c:\sc\verb-Azure\verb-Azure\verb-Azure.psd1_TMP                                                                                                                                                                        
+Module                         c:\sc\verb-Azure\verb-Azure\verb-Azure.psm1_TMP                                                                                                                                                                        
+Pester                         (SKIPPED)                                                                                                                                                                                                              
+Guid                           (SKIPPED)                                                                                                                                                                                                              
+Version                        1.0.2                                                                                                                                                                                                                  
+Valid                          True
+14:05:34: INFO:  #*======^ confirm-ModuleBuildSync:  ^======
+14:05:34: INFO:  (confirm-ModuleBuildSync:Success)
+14:05:35: INFO:  Test-ModuleTMPFiles w
+Name                           Value                                                                                                                                                                                                                  
+----                           -----                                                                                                                                                                                                                  
+ModuleNamePSM1Path             c:\sc\verb-Azure\verb-Azure\verb-Azure.psm1_TMP                                                                                                                                                                        
+verbose                        True
+VERBOSE: $PSBoundParameters:
+Key                Value                                            
+---                -----                                            
+ModuleNamePSM1Path {c:\sc\verb-Azure\verb-Azure\verb-Azure.psm1_TMP}
+Verbose            True
+14:05:35: INFO:  #*======v Test-ModuleTMPFiles: c:\sc\verb-Azure\verb-Azure\verb-Azure.psm1_TMP v======
+VERBOSE: (non-pipeline - param - input)
+14:05:35: INFO:  
+Psm1:c:\sc\verb-Azure\verb-Azure\verb-Azure.psm1_TMP
+Psd1:c:\sc\verb-Azure\verb-Azure\verb-Azure.psd1_TMP
+14:05:35: INFO:  Creating Testable c:\sc\verb-Azure\verb-Azure\aa230dc6-2b12-4abf-9147-dd001aaafca0.psd1
+ to validate c:\sc\verb-Azure\verb-Azure\verb-Azure.psd1_TMP will Test-ModuleManifest
+VERBOSE: Performing the operation "Copy File" on target "Item: C:\sc\verb-Azure\verb-Azure\verb-Azure.psd1_TMP Destination: C:\sc\verb-Azure\verb-Azure\aa230dc6-2b12-4abf-9147-dd001aaafca0.psd1".
+14:05:35: INFO:  Test-ModuleManifest w
+Name                           Value                                                                                                                                                                                                                  
+----                           -----                                                                                                                                                                                                                  
+verbose                        True                                                                                                                                                                                                                   
+Path                           c:\sc\verb-Azure\verb-Azure\aa230dc6-2b12-4abf-9147-dd001aaafca0.psd1                                                                                                                                                  
+ErrorVariable                  vManiErr                                                                                                                                                                                                               
+ErrorAction                    STOP
+VERBOSE: Loading module from path 'C:\sc\verb-Azure\verb-Azure\verb-Azure.psm1'.
+14:05:36: INFO:  Test-ModuleManifest:PASSED
+14:05:36: INFO:  Creating Testable c:\sc\verb-Azure\verb-Azure\aa230dc6-2b12-4abf-9147-dd001aaafca0.psm1
+ to validate c:\sc\verb-Azure\verb-Azure\verb-Azure.psm1_TMP will Import-Module
+VERBOSE: Performing the operation "Copy File" on target "Item: C:\sc\verb-Azure\verb-Azure\verb-Azure.psm1_TMP Destination: C:\sc\verb-Azure\verb-Azure\aa230dc6-2b12-4abf-9147-dd001aaafca0.psm1".
+14:05:36: INFO:  n import-module w
+Name                           Value                                                                                                                                                                                                                  
+----                           -----                                                                                                                                                                                                                  
+Name                           c:\sc\verb-Azure\verb-Azure\aa230dc6-2b12-4abf-9147-dd001aaafca0.psm1                                                                                                                                                  
+Force                          True                                                                                                                                                                                                                   
+verbose                        True                                                                                                                                                                                                                   
+ErrorAction                    STOP                                                                                                                                                                                                                   
+ErrorVariable                  vIpMoErr                                                                                                                                                                                                               
+PassThru                       True
+VERBOSE: Loading module from path 'C:\sc\verb-Azure\verb-Azure\aa230dc6-2b12-4abf-9147-dd001aaafca0.psm1'.
+WARNING: The names of some imported commands from the module 'aa230dc6-2b12-4abf-9147-dd001aaafca0' include unapproved verbs that might make them less discoverable. To find the commands with unapproved verbs, run the Import-Module command again with the Verbose parameter. For a list of approved verbs, type Get-Verb.
+VERBOSE: The 'Build-AADSignErrorsHash' command in the aa230dc6-2b12-4abf-9147-dd001aaafca0' module was imported, but because its name does not include an approved verb, it might be difficult to find. The suggested alternative verbs are "New".
+VERBOSE: Importing function 'Build-AADSignErrorsHash'.
+VERBOSE: Importing function 'get-AADBearerTokenHeaders'.
+VERBOSE: Importing function 'get-AADBearToken'.
+14:05:37: INFO:  Ipmo: PASSED
+14:05:37: INFO:  (remove-module -name c:\sc\verb-Azure\verb-Azure\aa230dc6-2b12-4abf-9147-dd001aaafca0.psm1 -force)
+14:05:37: INFO:  (remove-item -path c:\sc\verb-Azure\verb-Azure\aa230dc6-2b12-4abf-9147-dd001aaafca0.psm1 -ErrorAction SilentlyContinue ;
+14:05:37: INFO:  (remove-item -path c:\sc\verb-Azure\verb-Azure\aa230dc6-2b12-4abf-9147-dd001aaafca0.psd1 -ErrorAction SilentlyContinue ;
+14:05:37: INFO:  $objReport
+Name                           Value                                                                                                                                                                                                                  
+----                           -----                                                                                                                                                                                                                  
+Manifest                       aa230dc6-2b12-4abf-9147-dd001aaafca0                                                                                                                                                                                   
+Module                         aa230dc6-2b12-4abf-9147-dd001aaafca0                                                                                                                                                                                   
+Valid                          False
+14:05:37: INFO:  (SET:$objReport.Valid = $true ;)
+14:05:37: INFO:  (PIPELINE:New-Object PSObject -Property $objReport | write-output)
+$objReport
+Name                           Value                                                                                                                                                                                                                  
+----                           -----                                                                                                                                                                                                                  
+Manifest                       aa230dc6-2b12-4abf-9147-dd001aaafca0                                                                                                                                                                                   
+Module                         aa230dc6-2b12-4abf-9147-dd001aaafca0                                                                                                                                                                                   
+Valid                          True
+14:05:38: INFO:  #*======^ Test-ModuleTMPFiles: c:\sc\verb-Azure\verb-Azure\verb-Azure.psm1_TMP ^======
+14:05:38: INFO:  Processing error free: Overwriting temp .psm1 with temp copy
+copy-item w
+Name                           Value                                                                                                                                                                                                                  
+----                           -----                                                                                                                                                                                                                  
+Destination                    c:\sc\verb-Azure\verb-Azure\verb-Azure.psm1                                                                                                                                                                            
+Path                           c:\sc\verb-Azure\verb-Azure\verb-Azure.psm1_TMP                                                                                                                                                                        
+whatif                         False                                                                                                                                                                                                                  
+ErrorAction                    STOP
+14:05:38: INFO:  Processing error free: Overwriting temp .psd1 with temp copy
+copy-item w
+Name                           Value                                                                                                                                                                                                                  
+----                           -----                                                                                                                                                                                                                  
+Destination                    c:\sc\verb-Azure\verb-Azure\verb-Azure.psd1                                                                                                                                                                            
+Path                           c:\sc\verb-Azure\verb-Azure\verb-Azure.psd1_TMP                                                                                                                                                                        
+whatif                         False                                                                                                                                                                                                                  
+ErrorAction                    STOP
+14:05:38: INFO:  #*======^ ConvertTo-ModuleMergedTDO: ^======
+VERBOSE: Loading module from path 'C:\sc\verb-Azure\verb-Azure\verb-Azure.psm1'.
+14:05:38: VERBOSE:  ((no $ttmm_Err: test-ModuleManifest had no errors))
+14:05:38: INFO:  (Test-ModuleManifest:PASSED)
+14:05:39: INFO:  Checking sync of Psd1 module guid to the Pester Test Script: c:\sc\verb-Azure\Tests\verb-Azure.tests.ps1
+14:05:39: INFO:  confirm-ModuleBuildSync w
+Name                           Value                                                                                                                                                                                                                  
+----                           -----                                                                                                                                                                                                                  
+ModPsdPath                     C:\sc\verb-Azure\verb-Azure\verb-Azure.psd1                                                                                                                                                                            
+RequiredVersion                1.0.2                                                                                                                                                                                                                  
+whatif                         False                                                                                                                                                                                                                  
+verbose                        True
+VERBOSE: $PSBoundParameters:
+Key             Value                                        
+---             -----                                        
+ModPsdPath      {C:\sc\verb-Azure\verb-Azure\verb-Azure.psd1}
+RequiredVersion 1.0.2                                        
+whatIf          False                                        
+Verbose         True
+14:05:39: INFO:  #*======v confirm-ModuleBuildSync:  v======
+VERBOSE: (non-pipeline - param - input)
+14:05:39: INFO:  (test-path confirms $ModPsm1 & $ModTestPs1)
+14:05:39: INFO:  Import-PowerShellDataFile w
+Name                           Value                                                                                                                                                                                                                  
+----                           -----                                                                                                                                                                                                                  
+Path                           C:\sc\verb-Azure\verb-Azure\verb-Azure.psd1                                                                                                                                                                            
+ErrorAction                    Stop                                                                                                                                                                                                                   
+verbose                        True
+14:05:40: INFO:  (resolved Module attributes:
+$ModuleName:	verb-Azure
+$ModRoot:	c:\sc\verb-Azure
+$ModPsd1:	C:\sc\verb-Azure\verb-Azure\verb-Azure.psd1
+$ModPsm1:	C:\sc\verb-Azure\verb-Azure\verb-Azure.psm1
+$ModTestPs1:	c:\sc\verb-Azure\Tests\verb-Azure.tests.ps1
+$psd1Vers:	1.0.2
+$psd1guid:	4e2bd346-b78a-48de-a66f-c0ed2940483d)
+14:05:40: INFO:  confirm-ModulePsd1Version w
+Name                           Value                                                                                                                                                                                                                  
+----                           -----                                                                                                                                                                                                                  
+Path                           C:\sc\verb-Azure\verb-Azure\verb-Azure.psd1                                                                                                                                                                            
+RequiredVersion                1.0.2                                                                                                                                                                                                                  
+whatif                         False                                                                                                                                                                                                                  
+verbose                        True
+VERBOSE: $PSBoundParameters:
+Key             Value                                        
+---             -----                                        
+Path            {C:\sc\verb-Azure\verb-Azure\verb-Azure.psd1}
+RequiredVersion 1.0.2                                        
+whatIf          False                                        
+Verbose         True
+14:05:40: INFO:  #*======v confirm-ModulePsd1Version: C:\sc\verb-Azure\verb-Azure\verb-Azure.psd1 v======
+VERBOSE: (non-pipeline - param - input)
+14:05:40: INFO:  (Version already updated to match)
+14:05:40: INFO:  $objReport
+Name                           Value                                                                                                                                                                                                                  
+----                           -----                                                                                                                                                                                                                  
+Version                        1.0.2                                                                                                                                                                                                                  
+Valid                          False
+14:05:40: INFO:  (SET:$objReport.Valid = $true ;)
+14:05:40: INFO:  (PIPELINE:New-Object PSObject -Property $objReport | write-output)
+$objReport
+Name                           Value                                                                                                                                                                                                                  
+----                           -----                                                                                                                                                                                                                  
+Version                        1.0.2                                                                                                                                                                                                                  
+Valid                          True
+14:05:41: INFO:  #*======^ confirm-ModulePsd1Version: C:\sc\verb-Azure\verb-Azure\verb-Azure.psd1 ^======
+14:05:41: INFO:  (confirm-ModulePsd1Version:Success)
+14:05:41: INFO:  confirm-ModulePsm1Version w
+Name                           Value                                                                                                                                                                                                                  
+----                           -----                                                                                                                                                                                                                  
+Path                           C:\sc\verb-Azure\verb-Azure\verb-Azure.psm1                                                                                                                                                                            
+RequiredVersion                1.0.2                                                                                                                                                                                                                  
+whatif                         False                                                                                                                                                                                                                  
+verbose                        True
+VERBOSE: $PSBoundParameters:
+Key             Value                                        
+---             -----                                        
+Path            {C:\sc\verb-Azure\verb-Azure\verb-Azure.psm1}
+RequiredVersion 1.0.2                                        
+whatIf          False                                        
+Verbose         True
+14:05:41: INFO:  #*======v confirm-ModulePsm1Version: C:\sc\verb-Azure\verb-Azure\verb-Azure.psm1 v======
+VERBOSE: (non-pipeline - param - input)
+14:05:41: INFO:  (Version already updated to match)
+14:05:41: INFO:  $objReport
+Name                           Value                                                                                                                                                                                                                  
+----                           -----                                                                                                                                                                                                                  
+Version                        1.0.2                                                                                                                                                                                                                  
+Valid                          False
+14:05:41: INFO:  (SET:$objReport.Valid = $true ;)
+14:05:41: INFO:  (PIPELINE:New-Object PSObject -Property $objReport | write-output)
+$objReport
+Name                           Value                                                                                                                                                                                                                  
+----                           -----                                                                                                                                                                                                                  
+Version                        1.0.2                                                                                                                                                                                                                  
+Valid                          True
+14:05:41: INFO:  #*======^ confirm-ModulePsm1Version: C:\sc\verb-Azure\verb-Azure\verb-Azure.psm1 ^======
+14:05:41: INFO:  (confirm-ModulePsm1Version:Success)
+14:05:41: INFO:  Checking sync of Psd1 module guid to the Pester Test Script: c:\sc\verb-Azure\Tests\verb-Azure.tests.ps1
+14:05:41: INFO:  confirm-ModuleTestPs1Guid w
+Name                           Value                                                                                                                                                                                                                  
+----                           -----                                                                                                                                                                                                                  
+Path                           c:\sc\verb-Azure\Tests\verb-Azure.tests.ps1                                                                                                                                                                            
+RequiredGuid                   4e2bd346-b78a-48de-a66f-c0ed2940483d                                                                                                                                                                                   
+whatif                         False                                                                                                                                                                                                                  
+verbose                        True
+VERBOSE: $PSBoundParameters:
+Key          Value                                        
+---          -----                                        
+Path         {c:\sc\verb-Azure\Tests\verb-Azure.tests.ps1}
+RequiredGuid 4e2bd346-b78a-48de-a66f-c0ed2940483d         
+whatIf       False                                        
+Verbose      True
+14:05:42: INFO:  #*======v confirm-ModuleTestPs1Guid: c:\sc\verb-Azure\Tests\verb-Azure.tests.ps1 v======
+VERBOSE: (non-pipeline - param - input)
+14:05:42: INFO:  (Guid  already updated to match)
+14:05:42: INFO:  $objReport
+Name                           Value                                                                                                                                                                                                                  
+----                           -----                                                                                                                                                                                                                  
+Guid                           4e2bd346-b78a-48de-a66f-c0ed2940483d                                                                                                                                                                                   
+Valid                          False
+14:05:42: INFO:  (SET:$objReport.Valid = $true ;)
+14:05:42: INFO:  (PIPELINE:New-Object PSObject -Property $objReport | write-output)
+$objReport
+Name                           Value                                                                                                                                                                                                                  
+----                           -----                                                                                                                                                                                                                  
+Guid                           4e2bd346-b78a-48de-a66f-c0ed2940483d                                                                                                                                                                                   
+Valid                          True
+14:05:42: INFO:  #*======^ confirm-ModuleTestPs1Guid: c:\sc\verb-Azure\Tests\verb-Azure.tests.ps1 ^======
+14:05:42: INFO:  (confirm-ModuleTestPs1Guid:Success)
+14:05:42: INFO:  $objReport
+Name                           Value                                                                                                                                                                                                                  
+----                           -----                                                                                                                                                                                                                  
+Manifest                       C:\sc\verb-Azure\verb-Azure\verb-Azure.psd1                                                                                                                                                                            
+Module                         C:\sc\verb-Azure\verb-Azure\verb-Azure.psm1                                                                                                                                                                            
+Pester                         c:\sc\verb-Azure\Tests\verb-Azure.tests.ps1                                                                                                                                                                            
+Guid                           4e2bd346-b78a-48de-a66f-c0ed2940483d                                                                                                                                                                                   
+Version                        1.0.2                                                                                                                                                                                                                  
+Valid                          False
+14:05:43: INFO:  (SET:$objReport.Valid = $true ;)
+14:05:43: INFO:  (PIPELINE:New-Object PSObject -Property $objReport | write-output)
+$objReport
+Name                           Value                                                                                                                                                                                                                  
+----                           -----                                                                                                                                                                                                                  
+Manifest                       C:\sc\verb-Azure\verb-Azure\verb-Azure.psd1                                                                                                                                                                            
+Module                         C:\sc\verb-Azure\verb-Azure\verb-Azure.psm1                                                                                                                                                                            
+Pester                         c:\sc\verb-Azure\Tests\verb-Azure.tests.ps1                                                                                                                                                                            
+Guid                           4e2bd346-b78a-48de-a66f-c0ed2940483d                                                                                                                                                                                   
+Version                        1.0.2                                                                                                                                                                                                                  
+Valid                          True
+14:05:43: INFO:  #*======^ confirm-ModuleBuildSync:  ^======
+14:05:43: INFO:  (confirm-ModuleBuildSync:Success)
+14:05:43: VERBOSE:  ($Psd1filelist populated: xXML:c:\sc\verb-Azure\Psd1filelist)
+14:05:43: INFO:  Updating the Psd1 FileList to with populated $Psd1filelist...
+VERBOSE: $PSBoundParameters:
+Key      Value                                                                                                                                                                                                                                        
+---      -----                                                                                                                                                                                                                                        
+Path     C:\sc\verb-Azure\verb-Azure\verb-Azure.psd1                                                                                                                                                                                                  
+PassThru True                                                                                                                                                                                                                                         
+Verbose  True                                                                                                                                                                                                                                         
+whatIf   False                                                                                                                                                                                                                                        
+Value    {#...
+VERBOSE: 14:05:44:(Set-ContentFixEncoding:C:\sc\verb-Azure\verb-Azure\verb-Azure.psd1)
+VERBOSE: 14:05:44:Set-Content w
+Name                           Value                                                                                                                                                                                                                  
+----                           -----                                                                                                                                                                                                                  
+PassThru                       True                                                                                                                                                                                                                   
+Path                           C:\sc\verb-Azure\verb-Azure\verb-Azure.psd1                                                                                                                                                                            
+whatif                         False                                                                                                                                                                                                                  
+encoding                       UTF8                                                                                                                                                                                                                   
+ErrorAction                    STOP
+-Value[0,2]:
+#
+# Module manifest for module 'verb-Azure'
+VERBOSE: Get-ChildItem c:\sc\verb-Azure\* -recur | where-object {.name -match $rgxGuidModFiles}
+14:05:44: INFO:  Signing appropriate files...
+VERBOSE: (MONOLITH module:collecting non-include sign files)
+14:05:44: INFO:  Sign-file w
+Name                           Value                                                                                                                                                                                                                  
+----                           -----                                                                                                                                                                                                                  
+file                           {C:\sc\verb-Azure\rebuild-module.ps1, C:\sc\verb-Azure\requirements.psd1, C:\sc\verb-Azure\Tests\PPoShScriptingStyle.psd1, C:\sc\verb-Azure\Tests\ToddomationScriptingStyle-medium.psd1...}                            
+ErrorAction                    Stop                                                                                                                                                                                                                   
+showdebug                      False                                                                                                                                                                                                                  
+whatif                         False
+
+
+    Directory: C:\sc\verb-Azure
+
+
+SignerCertificate                         Status                                                                                                 Path
+-----------------                         ------                                                                                                 ----
+5F8F454A477F2C4539296F5E4EEE71FBB94CF5E5  Valid                                                                                                  rebuild-module.ps1
+5F8F454A477F2C4539296F5E4EEE71FBB94CF5E5  Valid                                                                                                  requirements.psd1
+
+
+    Directory: C:\sc\verb-Azure\Tests
+
+
+SignerCertificate                         Status                                                                                                 Path
+-----------------                         ------                                                                                                 ----
+5F8F454A477F2C4539296F5E4EEE71FBB94CF5E5  Valid                                                                                                  PPoShScriptingStyle.psd1
+5F8F454A477F2C4539296F5E4EEE71FBB94CF5E5  Valid                                                                                                  ToddomationScriptingStyle-medium.psd1
+5F8F454A477F2C4539296F5E4EEE71FBB94CF5E5  Valid                                                                                                  verb-Azure.tests.ps1
+
+
+    Directory: C:\sc\verb-Azure\verb-Azure
+
+
+SignerCertificate                         Status                                                                                                 Path
+-----------------                         ------                                                                                                 ----
+5F8F454A477F2C4539296F5E4EEE71FBB94CF5E5  Valid                                                                                                  verb-Azure.psd1
+5F8F454A477F2C4539296F5E4EEE71FBB94CF5E5  Valid                                                                                                  verb-Azure.psm1
+14:05:45: INFO:  Removing existing profile verb-Azure content...
+14:05:46: INFO:  Uninstall-ModuleForce w
+Name                           Value                                                                                                                                                                                                                  
+----                           -----                                                                                                                                                                                                                  
+ModuleName                     verb-Azure                                                                                                                                                                                                             
+Verbose                        True                                                                                                                                                                                                                   
+whatif                         False
+VERBOSE: $PSBoundParameters:
+Key        Value       
+---        -----       
+ModuleName {verb-Azure}
+Verbose    True        
+whatIf     False
+VERBOSE: (non-pipeline - param - input)
+14:06:07: INFO:  
+#*------v Uninstall PSGet Mod:verb-Azure:v1.0.1 v------
+14:06:07: INFO:  Uninstall-Script w
+Name                           Value                                                                                                                                                                                                                  
+----                           -----                                                                                                                                                                                                                  
+Force                          True                                                                                                                                                                                                                   
+Whatif                         False                                                                                                                                                                                                                  
+Verbose                        True
+VERBOSE: Populating RepositorySourceLocation property for module verb-Azure.
+VERBOSE: Loading module from path 'C:\Users\kadritss\Documents\WindowsPowerShell\Modules\verb-Azure\1.0.1\verb-Azure.psm1'.
+VERBOSE: Performing the operation "Uninstall-Module" on target "Version '1.0.1' of module 'verb-Azure'".
+VERBOSE: Successfully uninstalled the module 'verb-Azure' from module base 'C:\Users\kadritss\Documents\WindowsPowerShell\Modules\verb-Azure\1.0.1'.
+14:07:32: INFO:  
+#*------^ Uninstall PSGet Mod:verb-Azure:v1.0.1 ^------
+14:07:33: INFO:  (Processing $env:PSModulePath paths, for surviving locked copies of verb-Azure to *manually* purge...)
+14:07:33: INFO:  Checking: verb-Azure below: C:\Users\kadritss\Documents\WindowsPowerShell\Modules...
+14:07:33:-GracefulFail specified, using EA:'Continue'
+14:07:33:No existing Match:test-path -path C:\Users\kadritss\Documents\WindowsPowerShell\Modules\verb-Azure\*.*
+14:07:33: INFO:  Checking: verb-Azure below: C:\ProgramData\Boxstarter...
+14:07:33:-GracefulFail specified, using EA:'Continue'
+14:07:33:No existing Match:test-path -path C:\ProgramData\Boxstarter\verb-Azure\*.*
+14:07:33: INFO:  Checking: verb-Azure below: C:\Program Files\WindowsPowerShell\Modules...
+14:07:33:-GracefulFail specified, using EA:'Continue'
+14:07:33:No existing Match:test-path -path C:\Program Files\WindowsPowerShell\Modules\verb-Azure\*.*
+14:07:34: INFO:  Checking: verb-Azure below: C:\Windows\system32\WindowsPowerShell\v1.0\Modules...
+14:07:34:-GracefulFail specified, using EA:'Continue'
+14:07:34:No existing Match:test-path -path C:\Windows\system32\WindowsPowerShell\v1.0\Modules\verb-Azure\*.*
+14:07:34: INFO:  Checking: verb-Azure below: C:\Program Files\Microsoft Message Analyzer\PowerShell\...
+14:07:34:-GracefulFail specified, using EA:'Continue'
+14:07:34:No existing Match:test-path -path C:\Program Files\Microsoft Message Analyzer\PowerShell\verb-Azure\*.*
+14:07:34: INFO:  (no $sRet returned on call)
+14:07:34: INFO:  Copying module to profile (net of .git & .vscode dirs, and backed up content)...
+14:07:34: INFO:  $srcFiles:post-filter out:
+\\(Package|Tests|logs)\\|(\.ps[dm]1_(\d+-\d+[AP]M|TMP)|-LOG-BATCH-EXEC-\d+-\d+[AP]M-log\.txt|\\(fingerprint|Psd1filelist))$
+14:07:34: INFO:  Discovered mod-copy files ($srcFiles.fullname):w
+C:\sc\verb-Azure\verb-Azure\CHANGELOG.md
+C:\sc\verb-Azure\verb-Azure\Quick-Start-Installation-and-Example.md
+C:\sc\verb-Azure\verb-Azure\README.md
+C:\sc\verb-Azure\verb-Azure\verb-Azure.psd1
+C:\sc\verb-Azure\verb-Azure\verb-Azure.psm1
+14:07:35: INFO:  Non-Pre-existing:$to:C:\Users\kadritss\Documents\WindowsPowerShell\Modules\verb-Azure\verb-Azure
+Pre-creating before copy...
+VERBOSE: Performing the operation "Create Directory" on target "Destination: C:\Users\kadritss\Documents\WindowsPowerShell\Modules\verb-Azure\verb-Azure".
+14:07:35: INFO:  Mode   LastWriteTime         Length Name      
+----   -------------         ------ ----      
+d----- 12/11/2023 2:07:35 PM        verb-Azure
+14:07:35: INFO:  -Merge:exclude $MergeBuildExcl \\(Public|Internal|External|Private)\\.*.ps1$ files from temp build copy
+14:07:35: INFO:  Recursively remove empty subdirs below C:\Users\kadritss\Documents\WindowsPowerShell\Modules\verb-Azure\verb-Azure...
+.
+14:07:35: INFO:  Move/Flatten Resource etc files into root of temp Build dir...
+14:07:35: INFO:  Unable to locate a problematic temp mod dir C:\Users\kadritss\Documents\WindowsPowerShell\Modules\verb-Azure\verb-Azure COPY of Quick-Start-Installation-and-Example.md
+14:07:35: INFO:  Unable to locate a problematic temp mod dir C:\Users\kadritss\Documents\WindowsPowerShell\Modules\verb-Azure\verb-Azure COPY of CHANGELOG.md
+14:07:36: INFO:  Unable to locate a problematic temp mod dir C:\Users\kadritss\Documents\WindowsPowerShell\Modules\verb-Azure\verb-Azure COPY of README.md
+14:07:36: INFO:  Unable to locate a problematic temp mod dir C:\Users\kadritss\Documents\WindowsPowerShell\Modules\verb-Azure\verb-Azure COPY of LICENSE.txt
+14:07:36: INFO:  copy/Flatten Resource etc files into source root c:\sc\verb-Azure\verb-Azure dir...
+VERBOSE: Performing the operation "Copy File" on target "Item: C:\sc\verb-Azure\Docs\Quick-Start-Installation-and-Example.md Destination: C:\sc\verb-Azure\verb-Azure\Quick-Start-Installation-and-Example.md".
+VERBOSE: Performing the operation "Copy File" on target "Item: C:\sc\verb-Azure\CHANGELOG.md Destination: C:\sc\verb-Azure\verb-Azure\CHANGELOG.md".
+VERBOSE: Performing the operation "Copy File" on target "Item: C:\sc\verb-Azure\LICENSE.txt Destination: C:\sc\verb-Azure\verb-Azure\LICENSE.txt".
+VERBOSE: Performing the operation "Copy File" on target "Item: C:\sc\verb-Azure\README.md Destination: C:\sc\verb-Azure\verb-Azure\README.md".
+VERBOSE: Loading module from path 'C:\Users\kadritss\Documents\WindowsPowerShell\Modules\verb-Azure\verb-Azure\verb-Azure.psm1'.
+14:07:36: INFO:  Resolved $ModPsdPath:
+C:\sc\verb-Azure\verb-Azure\verb-Azure.psd1
+14:07:36: VERBOSE:  (resolve-path the CUMods verb-Azure.psd1 location)
+14:07:36: INFO:  
+==Verifying CU:Mods\verb-Azure\verb-Azure\Quick-Start-Installation-and-Example.md:
+validated Quick-Start-Installation-and-Example.md is found in C:\Users\kadritss\Documents\WindowsPowerShell\Modules\verb-Azure\verb-Azure\Quick-Start-Installation-and-Example.md
+14:07:37: INFO:  
+==Verifying CU:Mods\verb-Azure\verb-Azure\CHANGELOG.md:
+validated CHANGELOG.md is found in C:\Users\kadritss\Documents\WindowsPowerShell\Modules\verb-Azure\verb-Azure\CHANGELOG.md
+14:07:37: INFO:  
+==Verifying CU:Mods\verb-Azure\verb-Azure\README.md:
+validated README.md is found in C:\Users\kadritss\Documents\WindowsPowerShell\Modules\verb-Azure\verb-Azure\README.md
+14:07:37: INFO:  
+==Verifying CU:Mods\verb-Azure\verb-Azure\LICENSE.txt:
+
+14:07:37: WARNING:  FAILED TO LOCATE LICENSE.txt AT EXPECTED:C:\Users\kadritss\Documents\WindowsPowerShell\Modules\verb-Azure\verb-Azure\LICENSE.txt
+14:07:37: INFO:  RE-copy-item w
+Name                           Value                                                                                                                                                                                                                  
+----                           -----                                                                                                                                                                                                                  
+path                           C:\sc\verb-Azure\verb-Azure\verb-Azure.psd1\LICENSE.txt                                                                                                                                                                
+destination                    C:\Users\kadritss\Documents\WindowsPowerShell\Modules\verb-Azure\verb-Azure                                                                                                                                            
+force                          True                                                                                                                                                                                                                   
+erroraction                    STOP                                                                                                                                                                                                                   
+verbose                        True                                                                                                                                                                                                                   
+whatif                         False
+--$pltCI.path:
+C:\sc\verb-Azure\verb-Azure\verb-Azure.psd1\LICENSE.txt
+PS>TerminatingError(Copy-Item): "The running command stopped because the preference variable "ErrorActionPreference" or common parameter is set to Stop: Cannot find path 'C:\sc\verb-Azure\verb-Azure\verb-Azure.psd1\LICENSE.txt' because it does not exist."
+14:07:37: WARNING:
+14:07:37: INFO:  Running pre-Publish-Module .psd1 test:
+Test-ModuleManifest -path C:\sc\verb-Azure\verb-Azure\verb-Azure.psd1
+VERBOSE: Loading module from path 'C:\sc\verb-Azure\verb-Azure\verb-Azure.psm1'.
+14:07:37: VERBOSE:  ((no $ttmm_Err: test-ModuleManifest had no errors))
+14:07:37: INFO:  (Test-ModuleManifest:PASSED)
+14:07:38: INFO:  (Profiling Repo: get-PSRepository -name lyncRepo...)
+14:07:39: VERBOSE:  ((confirmed:$tRepo.PublishLocation accessible))
+14:07:39: INFO:  
+Publish-Module w
+Name                           Value                                                                                                                                                                                                                  
+----                           -----                                                                                                                                                                                                                  
+Name                           verb-Azure                                                                                                                                                                                                             
+Repository                     lyncRepo                                                                                                                                                                                                               
+RequiredVersion                1.0.2                                                                                                                                                                                                                  
+Verbose                        True                                                                                                                                                                                                                   
+ErrorAction                    Stop                                                                                                                                                                                                                   
+errorVariable                  pbmo_Err                                                                                                                                                                                                               
+whatif                         False
+VERBOSE: Suppressed Verbose Repository details, Name = 'lyncRepo', Location = '\\lynmsv10\lync_fs\scripts\sc'; IsTrusted = 'True'; IsRegistered = 'True'.
+VERBOSE: Repository details, Name = 'lyncRepo', Location = '\\lynmsv10\lync_fs\scripts\sc'; IsTrusted = 'True'; IsRegistered = 'True'.
+VERBOSE: Repository details, Name = 'lyncRepo', Location = '\\lynmsv10\lync_fs\scripts\sc'; IsTrusted = 'True'; IsRegistered = 'True'.
+VERBOSE: Publish Location:'\\lynmsv10\lync_fs\scripts\sc'.
+VERBOSE: Module 'verb-Azure' was found in 'C:\Users\kadritss\Documents\WindowsPowerShell\Modules\verb-Azure\verb-Azure'.
+VERBOSE: Loading module from path 'C:\Users\kadritss\AppData\Local\Temp\95426435\verb-Azure\verb-Azure.psm1'.
+Microsoft.PowerShell.Core\Test-ModuleManifest : The specified FileList entry 'LICENSE.txt' in the module manifest 
+'C:\Users\kadritss\AppData\Local\Temp\95426435\verb-Azure\verb-Azure.psd1' is invalid. Try again after updating this 
+entry with valid values.
+At C:\Program Files\WindowsPowerShell\Modules\PowerShellGet\2.2.5\PSModule.psm1:10817 char:27
++ ... oduleInfo = Microsoft.PowerShell.Core\Test-ModuleManifest -Path $mani ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (C:\Users\kadrit...verb-Azure.psd1:String) [Test-ModuleManifest], 
+DirectoryNotFoundException
+    + FullyQualifiedErrorId : 
+Modules_InvalidFilePathinModuleManifest,Microsoft.PowerShell.Commands.TestModuleManifestCommand
+Microsoft.PowerShell.Core\Test-ModuleManifest : The specified FileList entry 'LICENSE.txt' in the module manifest 'C:\Users\kadritss\AppData\Local\Temp\95426435\verb-Azure\verb-Azure.psd1' is invalid. Try again after updating this entry with
+valid values.
+At C:\Program Files\WindowsPowerShell\Modules\PowerShellGet\2.2.5\PSModule.psm1:10817 char:27
++ ... oduleInfo = Microsoft.PowerShell.Core\Test-ModuleManifest -Path $mani ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (C:\Users\kadrit...verb-Azure.psd1:String) [Test-ModuleManifest], DirectoryNotFoundException
+    + FullyQualifiedErrorId : Modules_InvalidFilePathinModuleManifest,Microsoft.PowerShell.Commands.TestModuleManifestCommand
+
+
+14:07:41: WARNING:
+
+14:07:41: WARNING:  FOUND $pbmo_Err: import-module HAD ERRORS! (no action, could be non-impacting)
+WARNING: ===:System.Management.Automation.StopUpstreamCommandsException: System error.
+   at Microsoft.PowerShell.Commands.SelectObjectCommand.ProcessRecord()
+   at System.Management.Automation.CommandProcessor.ProcessRecord()
+
+14:07:41: WARNING:
+
+14:07:41: WARNING:  Publish-Module PBMO UNDEFINED ERROR!
+
+14:07:41: WARNING:  System.Management.Automation.StopUpstreamCommandsException: System error.
+
+14:07:41: WARNING:
+
+14:07:41: WARNING:     at Microsoft.PowerShell.Commands.SelectObjectCommand.ProcessRecord()
+
+14:07:41: WARNING:
+
+14:07:41: WARNING:     at System.Management.Automation.CommandProcessor.ProcessRecord()
+
+14:07:41: WARNING:  (But PublishModule doesn't bother to return a functional Error object with an Exception, so we can't trust/parse or act on it. Just echo)
+WARNING: ===:The specified FileList entry 'LICENSE.txt' in the module manifest 'C:\Users\kadritss\AppData\Local\Temp\95426435\verb-Azure\verb-Azure.psd1' is invalid. Try again after updating this entry with valid values.
+
+14:07:42: WARNING:
+
+14:07:42: WARNING:  Publish-Module PBMO UNDEFINED ERROR!
+
+14:07:42: WARNING:  The specified FileList entry 'LICENSE.txt' in the module manifest 'C:\Users\kadritss\AppData\Local\Temp\95426435\verb-Azure\verb-Azure.psd1' is invalid. Try again after updating this entry with valid values.
+
+14:07:42: WARNING:  (But PublishModule doesn't bother to return a functional Error object with an Exception, so we can't trust/parse or act on it. Just echo)
+14:07:42: INFO:  Waiting for:find-module -name verb-Azure -Repository lyncRepo ...
+.
+14:07:45:-GracefulFail specified, using EA:'Continue'
+14:07:45:remove-item w
+Name                           Value                                                                                                                                                                                                                  
+----                           -----                                                                                                                                                                                                                  
+Path                           {C:\Users\kadritss\Documents\WindowsPowerShell\Modules\verb-Azure\verb-Azure\CHANGELOG.md, C:\Users\kadritss\Documents\WindowsPowerShell\Modules\verb-Azure\verb-Azure\Quick-Start-Installation-and-Example.md, C:\U...
+Recurse                        True                                                                                                                                                                                                                   
+ErrorAction                    Continue                                                                                                                                                                                                               
+whatif                         False
+14:07:45: INFO:  Install-Module w
+Name                           Value                                                                                                                                                                                                                  
+----                           -----                                                                                                                                                                                                                  
+Name                           verb-Azure                                                                                                                                                                                                             
+Repository                     lyncRepo                                                                                                                                                                                                               
+RequiredVersion                1.0.2                                                                                                                                                                                                                  
+scope                          CurrentUser                                                                                                                                                                                                            
+force                          True                                                                                                                                                                                                                   
+AllowClobber                   True                                                                                                                                                                                                                   
+errorVariable                  ismo_Err                                                                                                                                                                                                               
+ErrorAction                    Stop                                                                                                                                                                                                                   
+whatif                         False
+PS>TerminatingError(Install-Package): "The running command stopped because the preference variable "ErrorActionPreference" or common parameter is set to Stop: No match was found for the specified search criteria and module name 'verb-Azure'. Try Get-PSRepository to see all available registered module repositories."
+>> TerminatingError(Install-Package): "The running command stopped because the preference variable "ErrorActionPreference" or common parameter is set to Stop: No match was found for the specified search criteria and module name 'verb-Azure'. Try Get-PSRepository to see all available registered module repositories."
+14:07:49: WARNING:  No match was found for the specified search criteria and module name 'verb-Azure'. Try Get-PSRepository to see all available registered module repositories.
+PS>TerminatingError(): "System error."
+14:07:49:
+#*======^ RUNNING processbulk-NewModule.ps1 ^======
+
+
+
+▒
+▒
+▒
+░
+░
+
+LYN-8DCZ1G2
+ ▓▒▓
+TORO\kadriTSS
+ ▓▒▓
+Mon 12/11/2023 14:07
+ [00:03:34]
+
+▒
+▒
+▒
+▒
+▒
+
+[PS]
+:
+C:\u\w\p\scripts
+
+$
+
+
+
+
+PS>CommandInvocation(Set-PSBreakpoint): "Set-PSBreakpoint"
+>> ParameterBinding(Set-PSBreakpoint): name="Script"; value="C:\sc\verb-dev\Public\update-NewModule.ps1"
+>> ParameterBinding(Set-PSBreakpoint): name="Line"; value="2139"
+
+  ID Script                                                      Line Command                                                    Variable                                                   Action
+  -- ------                                                      ---- -------                                                    --------                                                   ------
+ 112 update-NewModule.ps1                                        2139
+
+
+PS>CommandInvocation(Set-PSBreakpoint): "Set-PSBreakpoint"
+>> ParameterBinding(Set-PSBreakpoint): name="Script"; value="C:\sc\verb-dev\Public\update-NewModule.ps1"
+>> ParameterBinding(Set-PSBreakpoint): name="Line"; value="2143"
+
+  ID Script                                                      Line Command                                                    Variable                                                   Action
+  -- ------                                                      ---- -------                                                    --------                                                   ------
+ 113 update-NewModule.ps1                                        2143
+
+
+PS>epbp ; $psise.CurrentFile.FullPath | ipmo -fo -verb ; 
+Creating BP file:C:\sc\verb-dev\Public\update-NewModule-ps1-BP.xml
+16 Breakpoints exported to C:\sc\verb-dev\Public\update-NewModule-ps1-BP.xml
+Line Script                                    
+---- ------                                    
+ 509 C:\sc\verb-dev\Public\update-NewModule.ps1
+ 536 C:\sc\verb-dev\Public\update-NewModule.ps1
+ 540 C:\sc\verb-dev\Public\update-NewModule.ps1
+1698 C:\sc\verb-dev\Public\update-NewModule.ps1
+1867 C:\sc\verb-dev\Public\update-NewModule.ps1
+1890 C:\sc\verb-dev\Public\update-NewModule.ps1
+2083 C:\sc\verb-dev\Public\update-NewModule.ps1
+2126 C:\sc\verb-dev\Public\update-NewModule.ps1
+2139 C:\sc\verb-dev\Public\update-NewModule.ps1
+2143 C:\sc\verb-dev\Public\update-NewModule.ps1
+2152 C:\sc\verb-dev\Public\update-NewModule.ps1
+2156 C:\sc\verb-dev\Public\update-NewModule.ps1
+2205 C:\sc\verb-dev\Public\update-NewModule.ps1
+2385 C:\sc\verb-dev\Public\update-NewModule.ps1
+2435 C:\sc\verb-dev\Public\update-NewModule.ps1
+2480 C:\sc\verb-dev\Public\update-NewModule.ps1
+VERBOSE: Loading module from path 'C:\sc\verb-dev\Public\update-NewModule.ps1'.
+VERBOSE: Dot-sourcing the script file 'C:\sc\verb-dev\Public\update-NewModule.ps1'.
+
+▒
+▒
+▒
+░
+░
+
+LYN-8DCZ1G2
+ ▓▒▓
+TORO\kadriTSS
+ ▓▒▓
+Mon 12/11/2023 14:20
+ [994ms]
+
+▒
+▒
+▒
+▒
+▒
+
+[PS]
+:
+C:\u\w\p\scripts
+
+$
+
+
+
+
+PS>cls ; eisebp ; .\reset-ModuleBuildFail.ps1 -Name verb-Azure -verbose ;
+Creating BP file:C:\sc\verb-dev\Public\update-NewModule-ps1-BP.xml
+16 Breakpoints exported to C:\sc\verb-dev\Public\update-NewModule-ps1-BP.xml
+Line Script                                    
+---- ------                                    
+ 509 C:\sc\verb-dev\Public\update-NewModule.ps1
+ 536 C:\sc\verb-dev\Public\update-NewModule.ps1
+ 540 C:\sc\verb-dev\Public\update-NewModule.ps1
+1698 C:\sc\verb-dev\Public\update-NewModule.ps1
+1867 C:\sc\verb-dev\Public\update-NewModule.ps1
+1890 C:\sc\verb-dev\Public\update-NewModule.ps1
+2083 C:\sc\verb-dev\Public\update-NewModule.ps1
+2126 C:\sc\verb-dev\Public\update-NewModule.ps1
+2139 C:\sc\verb-dev\Public\update-NewModule.ps1
+2143 C:\sc\verb-dev\Public\update-NewModule.ps1
+2152 C:\sc\verb-dev\Public\update-NewModule.ps1
+2156 C:\sc\verb-dev\Public\update-NewModule.ps1
+2205 C:\sc\verb-dev\Public\update-NewModule.ps1
+2385 C:\sc\verb-dev\Public\update-NewModule.ps1
+2435 C:\sc\verb-dev\Public\update-NewModule.ps1
+2480 C:\sc\verb-dev\Public\update-NewModule.ps1
+VERBOSE: consistent results
+Calculated $runSource:ExternalScript
+VERBOSE: $rPSBoundParameters:
+Key     Value     
+---     -----     
+Name    verb-Azure
+Verbose True
+VERBOSE: Collect all non-default Params (works back to psv2 w CmdletBinding)
+$runSource       : ExternalScript
+$CmdletName      : reset-ModuleBuildFail.ps1
+$scriptName      : C:\usr\work\ps\scripts\reset-ModuleBuildFail.ps1
+$ScriptBaseName  : reset-ModuleBuildFail.ps1
+$ScriptNameNoExt : reset-ModuleBuildFail
+$ScriptDir       : C:\usr\work\ps\scripts
+$PSScriptRoot    : C:\usr\work\ps\scripts
+$PSCommandPath   : C:\usr\work\ps\scripts\reset-ModuleBuildFail.ps1
+$rPSScriptRoot   : C:\usr\work\ps\scripts
+$rPSCommandPath  : C:\usr\work\ps\scripts\reset-ModuleBuildFail.ps1
+14:20:30:#*======v reset-ModuleBuildFail.ps1: v======
+**********************
+Windows PowerShell transcript end
+End time: 20231211142030
+**********************

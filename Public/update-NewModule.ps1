@@ -16,7 +16,17 @@ r.com/tostka
     Github      : https://github.com/tostka/verb-dev
     Tags        : Powershell,Module,Build,Development
     REVISIONS
-    * 1:36 PM 12/11/2023 (this was all built into vdev v1.5.42, didn't error out, but didn't fire the new re-copy-item code either) ; ammended fail of test, to re-copy missing file into cumods\modname\modname, prior to pbmo run (testing w vdev rebuild) ;confirmed, vnet finally built, with the pass pre-conffirming the CUMods\modname\modname contained all files cited in the psd1.filelist (not sure what diff that makes, it didn't actually copy them if missing...); 
+    * 3:14 PM 12/11/2023 added expl for reset-ModuleBuildFail.ps1 cleanup pass ; 
+        vazure bombed on build, missing LICENSE.TXT, so used leaf 
+        dest spec on the re-copy - actually fix may be to premptively run 
+        reset-ModuleBuildFail.ps1 ahead of any rebuild - could be the issue was 
+        deadwood inapprop in the sc\modname\modname\ dir;   (prior was all built into 
+        vdev v1.5.42, didn't error out, but didn't fire the new re-copy-item code 
+        either) ; ammended fail of test, to re-copy missing file into 
+        cumods\modname\modname, prior to pbmo run (testing w vdev rebuild) ;confirmed, 
+        vnet finally built, with the pass pre-conffirming the CUMods\modname\modname 
+        contained all files cited in the psd1.filelist (not sure what diff that makes, 
+        it didn't actually copy them if missing...);  
     * 3:40 PM 12/8/2023 WIP: dbging #2017, just fixed typo, intent is to loop out and preverif the modname\modname has the files in the cu mods modname.psd1, before the next step test-modulemanifest, and the followon pbmod, that has been bombing for verb-network.
         - added code pre pbmod, & test-mani, to pull the cached CUMods\modname\modname\psd1, loop the scModNameModname psd1.filelist, and verify that the CUMods copy has each filelist entry present.
     * 4:34 PM 12/6/2023
@@ -254,6 +264,8 @@ r.com/tostka
     PS>   } ;
     PS> } ; 
     Code for weeding a stack of repo's for inappropriate files in the heirarchy that could wind up unexpectedly published, with newly-functional psd1.FileList support (publishable extensions, *not* in Resource\Docs\License subdirs that explicitly source FileList includes). Review the output, and remove any files you don't want published.
+    PS> .\reset-ModuleBuildFail.ps1 -Name verb-Azure -verbose ;
+    Separate uwps script that resets the local Repo c:\sc\[modulename]\[modulename\ dir, and reinstalls the most recent published vers of a given module that failed a build attempt (via processbulk-newmodule.ps1 & update-NewModule()). Worth running on a build fail - it looks like some psd1.FileList publish-module errors are a product of deadwood already pre-populated in the sc\modname\modname dir
     .LINK
     https://github.com/tostka/verb-dev
     #>
@@ -2124,11 +2136,11 @@ $(if($Merge){'MERGE parm specified as well:`n-Merge Public|Internal|Classes incl
                             C:\sc\verb-network\verb-network\verb-network.psd1
                             #>
                             $pltCI=[ordered]@{
-                                path = (join-path -path $ModPsdPath -childpath $fl -ea STOP) ; ;
-                                destination = $CUModTestPath ; 
+                                path = (join-path -path $ModPsdPath -childpath $fl -ea STOP) ; 
+                                destination = (join-path -path $CUModTestPath -childpath $fl -ea STOP) ; ; # fully leaf the dest
                                 force = $true ; 
                                 erroraction = 'STOP' ;
-                                verbose = $($VerbosePreference -eq "Continue") ; 
+                                verbose = $true ; # $($VerbosePreference -eq "Continue") ; 
                                 whatif = $($whatif) ;
                             } ;
                             $smsg = "RE-copy-item w`n$(($pltCI|out-string).trim())" ; 
