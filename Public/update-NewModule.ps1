@@ -16,6 +16,7 @@ r.com/tostka
     Github      : https://github.com/tostka/verb-dev
     Tags        : Powershell,Module,Build,Development
     REVISIONS
+    * 8:52 AM 12/12/2023 fixed typo trailing log echo #2771 (and added ref to both currlog & perm copy stored at uwps\logs)
     * 3:14 PM 12/11/2023 added expl for reset-ModuleBuildFail.ps1 cleanup pass ; 
         vazure bombed on build, missing LICENSE.TXT, so used leaf 
         dest spec on the re-copy - actually fix may be to premptively run 
@@ -2768,7 +2769,9 @@ $($logfile)
         else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
     } ;
 
-    $smsg = "`n(Processing log can be found at:$(join-path -path $ModDirPath -childpath $logfile))" ;
+    #$smsg = "`n(Processing log can be found at:$(join-path -path $ModDirPath -childpath $logfile))" ;
+    # fix typo
+    $smsg = "`n(Most recent processing log can be found at:$(join-path -path $ModDirPath -childpath (split-path -leaf $logfile)))`n(perm copy stored at:$($logfile)" ;
     if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug
     else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
     # copy the conversion log into the dev dir $ModDirPath
