@@ -256,7 +256,7 @@ wr | Write
     #>
     [CmdletBinding()]
     [Alias('get-VerbAlias')]
-    [OutputType([boolean])]
+    #[OutputType([boolean])]
     PARAM (
         [Parameter(Mandatory=$true,ValueFromPipeline=$true,HelpMessage="Verb to find the associated standard alias[-verb report]")]
         [string[]] $Verb

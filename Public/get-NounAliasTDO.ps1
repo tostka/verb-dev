@@ -197,7 +197,7 @@ wr | WebRequest
     #>
     [CmdletBinding()]
     [Alias('get-NounAlias')]
-    [OutputType([boolean])]
+    #[OutputType([boolean])]
     PARAM (
         [Parameter(Mandatory=$true,ValueFromPipeline=$true,HelpMessage="Noun to find the associated standard alias[-Noun Module]")]
         [string[]] $Noun
