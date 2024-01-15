@@ -18,6 +18,11 @@ function Initialize-ModuleFingerprint {
     AddedWebsite: https://powershellexplained.com/2017-10-14-Powershell-module-semantic-version/
     AddedTwitter: 
     REVISIONS
+    * 11:02 AM 1/15/2024 had various fundemental breaks - looks like was mid-revision, and not finished, and this isn't routinely used outside of new mods (or on processbuilk... when not-preexisting .ps1): Fixes:
+        - fixed $moddir.FullName -> $moddir ; 
+        - researched it's use: it's not used in step-moduleversioncalculated (which has it's own copy of the logic), is used in uwps\processbulk-NewModule.ps1, not breaking anything cuz running on existing fingerprint files
+        - pulled in undefined varis from other calling scripts: $moddir, $modroot, if not defined; hard break in #187: $psd1MBasename (was using .psm1 rplc for a .psd1 file) ; 
+        - fixed all $psd1m.fullname -> $psd1m ; added results test to the gcm -module block (break had no cmds comming back); fixed catch block w-w -fore use ; 
     * 2:29 PM 5/16/2022 add: backup-fileTDO of the fingerprintfile
     * 9:58 AM 10/26/2021 updated all echos, wh, ww, wv's with wlts's, updated KM logic to match step-ModuleVersionCalculated's latest
     * 6:11 PM 10/15/2021 rem'd # raa, replaced psd1/psm1-location code with Get-PSModuleFile(), which is a variant of BuildHelpers get-psModuleManifest. 
