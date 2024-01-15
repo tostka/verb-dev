@@ -73,6 +73,7 @@ function Initialize-ModuleFingerprint {
         # Get parameters this function was invoked with
         #$PSParameters = New-Object -TypeName PSObject -Property $PSBoundParameters ;
         $Verbose = ($VerbosePreference -eq 'Continue') ; 
+        
     } ;  # BEGIN-E
     PROCESS {
         $error.clear() ;
@@ -85,17 +86,56 @@ function Initialize-ModuleFingerprint {
                 write-verbose "GOTCHA!" ;
             } ; 
 
+            <# 9:58 AM 1/15/2024 below is using undefined locally $moddir.FullName; clearly it should be $path, which is a string, if we're calling it from publish-ModuleLocalFork, should use that funcs inputs resolution:
+                $ModRoot = $path ; 
+                $moddir = (gi -Path $path).FullName;
+                $moddirfiles = gci -path $moddir -recur ;
+                But it's a core piece of verb-dev\Public\Step-ModuleVersionCalculated.ps1
+                No it's not, the func has internalized the logic from this:
+                #695: # KM's core logic code:
+                    $fingerprint = foreach ( $command in $commandList ){
+
+                but sc\powershell\PSScripts\processbulk-NewModule.ps1 *does* run it, at line 
+                #391: $pltInitModFngr=[ordered]@{Path=$ModRoot ;Verbose = ($VerbosePreference -eq 'Continue');} ;
+                            $smsg = "Initialize-ModuleFingerprint w`n$(($pltInitModFngr|out-string).trim())" ;
+                            if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug
+                            else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+
+                            Initialize-ModuleFingerprint @pltInitModFngr ;
+                            $hasFingerprint = [boolean](test-path (join-path -path $ModRoot -childpath 'fingerprint'))
+
+                    it's underlying 
+                    #185: $scRoot = 'c:\sc\' ; 
+                    #260: $modroot= join-path -path $scRoot -child $ModuleName ;
+
+                    below is also stocking $moddirfiles TWICE
+                    $moddirfiles = gci @pltGCI ;
+                    $moddirfiles = gci -path $path -recur 
+                    # 1st block must be roughed in not completed, rem it out
+                #>
+                # test and force
+                if(-not $moddir -AND $path){
+                    $moddir = (gi -Path $path).FullName;
+                    if(-not $modroot){$modroot= $path} ; 
+
+                }
+
             $pltXMO=@{Name=$null ; force=$true ; ErrorAction='STOP'} ;
-            
-            $pltGCI=[ordered]@{path=$moddir.FullName ;recurse=$true ; ErrorAction='STOP'} ;
+            <#
+            $pltGCI=[ordered]@{path=$moddir ;recurse=$true ; ErrorAction='STOP'} ;
             $smsg =  "gci w`n$(($pltGCI|out-string).trim())" ; 
             if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
             else{ write-verbose "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; 
             
             $moddirfiles = gci @pltGCI ;
-            
+            #>
+
             $Path = (Resolve-Path $Path).Path ; 
             $moddirfiles = gci -path $path -recur 
+            # using an undefined $modname below as well, resolve it from split path
+            if(-not $modname){
+                $modname = split-path $Path -leaf ;
+            } ;
             #-=-=-=-=-=-=-=-=
             if(-not (gcm Get-PSModuleFile -ea 0)){
                 function Get-PSModuleFile {
@@ -178,26 +218,35 @@ function Initialize-ModuleFingerprint {
 
             $psd1M = Get-PSModuleFile -path $Path -ext .psd1 -verbose:$($VerbosePreference -eq 'Continue');
             $psm1 = Get-PSModuleFile -path $Path -ext .psm1 -verbose:$($VerbosePreference -eq 'Continue' ); 
+            # 10:31 AM 1/15/2024 got some fullname refs, above are coming back as strings, no fullname property: fix
 
             if($psd1M){
                 if($psd1M -is [system.array]){
                     throw "`$psd1M resolved to multiple .psm1 files in the module tree!" ; 
                 } ; 
                 # regardless of root dir name, the .psm1 name *is* the name of the module, use it for ipmo/rmo's
-                $psd1MBasename = ((split-path $psd1M.fullname -leaf).replace('.psm1','')) ; 
+                #$psd1MBasename = ((split-path $psd1M -leaf).replace('.psm1','')) ; # this isn't going to work, it's a .psd1 path, and we're rplacing .psm1!
+                $psd1MBasename = ((split-path $psd1M -leaf).replace('.psd1','')) ; # this isn't going to work, it's a .psd1 path, and we're rplacing .psm1!
                 if($modname -ne $psd1MBasename){
-                    $smsg = "Module has non-standard root-dir name`n$($moddir.fullname)"
+                    $smsg = "Module has non-standard root-dir name`n$($moddir)"
                     $smsg += "`ncorrecting `$modname variable to use *actual* .psm1 basename:$($psd1MBasename)" ; 
                     if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN } #Error|Warn|Debug 
                     else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; 
                     $modname = $psd1MBasename ; 
                 } ; 
-                $pltXMO.Name = $psd1M.fullname # load via full path to .psm1
+                $pltXMO.Name = $psd1M # load via full path to .psm1
                 $smsg =  "import-module w`n$(($pltXMO|out-string).trim())" ; 
                 if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
                 else{ write-verbose "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; 
                 import-module @pltXMO ;
-                $commandList = Get-Command -Module $modname ;
+                # ipmo works on full .psd1 name, but gcm doesn't, so if then the results
+                if(-not ($commandList = Get-Command -Module $modname)){
+                    $smsg = "get-command -module $($modname.replace('.psd1','')) FAILED to return a list of commands!"
+                    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN } #Error|Warn|Debug 
+                    else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; ]
+                    throw $smsg ;
+                    BREAK ; 
+                } ;
                 $pltXMO.Name = $psd1MBasename ; # have to rmo using *basename*
                 $smsg =  "remove-module w`n$(($pltXMO|out-string).trim())" ; 
                 if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
@@ -225,7 +274,7 @@ function Initialize-ModuleFingerprint {
                 } ;   
 
             } else {
-                throw "No module .psm1 file found in `$path:`n$(join-path -path $moddir.fullname -child "$modname.psm1")" ;
+                throw "No module .psm1 file found in `$path:`n$(join-path -path $moddir -child "$modname.psm1")" ;
             } ;  
   
         } CATCH {
@@ -240,7 +289,7 @@ function Initialize-ModuleFingerprint {
             #-=-=-=-=-=-=-=-=
             $smsg = "FULL ERROR TRAPPED (EXPLICIT CATCH BLOCK WOULD LOOK LIKE): } catch[$($ErrTrapd.Exception.GetType().FullName)]{" ; 
             if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level ERROR } #Error|Warn|Debug 
-            else{ write-warning -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+            else{ write-warning  "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
             Break #Opts: STOP(debug)|EXIT(close)|CONTINUE(move on in loop cycle)|BREAK(exit loop iteration)|THROW $_/'CustomMsg'(end script with Err output)
         } ; 
     } ;  # PROC-E
@@ -253,7 +302,7 @@ function Initialize-ModuleFingerprint {
             if (!$fingerprintBU) {throw "FAILURE" } ;
             #> 
 
-            $pltOFile=[ordered]@{Encoding='utf8' ;FilePath=(join-path -path $moddir.fullname -childpath 'fingerprint') ;whatif=$($whatif) ;} ; 
+            $pltOFile=[ordered]@{Encoding='utf8' ;FilePath=(join-path -path $moddir -childpath 'fingerprint') ;whatif=$($whatif) ;} ; 
 
             if(test-path $pltOFile.FilePath){
                 write-verbose "(backup-FileTDO -path $($pltOFile.FilePath))" ;
