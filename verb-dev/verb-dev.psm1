@@ -5,7 +5,7 @@
 .SYNOPSIS
 VERB-dev - Development PS Module-related generic functions
 .NOTES
-Version     : 1.5.44
+Version     : 1.5.45
 Author      : Todd Kadrie
 Website     :	https://www.toddomation.com
 Twitter     :	@tostka
@@ -6912,7 +6912,7 @@ wr | WebRequest
     #>
     [CmdletBinding()]
     [Alias('get-NounAlias')]
-    [OutputType([boolean])]
+    #[OutputType([boolean])]
     PARAM (
         [Parameter(Mandatory=$true,ValueFromPipeline=$true,HelpMessage="Noun to find the associated standard alias[-Noun Module]")]
         [string[]] $Noun
@@ -7692,7 +7692,7 @@ wr | Write
     #>
     [CmdletBinding()]
     [Alias('get-VerbAlias')]
-    [OutputType([boolean])]
+    #[OutputType([boolean])]
     PARAM (
         [Parameter(Mandatory=$true,ValueFromPipeline=$true,HelpMessage="Verb to find the associated standard alias[-verb report]")]
         [string[]] $Verb
@@ -8255,6 +8255,11 @@ function Initialize-ModuleFingerprint {
     AddedWebsite: https://powershellexplained.com/2017-10-14-Powershell-module-semantic-version/
     AddedTwitter: 
     REVISIONS
+    * 11:02 AM 1/15/2024 had various fundemental breaks - looks like was mid-revision, and not finished, and this isn't routinely used outside of new mods (or on processbuilk... when not-preexisting .ps1): Fixes:
+        - fixed $moddir.FullName -> $moddir ; 
+        - researched it's use: it's not used in step-moduleversioncalculated (which has it's own copy of the logic), is used in uwps\processbulk-NewModule.ps1, not breaking anything cuz running on existing fingerprint files
+        - pulled in undefined varis from other calling scripts: $moddir, $modroot, if not defined; hard break in #187: $psd1MBasename (was using .psm1 rplc for a .psd1 file) ; 
+        - fixed all $psd1m.fullname -> $psd1m ; added results test to the gcm -module block (break had no cmds comming back); fixed catch block w-w -fore use ; 
     * 2:29 PM 5/16/2022 add: backup-fileTDO of the fingerprintfile
     * 9:58 AM 10/26/2021 updated all echos, wh, ww, wv's with wlts's, updated KM logic to match step-ModuleVersionCalculated's latest
     * 6:11 PM 10/15/2021 rem'd # raa, replaced psd1/psm1-location code with Get-PSModuleFile(), which is a variant of BuildHelpers get-psModuleManifest. 
@@ -8310,6 +8315,7 @@ function Initialize-ModuleFingerprint {
         # Get parameters this function was invoked with
         #$PSParameters = New-Object -TypeName PSObject -Property $PSBoundParameters ;
         $Verbose = ($VerbosePreference -eq 'Continue') ; 
+        
     } ;  # BEGIN-E
     PROCESS {
         $error.clear() ;
@@ -8322,17 +8328,56 @@ function Initialize-ModuleFingerprint {
                 write-verbose "GOTCHA!" ;
             } ; 
 
+            <# 9:58 AM 1/15/2024 below is using undefined locally $moddir.FullName; clearly it should be $path, which is a string, if we're calling it from publish-ModuleLocalFork, should use that funcs inputs resolution:
+                $ModRoot = $path ; 
+                $moddir = (gi -Path $path).FullName;
+                $moddirfiles = gci -path $moddir -recur ;
+                But it's a core piece of verb-dev\Public\Step-ModuleVersionCalculated.ps1
+                No it's not, the func has internalized the logic from this:
+                #695: # KM's core logic code:
+                    $fingerprint = foreach ( $command in $commandList ){
+
+                but sc\powershell\PSScripts\processbulk-NewModule.ps1 *does* run it, at line 
+                #391: $pltInitModFngr=[ordered]@{Path=$ModRoot ;Verbose = ($VerbosePreference -eq 'Continue');} ;
+                            $smsg = "Initialize-ModuleFingerprint w`n$(($pltInitModFngr|out-string).trim())" ;
+                            if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug
+                            else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+
+                            Initialize-ModuleFingerprint @pltInitModFngr ;
+                            $hasFingerprint = [boolean](test-path (join-path -path $ModRoot -childpath 'fingerprint'))
+
+                    it's underlying 
+                    #185: $scRoot = 'c:\sc\' ; 
+                    #260: $modroot= join-path -path $scRoot -child $ModuleName ;
+
+                    below is also stocking $moddirfiles TWICE
+                    $moddirfiles = gci @pltGCI ;
+                    $moddirfiles = gci -path $path -recur 
+                    # 1st block must be roughed in not completed, rem it out
+                #>
+                # test and force
+                if(-not $moddir -AND $path){
+                    $moddir = (gi -Path $path).FullName;
+                    if(-not $modroot){$modroot= $path} ; 
+
+                }
+
             $pltXMO=@{Name=$null ; force=$true ; ErrorAction='STOP'} ;
-            
-            $pltGCI=[ordered]@{path=$moddir.FullName ;recurse=$true ; ErrorAction='STOP'} ;
+            <#
+            $pltGCI=[ordered]@{path=$moddir ;recurse=$true ; ErrorAction='STOP'} ;
             $smsg =  "gci w`n$(($pltGCI|out-string).trim())" ; 
             if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
             else{ write-verbose "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; 
             
             $moddirfiles = gci @pltGCI ;
-            
+            #>
+
             $Path = (Resolve-Path $Path).Path ; 
             $moddirfiles = gci -path $path -recur 
+            # using an undefined $modname below as well, resolve it from split path
+            if(-not $modname){
+                $modname = split-path $Path -leaf ;
+            } ;
             #-=-=-=-=-=-=-=-=
             if(-not (gcm Get-PSModuleFile -ea 0)){
                 function Get-PSModuleFile {
@@ -8415,26 +8460,35 @@ function Initialize-ModuleFingerprint {
 
             $psd1M = Get-PSModuleFile -path $Path -ext .psd1 -verbose:$($VerbosePreference -eq 'Continue');
             $psm1 = Get-PSModuleFile -path $Path -ext .psm1 -verbose:$($VerbosePreference -eq 'Continue' ); 
+            # 10:31 AM 1/15/2024 got some fullname refs, above are coming back as strings, no fullname property: fix
 
             if($psd1M){
                 if($psd1M -is [system.array]){
                     throw "`$psd1M resolved to multiple .psm1 files in the module tree!" ; 
                 } ; 
                 # regardless of root dir name, the .psm1 name *is* the name of the module, use it for ipmo/rmo's
-                $psd1MBasename = ((split-path $psd1M.fullname -leaf).replace('.psm1','')) ; 
+                #$psd1MBasename = ((split-path $psd1M -leaf).replace('.psm1','')) ; # this isn't going to work, it's a .psd1 path, and we're rplacing .psm1!
+                $psd1MBasename = ((split-path $psd1M -leaf).replace('.psd1','')) ; # this isn't going to work, it's a .psd1 path, and we're rplacing .psm1!
                 if($modname -ne $psd1MBasename){
-                    $smsg = "Module has non-standard root-dir name`n$($moddir.fullname)"
+                    $smsg = "Module has non-standard root-dir name`n$($moddir)"
                     $smsg += "`ncorrecting `$modname variable to use *actual* .psm1 basename:$($psd1MBasename)" ; 
                     if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN } #Error|Warn|Debug 
                     else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; 
                     $modname = $psd1MBasename ; 
                 } ; 
-                $pltXMO.Name = $psd1M.fullname # load via full path to .psm1
+                $pltXMO.Name = $psd1M # load via full path to .psm1
                 $smsg =  "import-module w`n$(($pltXMO|out-string).trim())" ; 
                 if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
                 else{ write-verbose "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; 
                 import-module @pltXMO ;
-                $commandList = Get-Command -Module $modname ;
+                # ipmo works on full .psd1 name, but gcm doesn't, so if then the results
+                if(-not ($commandList = Get-Command -Module $modname)){
+                    $smsg = "get-command -module $($modname.replace('.psd1','')) FAILED to return a list of commands!"
+                    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN } #Error|Warn|Debug 
+                    else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; ]
+                    throw $smsg ;
+                    BREAK ; 
+                } ;
                 $pltXMO.Name = $psd1MBasename ; # have to rmo using *basename*
                 $smsg =  "remove-module w`n$(($pltXMO|out-string).trim())" ; 
                 if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
@@ -8462,7 +8516,7 @@ function Initialize-ModuleFingerprint {
                 } ;   
 
             } else {
-                throw "No module .psm1 file found in `$path:`n$(join-path -path $moddir.fullname -child "$modname.psm1")" ;
+                throw "No module .psm1 file found in `$path:`n$(join-path -path $moddir -child "$modname.psm1")" ;
             } ;  
   
         } CATCH {
@@ -8477,7 +8531,7 @@ function Initialize-ModuleFingerprint {
             #-=-=-=-=-=-=-=-=
             $smsg = "FULL ERROR TRAPPED (EXPLICIT CATCH BLOCK WOULD LOOK LIKE): } catch[$($ErrTrapd.Exception.GetType().FullName)]{" ; 
             if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level ERROR } #Error|Warn|Debug 
-            else{ write-warning -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+            else{ write-warning  "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
             Break #Opts: STOP(debug)|EXIT(close)|CONTINUE(move on in loop cycle)|BREAK(exit loop iteration)|THROW $_/'CustomMsg'(end script with Err output)
         } ; 
     } ;  # PROC-E
@@ -8490,7 +8544,7 @@ function Initialize-ModuleFingerprint {
             if (!$fingerprintBU) {throw "FAILURE" } ;
             #> 
 
-            $pltOFile=[ordered]@{Encoding='utf8' ;FilePath=(join-path -path $moddir.fullname -childpath 'fingerprint') ;whatif=$($whatif) ;} ; 
+            $pltOFile=[ordered]@{Encoding='utf8' ;FilePath=(join-path -path $moddir -childpath 'fingerprint') ;whatif=$($whatif) ;} ; 
 
             if(test-path $pltOFile.FilePath){
                 write-verbose "(backup-FileTDO -path $($pltOFile.FilePath))" ;
@@ -10212,6 +10266,7 @@ function Step-ModuleVersionCalculated {
     AddedWebsite: www.thesurlyadmin.com
     AddedTwitter: @thesurlyadm1n
     REVISIONS
+    * 8:16 AM 1/16/2024 added gcm commands return shortage comment in re: in-line internal funcs throwing off the count (as raw goes after those as full blown funcs, while gcm doesn't return/count them)
     * 3:32 PM 11/29/2023 add test-modulemanifest error testing (cap -errorvariable and eval), it doesn't actually returna $false test, just the parsed xml, where there's an unresolvable FileList entry. 
     * 8:02 AM 6/23/2023 fix: #433: # 2:20 PM 6/22/2023 if you're going to use a param with boolean, they have to be colon'd: -PassThru:$true (built into v1.5.26)
     * 2:18 PM 6/2/2023 added: Try/Catch around all critical items; added test for .psm1 diverge <<<<<< HEAD tags; expanded ipmo -fo -verb tests to include ErrorVariable and Passthru, capture into variable, for info tracking down compile fails.
@@ -10723,6 +10778,7 @@ function Step-ModuleVersionCalculated {
                             # use Select-String regex parse to prxy count # of funcs that roughly should come back from gcm w/in $ASTMatchThreshold
                             if( ($commandList.count / $rawfunccount) -lt $ASTMatchThreshold ){
                                 $smsg = "get-command failed to return a complete Func/Alias list from $($ModuleName) -lt AST $($ASTMatchThreshold * 100)% match:" ; 
+                                $smsg += "`n(or has significant BUILD-block etc _internal_ funcs, throwing count off)" ; 
                                 $smsg += "`nAST profile (get-FunctionBlocks+get-AliasAssignsAST) returned:$($ASTCmds.count)"
                                 $smsg += "`nFORCING STEP EVAL INTO '$($MinVersionIncrementBump)' TO WORK AROUND BUG" ;
                                 if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN } #Error|Warn|Debug 
@@ -14416,8 +14472,8 @@ Export-ModuleMember -Function backup-ModuleBuild,check-PsLocalRepoRegistration,c
 # SIG # Begin signature block
 # MIIELgYJKoZIhvcNAQcCoIIEHzCCBBsCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUg248SbiGtzc8pKkB48vwPlyO
-# tV6gggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUChVPsoWUMPmWJEvrYGRQLbJY
+# XrugggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
 # MCwxKjAoBgNVBAMTIVBvd2VyU2hlbGwgTG9jYWwgQ2VydGlmaWNhdGUgUm9vdDAe
 # Fw0xNDEyMjkxNzA3MzNaFw0zOTEyMzEyMzU5NTlaMBUxEzARBgNVBAMTClRvZGRT
 # ZWxmSUkwgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBALqRVt7uNweTkZZ+16QG
@@ -14432,9 +14488,9 @@ Export-ModuleMember -Function backup-ModuleBuild,check-PsLocalRepoRegistration,c
 # AWAwggFcAgEBMEAwLDEqMCgGA1UEAxMhUG93ZXJTaGVsbCBMb2NhbCBDZXJ0aWZp
 # Y2F0ZSBSb290AhBaydK0VS5IhU1Hy6E1KUTpMAkGBSsOAwIaBQCgeDAYBgorBgEE
 # AYI3AgEMMQowCKACgAChAoAAMBkGCSqGSIb3DQEJAzEMBgorBgEEAYI3AgEEMBwG
-# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBT0kHks
-# Jw99JfgnGQjidnEGrIbs0TANBgkqhkiG9w0BAQEFAASBgCa4KP0gcuMDhSxJZcNS
-# emU3cOaMSAyc2a04+ejNZ3SikNWE2q+C4trn3REBh6QJAHgupXH+MjDyZ+TMI9a4
-# MezrHmKhYohcoYgCrb/rLfx96izu6bAH2B+cAjTZd1P9L0IFJT3lcROHIFwZIhcR
-# GcL+38S38c1BpEVfu0Plhm4X
+# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBS3lxFG
+# VcC4ORrLoF6NdVtoKA1DVzANBgkqhkiG9w0BAQEFAASBgJcAb/4th9nP13yF5NAU
+# lVW9ak1T5yRgnmtlG8maz3neGlXgswWTIK5YnOi9BNKBqL5XLk4Y0NiBxQ5CZsMc
+# R2VKXzrJJXp2i72jSkO3G1JvvYSLcau7DOsx5anj/L6ZmYt7LbTSw5p4SxdCIbz+
+# 0VFKnZYvabm8W2TEjaM74tht
 # SIG # End signature block
