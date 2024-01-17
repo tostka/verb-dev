@@ -16,6 +16,7 @@ Function Uninstall-ModuleForce {
     Github      : https://github.com/tostka/verb-dev
     Tags        : Powershell,Module,Management,Lifecycle
     REVISIONS
+    * 12:33 PM 1/17/2024 added RunAA pretest, and folder perms seize code
     * 10:10 AM 5/17/2022 updated post test, also don't want it to abort/break, on any single failure.
     * 11:11 AM 5/10/2022 init, split out process-NewModule #773: $smsg= "Removing existing profile $($ModuleName) content..."  block, to have a single maintainable shared func
     .DESCRIPTION
@@ -70,7 +71,13 @@ Function Uninstall-ModuleForce {
             #write-verbose "Data received from parameter input: '$($InputObject)'" ;
             write-verbose "(non-pipeline - param - input)" ;
         } ;
-
+        
+        if(-not(get-variable -Name whoamiAll -ea 0)){$whoamiAll = (whoami /all)} ;
+        if([bool](($whoamiAll |Where-Object{$_ -match 'BUILTIN\\Administrators'}) -AND ($whoamiAll |
+            Where-Object{$_ -match 'S-1-16-12288'}))){} else { 
+                throw "Must be RunAsAdmin!" ; 
+                BREAK ;
+            } ; 
     } ;  # BEGIN-E
     PROCESS {
         $Error.Clear() ;
@@ -126,11 +133,17 @@ Function Uninstall-ModuleForce {
 
             $modpaths = $env:PSModulePath.split(';') ;
             foreach($modpath in $modpaths){
-                #"==$($modpath):"
                 $smsg= "Checking: $($Mod) below: $($modpath)..." ;
                 if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info }  #Error|Warn|Debug
                 else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
                 $searchPath = join-path -path $modpath -ChildPath "$($Mod)\*.*" ;
+                # adding ownership seize before removal:
+                if($mPath = get-item -path (join-path -path $modpath -ChildPath $Mod) -ea 0){
+                    write-host "Seizing ownership:$($mPath.fullname)..." ;
+                    takeown /F $mPath.fullname /A /R ;
+                    icacls $mPath.fullname /reset ;
+                    icacls $mPath.fullname /grant Administrators:'F' /inheritance:d /T ;
+                } ; 
                 # adding -GracefulFail to get past locked verb-dev cmdlets
                 $bRet = remove-ItemRetry -Path $searchPath -Recurse -showdebug:$($showdebug) -whatif:$($whatif) -GracefulFail ;
                 #if (-not$bRet) {throw "FAILURE" ; Break ; } ;
