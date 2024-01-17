@@ -15,6 +15,7 @@ function import-ISEOpenFiles {
     Github      : https://github.com/tostka/verb-dev
     Tags        : Powershell,ISE,development,debugging
     REVISIONS
+    * 3:31 PM 1/17/2024 typo fix: lacking $ on () (dumping $ISES obj into pipeline/console)
     * 1:20 PM 3/27/2023 bugfix: coerce $txmlf into [system.io.fileinfo], to make it match $fileinfo's type.
     * 9:35 AM 3/8/2023 added -filepath (with pipeline support), explicit pathed file support (to pipeline in from get-IseOpenFilesExported()).
     * 3:28 PM 6/23/2022 add -Tag param to permit running interger-suffixed variants (ie. mult ise sessions open & stored from same desktop). 
@@ -90,7 +91,7 @@ function import-ISEOpenFiles {
                     if($allISEScripts){
                         foreach($ISES in $allISEScripts){
                             if($psise.powershelltabs.files.fullpath -contains $ISES){
-                                write-host "($ISES) is already OPEN in Current ISE tab list (skipping)" ;
+                                write-host "$($ISES) is already OPEN in Current ISE tab list (skipping)" ;
                             } else {
                                 if(test-path $ISES){
                                     <# #New tab & open in new tab: - no we want them all in one tab
