@@ -5,7 +5,7 @@
 .SYNOPSIS
 VERB-dev - Development PS Module-related generic functions
 .NOTES
-Version     : 1.5.45
+Version     : 1.5.46
 Author      : Todd Kadrie
 Website     :	https://www.toddomation.com
 Twitter     :	@tostka
@@ -4605,6 +4605,7 @@ function export-ISEBreakPointsALL {
     Github      : https://github.com/tostka/verb-dev
     Tags        : Powershell,ISE,development,debugging
     REVISIONS
+    * 1:22 PM 2/28/2024 add: 'epBpAll' alias
     * 12:23 PM 5/23/2022 added try/catch: failed out hard on Untitled.ps1's
     * 9:19 AM 5/20/2022 add: eIseBpAll alias (using these a lot lately)
     * 12:14 PM 5/11/2022 init
@@ -4621,7 +4622,7 @@ function export-ISEBreakPointsALL {
     https://github.com/tostka/verb-dev
     #>
     [CmdletBinding()]
-    [Alias('eIseBpAll')]
+    [Alias('eIseBpAll','epBpAll')]
     PARAM(
         [Parameter(HelpMessage="Whatif Flag  [-whatIf]")]
         [switch] $whatIf
@@ -7983,6 +7984,7 @@ function import-ISEBreakPointsALL {
     Github      : https://github.com/tostka/verb-dev
     Tags        : Powershell,ISE,development,debugging
     REVISIONS
+    * 1:21 PM 2/28/2024 add ipbpAll alias
     * 12:23 PM 5/23/2022 added try/catch: failed out hard on Untitled.ps1's
     * 9:19 AM 5/20/2022 add: iIseBpAll alias (using these a lot lately; w freq crashouts of ise, and need to recover all files open & BPs to quickly get back to function)
     * 1:58 PM 5/16/2022 rem'd whatif (not supported in child func)
@@ -7999,7 +8001,7 @@ function import-ISEBreakPointsALL {
     https://github.com/tostka/verb-dev
     #>
     [CmdletBinding()]
-    [Alias('iIseBpAll')]
+    [Alias('iIseBpAll','ipbpAll')]
     PARAM(
         #[Parameter(HelpMessage="Whatif Flag  [-whatIf]")]
         #[switch] $whatIf
@@ -8124,6 +8126,7 @@ function import-ISEOpenFiles {
     Github      : https://github.com/tostka/verb-dev
     Tags        : Powershell,ISE,development,debugging
     REVISIONS
+    * 3:31 PM 1/17/2024 typo fix: lacking $ on () (dumping $ISES obj into pipeline/console)
     * 1:20 PM 3/27/2023 bugfix: coerce $txmlf into [system.io.fileinfo], to make it match $fileinfo's type.
     * 9:35 AM 3/8/2023 added -filepath (with pipeline support), explicit pathed file support (to pipeline in from get-IseOpenFilesExported()).
     * 3:28 PM 6/23/2022 add -Tag param to permit running interger-suffixed variants (ie. mult ise sessions open & stored from same desktop). 
@@ -8199,7 +8202,7 @@ function import-ISEOpenFiles {
                     if($allISEScripts){
                         foreach($ISES in $allISEScripts){
                             if($psise.powershelltabs.files.fullpath -contains $ISES){
-                                write-host "($ISES) is already OPEN in Current ISE tab list (skipping)" ;
+                                write-host "$($ISES) is already OPEN in Current ISE tab list (skipping)" ;
                             } else {
                                 if(test-path $ISES){
                                     <# #New tab & open in new tab: - no we want them all in one tab
@@ -11517,6 +11520,7 @@ Function Uninstall-ModuleForce {
     Github      : https://github.com/tostka/verb-dev
     Tags        : Powershell,Module,Management,Lifecycle
     REVISIONS
+    * 12:33 PM 1/17/2024 added RunAA pretest, and folder perms seize code
     * 10:10 AM 5/17/2022 updated post test, also don't want it to abort/break, on any single failure.
     * 11:11 AM 5/10/2022 init, split out process-NewModule #773: $smsg= "Removing existing profile $($ModuleName) content..."  block, to have a single maintainable shared func
     .DESCRIPTION
@@ -11571,7 +11575,13 @@ Function Uninstall-ModuleForce {
             #write-verbose "Data received from parameter input: '$($InputObject)'" ;
             write-verbose "(non-pipeline - param - input)" ;
         } ;
-
+        
+        if(-not(get-variable -Name whoamiAll -ea 0)){$whoamiAll = (whoami /all)} ;
+        if([bool](($whoamiAll |Where-Object{$_ -match 'BUILTIN\\Administrators'}) -AND ($whoamiAll |
+            Where-Object{$_ -match 'S-1-16-12288'}))){} else { 
+                throw "Must be RunAsAdmin!" ; 
+                BREAK ;
+            } ; 
     } ;  # BEGIN-E
     PROCESS {
         $Error.Clear() ;
@@ -11627,11 +11637,17 @@ Function Uninstall-ModuleForce {
 
             $modpaths = $env:PSModulePath.split(';') ;
             foreach($modpath in $modpaths){
-                #"==$($modpath):"
                 $smsg= "Checking: $($Mod) below: $($modpath)..." ;
                 if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info }  #Error|Warn|Debug
                 else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
                 $searchPath = join-path -path $modpath -ChildPath "$($Mod)\*.*" ;
+                # adding ownership seize before removal:
+                if($mPath = get-item -path (join-path -path $modpath -ChildPath $Mod) -ea 0){
+                    write-host "Seizing ownership:$($mPath.fullname)..." ;
+                    takeown /F $mPath.fullname /A /R ;
+                    icacls $mPath.fullname /reset ;
+                    icacls $mPath.fullname /grant Administrators:'F' /inheritance:d /T ;
+                } ; 
                 # adding -GracefulFail to get past locked verb-dev cmdlets
                 $bRet = remove-ItemRetry -Path $searchPath -Recurse -showdebug:$($showdebug) -whatif:$($whatif) -GracefulFail ;
                 #if (-not$bRet) {throw "FAILURE" ; Break ; } ;
@@ -14472,8 +14488,8 @@ Export-ModuleMember -Function backup-ModuleBuild,check-PsLocalRepoRegistration,c
 # SIG # Begin signature block
 # MIIELgYJKoZIhvcNAQcCoIIEHzCCBBsCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUChVPsoWUMPmWJEvrYGRQLbJY
-# XrugggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUsBh+lpw7vFdPVfHPCKDI+OCf
+# f/6gggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
 # MCwxKjAoBgNVBAMTIVBvd2VyU2hlbGwgTG9jYWwgQ2VydGlmaWNhdGUgUm9vdDAe
 # Fw0xNDEyMjkxNzA3MzNaFw0zOTEyMzEyMzU5NTlaMBUxEzARBgNVBAMTClRvZGRT
 # ZWxmSUkwgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBALqRVt7uNweTkZZ+16QG
@@ -14488,9 +14504,9 @@ Export-ModuleMember -Function backup-ModuleBuild,check-PsLocalRepoRegistration,c
 # AWAwggFcAgEBMEAwLDEqMCgGA1UEAxMhUG93ZXJTaGVsbCBMb2NhbCBDZXJ0aWZp
 # Y2F0ZSBSb290AhBaydK0VS5IhU1Hy6E1KUTpMAkGBSsOAwIaBQCgeDAYBgorBgEE
 # AYI3AgEMMQowCKACgAChAoAAMBkGCSqGSIb3DQEJAzEMBgorBgEEAYI3AgEEMBwG
-# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBS3lxFG
-# VcC4ORrLoF6NdVtoKA1DVzANBgkqhkiG9w0BAQEFAASBgJcAb/4th9nP13yF5NAU
-# lVW9ak1T5yRgnmtlG8maz3neGlXgswWTIK5YnOi9BNKBqL5XLk4Y0NiBxQ5CZsMc
-# R2VKXzrJJXp2i72jSkO3G1JvvYSLcau7DOsx5anj/L6ZmYt7LbTSw5p4SxdCIbz+
-# 0VFKnZYvabm8W2TEjaM74tht
+# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBRnrKVv
+# 7CzMROwZeYguFI8DEg4WADANBgkqhkiG9w0BAQEFAASBgKvccAvEG7CL8+BktknS
+# cp849t55HMselsiA6+RGHOceRWUSoBy2bvCVP+96eEBgbp7WjH3enexeL2wlu22B
+# g6PMNCFliO08x3y/8gR1+kcVtJw+3nJGz6BA5xB+18akj8sJmCrtv0PFYyq1mxX1
+# k6YgGRO6iCxV6nRbxlIPTkG3
 # SIG # End signature block
