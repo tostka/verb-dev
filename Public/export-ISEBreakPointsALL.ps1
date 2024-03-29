@@ -15,6 +15,7 @@ function export-ISEBreakPointsALL {
     Github      : https://github.com/tostka/verb-dev
     Tags        : Powershell,ISE,development,debugging
     REVISIONS
+    * 8:27 AM 3/26/2024 chg eIseBpAll -> epIseBpAll
     * 1:22 PM 2/28/2024 add: 'epBpAll' alias
     * 12:23 PM 5/23/2022 added try/catch: failed out hard on Untitled.ps1's
     * 9:19 AM 5/20/2022 add: eIseBpAll alias (using these a lot lately)
@@ -32,7 +33,7 @@ function export-ISEBreakPointsALL {
     https://github.com/tostka/verb-dev
     #>
     [CmdletBinding()]
-    [Alias('eIseBpAll','epBpAll')]
+    [Alias('epIseBpAll','epBpAll')]
     PARAM(
         [Parameter(HelpMessage="Whatif Flag  [-whatIf]")]
         [switch] $whatIf

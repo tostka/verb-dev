@@ -15,6 +15,7 @@ function import-ISEBreakPointsALL {
     Github      : https://github.com/tostka/verb-dev
     Tags        : Powershell,ISE,development,debugging
     REVISIONS
+    * 8:28 AM 3/26/2024 chg iIseBpAll -> ipIseBpAll
     * 1:21 PM 2/28/2024 add ipbpAll alias
     * 12:23 PM 5/23/2022 added try/catch: failed out hard on Untitled.ps1's
     * 9:19 AM 5/20/2022 add: iIseBpAll alias (using these a lot lately; w freq crashouts of ise, and need to recover all files open & BPs to quickly get back to function)
@@ -32,7 +33,7 @@ function import-ISEBreakPointsALL {
     https://github.com/tostka/verb-dev
     #>
     [CmdletBinding()]
-    [Alias('iIseBpAll','ipbpAll')]
+    [Alias('ipIseBpAll','ipbpAll')]
     PARAM(
         #[Parameter(HelpMessage="Whatif Flag  [-whatIf]")]
         #[switch] $whatIf

@@ -15,6 +15,7 @@ function import-ISEBreakPoints {
     Github      : https://github.com/tostka
     Tags        : Powershell,ISE,development,debugging
     REVISIONS
+    * 8:28 AM 3/26/2024 chg iIseBp -> ipIseBP
     * 10:20 AM 5/11/2022 added whatif support
     * 8:58 AM 5/9/2022 err suppress: test for bps before importing (emtpy bp xml files happen)
     * 8:43 AM 8/26/2020 fixed typo $ibp[0]->$ibps[0]
@@ -38,7 +39,7 @@ function import-ISEBreakPoints {
     Github      : https://github.com/tostka
     #>
     [CmdletBinding()]
-    [Alias('iIseBp','ipbp')]
+    [Alias('ipIseBp','ipbp')]
 
     #[ValidateScript({Test-Path $_})]
     PARAM(

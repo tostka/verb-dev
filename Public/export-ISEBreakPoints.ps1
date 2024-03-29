@@ -17,6 +17,7 @@ function export-ISEBreakPoints {
     Github      : https://github.com/tostka
     Tags        : Powershell,ISE,development,debugging
     REVISIONS
+    * 8:27 AM 3/26/2024 chg eIseBp -> epIseBp
     * 2:35 PM 5/24/2023 add: prompt for force deletion of existing .xml if no psbreakpoints defined in loaded ISE copy for script.
     * 10:20 AM 5/11/2022 added whatif support; updated CBH ; expanded echos; cleanedup
     * 8:58 AM 5/9/2022 add: test for bps before exporting
@@ -40,7 +41,7 @@ function export-ISEBreakPoints {
     Github      : https://github.com/tostka
     #>
     [CmdletBinding()]
-    [Alias('eIseBp','epBP')]
+    [Alias('epIseBp','epBP')]
     PARAM(
         [Parameter(HelpMessage="Default Path for export (when `$Script directory is unavailable)[-PathDefault c:\path-to\]")]
         [ValidateScript({Test-Path $_ -PathType 'Container'})]

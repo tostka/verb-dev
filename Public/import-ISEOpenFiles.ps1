@@ -15,6 +15,7 @@ function import-ISEOpenFiles {
     Github      : https://github.com/tostka/verb-dev
     Tags        : Powershell,ISE,development,debugging
     REVISIONS
+    * 8:30 AM 3/26/2024 chg iIseOpen -> ipIseOpen
     * 3:31 PM 1/17/2024 typo fix: lacking $ on () (dumping $ISES obj into pipeline/console)
     * 1:20 PM 3/27/2023 bugfix: coerce $txmlf into [system.io.fileinfo], to make it match $fileinfo's type.
     * 9:35 AM 3/8/2023 added -filepath (with pipeline support), explicit pathed file support (to pipeline in from get-IseOpenFilesExported()).
@@ -38,7 +39,7 @@ function import-ISEOpenFiles {
     https://github.com/tostka/verb-dev
     #>
     [CmdletBinding()]
-    [Alias('iIseOpen')]
+    [Alias('ipIseOpen')]
     PARAM(
         [Parameter(Position=0,HelpMessage="Optional Tag to apply to filename[-Tag MFA]")]
         [string]$Tag,

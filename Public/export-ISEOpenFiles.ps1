@@ -15,6 +15,7 @@ function export-ISEOpenFiles {
     Github      : https://github.com/tostka/verb-dev
     Tags        : Powershell,ISE,development,debugging
     REVISIONS
+    * 8:31 AM 3/26/2024 chg eIseOpen -> epIseOpen
     * 3:28 PM 6/23/2022 add -Tag param to permit running interger-suffixed variants (ie. mult ise sessions open & stored from same desktop). 
     * 9:19 AM 5/20/2022 add: eIseOpen alias (using these a lot lately; w freq crashouts of ise, and need to recover all files open & BPs to quickly get back to function)
     * 12:12 PM 5/11/2022 init
@@ -35,7 +36,7 @@ function export-ISEOpenFiles {
     https://github.com/tostka/verb-dev
     #>
     [CmdletBinding()]
-    [Alias('eIseOpen')]
+    [Alias('epIseOpen')]
     PARAM(
         [Parameter(Position=0,HelpMessage="Optional Tag to apply to filename[-Tag MFA]")]
         [string]$Tag,
