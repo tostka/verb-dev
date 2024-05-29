@@ -15,6 +15,7 @@ function copy-ISETabFileToLocal {
     Github      : https://github.com/tostka/verb-dev
     Tags        : Powershell,ISE,development,debugging,backup
     REVISIONS
+    * 2:15 PM 5/29/2024 add: c:\sc dev repo dest test, prompt for optional -nofunc use (avoid mistakes copying into repo with _func.ps1 source name intact)
     * 1:22 PM 5/22/2024init
     .DESCRIPTION
     copy-ISETabFileToLocal - Copy the currently open ISE tab file, to local machine (RDP remote only), prompting for local path. The filename copied is either the intact local name, or, if -stripFunc is used, the filename with any _func substring removed. 
@@ -76,6 +77,21 @@ function copy-ISETabFileToLocal {
                 TRY{
                     if($path){
                         [system.io.fileinfo[]]$source = @($path) ; 
+                        if(-not $noFunc -AND $LocalDestination -match '^C:\\sc\\'){
+                            $smsg = "Note: Copying to `$LocalDestination prefixed with C:\sc\ (dev repo)" ; 
+                            $smsg += "`nWITHOUT specifying -NoFunc!" ; 
+                            $smsg += "`nDO YOU WANT TO USE -NOFUNC (suppress _func.ps1 on copy)?" ; 
+                            write-warning $smsg ; 
+                            $bRet=Read-Host "Enter YYY to continue. Anything else will exit"  ; 
+                            if ($bRet.ToUpper() -eq "YYY") {
+                                $smsg = "(specifying -NoFunc)" ; 
+                                write-host -foregroundcolor green $smsg  ;
+                                $noFunc = $true ; 
+                            } else {
+                                $smsg = "(*skip* copying -BP.xml file)" ; 
+                                write-host -foregroundcolor yellow $smsg  ;
+                            } ; 
+                        } ; 
                         if($LocalDestination.substring(0,1) -ne 'c'){
                             $Destination = $LocalDestination.replace(':','$') ; 
                             $Destination = (join-path -path "\\$($mybox[0])\" -childpath $Destination) ; 
