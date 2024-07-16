@@ -1,11 +1,11 @@
-﻿# verb-DEV.psm1
+﻿# verb-dev.psm1
 
 
 <#
 .SYNOPSIS
 VERB-dev - Development PS Module-related generic functions
 .NOTES
-Version     : 1.5.43
+Version     : 1.5.47
 Author      : Todd Kadrie
 Website     :	https://www.toddomation.com
 Twitter     :	@tostka
@@ -4474,6 +4474,169 @@ Function convertTo-WrappedPS {
 #*------^ convertTo-WrappedPS.ps1 ^------
 
 
+#*------v copy-ISETabFileToLocal.ps1 v------
+function copy-ISETabFileToLocal {
+    <#
+    .SYNOPSIS
+    copy-ISETabFileToLocal - Copy the currently open ISE tab file, to local machine (RDP remote only), prompting for local path. The filename copied is either the intact local name, or, if -stripFunc is used, the filename with any _func substring removed. 
+    .NOTES
+    Version     : 1.0.0
+    Author      : Todd Kadrie
+    Website     : http://www.toddomation.com
+    Twitter     : @tostka / http://twitter.com/tostka
+    CreatedDate : 2024-05-22
+    FileName    : copy-ISETabFileToLocal
+    License     : MIT License
+    Copyright   : (c) 2024 Todd Kadrie
+    Github      : https://github.com/tostka/verb-dev
+    Tags        : Powershell,ISE,development,debugging,backup
+    REVISIONS
+    * 2:15 PM 5/29/2024 add: c:\sc dev repo dest test, prompt for optional -nofunc use (avoid mistakes copying into repo with _func.ps1 source name intact)
+    * 1:22 PM 5/22/2024init
+    .DESCRIPTION
+    copy-ISETabFileToLocal - Copy the currently open ISE tab file, to local machine (RDP remote only), prompting for local path. The filename copied is either the intact local name, or, if -stripFunc is used, the filename with any _func substring removed. 
+    This also checks for a matching exported breakpoint file (name matches target script .ps1, with trailing name ...-ps1-BP.xml), and prompts to also move that file along with the .ps1. 
+
+    .PARAMETER Path
+    Path to source file (defaults to `$psise.CurrentFile.FullPath)[-Path 'D:\scripts\copy-ISETabFileToLocal_func.ps1']
+    .PARAMETER LocalDestination
+    Localized destination directory path[-path c:\pathto\]
+    .PARAMETER noFunc
+    Switch to remove any '_func' substring from the original file name, while copying (used for copying to final module .\Public directory for publishing[-noFunc]
+    .PARAMETER whatIf
+    Whatif switch [-whatIf]
+    .EXAMPLE
+    PS> copy-ISETabFileToLocal -verbose -whatif
+    Copy the current tab file to prompted local destination, whatif, with verbose output
+    .EXAMPLE
+    PS> copy-ISETabFileToLocal -verbose -localdest C:\sc\verb-dev\public\ -noFunc -whatif
+    Copy the current tab file to explicit specified -LocalDesetination, replacing any _func substring from filename, with whatif, with verbose output
+    .LINK
+    https://github.com/tostka/verb-dev
+    #>
+    [CmdletBinding()]
+    [Alias('cpIseFileLocal')]
+    PARAM(
+        [Parameter(Mandatory = $false,Position=0,HelpMessage="Path to source file (defaults to `$psise.CurrentFile.FullPath)[-Path 'D:\scripts\copy-ISETabFileToLocal_func.ps1']")]
+            [ValidateScript({Test-Path $_ -PathType 'Container'})]
+            #[string]
+            [system.io.fileinfo]$Path=$psise.CurrentFile.FullPath,
+        [Parameter(Mandatory = $true,Position = 1,HelpMessage = 'Localized destination directory path[-path c:\pathto\]')]
+            #[Alias('PsPath')]
+            #[ValidateScript({Test-Path $_ -PathType 'Container'})]
+            [ValidateScript({
+                if([uri]$_ |?{ $_.IsUNC}){
+                    throw "UNC Path specified: Please specify a 'localized' path!" ; 
+                }elseif([uri]$_ |?{$_.AbsolutePath -AND $_.LocalPath -AND $_.IsFile -AND -not $_.IsUNC}){
+                    $true ;
+                }else{
+                    throw "Invalid path!" ; 
+                }
+            })]
+            #[System.IO.DirectoryInfo]
+            [string]$LocalDestination,
+        [Parameter(HelpMessage="Switch to remove any '_func' substring from the original file name, while copying (used for copying to final module .\Public directory for publishing[-noFunc])")]
+            [switch]$noFunc,
+        [Parameter(HelpMessage="Whatif switch [-whatIf]")]
+            [switch] $whatIf
+    ) ;
+    BEGIN {
+        ${CmdletName} = $PSCmdlet.MyInvocation.MyCommand.Name ;
+        $verbose = $($VerbosePreference -eq "Continue")
+        $sBnr="#*======v $($CmdletName): v======" ;
+        write-verbose  "$((get-date).ToString('HH:mm:ss')):$($sBnr)" ;
+        $moveBP = $false ; 
+    }
+    PROCESS {
+        if ($psise){
+            if($env:SESSIONNAME  -match 'RDP-Tcp#\d+'){
+                TRY{
+                    if($path){
+                        [system.io.fileinfo[]]$source = @($path) ; 
+                        if(-not $noFunc -AND $LocalDestination -match '^C:\\sc\\'){
+                            $smsg = "Note: Copying to `$LocalDestination prefixed with C:\sc\ (dev repo)" ; 
+                            $smsg += "`nWITHOUT specifying -NoFunc!" ; 
+                            $smsg += "`nDO YOU WANT TO USE -NOFUNC (suppress _func.ps1 on copy)?" ; 
+                            write-warning $smsg ; 
+                            $bRet=Read-Host "Enter YYY to continue. Anything else will exit"  ; 
+                            if ($bRet.ToUpper() -eq "YYY") {
+                                $smsg = "(specifying -NoFunc)" ; 
+                                write-host -foregroundcolor green $smsg  ;
+                                $noFunc = $true ; 
+                            } else {
+                                $smsg = "(*skip* copying -BP.xml file)" ; 
+                                write-host -foregroundcolor yellow $smsg  ;
+                            } ; 
+                        } ; 
+                        if($LocalDestination.substring(0,1) -ne 'c'){
+                            $Destination = $LocalDestination.replace(':','$') ; 
+                            $Destination = (join-path -path "\\$($mybox[0])\" -childpath $Destination) ; 
+                        }else{
+                            $Destination = $LocalDestination.replace(':','') ; 
+                            $Destination = (join-path -path "\\tsclient\" -childpath $Destination) ; 
+                        } ; 
+                        write-verbose "resolved `$Destination:$($Destination)" ; 
+                        if(-not (test-path -path $Destination)){
+                            $smsg = "Missing/invalid converted `$Destination:"
+                            $smsg += "`n$($Destination)" ; 
+                            write-warning $smsg ; 
+                            throw $smsg ; 
+                            break ; 
+                        } ;
+                        # check for matching local ps1-BP.xml file to also copy
+                        if($bpp = get-childitem -path ($path.fullname.replace('.ps1','-ps1-BP.xml')) -ea 0){
+                            $smsg = "Matching Breakpoint export file found:`n$(($bpp |out-string).trim())" ; 
+                            $smsg += "`nDo you want to move this file with the .ps1?" ; 
+                            if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Prompt } 
+                            else{ write-host -foregroundcolor YELLOW "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                            $bRet=Read-Host "Enter Y to continue. Anything else will exit"  ; 
+                            if ($bRet.ToUpper() -eq "Y") {
+                                $smsg = "(copying -BP.xml file)" ; 
+                                write-host -foregroundcolor green $smsg  ;
+                                $moveBP = $true ; 
+                                $source += @($bpp)
+                            } else {
+                                $smsg = "(*skip* copying -BP.xml file)" ; 
+                                write-host -foregroundcolor yellow $smsg  ;
+                            } ; 
+                        } ; 
+                        $pltCI=[ordered]@{
+                            path = $null ; 
+                            destination = $null ; 
+                            erroraction = 'STOP' ;
+                            verbose = $true ; 
+                            whatif = $($whatif) ;
+                        } ;
+                        foreach($src in $source){
+                            $pltCI.path = $src.fullname ; 
+                            if($noFunc){
+                                $pltCI.destination = (join-path -path $Destination -childpath $src.name.replace('_func','') -EA stop)
+                            } else { 
+                                $pltCI.destination = (join-path -path $Destination -childpath $_.name  -EA stop); 
+                            } ; 
+                            $smsg = "copy-item w`n$(($pltCI|out-string).trim())" ; 
+                            write-host -foregroundcolor green $smsg  ;
+                            copy-item @pltCI ; 
+                        } ; 
+                    } else { 
+                        throw "NO POPULATED `$psise.CurrentFile.FullPath!`n(PSISE-only, with a target file tab selected)" ; 
+                    } ; 
+                } CATCH {
+                    $ErrTrapd=$Error[0] ;
+                    $smsg = "`n$(($ErrTrapd | fl * -Force|out-string).trim())" ;
+                    write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" ;
+                } ;             
+            } else {  write-warning "This script only functions within PS ISE, with a script file open for editing" };
+        } else {  write-warning "This script only functions within an RDP remote session (non-local)" };
+    } # PROC-E
+    END{
+        write-verbose  "$((get-date).ToString('HH:mm:ss')):$($sBnr.replace('=v','=^').replace('v=','^='))" ;
+    }
+}
+
+#*------^ copy-ISETabFileToLocal.ps1 ^------
+
+
 #*------v export-ISEBreakPoints.ps1 v------
 function export-ISEBreakPoints {
     <#
@@ -4491,6 +4654,7 @@ function export-ISEBreakPoints {
     Github      : https://github.com/tostka
     Tags        : Powershell,ISE,development,debugging
     REVISIONS
+    * 8:27 AM 3/26/2024 chg eIseBp -> epIseBp
     * 2:35 PM 5/24/2023 add: prompt for force deletion of existing .xml if no psbreakpoints defined in loaded ISE copy for script.
     * 10:20 AM 5/11/2022 added whatif support; updated CBH ; expanded echos; cleanedup
     * 8:58 AM 5/9/2022 add: test for bps before exporting
@@ -4514,7 +4678,7 @@ function export-ISEBreakPoints {
     Github      : https://github.com/tostka
     #>
     [CmdletBinding()]
-    [Alias('eIseBp','epBP')]
+    [Alias('epIseBp','epBP')]
     PARAM(
         [Parameter(HelpMessage="Default Path for export (when `$Script directory is unavailable)[-PathDefault c:\path-to\]")]
         [ValidateScript({Test-Path $_ -PathType 'Container'})]
@@ -4605,6 +4769,8 @@ function export-ISEBreakPointsALL {
     Github      : https://github.com/tostka/verb-dev
     Tags        : Powershell,ISE,development,debugging
     REVISIONS
+    * 8:27 AM 3/26/2024 chg eIseBpAll -> epIseBpAll
+    * 1:22 PM 2/28/2024 add: 'epBpAll' alias
     * 12:23 PM 5/23/2022 added try/catch: failed out hard on Untitled.ps1's
     * 9:19 AM 5/20/2022 add: eIseBpAll alias (using these a lot lately)
     * 12:14 PM 5/11/2022 init
@@ -4621,7 +4787,7 @@ function export-ISEBreakPointsALL {
     https://github.com/tostka/verb-dev
     #>
     [CmdletBinding()]
-    [Alias('eIseBpAll')]
+    [Alias('epIseBpAll','epBpAll')]
     PARAM(
         [Parameter(HelpMessage="Whatif Flag  [-whatIf]")]
         [switch] $whatIf
@@ -4681,6 +4847,7 @@ function export-ISEOpenFiles {
     Github      : https://github.com/tostka/verb-dev
     Tags        : Powershell,ISE,development,debugging
     REVISIONS
+    * 8:31 AM 3/26/2024 chg eIseOpen -> epIseOpen
     * 3:28 PM 6/23/2022 add -Tag param to permit running interger-suffixed variants (ie. mult ise sessions open & stored from same desktop). 
     * 9:19 AM 5/20/2022 add: eIseOpen alias (using these a lot lately; w freq crashouts of ise, and need to recover all files open & BPs to quickly get back to function)
     * 12:12 PM 5/11/2022 init
@@ -4701,7 +4868,7 @@ function export-ISEOpenFiles {
     https://github.com/tostka/verb-dev
     #>
     [CmdletBinding()]
-    [Alias('eIseOpen')]
+    [Alias('epIseOpen')]
     PARAM(
         [Parameter(Position=0,HelpMessage="Optional Tag to apply to filename[-Tag MFA]")]
         [string]$Tag,
@@ -4738,6 +4905,469 @@ function export-ISEOpenFiles {
 }
 
 #*------^ export-ISEOpenFiles.ps1 ^------
+
+
+#*------v find-NounAliasesTDO.ps1 v------
+Function find-NounAliasesTDO {
+    <#
+    .SYNOPSIS
+    find-NounAliasesTDO.ps1 - Polls current Aliases defined on the local system, to try to discern 'standard' but non-formally-documented 'noun' aliases for a given Powershell Noun (as Verb's have aliases have formal/recommended aliases in MS documentation, but Noun's are not covered with the same guidence). (E.g. the common Noun 'module' uses the standard alias 'mo', in get-module (gmo), import-module (ipmo), etc))
+    .NOTES
+    Version     : 1.0.0
+    Author      : Todd Kadrie
+    Website     : http://www.toddomation.com
+    Twitter     : @tostka / http://twitter.com/tostka
+    CreatedDate : 2023-12-12
+    FileName    : find-NounAliasesTDO.ps1
+    License     : MIT License
+    Copyright   : (c) 2023 Todd Kadrie
+    Github      : https://github.com/tostka/verb-dev
+    Tags        : Powershell,development,verbs
+    REVISION
+    * 1:32 PM 12/13/2023 init
+    .DESCRIPTION
+    find-NounAliasesTDO.ps1 - Polls current Aliases defined on the local system, to try to discern 'standard' but non-formally-documented 'noun' aliases for a given Powershell Noun (as Verb's have aliases have formal/recommended aliases in MS documentation, but Noun's are not covered with the same guidence). (E.g. the common Noun 'module' uses the standard alias 'mo', in get-module (gmo), import-module (ipmo), etc))
+
+    I use this for building mnemoic splatted variable names: $plt[verbAlias][NounAlias]
+
+    While Verb Aliases are documented at...
+    
+        [Approved Verbs for PowerShell Commands - PowerShell | Microsoft Learn - UID - learn.microsoft.com/](https://learn.microsoft.com/en-us/powershell/scripting/developer/cmdlet/approved-verbs-for-windows-powershell-commands?view=powershell-7.3)
+    
+    ...commonly-used Noun's lack the same guidence. 
+
+    But there are discernable patterns: 
+    Fore example all the '[verb]-Module' cmdlet Alias varants use:
+        - the standard one or two-character verb aliases (g=get, ip = import, r=remove), 
+        - and the same trailing pair of characters in each default Alias: 'mo'
+    
+    => which implies 'mo' is the NounAlias for 'module'
+
+    So given the above, we can derive patterns of 'Noun Aliases' by:
+    1) looping through the standard Verb list, 
+    2) pulling all defined aliases with a definition using a given verb-Noun combo, 
+    3) disards any alias that:
+        - includes a dash (-), implies variant verb-noun names coverage, not short aliases
+        - or is greater than 4 charaters, again, implies *not* a Microsoft standard alias, which observationally appear to be 3-4 characters long, by defailt.
+    3) and examine/parse off the known-verb-Alias portion of the Alias, 
+    4) and consider the remainder - for builtin or common-Microsoft-Modules, to be 'semi-standards'.
+    5) Once the number of matched/analyzed aliases have been completed - as specified by MatchThreshold (3 default), the processing on the current verb-Noun combo is ended, and the process moves onto the next verb in the series.
+   
+    As this process needs to discover **all aliases**, _including_ verb-aliases MS has historically used that *aren't* compliant with the current published get-Verb list, 
+    this code includes *non-compliant* historical MS verb-> alias mappings (cnsn -> Connect-PSSession, verb docs says use 'cc' with cn == Confirm), in it's analysis. 
+    As even in those older cases, the non-stqandard Verb aliases may steal yield functional standard Noun Aliases, for our own guidence.
+    
+    > 🏷️  **Note**
+    > 
+    > Microsoft has *not* been consistent in the verb aliases they've used in cmdlets over time. 
+    > The below includes notations of observed instances where MS has used a _different_ alias for the same verb, on different 'official' modules and cmdlets.
+
+        a | Add
+        ap | Approve
+        as | Assert
+        ba | Backup
+        bl | Block
+        bd | Build
+        ch | Checkpoint
+        cl | Clear
+        cs | Close
+        cr | Compare
+        cp | Complete
+        cm | Compress
+        cn | Confirm
+        cc,cn | Connect (cnsn -> Connect-PSSession, verb docs says cc, and cn == Confirm)
+        cv | Convert
+        cf | ConvertFrom
+        ct | ConvertTo
+        cp | Copy
+        db | Debug
+        dn | Deny
+        dp | Deploy
+        d | Disable
+        dc,dn | Disconnect (dnsn -> Disconnect-PSSession, verb docs says dc)
+        dm | Dismount
+        ed | Edit
+        e | Enable
+        et | Enter
+        ex | Exit
+        en | Expand
+        ep | Export
+        f | Format
+        g | Get
+        gr | Grant
+        gp | Group
+        h | Hide 
+        j | Join 
+        ip | Import
+        i | Invoke
+        in | Initialize
+        is | Install
+        l | Limit
+        lk | Lock 
+        ms | Measure
+        mg | Merge
+        mt | Mount
+        m | Move
+        n | New
+        op | Open 
+        om | Optimize 
+        o | Out
+        pi | Ping
+        pop | Pop 
+        pt | Protect
+        pb | Publish
+        pu | Push
+        rd | Read 
+        re | Redo
+        rc | Receive
+        rg | Register
+        r | Remove
+        rn | Rename
+        rp | Repair
+        rq | Request
+        rv | Resolve
+        rt | Restart
+        rr | Restore
+        ru | Resume
+        rk | Revoke
+        sv | Save
+        sr | Search 
+        sc | Select
+        sd | Send
+        s | Set
+        sh | Show
+        sk | Skip
+        sl | Split 
+        sa | Start
+        st | Step 
+        sp | Stop
+        sb | Submit
+        ss,su | Suspend (sujb -> Suspend-Job, verb docs says ss)
+        sy | Sync
+        sw | Switch 
+        t | Test
+        tr | Trace
+        ul | Unblock
+        un | Undo 
+        us | Uninstall
+        uk | Unlock
+        up | Unprotect
+        ub | Unpublish
+        ur | Unregister
+        ud | Update
+        u | Use
+        w | Wait
+        wc | Watch
+        ? | Where
+        wr | Write
+
+    ## Powershell code to convert a markdown table like the above, to the input $sdata value above:
+     (uses my verb-IO module's convertfrom-MarkdownTable())
+
+    ```powershell
+    $verbAliases = @"
+Prefix | Verb
+a | Add
+ap | Approve
+as | Assert
+ba | Backup
+bl | Block
+bd | Build
+ch | Checkpoint
+cl | Clear
+cs | Close
+cr | Compare
+cp | Complete
+cm | Compress
+cn | Confirm
+cc | Connect
+cv | Convert
+cf | ConvertFrom
+ct | ConvertTo
+cp | Copy
+db | Debug
+dn | Deny
+dp | Deploy
+d | Disable
+dc | Disconnect
+dm | Dismount
+ed | Edit
+e | Enable
+et | Enter
+ex | Exit
+en | Expand
+ep | Export
+f | Format
+g | Get
+gr | Grant
+gp | Group
+h | Hide
+j | Join
+ip | Import
+i | Invoke
+in | Initialize
+is | Install
+l | Limit
+lk | Lock
+ms | Measure
+mg | Merge
+mt | Mount
+m | Move
+n | New
+op | Open
+om | Optimize
+o | Out
+pi | Ping
+pop | Pop
+pt | Protect
+pb | Publish
+pu | Push
+rd | Read
+re | Redo
+rc | Receive
+rg | Register
+r | Remove
+rn | Rename
+rp | Repair
+rq | Request
+rv | Resolve
+rt | Restart
+rr | Restore
+ru | Resume
+rk | Revoke
+sv | Save
+sr | Search
+sc | Select
+sd | Send
+s | Set
+sh | Show
+sk | Skip
+sl | Split
+sa | Start
+st | Step
+sp | Stop
+sb | Submit
+ss | Suspend
+sy | Sync
+sw | Switch
+t | Test
+tr | Trace
+ul | Unblock
+un | Undo
+us | Uninstall
+uk | Unlock
+up | Unprotect
+ub | Unpublish
+ur | Unregister
+ud | Update
+u | Use
+w | Wait
+wc | Watch
+? | Where
+wr | Write
+"@ ; 
+    write-verbose "split & replace ea line with a quote-wrapped [alias];[verb] combo, then join the array with commas" ;
+    $sdata = "'$(($verbAliases.Split([Environment]::NewLine).replace(' | ',';') | %{ "$($_)" }) -join "','")'" ; 
+    ```
+    
+    .PARAMETER ResultSize
+    Integer maximum number of results to request from get-command (defaults to 10)[-ResultSize 100]
+    .PARAMETER MatchThreshold
+    Integer maximum number of matches to process, before moving on to the next verb in the series (defaults to 10)[-MatchThreshold 10]
+    .INPUTS
+    Accepts piped input.
+    .OUTPUTS
+    System.string
+    .EXAMPLE
+    PS> $NounAliasesFound = find-NounAliasesTDO ;
+    Return the 'standard' MS alias for the 'Compare' verb (returns 'cr')
+    .LINK
+    https://github.com/tostka/verb-dev
+    #>
+    [CmdletBinding()]
+    [Alias('get-VerbAlias')]
+    [OutputType([boolean])]
+    PARAM (
+        #[Parameter(Mandatory=$true,ValueFromPipeline=$true,HelpMessage="Verb to find the assoicated standard alias[-verb report]")]
+        #[string[]] $Verb
+        [Parameter(HelpMessage="Integer maximum number of results to request from get-command (defaults to 10)[-ResultSize 100]")]
+            [int]$ResultSize = 20,
+        [Parameter(HelpMessage="Integer maximum number of matches to process, before moving on to the next verb in the series (defaults to 10)[-MatchThreshold 10]")]
+            [int]$MatchThreshold = 3
+    ) ;
+    BEGIN {
+        $verbose = ($VerbosePreference -eq "Continue") ; 
+
+        $verbAliases = @"
+Prefix | Verb
+a | Add
+ap | Approve
+as | Assert
+ba | Backup
+bl | Block
+bd | Build
+ch | Checkpoint
+cl | Clear
+cs | Close
+cr | Compare
+cp | Complete
+cm | Compress
+cn | Confirm
+cn | Connect
+cc | Connect
+cv | Convert
+cf | ConvertFrom
+ct | ConvertTo
+cp | Copy
+db | Debug
+dn | Deny
+dp | Deploy
+d | Disable
+dc | Disconnect
+dn | Disconnect 
+dm | Dismount
+ed | Edit
+e | Enable
+et | Enter
+ex | Exit
+en | Expand
+ep | Export
+f | Format
+g | Get
+gr | Grant
+gp | Group
+h | Hide
+j | Join
+ip | Import
+i | Invoke
+in | Initialize
+is | Install
+l | Limit
+lk | Lock
+ms | Measure
+mg | Merge
+mt | Mount
+m | Move
+n | New
+op | Open
+om | Optimize
+o | Out
+pi | Ping
+pop | Pop
+pt | Protect
+pb | Publish
+pu | Push
+rd | Read
+re | Redo
+rc | Receive
+rg | Register
+r | Remove
+rn | Rename
+rp | Repair
+rq | Request
+rv | Resolve
+rt | Restart
+rr | Restore
+ru | Resume
+rk | Revoke
+sv | Save
+sr | Search
+sc | Select
+sd | Send
+s | Set
+sh | Show
+sk | Skip
+sl | Split
+sa | Start
+st | Step
+sp | Stop
+sb | Submit
+ss | Suspend
+su | Suspend
+sy | Sync
+sw | Switch
+t | Test
+tr | Trace
+ul | Unblock
+un | Undo
+us | Uninstall
+uk | Unlock
+up | Unprotect
+ub | Unpublish
+ur | Unregister
+ud | Update
+u | Use
+w | Wait
+wc | Watch
+? | Where
+wr | Write
+"@ | convertfrom-markdowntable ; 
+
+        $allAliases = get-alias ; 
+        write-verbose "$($allAliases | measure-object | select -expand count) total system aliases discovered" ;  
+        $Aggreg = @() ;
+} ;
+    PROCESS {
+        
+        foreach($alPre in $verbAliases){
+            write-host "Procesing Verb (alias): $($alPre.verb):($($alPre.Prefix))" ; 
+            if($alPre.Prefix -eq 'cc'){
+                write-verbose 'gotcha!' ; 
+            } ; 
+            #ResultSize, MatchThreshold
+            $cmds = get-command -verb $alPre.verb -totalcount $ResultSize ; 
+            $smsg = "get-command -verb $($alPre.verb) matched $(($cmds|measure-object).count) commands:" ; 
+            $smsg += "`n$(($cmds.name|out-string).trim())" ; 
+            write-verbose $smsg ; 
+            $prcd = 0 ; 
+            foreach($cmd in $cmds){
+                if($als = $allAliases  | ?{$_.Definition -eq $cmd.name}){
+                    $smsg = "`$allAliases  | `?{$_.Definition -eq '$($cmd.name)'} matched $(($als|measure-object).count) commands:" ;
+                    $smsg += "`n$(($als.name|out-string).trim())" ; 
+                    write-verbose $smsg ; 
+
+                    foreach($al in $als){
+                        if( $al.name.tostring().contains('-') ){
+                            write-verbose "name contains dash"
+                        }elseif($al.name.tostring().length -gt 4){
+                            write-verbose "$($al.name).length -gt 4:$($al.name.tostring().length)"
+                        }else{
+                            $prcd++ ; 
+                            if($prcd -gt $MatchThreshold){ 
+                                write-verbose "$($prcd) matched aliases found: Halting loop on verb:$($alPre.verb)" ; 
+                                break ;
+                            } ; 
+                            write-host "$($cmd.name):$($al.name.tostring()):noun:$($cmd.noun), derived assoc nounAlias:$($al.name.tostring().replace($alPre.Prefix,''))"
+                            $hsh=@{
+                                Noun = $cmd.noun ; 
+                                NounAlias = $al.name.tostring().replace($alPre.Prefix,'') ; 
+                            } ; 
+                            $aggreg += New-Object -TypeName PsObject -Property $hsh ; 
+                        } ; 
+                    } ;  # loop-E
+                    #if($prcd -eq 0){
+                    #    write-verbose "(no matching aliases were discovered processing verb:$($alPre.verb)" ; 
+                    #} ; 
+                } else {
+                    write-host -nonewline '.'
+                }; 
+            } ; 
+        } ; 
+        
+    } ;  # PROC-E
+    END {
+        $aggreg | sort noun | write-output  ; 
+        write-host "Post analysis:" ; 
+        foreach($agg in ($AGGREG | sort noun)){
+            $tnoun = $agg ; 
+            $smsg = "==$($tnoun.noun):NounAlias distribution:" ; 
+            $smsg += "`n$(($aggreg |?{$_.noun -eq $tnoun.noun} | group nounalias  |  ft -a count,name|out-string).trim())`n" ; 
+            write-host $smsg ;   
+        } ; 
+    } ; # END-E
+}
+
+#*------^ find-NounAliasesTDO.ps1 ^------
 
 
 #*------v get-AliasAssignsAST.ps1 v------
@@ -5964,6 +6594,54 @@ function get-HelpParsed {
 #*------^ get-HelpParsed.ps1 ^------
 
 
+#*------v get-ISEBreakPoints.ps1 v------
+function get-ISEBreakPoints {
+    <#
+    .SYNOPSIS
+    get-ISEBreakPoints - Get-PSBreakPoints for solely the current focused ISE Open Tab
+    .NOTES
+    Version     : 1.0.0
+    Author      : Todd Kadrie
+    Website     : http://www.toddomation.com
+    Twitter     : @tostka / http://twitter.com/tostka
+    CreatedDate : 2024-07-11
+    FileName    : get-ISEBreakPoints
+    License     : MIT License
+    Copyright   : (c) 2024 Todd Kadrie
+    Github      : https://github.com/tostka/verb-dev
+    Tags        : Powershell,ISE,development,debugging
+    REVISIONS
+    * 2:27 PM 7/11/2024 init
+    .DESCRIPTION
+    get-ISEBreakPoints - Get-PSBreakPoints for solely the current focused ISE Open Tab (fltered on -script param)
+    .EXAMPLE
+    PS> get-isebreakpoints | ft -a ; 
+
+        ID Script                        Line Command Variable Action
+        -- ------                        ---- ------- -------- ------
+        70 test-ExoDnsRecordTDO_func.ps1  237                        
+        71 test-ExoDnsRecordTDO_func.ps1  256                        
+        ...                       
+
+    Export all 'line'-type breakpoints on the current open ISE tab, to a matching xml file
+    .LINK
+    Github      : https://github.com/tostka
+    #>
+    [CmdletBinding()]
+    [Alias('gIseBp')]
+    PARAM() ;
+    PROCESS {
+        if ($psise){
+            if($psise.CurrentFile.FullPath){
+                get-psbreakpoint -script $psise.CurrentFile.FullPath | write-output ; 
+            } else { throw "ISE has no current file open. Open a file before using this script" } ; 
+        } else {  write-warning "This script only functions within PS ISE, with a script file open for editing" };
+    } # PROC-E
+}
+
+#*------^ get-ISEBreakPoints.ps1 ^------
+
+
 #*------v get-ISEOpenFilesExported.ps1 v------
 function get-ISEOpenFilesExported {
     <#
@@ -6250,6 +6928,244 @@ function get-ModuleRevisedCommands {
 }
 
 #*------^ get-ModuleRevisedCommands.ps1 ^------
+
+
+#*------v get-NounAliasTDO.ps1 v------
+Function get-NounAliasTDO {
+    <#
+    .SYNOPSIS
+    get-NounAliasTDO.ps1 - Returns dereived 'alias' a given Powershell Noun (as derived from use of verb-dev:Find-NounAliasesTDO()))
+    .NOTES
+    Version     : 1.0.0
+    Author      : Todd Kadrie
+    Website     : http://www.toddomation.com
+    Twitter     : @tostka / http://twitter.com/tostka
+    CreatedDate : 2023-12-12
+    FileName    : get-NounAliasTDO.ps1
+    License     : MIT License
+    Copyright   : (c) 2023 Todd Kadrie
+    Github      : https://github.com/tostka/verb-dev
+    Tags        : Powershell,development,verbs
+    REVISION
+    * 3:00 PM 7/20/2022 init
+    .DESCRIPTION
+    get-NounAliasTDO.ps1 - Returns dereived 'alias' a given Powershell Noun (as derived from use of verb-dev:Find-NounAliasesTDO()))
+
+    I use this for building mnemoic splatted variable names: $plt[verbAlias][objectalias]
+
+    As documented at:
+    
+    [Approved Verbs for PowerShell Commands - PowerShell | Microsoft Learn - UID - learn.microsoft.com/](https://learn.microsoft.com/en-us/powershell/scripting/developer/cmdlet/approved-verbs-for-windows-powershell-commands?view=powershell-7.3)
+    
+   
+    > 🏷️  **Note**
+    > 
+    > Microsoft has *not* been consistent in the verb aliases they've used in cmdlets over time. 
+    > The below includes notations of observed instances where MS has used a _different_ alias for the same verb, on different 'official' modules and cmdlets.
+
+        a | Add
+        ap | Approve
+        as | Assert
+        ba | Backup
+        bl | Block
+        bd | Build
+        ch | Checkpoint
+        cl | Clear
+        cs | Close
+        cr | Compare
+        cp | Complete
+        cm | Compress
+        cn | Confirm
+        cc,cn | Connect (cnsn -> Connect-PSSession, verb docs says cc, and cn == Confirm)
+        cv | Convert
+        cf | ConvertFrom
+        ct | ConvertTo
+        cp | Copy
+        db | Debug
+        dn | Deny
+        dp | Deploy
+        d | Disable
+        dc,dn | Disconnect (dnsn -> Disconnect-PSSession, verb docs says dc)
+        dm | Dismount
+        ed | Edit
+        e | Enable
+        et | Enter
+        ex | Exit
+        en | Expand
+        ep | Export
+        f | Format
+        g | Get
+        gr | Grant
+        gp | Group
+        h | Hide 
+        j | Join 
+        ip | Import
+        i | Invoke
+        in | Initialize
+        is | Install
+        l | Limit
+        lk | Lock 
+        ms | Measure
+        mg | Merge
+        mt | Mount
+        m | Move
+        n | New
+        op | Open 
+        om | Optimize 
+        o | Out
+        pi | Ping
+        pop | Pop 
+        pt | Protect
+        pb | Publish
+        pu | Push
+        rd | Read 
+        re | Redo
+        rc | Receive
+        rg | Register
+        r | Remove
+        rn | Rename
+        rp | Repair
+        rq | Request
+        rv | Resolve
+        rt | Restart
+        rr | Restore
+        ru | Resume
+        rk | Revoke
+        sv | Save
+        sr | Search 
+        sc | Select
+        sd | Send
+        s | Set
+        sh | Show
+        sk | Skip
+        sl | Split 
+        sa | Start
+        st | Step 
+        sp | Stop
+        sb | Submit
+        ss,su | Suspend (sujb -> Suspend-Job, verb docs says ss)
+        sy | Sync
+        sw | Switch 
+        t | Test
+        tr | Trace
+        ul | Unblock
+        un | Undo 
+        us | Uninstall
+        uk | Unlock
+        up | Unprotect
+        ub | Unpublish
+        ur | Unregister
+        ud | Update
+        u | Use
+        w | Wait
+        wc | Watch
+        ? | Where
+        wr | Write
+
+    ## Powershell code to convert a markdown table like the above, to the input $sdata value above:
+     (uses my verb-IO module's convertfrom-MarkdownTable())
+
+    ```powershell
+    $nounAliases = @"
+al | Alias
+bp | PSBreakpoint
+c | Content
+ci | ChildItem
+cm | Command
+cs | PSCallStack
+csv | Csv
+dr | PSDrive
+ex | Expression
+gv | GridView
+h | Host
+hx | Hex
+hy | History
+i | Item
+in | ComputerInfo
+jb | Job
+l | list
+m | member
+mo | Module
+p | ItemProperty
+pa | Path
+Prefix | Noun
+ps | Process
+pv | ItemPropertyValue
+rm | RestMethod
+sn | PSSession
+snp | PSSnapin
+st | SourceTable
+sv | Service
+t | Table
+tn | Typename
+tz | TimeZone
+u | Unique
+v | Variable
+w | Wide
+wmi | WmiObject, WmiMethod
+wr | WebRequest
+"@ ; 
+    write-verbose "split & replace ea line with a quote-wrapped [alias];[noun] combo, then join the array with commas" ;
+    $nounAliases.Split([Environment]::NewLine) | sort ; 
+    $sdata = "'$(($nounAliases.Split([Environment]::NewLine).replace(' | ',';') | %{ "$($_)" }) -join "','")'" ; 
+    ```
+    
+    .PARAMETER Noun
+    Noun to find the associated standard alias[-Noun process]
+    .INPUTS
+    Accepts piped input.
+    .OUTPUTS
+    System.string
+    .EXAMPLE
+    PS> 'Module' | get-NounAliasTDO ;
+    Return the 'standard' MS alias for the 'Module' noun (returns 'mo')
+    .EXAMPLE
+    PS> get-alias | sort displayname | ?{$_.displayname -match '\s->\s' } | ft -a displayname
+    Quick code to dump a list for review, for addition to this function (without full pass of find-NounAliasesTDO)
+    .LINK
+    https://github.com/tostka/verb-dev
+    #>
+    [CmdletBinding()]
+    [Alias('get-NounAlias')]
+    #[OutputType([boolean])]
+    PARAM (
+        [Parameter(Mandatory=$true,ValueFromPipeline=$true,HelpMessage="Noun to find the associated standard alias[-Noun Module]")]
+        [string[]] $Noun
+    ) ;
+    BEGIN {
+        $verbose = ($VerbosePreference -eq "Continue") ; 
+        # array of mappings: [Noun];[std alias] (1st entry is the column name row, for use when an input for a data table, or into convertto-Markdowntable)
+        $sdata = 'al;Alias','bp;PSBreakpoint','c;Content','ci;ChildItem','cm;Command','cs;PSCallStack','csv;Csv',
+        'dr;PSDrive','ex;Expression','gv;GridView','h;Host','hx;Hex','hy;History','i;Item','in;ComputerInfo',
+        'jb;Job','l;list','m;member','mo;Module','p;ItemProperty','pa;Path','Prefix;Noun','ps;Process',
+        'pv;ItemPropertyValue','rm;RestMethod','sn;PSSession','snp;PSSnapin','st;SourceTable','sv;Service','t;Table',
+        'tn;Typename','tz;TimeZone','u;Unique','v;Variable','w;Wide','wr;WebRequest'
+        # convert semi-delimted array of values into indexed hash for lookups
+        $hshAliasesPrfx = @{} ;
+        $sdata | select-object -skip 1 |foreach-object{
+            # split at semi, and assign the array elements to $value & $key respectively
+            $value,$key = $_.split(';') ; 
+            # add indexed hash element on $key with $value
+            $hshAliasesPrfx[$key] = $value ;
+        } ;
+        # clear temp varis
+        'sdata','key','value' | remove-variable -ea 0 -verbose ; 
+    } ;
+    PROCESS {
+        foreach($item in $Noun){
+            write-verbose "(checking: $($item))" ; 
+            if($hshAliasesPrfx[$item]){
+                $hshAliasesPrfx[$item] | write-output 
+            }else {
+                write-warning "no lookup match for Noun '$($item)'" 
+                $false | write-output ; 
+            } ;
+        } ; 
+    } ;  # PROC-E
+    END {} ; # END-E
+}
+
+#*------^ get-NounAliasTDO.ps1 ^------
 
 
 #*------v get-ProjectNameTDO.ps1 v------
@@ -6735,6 +7651,310 @@ function get-VariableAssignsAST {
 #*------^ get-VariableAssignsAST.ps1 ^------
 
 
+#*------v get-VerbAliasTDO.ps1 v------
+Function get-VerbAliasTDO {
+    <#
+    .SYNOPSIS
+    get-VerbAliasTDO.ps1 - Returns the 'standard' alias prefix for a given Powershell verb (according to MS documentation). (E.g. the common verb 'copy' has uses the standard alias prefix 'cp')
+    .NOTES
+    Version     : 1.0.0
+    Author      : Todd Kadrie
+    Website     : http://www.toddomation.com
+    Twitter     : @tostka / http://twitter.com/tostka
+    CreatedDate : 2023-12-12
+    FileName    : get-VerbAliasTDO.ps1
+    License     : MIT License
+    Copyright   : (c) 2023 Todd Kadrie
+    Github      : https://github.com/tostka/verb-dev
+    Tags        : Powershell,development,verbs
+    REVISION
+    * 3:00 PM 7/20/2022 init
+    .DESCRIPTION
+    get-VerbAliasTDO.ps1 - Returns the 'standard' alias prefix for a given Powershell verb (according to MS documentation). (E.g. the common verb 'copy' has uses the standard alias prefix 'cp')
+
+    I use this for building mnemoic splatted variable names: $plt[verbAlias][objectalias]
+
+    As documented at:
+    
+    [Approved Verbs for PowerShell Commands - PowerShell | Microsoft Learn - UID - learn.microsoft.com/](https://learn.microsoft.com/en-us/powershell/scripting/developer/cmdlet/approved-verbs-for-windows-powershell-commands?view=powershell-7.3)
+    
+   
+    > 🏷️  **Note**
+    > 
+    > Microsoft has *not* been consistent in the verb aliases they've used in cmdlets over time. 
+    > The below includes notations of observed instances where MS has used a _different_ alias for the same verb, on different 'official' modules and cmdlets.
+
+        a | Add
+        ap | Approve
+        as | Assert
+        ba | Backup
+        bl | Block
+        bd | Build
+        ch | Checkpoint
+        cl | Clear
+        cs | Close
+        cr | Compare
+        cp | Complete
+        cm | Compress
+        cn | Confirm
+        cc,cn | Connect (cnsn -> Connect-PSSession, verb docs says cc, and cn == Confirm)
+        cv | Convert
+        cf | ConvertFrom
+        ct | ConvertTo
+        cp | Copy
+        db | Debug
+        dn | Deny
+        dp | Deploy
+        d | Disable
+        dc,dn | Disconnect (dnsn -> Disconnect-PSSession, verb docs says dc)
+        dm | Dismount
+        ed | Edit
+        e | Enable
+        et | Enter
+        ex | Exit
+        en | Expand
+        ep | Export
+        f | Format
+        g | Get
+        gr | Grant
+        gp | Group
+        h | Hide 
+        j | Join 
+        ip | Import
+        i | Invoke
+        in | Initialize
+        is | Install
+        l | Limit
+        lk | Lock 
+        ms | Measure
+        mg | Merge
+        mt | Mount
+        m | Move
+        n | New
+        op | Open 
+        om | Optimize 
+        o | Out
+        pi | Ping
+        pop | Pop 
+        pt | Protect
+        pb | Publish
+        pu | Push
+        rd | Read 
+        re | Redo
+        rc | Receive
+        rg | Register
+        r | Remove
+        rn | Rename
+        rp | Repair
+        rq | Request
+        rv | Resolve
+        rt | Restart
+        rr | Restore
+        ru | Resume
+        rk | Revoke
+        sv | Save
+        sr | Search 
+        sc | Select
+        sd | Send
+        s | Set
+        sh | Show
+        sk | Skip
+        sl | Split 
+        sa | Start
+        st | Step 
+        sp | Stop
+        sb | Submit
+        ss,su | Suspend (sujb -> Suspend-Job, verb docs says ss)
+        sy | Sync
+        sw | Switch 
+        t | Test
+        tr | Trace
+        ul | Unblock
+        un | Undo 
+        us | Uninstall
+        uk | Unlock
+        up | Unprotect
+        ub | Unpublish
+        ur | Unregister
+        ud | Update
+        u | Use
+        w | Wait
+        wc | Watch
+        ? | Where
+        wr | Write
+
+    ## Powershell code to convert a markdown table like the above, to the input $sdata value above:
+     (uses my verb-IO module's convertfrom-MarkdownTable())
+
+    
+    ```powershell
+    $verbAliases = @"
+Prefix | Verb
+a | Add
+ap | Approve
+as | Assert
+ba | Backup
+bl | Block
+bd | Build
+ch | Checkpoint
+cl | Clear
+cs | Close
+cr | Compare
+cp | Complete
+cm | Compress
+cn | Confirm
+cc | Connect
+cv | Convert
+cf | ConvertFrom
+ct | ConvertTo
+cp | Copy
+db | Debug
+dn | Deny
+dp | Deploy
+d | Disable
+dc | Disconnect
+dm | Dismount
+ed | Edit
+e | Enable
+et | Enter
+ex | Exit
+en | Expand
+ep | Export
+f | Format
+g | Get
+gr | Grant
+gp | Group
+h | Hide
+j | Join
+ip | Import
+i | Invoke
+in | Initialize
+is | Install
+l | Limit
+lk | Lock
+ms | Measure
+mg | Merge
+mt | Mount
+m | Move
+n | New
+op | Open
+om | Optimize
+o | Out
+pi | Ping
+pop | Pop
+pt | Protect
+pb | Publish
+pu | Push
+rd | Read
+re | Redo
+rc | Receive
+rg | Register
+r | Remove
+rn | Rename
+rp | Repair
+rq | Request
+rv | Resolve
+rt | Restart
+rr | Restore
+ru | Resume
+rk | Revoke
+sv | Save
+sr | Search
+sc | Select
+sd | Send
+s | Set
+sh | Show
+sk | Skip
+sl | Split
+sa | Start
+st | Step
+sp | Stop
+sb | Submit
+ss | Suspend
+sy | Sync
+sw | Switch
+t | Test
+tr | Trace
+ul | Unblock
+un | Undo
+us | Uninstall
+uk | Unlock
+up | Unprotect
+ub | Unpublish
+ur | Unregister
+ud | Update
+u | Use
+w | Wait
+wc | Watch
+? | Where
+wr | Write
+"@ ; 
+    write-verbose "split & replace ea line with a quote-wrapped [alias];[verb] combo, then join the array with commas" ;
+    $sdata = "'$(($verbAliases.Split([Environment]::NewLine).replace(' | ',';') | %{ "$($_)" }) -join "','")'" ; 
+    ```
+    
+    .PARAMETER Verb
+    Verb to find the associated standard alias[-verb report]
+    .INPUTS
+    Accepts piped input.
+    .OUTPUTS
+    System.string
+    .EXAMPLE
+    PS> 'Compare' | get-NounAliasTDO ;
+    Return the 'standard' MS alias for the 'Compare' verb (returns 'cr')
+    .LINK
+    https://github.com/tostka/verb-dev
+    #>
+    [CmdletBinding()]
+    [Alias('get-VerbAlias')]
+    #[OutputType([boolean])]
+    PARAM (
+        [Parameter(Mandatory=$true,ValueFromPipeline=$true,HelpMessage="Verb to find the associated standard alias[-verb report]")]
+        [string[]] $Verb
+    ) ;
+    BEGIN {
+        $verbose = ($VerbosePreference -eq "Continue") ; 
+        # array of mappings: [verb];[std alias] (1st entry is the column name row, for use when an input for a data table, or into convertto-Markdowntable)
+        $sdata = 'Prefix;Verb','a;Add','ap;Approve','as;Assert','ba;Backup','bl;Block','bd;Build','ch;Checkpoint','cl;Clear',
+            'cs;Close','cr;Compare','cp;Complete','cm;Compress','cn;Confirm','cc;Connect','cv;Convert','cf;ConvertFrom',
+            'ct;ConvertTo','cp;Copy','db;Debug','dn;Deny','dp;Deploy','d;Disable','dc;Disconnect','dm;Dismount','ed;Edit',
+            'e;Enable','et;Enter','ex;Exit','en;Expand','ep;Export','f;Format','g;Get','gr;Grant','gp;Group','h;Hide','j;Join',
+            'ip;Import','i;Invoke','in;Initialize','is;Install','l;Limit','lk;Lock','ms;Measure','mg;Merge','mt;Mount','m;Move',
+            'n;New','op;Open','om;Optimize','o;Out','pi;Ping','pop;Pop','pt;Protect','pb;Publish','pu;Push','rd;Read','re;Redo',
+            'rc;Receive','rg;Register','r;Remove','rn;Rename','rp;Repair','rq;Request','rv;Resolve','rt;Restart','rr;Restore',
+            'ru;Resume','rk;Revoke','sv;Save','sr;Search','sc;Select','sc;Select-object','sd;Send','s;Set','sh;Show','sk;Skip','sl;Split','sa;Start',
+            'st;Step','sp;Stop','sb;Submit','ss;Suspend','sy;Sync','sw;Switch','t;Test','tr;Trace','ul;Unblock','un;Undo',
+            'us;Uninstall','uk;Unlock','up;Unprotect','ub;Unpublish','ur;Unregister','ud;Update','u;Use','w;Wait','wc;Watch',
+            '?;Where','wr;Write' ; 
+        # convert semi-delimted array of values into indexed hash for lookups
+        $hshAliasesPrfx = @{} ;
+        $sdata | select-object -skip 1 |foreach-object{
+            # split at semi, and assign the array elements to $value & $key respectively
+            $value,$key = $_.split(';') ; 
+            # add indexed hash element on $key with $value
+            $hshAliasesPrfx[$key] = $value ;
+        } ;
+        # clear temp varis
+        'sdata','key','value' | remove-variable -ea 0 -verbose ; 
+    } ;
+    PROCESS {
+        foreach($item in $verb){
+            write-verbose "(checking: $($item))" ; 
+            #[boolean]((Get-Verb).Verb -match $item) | write-output ;
+            if($hshAliasesPrfx[$item]){
+                $hshAliasesPrfx[$item] | write-output 
+            }else {
+                write-warning "no lookup match for verb '$($item)'" 
+                $false | write-output ; 
+            } ;
+        } ; 
+    } ;  # PROC-E
+    END {} ; # END-E
+}
+
+#*------^ get-VerbAliasTDO.ps1 ^------
+
+
 #*------v get-VersionInfo.ps1 v------
 function get-VersionInfo {
     <#
@@ -6843,6 +8063,7 @@ function import-ISEBreakPoints {
     Github      : https://github.com/tostka
     Tags        : Powershell,ISE,development,debugging
     REVISIONS
+    * 8:28 AM 3/26/2024 chg iIseBp -> ipIseBP
     * 10:20 AM 5/11/2022 added whatif support
     * 8:58 AM 5/9/2022 err suppress: test for bps before importing (emtpy bp xml files happen)
     * 8:43 AM 8/26/2020 fixed typo $ibp[0]->$ibps[0]
@@ -6866,7 +8087,7 @@ function import-ISEBreakPoints {
     Github      : https://github.com/tostka
     #>
     [CmdletBinding()]
-    [Alias('iIseBp','ipbp')]
+    [Alias('ipIseBp','ipbp')]
 
     #[ValidateScript({Test-Path $_})]
     PARAM(
@@ -6978,6 +8199,8 @@ function import-ISEBreakPointsALL {
     Github      : https://github.com/tostka/verb-dev
     Tags        : Powershell,ISE,development,debugging
     REVISIONS
+    * 8:28 AM 3/26/2024 chg iIseBpAll -> ipIseBpAll
+    * 1:21 PM 2/28/2024 add ipbpAll alias
     * 12:23 PM 5/23/2022 added try/catch: failed out hard on Untitled.ps1's
     * 9:19 AM 5/20/2022 add: iIseBpAll alias (using these a lot lately; w freq crashouts of ise, and need to recover all files open & BPs to quickly get back to function)
     * 1:58 PM 5/16/2022 rem'd whatif (not supported in child func)
@@ -6994,7 +8217,7 @@ function import-ISEBreakPointsALL {
     https://github.com/tostka/verb-dev
     #>
     [CmdletBinding()]
-    [Alias('iIseBpAll')]
+    [Alias('ipIseBpAll','ipbpAll')]
     PARAM(
         #[Parameter(HelpMessage="Whatif Flag  [-whatIf]")]
         #[switch] $whatIf
@@ -7119,6 +8342,8 @@ function import-ISEOpenFiles {
     Github      : https://github.com/tostka/verb-dev
     Tags        : Powershell,ISE,development,debugging
     REVISIONS
+    * 8:30 AM 3/26/2024 chg iIseOpen -> ipIseOpen
+    * 3:31 PM 1/17/2024 typo fix: lacking $ on () (dumping $ISES obj into pipeline/console)
     * 1:20 PM 3/27/2023 bugfix: coerce $txmlf into [system.io.fileinfo], to make it match $fileinfo's type.
     * 9:35 AM 3/8/2023 added -filepath (with pipeline support), explicit pathed file support (to pipeline in from get-IseOpenFilesExported()).
     * 3:28 PM 6/23/2022 add -Tag param to permit running interger-suffixed variants (ie. mult ise sessions open & stored from same desktop). 
@@ -7141,7 +8366,7 @@ function import-ISEOpenFiles {
     https://github.com/tostka/verb-dev
     #>
     [CmdletBinding()]
-    [Alias('iIseOpen')]
+    [Alias('ipIseOpen')]
     PARAM(
         [Parameter(Position=0,HelpMessage="Optional Tag to apply to filename[-Tag MFA]")]
         [string]$Tag,
@@ -7194,7 +8419,7 @@ function import-ISEOpenFiles {
                     if($allISEScripts){
                         foreach($ISES in $allISEScripts){
                             if($psise.powershelltabs.files.fullpath -contains $ISES){
-                                write-host "($ISES) is already OPEN in Current ISE tab list (skipping)" ;
+                                write-host "$($ISES) is already OPEN in Current ISE tab list (skipping)" ;
                             } else {
                                 if(test-path $ISES){
                                     <# #New tab & open in new tab: - no we want them all in one tab
@@ -7250,6 +8475,11 @@ function Initialize-ModuleFingerprint {
     AddedWebsite: https://powershellexplained.com/2017-10-14-Powershell-module-semantic-version/
     AddedTwitter: 
     REVISIONS
+    * 11:02 AM 1/15/2024 had various fundemental breaks - looks like was mid-revision, and not finished, and this isn't routinely used outside of new mods (or on processbuilk... when not-preexisting .ps1): Fixes:
+        - fixed $moddir.FullName -> $moddir ; 
+        - researched it's use: it's not used in step-moduleversioncalculated (which has it's own copy of the logic), is used in uwps\processbulk-NewModule.ps1, not breaking anything cuz running on existing fingerprint files
+        - pulled in undefined varis from other calling scripts: $moddir, $modroot, if not defined; hard break in #187: $psd1MBasename (was using .psm1 rplc for a .psd1 file) ; 
+        - fixed all $psd1m.fullname -> $psd1m ; added results test to the gcm -module block (break had no cmds comming back); fixed catch block w-w -fore use ; 
     * 2:29 PM 5/16/2022 add: backup-fileTDO of the fingerprintfile
     * 9:58 AM 10/26/2021 updated all echos, wh, ww, wv's with wlts's, updated KM logic to match step-ModuleVersionCalculated's latest
     * 6:11 PM 10/15/2021 rem'd # raa, replaced psd1/psm1-location code with Get-PSModuleFile(), which is a variant of BuildHelpers get-psModuleManifest. 
@@ -7305,6 +8535,7 @@ function Initialize-ModuleFingerprint {
         # Get parameters this function was invoked with
         #$PSParameters = New-Object -TypeName PSObject -Property $PSBoundParameters ;
         $Verbose = ($VerbosePreference -eq 'Continue') ; 
+        
     } ;  # BEGIN-E
     PROCESS {
         $error.clear() ;
@@ -7317,17 +8548,56 @@ function Initialize-ModuleFingerprint {
                 write-verbose "GOTCHA!" ;
             } ; 
 
+            <# 9:58 AM 1/15/2024 below is using undefined locally $moddir.FullName; clearly it should be $path, which is a string, if we're calling it from publish-ModuleLocalFork, should use that funcs inputs resolution:
+                $ModRoot = $path ; 
+                $moddir = (gi -Path $path).FullName;
+                $moddirfiles = gci -path $moddir -recur ;
+                But it's a core piece of verb-dev\Public\Step-ModuleVersionCalculated.ps1
+                No it's not, the func has internalized the logic from this:
+                #695: # KM's core logic code:
+                    $fingerprint = foreach ( $command in $commandList ){
+
+                but sc\powershell\PSScripts\processbulk-NewModule.ps1 *does* run it, at line 
+                #391: $pltInitModFngr=[ordered]@{Path=$ModRoot ;Verbose = ($VerbosePreference -eq 'Continue');} ;
+                            $smsg = "Initialize-ModuleFingerprint w`n$(($pltInitModFngr|out-string).trim())" ;
+                            if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug
+                            else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+
+                            Initialize-ModuleFingerprint @pltInitModFngr ;
+                            $hasFingerprint = [boolean](test-path (join-path -path $ModRoot -childpath 'fingerprint'))
+
+                    it's underlying 
+                    #185: $scRoot = 'c:\sc\' ; 
+                    #260: $modroot= join-path -path $scRoot -child $ModuleName ;
+
+                    below is also stocking $moddirfiles TWICE
+                    $moddirfiles = gci @pltGCI ;
+                    $moddirfiles = gci -path $path -recur 
+                    # 1st block must be roughed in not completed, rem it out
+                #>
+                # test and force
+                if(-not $moddir -AND $path){
+                    $moddir = (gi -Path $path).FullName;
+                    if(-not $modroot){$modroot= $path} ; 
+
+                }
+
             $pltXMO=@{Name=$null ; force=$true ; ErrorAction='STOP'} ;
-            
-            $pltGCI=[ordered]@{path=$moddir.FullName ;recurse=$true ; ErrorAction='STOP'} ;
+            <#
+            $pltGCI=[ordered]@{path=$moddir ;recurse=$true ; ErrorAction='STOP'} ;
             $smsg =  "gci w`n$(($pltGCI|out-string).trim())" ; 
             if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
             else{ write-verbose "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; 
             
             $moddirfiles = gci @pltGCI ;
-            
+            #>
+
             $Path = (Resolve-Path $Path).Path ; 
             $moddirfiles = gci -path $path -recur 
+            # using an undefined $modname below as well, resolve it from split path
+            if(-not $modname){
+                $modname = split-path $Path -leaf ;
+            } ;
             #-=-=-=-=-=-=-=-=
             if(-not (gcm Get-PSModuleFile -ea 0)){
                 function Get-PSModuleFile {
@@ -7410,26 +8680,35 @@ function Initialize-ModuleFingerprint {
 
             $psd1M = Get-PSModuleFile -path $Path -ext .psd1 -verbose:$($VerbosePreference -eq 'Continue');
             $psm1 = Get-PSModuleFile -path $Path -ext .psm1 -verbose:$($VerbosePreference -eq 'Continue' ); 
+            # 10:31 AM 1/15/2024 got some fullname refs, above are coming back as strings, no fullname property: fix
 
             if($psd1M){
                 if($psd1M -is [system.array]){
                     throw "`$psd1M resolved to multiple .psm1 files in the module tree!" ; 
                 } ; 
                 # regardless of root dir name, the .psm1 name *is* the name of the module, use it for ipmo/rmo's
-                $psd1MBasename = ((split-path $psd1M.fullname -leaf).replace('.psm1','')) ; 
+                #$psd1MBasename = ((split-path $psd1M -leaf).replace('.psm1','')) ; # this isn't going to work, it's a .psd1 path, and we're rplacing .psm1!
+                $psd1MBasename = ((split-path $psd1M -leaf).replace('.psd1','')) ; # this isn't going to work, it's a .psd1 path, and we're rplacing .psm1!
                 if($modname -ne $psd1MBasename){
-                    $smsg = "Module has non-standard root-dir name`n$($moddir.fullname)"
+                    $smsg = "Module has non-standard root-dir name`n$($moddir)"
                     $smsg += "`ncorrecting `$modname variable to use *actual* .psm1 basename:$($psd1MBasename)" ; 
                     if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN } #Error|Warn|Debug 
                     else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; 
                     $modname = $psd1MBasename ; 
                 } ; 
-                $pltXMO.Name = $psd1M.fullname # load via full path to .psm1
+                $pltXMO.Name = $psd1M # load via full path to .psm1
                 $smsg =  "import-module w`n$(($pltXMO|out-string).trim())" ; 
                 if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
                 else{ write-verbose "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; 
                 import-module @pltXMO ;
-                $commandList = Get-Command -Module $modname ;
+                # ipmo works on full .psd1 name, but gcm doesn't, so if then the results
+                if(-not ($commandList = Get-Command -Module $modname)){
+                    $smsg = "get-command -module $($modname.replace('.psd1','')) FAILED to return a list of commands!"
+                    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN } #Error|Warn|Debug 
+                    else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; ]
+                    throw $smsg ;
+                    BREAK ; 
+                } ;
                 $pltXMO.Name = $psd1MBasename ; # have to rmo using *basename*
                 $smsg =  "remove-module w`n$(($pltXMO|out-string).trim())" ; 
                 if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug 
@@ -7457,7 +8736,7 @@ function Initialize-ModuleFingerprint {
                 } ;   
 
             } else {
-                throw "No module .psm1 file found in `$path:`n$(join-path -path $moddir.fullname -child "$modname.psm1")" ;
+                throw "No module .psm1 file found in `$path:`n$(join-path -path $moddir -child "$modname.psm1")" ;
             } ;  
   
         } CATCH {
@@ -7472,7 +8751,7 @@ function Initialize-ModuleFingerprint {
             #-=-=-=-=-=-=-=-=
             $smsg = "FULL ERROR TRAPPED (EXPLICIT CATCH BLOCK WOULD LOOK LIKE): } catch[$($ErrTrapd.Exception.GetType().FullName)]{" ; 
             if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level ERROR } #Error|Warn|Debug 
-            else{ write-warning -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+            else{ write-warning  "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
             Break #Opts: STOP(debug)|EXIT(close)|CONTINUE(move on in loop cycle)|BREAK(exit loop iteration)|THROW $_/'CustomMsg'(end script with Err output)
         } ; 
     } ;  # PROC-E
@@ -7485,7 +8764,7 @@ function Initialize-ModuleFingerprint {
             if (!$fingerprintBU) {throw "FAILURE" } ;
             #> 
 
-            $pltOFile=[ordered]@{Encoding='utf8' ;FilePath=(join-path -path $moddir.fullname -childpath 'fingerprint') ;whatif=$($whatif) ;} ; 
+            $pltOFile=[ordered]@{Encoding='utf8' ;FilePath=(join-path -path $moddir -childpath 'fingerprint') ;whatif=$($whatif) ;} ; 
 
             if(test-path $pltOFile.FilePath){
                 write-verbose "(backup-FileTDO -path $($pltOFile.FilePath))" ;
@@ -8988,6 +10267,112 @@ Function save-ISEConsoleColors {
 #*------^ save-ISEConsoleColors.ps1 ^------
 
 
+#*------v show-ISEOpenTab.ps1 v------
+function show-ISEOpenTab {
+    <#
+    .SYNOPSIS
+    show-ISEOpenTab - Display a list of all currently open ISE tab files, prompt for selection, and then foreground selected tab file
+    .NOTES
+    Version     : 1.0.0
+    Author      : Todd Kadrie
+    Website     : http://www.toddomation.com
+    Twitter     : @tostka / http://twitter.com/tostka
+    CreatedDate : 2022-05-11
+    FileName    : show-ISEOpenTab
+    License     : MIT License
+    Copyright   : (c) 2024 Todd Kadrie
+    Github      : https://github.com/tostka/verb-dev
+    Tags        : Powershell,ISE,development,debugging
+    REVISIONS
+    * 10:09 AM 5/14/2024 init
+    .DESCRIPTION
+    show-ISEOpenTab - Display a list of all currently open ISE tab files, prompt for selection, and then foreground selected tab file
+    Alternately supports a -Path param, that permits ISE Console use to direct switch active Tab File. 
+
+    This is really only useful when you run a massive number of open file tabs, and visually scanning them unsorted is too much work. 
+    Opens them in a sortable grid view, with both Displayname & fullpath, and you can rapidly zoom in on the target tab file you're seeking. 
+
+    .PARAMETER Path
+    Optional Path to filter against the ISE .files Fullname string (for direct ISE console use)[-Path ' D:\scripts\show-ISEOpenTab_func.ps1']
+    .EXAMPLE
+    PS> show-ISEOpenTab -verbose -whatif
+    Intereactive pass, uses out-grid as a picker select a prompted target file tab, from full list. 
+    .EXAMPLE
+    PS> show-ISEOpenTab -Path 'D:\scripts\get-MailHeaderSenderIDKeys.ps1' -verbose ;
+    ISE Console direct switch open files in ISE to the file tab with the specified path as it's FullName
+    .LINK
+    https://github.com/tostka/verb-dev
+    #>
+    [CmdletBinding()]
+    [Alias('shIseTab')]
+    PARAM(
+        [Parameter(Position=0,HelpMessage="Optional Path to filter against the ISE .files Fullname string (for direct ISE console use)[-Path ' D:\scripts\show-ISEOpenTab_func.ps1']")]
+        [string]$Path
+    ) ;
+    BEGIN {
+        ${CmdletName} = $PSCmdlet.MyInvocation.MyCommand.Name ;
+        $verbose = $($VerbosePreference -eq "Continue")
+        $sBnr="#*======v $($CmdletName): v======" ;
+        write-verbose  "$((get-date).ToString('HH:mm:ss')):$($sBnr)" ;
+    }
+    PROCESS {
+        if ($psise){
+            #$AllUsrsScripts = "$($env:ProgramFiles)\WindowsPowerShell\Scripts" ;
+            #$CUScripts = "$([Environment]::GetFolderPath('MyDocuments'))\WindowsPowershell\Scripts" ;
+            $allISEFiles = $psise.powershelltabs.files #.fullpath ;
+
+            if($Path){
+                $tFile = $allISEFiles | ?{$_.Fullpath -eq $Path} 
+            } else{$tFile = $allISEFiles | select DisplayName,FullPath | out-gridview -Title "Pick Tab to focus:" -passthru};
+            If($tFile){
+                $Name = $tFile.DisplayName ; 
+                write-verbose "Searching for $($tFile.DisplayName)" ; 
+                #loop tabs for target displayname
+                # Get the tab using the name
+                # Finds the tab, but there's version bug in the SelectedPowerShellTab, doesn't like setting to the discovered $tab…
+                if( $Name )  {
+                    $found = 0 ;
+                    if($host.version.major -lt 3){
+                        for( $i = 0; $i -lt $psise.PowerShellTabs.Count; $i++){
+                            write-verbose $psise.PowerShellTabs[$i].DisplayName ;
+                            if( $psise.PowerShellTabs[$i].DisplayName -eq $Name ){
+                                $tab = $psise.PowerShellTabs[$i] ;
+                                $found++ ;
+                            } ;
+                        } ;
+                        if($found -eq 0) {Throw ("Could not find a tab named " + $Name) } else {
+                            $psISE.PowerShellTabs.SelectedPowerShellTab = $tab | select -first 1 ;
+                        } ;
+                    } else {
+                        for( $i = 0; $i -lt $psise.PowerShellTabs.files.Count; $i++){
+                            write-verbose $psise.PowerShellTabs.files[$i].DisplayName ;
+                            if( $psise.PowerShellTabs.files[$i].DisplayName -eq $Name ){
+                                $tab = $psise.PowerShellTabs.files[$i] ;
+                                # it's doubtful you really need to cycle the 'files', vs postfilter; but postfilter works fine for $psISE.CurrentPowerShellTab.Files.SetSelectedFile
+                                # (and SelectedPowerShellTab explicitly *doesnt* work anymore under ps5 at least, as written above in the ms learn exampls)
+                                $targetFileTab =  $psise.PowerShellTabs.files | ?{$_.displayname -eq $Name} ;
+                                $found++ ;
+                            } ;
+                        } ;
+                        if($found -eq 0) {Throw ("Could not find a tab named " + $Name) } else {
+                            #$psISE.PowerShellTabs.files.SelectedPowerShellTab = $tab | select -first 1 ;
+                            $psISE.CurrentPowerShellTab.Files.SetSelectedFile(($targetFileTab | select -first 1))
+                        } ;
+                    } ;
+                } ;
+            } else {
+                write-warning "No matching file in existing Tabs Files list found" ; 
+            } ; 
+        } else {  write-warning "This script only functions within PS ISE, with a script file open for editing" };
+    } # PROC-E
+    END{
+        write-verbose  "$((get-date).ToString('HH:mm:ss')):$($sBnr.replace('=v','=^').replace('v=','^='))" ;
+    }
+}
+
+#*------^ show-ISEOpenTab.ps1 ^------
+
+
 #*------v show-Verbs.ps1 v------
 Function show-Verbs {
     <#
@@ -9207,6 +10592,7 @@ function Step-ModuleVersionCalculated {
     AddedWebsite: www.thesurlyadmin.com
     AddedTwitter: @thesurlyadm1n
     REVISIONS
+    * 8:16 AM 1/16/2024 added gcm commands return shortage comment in re: in-line internal funcs throwing off the count (as raw goes after those as full blown funcs, while gcm doesn't return/count them)
     * 3:32 PM 11/29/2023 add test-modulemanifest error testing (cap -errorvariable and eval), it doesn't actually returna $false test, just the parsed xml, where there's an unresolvable FileList entry. 
     * 8:02 AM 6/23/2023 fix: #433: # 2:20 PM 6/22/2023 if you're going to use a param with boolean, they have to be colon'd: -PassThru:$true (built into v1.5.26)
     * 2:18 PM 6/2/2023 added: Try/Catch around all critical items; added test for .psm1 diverge <<<<<< HEAD tags; expanded ipmo -fo -verb tests to include ErrorVariable and Passthru, capture into variable, for info tracking down compile fails.
@@ -9718,6 +11104,7 @@ function Step-ModuleVersionCalculated {
                             # use Select-String regex parse to prxy count # of funcs that roughly should come back from gcm w/in $ASTMatchThreshold
                             if( ($commandList.count / $rawfunccount) -lt $ASTMatchThreshold ){
                                 $smsg = "get-command failed to return a complete Func/Alias list from $($ModuleName) -lt AST $($ASTMatchThreshold * 100)% match:" ; 
+                                $smsg += "`n(or has significant BUILD-block etc _internal_ funcs, throwing count off)" ; 
                                 $smsg += "`nAST profile (get-FunctionBlocks+get-AliasAssignsAST) returned:$($ASTCmds.count)"
                                 $smsg += "`nFORCING STEP EVAL INTO '$($MinVersionIncrementBump)' TO WORK AROUND BUG" ;
                                 if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN } #Error|Warn|Debug 
@@ -10456,6 +11843,7 @@ Function Uninstall-ModuleForce {
     Github      : https://github.com/tostka/verb-dev
     Tags        : Powershell,Module,Management,Lifecycle
     REVISIONS
+    * 12:33 PM 1/17/2024 added RunAA pretest, and folder perms seize code
     * 10:10 AM 5/17/2022 updated post test, also don't want it to abort/break, on any single failure.
     * 11:11 AM 5/10/2022 init, split out process-NewModule #773: $smsg= "Removing existing profile $($ModuleName) content..."  block, to have a single maintainable shared func
     .DESCRIPTION
@@ -10510,7 +11898,13 @@ Function Uninstall-ModuleForce {
             #write-verbose "Data received from parameter input: '$($InputObject)'" ;
             write-verbose "(non-pipeline - param - input)" ;
         } ;
-
+        
+        if(-not(get-variable -Name whoamiAll -ea 0)){$whoamiAll = (whoami /all)} ;
+        if([bool](($whoamiAll |Where-Object{$_ -match 'BUILTIN\\Administrators'}) -AND ($whoamiAll |
+            Where-Object{$_ -match 'S-1-16-12288'}))){} else { 
+                throw "Must be RunAsAdmin!" ; 
+                BREAK ;
+            } ; 
     } ;  # BEGIN-E
     PROCESS {
         $Error.Clear() ;
@@ -10566,11 +11960,17 @@ Function Uninstall-ModuleForce {
 
             $modpaths = $env:PSModulePath.split(';') ;
             foreach($modpath in $modpaths){
-                #"==$($modpath):"
                 $smsg= "Checking: $($Mod) below: $($modpath)..." ;
                 if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info }  #Error|Warn|Debug
                 else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
                 $searchPath = join-path -path $modpath -ChildPath "$($Mod)\*.*" ;
+                # adding ownership seize before removal:
+                if($mPath = get-item -path (join-path -path $modpath -ChildPath $Mod) -ea 0){
+                    write-host "Seizing ownership:$($mPath.fullname)..." ;
+                    takeown /F $mPath.fullname /A /R ;
+                    icacls $mPath.fullname /reset ;
+                    icacls $mPath.fullname /grant Administrators:'F' /inheritance:d /T ;
+                } ; 
                 # adding -GracefulFail to get past locked verb-dev cmdlets
                 $bRet = remove-ItemRetry -Path $searchPath -Recurse -showdebug:$($showdebug) -whatif:$($whatif) -GracefulFail ;
                 #if (-not$bRet) {throw "FAILURE" ; Break ; } ;
@@ -10610,12 +12010,13 @@ r.com/tostka
     Github      : https://github.com/tostka/verb-dev
     Tags        : Powershell,Module,Build,Development
     REVISIONS
+    * 8:52 AM 12/12/2023 fixed typo trailing log echo #2771 (and added ref to both currlog & perm copy stored at uwps\logs)
     * 3:14 PM 12/11/2023 added expl for reset-ModuleBuildFail.ps1 cleanup pass ; 
         vazure bombed on build, missing LICENSE.TXT, so used leaf 
         dest spec on the re-copy - actually fix may be to premptively run 
         reset-ModuleBuildFail.ps1 ahead of any rebuild - could be the issue was 
         deadwood inapprop in the sc\modname\modname\ dir;   (prior was all built into 
-        vdev v1.5.43, didn't error out, but didn't fire the new re-copy-item code 
+        vdev v1.5.42, didn't error out, but didn't fire the new re-copy-item code 
         either) ; ammended fail of test, to re-copy missing file into 
         cumods\modname\modname, prior to pbmo run (testing w vdev rebuild) ;confirmed, 
         vnet finally built, with the pass pre-conffirming the CUMods\modname\modname 
@@ -13362,7 +14763,9 @@ $($logfile)
         else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
     } ;
 
-    $smsg = "`n(Processing log can be found at:$(join-path -path $ModDirPath -childpath $logfile))" ;
+    #$smsg = "`n(Processing log can be found at:$(join-path -path $ModDirPath -childpath $logfile))" ;
+    # fix typo
+    $smsg = "`n(Most recent processing log can be found at:$(join-path -path $ModDirPath -childpath (split-path -leaf $logfile)))`n(perm copy stored at:$($logfile)" ;
     if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug
     else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
     # copy the conversion log into the dev dir $ModDirPath
@@ -13400,7 +14803,7 @@ $($logfile)
 
 #*======^ END FUNCTIONS ^======
 
-Export-ModuleMember -Function backup-ModuleBuild,check-PsLocalRepoRegistration,confirm-ModuleBuildSync,confirm-ModulePsd1Version,confirm-ModulePsm1Version,confirm-ModuleTestPs1Guid,convert-CommandLine2VSCDebugJson,convertFrom-EscapedPSText,Convert-HelpToHtmlFile,convert-ISEOpenSession,converto-VSCConfig,ConvertTo-Breakpoint,_extractBreakpoint,convertTo-EscapedPSText,ConvertTo-ModuleDynamicTDO,ConvertTo-ModuleMergedTDO,convertTo-UnwrappedPS,convertTo-WrappedPS,export-ISEBreakPoints,export-ISEBreakPointsALL,export-ISEOpenFiles,get-AliasAssignsAST,get-CodeProfileAST,get-CodeRiskProfileAST,Get-CommentBlocks,get-FunctionBlock,get-FunctionBlocks,get-HelpParsed,get-ISEOpenFilesExported,get-ModuleRevisedCommands,get-ProjectNameTDO,Get-PSBreakpointSorted,Get-PSModuleFile,get-StrictMode,Version,ToString,get-VariableAssignsAST,get-VersionInfo,import-ISEBreakPoints,import-ISEBreakPointsALL,import-ISEConsoleColors,import-ISEOpenFiles,Initialize-ModuleFingerprint,Get-PSModuleFile,Initialize-PSModuleDirectories,move-ISEBreakPoints,new-CBH,New-GitHubGist,pop-FunctionDev,push-FunctionDev,restore-ISEConsoleColors,restore-ModuleBuild,save-ISEConsoleColors,show-Verbs,Split-CommandLine,Step-ModuleVersionCalculated,Get-PSModuleFile,Test-ModuleTMPFiles,test-VerbStandard,Uninstall-ModuleForce,update-NewModule,get-FolderEmpty,reset-ModulePublishingDirectory,populate-ModulePublishingDirectory -Alias *
+Export-ModuleMember -Function backup-ModuleBuild,check-PsLocalRepoRegistration,confirm-ModuleBuildSync,confirm-ModulePsd1Version,confirm-ModulePsm1Version,confirm-ModuleTestPs1Guid,convert-CommandLine2VSCDebugJson,convertFrom-EscapedPSText,Convert-HelpToHtmlFile,convert-ISEOpenSession,converto-VSCConfig,ConvertTo-Breakpoint,_extractBreakpoint,convertTo-EscapedPSText,ConvertTo-ModuleDynamicTDO,ConvertTo-ModuleMergedTDO,convertTo-UnwrappedPS,convertTo-WrappedPS,copy-ISETabFileToLocal,export-ISEBreakPoints,export-ISEBreakPointsALL,export-ISEOpenFiles,find-NounAliasesTDO,get-AliasAssignsAST,get-CodeProfileAST,get-CodeRiskProfileAST,Get-CommentBlocks,get-FunctionBlock,get-FunctionBlocks,get-HelpParsed,get-ISEBreakPoints,get-ISEOpenFilesExported,get-ModuleRevisedCommands,get-NounAliasTDO,get-ProjectNameTDO,Get-PSBreakpointSorted,Get-PSModuleFile,get-StrictMode,Version,ToString,get-VariableAssignsAST,get-VerbAliasTDO,get-VersionInfo,import-ISEBreakPoints,import-ISEBreakPointsALL,import-ISEConsoleColors,import-ISEOpenFiles,Initialize-ModuleFingerprint,Get-PSModuleFile,Initialize-PSModuleDirectories,move-ISEBreakPoints,new-CBH,New-GitHubGist,pop-FunctionDev,push-FunctionDev,restore-ISEConsoleColors,restore-ModuleBuild,save-ISEConsoleColors,show-ISEOpenTab,show-Verbs,Split-CommandLine,Step-ModuleVersionCalculated,Get-PSModuleFile,Test-ModuleTMPFiles,test-VerbStandard,Uninstall-ModuleForce,update-NewModule,get-FolderEmpty,reset-ModulePublishingDirectory,populate-ModulePublishingDirectory -Alias *
 
 
 
@@ -13408,8 +14811,8 @@ Export-ModuleMember -Function backup-ModuleBuild,check-PsLocalRepoRegistration,c
 # SIG # Begin signature block
 # MIIELgYJKoZIhvcNAQcCoIIEHzCCBBsCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUfjYkq3WRCrzM63QlLvAcmufU
-# iZagggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUfn8aZNwlCyA9W7E7uSK+gIvO
+# LmugggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
 # MCwxKjAoBgNVBAMTIVBvd2VyU2hlbGwgTG9jYWwgQ2VydGlmaWNhdGUgUm9vdDAe
 # Fw0xNDEyMjkxNzA3MzNaFw0zOTEyMzEyMzU5NTlaMBUxEzARBgNVBAMTClRvZGRT
 # ZWxmSUkwgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBALqRVt7uNweTkZZ+16QG
@@ -13424,9 +14827,9 @@ Export-ModuleMember -Function backup-ModuleBuild,check-PsLocalRepoRegistration,c
 # AWAwggFcAgEBMEAwLDEqMCgGA1UEAxMhUG93ZXJTaGVsbCBMb2NhbCBDZXJ0aWZp
 # Y2F0ZSBSb290AhBaydK0VS5IhU1Hy6E1KUTpMAkGBSsOAwIaBQCgeDAYBgorBgEE
 # AYI3AgEMMQowCKACgAChAoAAMBkGCSqGSIb3DQEJAzEMBgorBgEEAYI3AgEEMBwG
-# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBRrg967
-# ZQUegjMiQKu1BS/On2v3EDANBgkqhkiG9w0BAQEFAASBgBU16k9vXG8SJi4pE1jw
-# FNljbT7LOnr6WY3I80E1mP+RXhDSmGKAxMq54Z9G3WQhMDjeRblnKjrX3yk4HI91
-# 8m7gGGmeOTVIbSKhdzrneRMIMIksE6E0vmfzElbWVW7zAGEkQw2Zp+r7E5eefkS2
-# JeRLD+3uUYosMuTcWxr8pIE6
+# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBSQIrIN
+# GE+wdqry2CfRCNjRwZ8lXjANBgkqhkiG9w0BAQEFAASBgIYNUT2Gd0ueGYw7wS3T
+# Uz8bc3nXp1UdiIoA7YOyvUxm7HeckN4ylhSUCqFasSJoZTIx+yyC9qVrUQ/7tE2C
+# ULzspe5mrFd8u7WtKbRpK8e/vTiaBdr3PGQPMXOpEPHoqV8XKpeSltf0ZLUxVohG
+# cD4xWo1qZbfExn6QPcjDLNIo
 # SIG # End signature block

@@ -1,0 +1,1557 @@
+﻿**********************
+Windows PowerShell transcript start
+Start time: 20240716104316
+Username: TORO\kadritss
+RunAs User: TORO\kadritss
+Configuration Name: 
+Machine: LYN-8DCZ1G2 (Microsoft Windows NT 10.0.17134.0)
+Host Application: C:\Windows\System32\WindowsPowerShell\v1.0\powershell_ise.exe
+Process ID: 21264
+PSVersion: 5.1.17134.858
+PSEdition: Desktop
+PSCompatibleVersions: 1.0, 2.0, 3.0, 4.0, 5.0, 5.1.17134.858
+Platform: Win32NT
+BuildVersion: 10.0.17134.858
+CLRVersion: 4.0.30319.42000
+WSManStackVersion: 3.0
+OS: Microsoft Windows NT 10.0.17134.0
+PSRemotingProtocolVersion: 2.3
+SerializationVersion: 1.1.0.1
+**********************
+Transcript started, output file is C:\sc\verb-dev\verb-dev\logs\VERB-dev-verb-logging-Transcript-BATCH-EXEC-20240716-1043AM-trans-log.txt
+10:43:16: INFO:  #*======v VERB-dev.psm1:verb-logging v======
+10:43:16:(executing:Get-BuildEnvironment -Path c:\sc\verb-logging 
+(use -NoBuildInfo if hangs))
+10:43:19: INFO:  Run: reset-ModulePublishingDirectory -ModuleName verb-logging
+10:43:19: ##  
+#*------v PROCESSING : verb-logging v------
+10:43:19: INFO:  Pre-purge (CHANGELOG|README)\.md$ Root dir matches from :
+processing:Resource...
+10:43:19: INFO:  (no matching 'c:\sc\verb-logging\Resource\' content found
+processing:Licenses...
+10:43:19: INFO:  (no matching 'c:\sc\verb-logging\Licenses\' content found
+processing:Docs...
+10:43:19: INFO:  verb-logging resolved $ModPubPath:C:\sc\verb-logging\verb-logging\
+$ModResPath:C:\sc\verb-logging\Docs\
+10:43:19: INFO:  ==C:\sc\verb-logging\CHANGELOG.md:
+no conflicting C:\sc\verb-logging\verb-logging\\CHANGELOG.md found
+10:43:19: INFO:  ==C:\sc\verb-logging\README.md:
+no conflicting C:\sc\verb-logging\verb-logging\\README.md found
+10:43:19: INFO:  ==C:\sc\verb-logging\Docs\Quick-Start-Installation-and-Example.md:
+no conflicting C:\sc\verb-logging\verb-logging\\Quick-Start-Installation-and-Example.md found
+10:43:19: ##  
+#*------^ PROCESSING : verb-logging ^------
+10:43:19: INFO:  Run: populate-ModulePublishingDirectory -ModuleName verb-logging
+10:43:19: ##  
+#*------v PROCESSING : verb-logging v------
+10:43:19: INFO:  Locating (CHANGELOG|README)\.md$ Root dir matches from :
+processing:Resource...
+10:43:19: INFO:  (no matching 'c:\sc\verb-logging\Resource\' content found
+processing:Licenses...
+10:43:19: INFO:  (no matching 'c:\sc\verb-logging\Licenses\' content found
+processing:Docs...
+10:43:19: INFO:  verb-logging resolved $ModPubPath:C:\sc\verb-logging\verb-logging\
+$ModResPath:C:\sc\verb-logging\Docs\
+10:43:19: INFO:  copy-item w
+Name                           Value                                                                                                                                                                                                   
+----                           -----                                                                                                                                                                                                   
+path                           {C:\sc\verb-logging\CHANGELOG.md, C:\sc\verb-logging\README.md, C:\sc\verb-logging\Docs\Quick-Start-Installation-and-Example.md}                                                                        
+destination                    C:\sc\verb-logging\verb-logging\                                                                                                                                                                        
+force                          True                                                                                                                                                                                                    
+erroraction                    STOP                                                                                                                                                                                                    
+verbose                        False                                                                                                                                                                                                   
+whatif                         False
+--$pltCI.path:
+C:\sc\verb-logging\CHANGELOG.md
+C:\sc\verb-logging\README.md
+C:\sc\verb-logging\Docs\Quick-Start-Installation-and-Example.md
+10:43:19: ##  
+#*------^ PROCESSING : verb-logging ^------
+10:43:19: INFO:  Validate updated verb-logging\verb-logging dir contents against Manifest:
+Run: test-modulemanifest -Path C:\sc\verb-logging\verb-logging\verb-logging.psd1
+10:43:20: INFO:  NON-Republish pass detected:
+MERGE parm specified as well:`n-Merge Public|Internal|Classes include subdirs module content into updated .psm1
+-Sign updated files.
+-Uninstall/Remove existing profile module
+-Copy new module to profile
+-Confirm: Get-Module -ListAvailable
+-Check/Update existing Psd1 Version
+-Publish-Module
+-Remove existing installed profile module
+-Test Install-Module
+-Test Import-Module
+10:43:20: INFO:  -Merge specified...
+10:43:20: INFO:  ConvertTo-ModuleMergedTDO w
+Name                           Value                                                                                                                                                                                                   
+----                           -----                                                                                                                                                                                                   
+ModuleName                     verb-logging                                                                                                                                                                                            
+ModuleSourcePath               {c:\sc\verb-logging\Public, c:\sc\verb-logging\Internal}                                                                                                                                                
+ModuleDestinationPath          c:\sc\verb-logging\verb-logging                                                                                                                                                                         
+RequiredVersion                1.4.1                                                                                                                                                                                                   
+LogSpec                        {logging, logfile, transcript}                                                                                                                                                                          
+NoAliasExport                                                                                                                                                                                                                          
+ErrorAction                    Stop                                                                                                                                                                                                    
+showdebug                      False                                                                                                                                                                                                   
+whatif                         False
+10:43:20: INFO:  ConvertTo-ModuleMergedTDO w
+Name                           Value                                                                                                                                                                                                   
+----                           -----                                                                                                                                                                                                   
+ModuleName                     verb-logging                                                                                                                                                                                            
+ModuleSourcePath               {c:\sc\verb-logging\Public, c:\sc\verb-logging\Internal}                                                                                                                                                
+ModuleDestinationPath          c:\sc\verb-logging\verb-logging                                                                                                                                                                         
+RequiredVersion                1.4.1                                                                                                                                                                                                   
+LogSpec                        {logging, logfile, transcript}                                                                                                                                                                          
+NoAliasExport                                                                                                                                                                                                                          
+ErrorAction                    Stop                                                                                                                                                                                                    
+showdebug                      False                                                                                                                                                                                                   
+whatif                         False
+DEADWOOD REMOVAL:remove-UnneededFileVariants w
+Name                           Value                                                                                                                                                                                                   
+----                           -----                                                                                                                                                                                                   
+Path                           c:\sc\verb-logging\verb-logging                                                                                                                                                                         
+Include                        verb-logging.psm1_*                                                                                                                                                                                     
+Pattern                        \.ps(m|d)1_\d{8}-\d{3,4}(A|P)M$                                                                                                                                                                         
+FilterOn                       CreationTime                                                                                                                                                                                            
+Keep                           2                                                                                                                                                                                                       
+KeepToday                      True                                                                                                                                                                                                    
+verbose                        True                                                                                                                                                                                                    
+whatif                         False
+10:43:21:gci w
+Name                           Value                                                                                                                                                                                                   
+----                           -----                                                                                                                                                                                                   
+path                           c:\sc\verb-logging\verb-logging\*                                                                                                                                                                       
+include                        verb-logging.psm1_*                                                                                                                                                                                     
+ErrorAction                    Stop
+VERBOSE: $cuttime:07/16/2024 00:00:00
+VERBOSE: post-filtering on pattern:\.ps(m|d)1_\d{8}-\d{3,4}(A|P)M$
+(5 in set *before* filtering)
+(4 in set *after* filtering)
+VERBOSE: filtering on files prior to $cuttime:07/16/2024 00:00:00 AM, on CreationTime property
+(4 in set *before* filtering)
+(3 in set *after* filtering)
+VERBOSE: attempting to retain remaining 2 generations net of prior filtering
+(3 in set *before* filtering)
+(1 in set *after* filtering)
+(Note:net population is *below* target -Keep:2 spec - insufficient older files available)
+10:43:21:Reducing matched population from 5 to 1 files via:
+post-filtered files with regex pattern:\.ps(m|d)1_\d{8}-\d{3,4}(A|P)M$
+filtered files on CreationTime prior to 07/16/2024 00:00:00 AM
+10:43:21:Remove-Item w 
+Name                           Value                                                                                                                                                                                                   
+----                           -----                                                                                                                                                                                                   
+path                           C:\sc\verb-logging\verb-logging\verb-logging.psm1_20230217-1239PM                                                                                                                                       
+ErrorAction                    STOP                                                                                                                                                                                                    
+whatif                         False
+10:43:22: INFO:  (NON-dyn psm1 detected - purging existing non-CBH content...)
+VERBOSE: L10:43:23:(doesn't appear to be an inter meta-CBH block)
+10:43:23: INFO:  Initialize-PSModuleDirectories w
+Name                           Value                                                                                                                                                                                                   
+----                           -----                                                                                                                                                                                                   
+ModuleSourcePath               {c:\sc\verb-logging\Public, c:\sc\verb-logging\Internal}                                                                                                                                                
+ModuleDestinationPath          c:\sc\verb-logging\verb-logging                                                                                                                                                                         
+ErrorAction                    Stop                                                                                                                                                                                                    
+whatif                         False
+10:43:23: INFO:  Creating missing dir:new-Item w
+Name                           Value                                                                                                                                                                                                   
+----                           -----                                                                                                                                                                                                   
+path                           c:\sc\verb-logging\Libs                                                                                                                                                                                 
+ItemType                       Directory                                                                                                                                                                                               
+ErrorAction                    Stop                                                                                                                                                                                                    
+whatif                         False
+10:43:23: INFO:  Creating missing dir:new-Item w
+Name                           Value                                                                                                                                                                                                   
+----                           -----                                                                                                                                                                                                   
+path                           c:\sc\verb-logging\Licenses                                                                                                                                                                             
+ItemType                       Directory                                                                                                                                                                                               
+ErrorAction                    Stop                                                                                                                                                                                                    
+whatif                         False
+10:43:23: INFO:  Creating missing dir:new-Item w
+Name                           Value                                                                                                                                                                                                   
+----                           -----                                                                                                                                                                                                   
+path                           c:\sc\verb-logging\Resource                                                                                                                                                                             
+ItemType                       Directory                                                                                                                                                                                               
+ErrorAction                    Stop                                                                                                                                                                                                    
+whatif                         False
+10:43:23: INFO:  
+#*------v (1/2):C:\sc\verb-logging\Public v------
+10:43:23: INFO:  Processing 19 $ComponentScripts files through Remove-AuthenticodeSignature...
+10:43:23: INFO:  Processing (1/19):C:\sc\verb-logging\Public\Archive-Log.ps1...
+10:43:24: INFO:  Processing (2/19):C:\sc\verb-logging\Public\Cleanup.ps1...
+10:43:24: INFO:  Processing (3/19):C:\sc\verb-logging\Public\get-ArchivePath.ps1...
+10:43:24: INFO:  Processing (4/19):C:\sc\verb-logging\Public\get-EventsFiltered.ps1...
+10:43:24: INFO:  Processing (5/19):C:\sc\verb-logging\Public\get-lastboot.ps1...
+10:43:24: INFO:  Processing (6/19):C:\sc\verb-logging\Public\get-LastEvent.ps1...
+10:43:25: INFO:  Processing (7/19):C:\sc\verb-logging\Public\get-lastlogon.ps1...
+10:43:25: INFO:  Processing (8/19):C:\sc\verb-logging\Public\get-lastshutdown.ps1...
+10:43:25: INFO:  Processing (9/19):C:\sc\verb-logging\Public\get-lastsleep.ps1...
+10:43:25: INFO:  Processing (10/19):C:\sc\verb-logging\Public\get-lastwake.ps1...
+10:43:25: INFO:  Processing (11/19):C:\sc\verb-logging\Public\get-winEventsLoopedIDs.ps1...
+10:43:25: INFO:  Processing (12/19):C:\sc\verb-logging\Public\Start-IseTranscript.ps1...
+10:43:25: INFO:  Processing (13/19):C:\sc\verb-logging\Public\Start-Log.ps1...
+10:43:25: INFO:  Processing (14/19):C:\sc\verb-logging\Public\start-TranscriptLog.ps1...
+10:43:25: INFO:  Processing (15/19):C:\sc\verb-logging\Public\Stop-TranscriptLog.ps1...
+10:43:25: INFO:  Processing (16/19):C:\sc\verb-logging\Public\Test-Transcribing.ps1...
+10:43:25: INFO:  Processing (17/19):C:\sc\verb-logging\Public\Test-Transcribing2.ps1...
+10:43:26: INFO:  Processing (18/19):C:\sc\verb-logging\Public\Test-TranscriptionSupported.ps1...
+10:43:26: INFO:  Processing (19/19):C:\sc\verb-logging\Public\Write-Log.ps1...
+10:43:26: INFO:  
+#*------v (2/2):C:\sc\verb-logging\Internal v------
+10:43:26: INFO:  Processing 0 $ComponentScripts files through Remove-AuthenticodeSignature...
+10:43:26: INFO:  (Updating Psm1 Export-ModuleMember -Function to reflect Public modules)
+10:43:26: INFO:  Adding:FooterBlock...
+10:43:26: INFO:  confirm-ModuleBuildSync w
+Name                           Value                                                                                                                                                                                                   
+----                           -----                                                                                                                                                                                                   
+ModPsdPath                     c:\sc\verb-logging\verb-logging\verb-logging.psd1_TMP                                                                                                                                                   
+RequiredVersion                1.4.1                                                                                                                                                                                                   
+NoTest                         True                                                                                                                                                                                                    
+whatif                         False                                                                                                                                                                                                   
+verbose                        False
+10:43:26: INFO:  (test-path confirms $ModPsm1 & $ModTestPs1)
+10:43:26: INFO:  Import-PowerShellDataFile w
+Name                           Value                                                                                                                                                                                                   
+----                           -----                                                                                                                                                                                                   
+Path                           c:\sc\verb-logging\verb-logging\verb-logging.psd1_TMP                                                                                                                                                   
+ErrorAction                    Stop                                                                                                                                                                                                    
+verbose                        False
+10:43:26: INFO:  (resolved Module attributes:
+$ModuleName:	verb-logging
+$ModRoot:	c:\sc\verb-logging
+$ModPsd1:	c:\sc\verb-logging\verb-logging\verb-logging.psd1_TMP
+$ModPsm1:	c:\sc\verb-logging\verb-logging\verb-logging.psm1_TMP
+$ModTestPs1:	c:\sc\verb-logging\Tests\verb-logging.tests.ps1
+$psd1Vers:	1.4.0
+$psd1guid:	c3cd74fb-9df8-4d00-9c5e-ef0968372045)
+10:43:26: INFO:  confirm-ModulePsd1Version w
+Name                           Value                                                                                                                                                                                                   
+----                           -----                                                                                                                                                                                                   
+Path                           c:\sc\verb-logging\verb-logging\verb-logging.psd1_TMP                                                                                                                                                   
+RequiredVersion                1.4.1                                                                                                                                                                                                   
+whatif                         False                                                                                                                                                                                                   
+verbose                        False
+10:43:26: WARNING:  In:c:\sc\verb-logging\verb-logging\verb-logging.psd1_TMP
+Version present:(1.4.0)
+*does not* properly match:1.4.1
+FORCING MATCHING UPDATE!
+10:43:26: INFO:  $objReport
+Name                           Value                                                                                                                                                                                                   
+----                           -----                                                                                                                                                                                                   
+Version                        1.4.1                                                                                                                                                                                                   
+Valid                          False
+10:43:26: INFO:  (SET:$objReport.Valid = $true ;)
+10:43:26: INFO:  (PIPELINE:New-Object PSObject -Property $objReport | write-output)
+$objReport
+Name                           Value                                                                                                                                                                                                   
+----                           -----                                                                                                                                                                                                   
+Version                        1.4.1                                                                                                                                                                                                   
+Valid                          True
+10:43:27: INFO:  #*======^ confirm-ModulePsd1Version: c:\sc\verb-logging\verb-logging\verb-logging.psd1_TMP ^======
+10:43:27: INFO:  (confirm-ModulePsd1Version:Success)
+10:43:27: INFO:  confirm-ModulePsm1Version w
+Name                           Value                                                                                                                                                                                                   
+----                           -----                                                                                                                                                                                                   
+Path                           c:\sc\verb-logging\verb-logging\verb-logging.psm1_TMP                                                                                                                                                   
+RequiredVersion                1.4.1                                                                                                                                                                                                   
+whatif                         False                                                                                                                                                                                                   
+verbose                        False
+10:43:27: WARNING:  In:c:\sc\verb-logging\verb-logging\verb-logging.psm1_TMP
+Version present:(1.4.0)
+*does not* properly match:1.4.1
+FORCING MATCHING UPDATE!
+10:43:28: INFO:  $objReport
+Name                           Value                                                                                                                                                                                                   
+----                           -----                                                                                                                                                                                                   
+Version                        1.4.1                                                                                                                                                                                                   
+Valid                          False
+10:43:28: INFO:  (SET:$objReport.Valid = $true ;)
+10:43:28: INFO:  (PIPELINE:New-Object PSObject -Property $objReport | write-output)
+$objReport
+Name                           Value                                                                                                                                                                                                   
+----                           -----                                                                                                                                                                                                   
+Version                        1.4.1                                                                                                                                                                                                   
+Valid                          True
+10:43:29: INFO:  #*======^ confirm-ModulePsm1Version: c:\sc\verb-logging\verb-logging\verb-logging.psm1_TMP ^======
+10:43:29: INFO:  (confirm-ModulePsm1Version:Success)
+10:43:29: INFO:  (-NoTest: skipping confirm-ModuleTestPs1Guid)
+10:43:29: INFO:  $objReport
+Name                           Value                                                                                                                                                                                                   
+----                           -----                                                                                                                                                                                                   
+Manifest                       c:\sc\verb-logging\verb-logging\verb-logging.psd1_TMP                                                                                                                                                   
+Module                         c:\sc\verb-logging\verb-logging\verb-logging.psm1_TMP                                                                                                                                                   
+Pester                         (SKIPPED)                                                                                                                                                                                               
+Guid                           (SKIPPED)                                                                                                                                                                                               
+Version                        1.4.1                                                                                                                                                                                                   
+Valid                          False
+10:43:29: INFO:  (SET:$objReport.Valid = $true ;)
+10:43:29: INFO:  (PIPELINE:New-Object PSObject -Property $objReport | write-output)
+$objReport
+Name                           Value                                                                                                                                                                                                   
+----                           -----                                                                                                                                                                                                   
+Manifest                       c:\sc\verb-logging\verb-logging\verb-logging.psd1_TMP                                                                                                                                                   
+Module                         c:\sc\verb-logging\verb-logging\verb-logging.psm1_TMP                                                                                                                                                   
+Pester                         (SKIPPED)                                                                                                                                                                                               
+Guid                           (SKIPPED)                                                                                                                                                                                               
+Version                        1.4.1                                                                                                                                                                                                   
+Valid                          True
+10:43:29: INFO:  #*======^ confirm-ModuleBuildSync:  ^======
+10:43:29: INFO:  (confirm-ModuleBuildSync:Success)
+10:43:29: INFO:  Test-ModuleTMPFiles w
+Name                           Value                                                                                                                                                                                                   
+----                           -----                                                                                                                                                                                                   
+ModuleNamePSM1Path             c:\sc\verb-logging\verb-logging\verb-logging.psm1_TMP                                                                                                                                                   
+verbose                        False
+10:43:29: INFO:  #*======v Test-ModuleTMPFiles: c:\sc\verb-logging\verb-logging\verb-logging.psm1_TMP v======
+10:43:29: INFO:  
+Psm1:c:\sc\verb-logging\verb-logging\verb-logging.psm1_TMP
+Psd1:c:\sc\verb-logging\verb-logging\verb-logging.psd1_TMP
+10:43:29: INFO:  Test-ModuleManifest:PASSED
+10:43:30: INFO:  Creating Testable c:\sc\verb-logging\verb-logging\48cba7df-30e0-4265-896b-1f2e75c17bcb.psm1
+ to validate c:\sc\verb-logging\verb-logging\verb-logging.psm1_TMP will Import-Module
+WARNING: The names of some imported commands from the module '48cba7df-30e0-4265-896b-1f2e75c17bcb' include unapproved verbs that might make them less discoverable. To find the commands with unapproved verbs, run the Import-Module command again with the Verbose parameter. For a list of approved verbs, type Get-Verb.
+10:43:30: INFO:  Ipmo: PASSED
+10:43:30: INFO:  (remove-module -name c:\sc\verb-logging\verb-logging\48cba7df-30e0-4265-896b-1f2e75c17bcb.psm1 -force)
+10:43:30: INFO:  (remove-item -path c:\sc\verb-logging\verb-logging\48cba7df-30e0-4265-896b-1f2e75c17bcb.psm1 -ErrorAction SilentlyContinue ;
+10:43:30: INFO:  (remove-item -path c:\sc\verb-logging\verb-logging\48cba7df-30e0-4265-896b-1f2e75c17bcb.psd1 -ErrorAction SilentlyContinue ;
+10:43:30: INFO:  $objReport
+Name                           Value                                                                                                                                                                                                   
+----                           -----                                                                                                                                                                                                   
+Manifest                       48cba7df-30e0-4265-896b-1f2e75c17bcb                                                                                                                                                                    
+Module                         48cba7df-30e0-4265-896b-1f2e75c17bcb                                                                                                                                                                    
+Valid                          False
+10:43:30: INFO:  (SET:$objReport.Valid = $true ;)
+10:43:30: INFO:  (PIPELINE:New-Object PSObject -Property $objReport | write-output)
+$objReport
+Name                           Value                                                                                                                                                                                                   
+----                           -----                                                                                                                                                                                                   
+Manifest                       48cba7df-30e0-4265-896b-1f2e75c17bcb                                                                                                                                                                    
+Module                         48cba7df-30e0-4265-896b-1f2e75c17bcb                                                                                                                                                                    
+Valid                          True
+10:43:30: INFO:  #*======^ Test-ModuleTMPFiles: c:\sc\verb-logging\verb-logging\verb-logging.psm1_TMP ^======
+10:43:31: INFO:  #*======^ ConvertTo-ModuleMergedTDO: ^======
+10:43:31: INFO:  (Test-ModuleManifest:PASSED)
+10:43:31: INFO:  Checking sync of Psd1 module guid to the Pester Test Script: c:\sc\verb-logging\Tests\verb-logging.tests.ps1
+10:43:31: INFO:  confirm-ModuleBuildSync w
+Name                           Value                                                                                                                                                                                                   
+----                           -----                                                                                                                                                                                                   
+ModPsdPath                     C:\sc\verb-logging\verb-logging\verb-logging.psd1                                                                                                                                                       
+RequiredVersion                1.4.1                                                                                                                                                                                                   
+whatif                         False                                                                                                                                                                                                   
+verbose                        False
+10:43:31: INFO:  (test-path confirms $ModPsm1 & $ModTestPs1)
+10:43:31: INFO:  Import-PowerShellDataFile w
+Name                           Value                                                                                                                                                                                                   
+----                           -----                                                                                                                                                                                                   
+Path                           C:\sc\verb-logging\verb-logging\verb-logging.psd1                                                                                                                                                       
+ErrorAction                    Stop                                                                                                                                                                                                    
+verbose                        False
+10:43:31: INFO:  (resolved Module attributes:
+$ModuleName:	verb-logging
+$ModRoot:	c:\sc\verb-logging
+$ModPsd1:	C:\sc\verb-logging\verb-logging\verb-logging.psd1
+$ModPsm1:	C:\sc\verb-logging\verb-logging\verb-logging.psm1
+$ModTestPs1:	c:\sc\verb-logging\Tests\verb-logging.tests.ps1
+$psd1Vers:	1.4.1
+$psd1guid:	c3cd74fb-9df8-4d00-9c5e-ef0968372045)
+10:43:31: INFO:  confirm-ModulePsd1Version w
+Name                           Value                                                                                                                                                                                                   
+----                           -----                                                                                                                                                                                                   
+Path                           C:\sc\verb-logging\verb-logging\verb-logging.psd1                                                                                                                                                       
+RequiredVersion                1.4.1                                                                                                                                                                                                   
+whatif                         False                                                                                                                                                                                                   
+verbose                        False
+10:43:31: INFO:  (Version already updated to match)
+10:43:31: INFO:  $objReport
+Name                           Value                                                                                                                                                                                                   
+----                           -----                                                                                                                                                                                                   
+Version                        1.4.1                                                                                                                                                                                                   
+Valid                          False
+10:43:31: INFO:  (SET:$objReport.Valid = $true ;)
+10:43:31: INFO:  (PIPELINE:New-Object PSObject -Property $objReport | write-output)
+$objReport
+Name                           Value                                                                                                                                                                                                   
+----                           -----                                                                                                                                                                                                   
+Version                        1.4.1                                                                                                                                                                                                   
+Valid                          True
+10:43:32: INFO:  #*======^ confirm-ModulePsd1Version: C:\sc\verb-logging\verb-logging\verb-logging.psd1 ^======
+10:43:32: INFO:  (confirm-ModulePsd1Version:Success)
+10:43:32: INFO:  confirm-ModulePsm1Version w
+Name                           Value                                                                                                                                                                                                   
+----                           -----                                                                                                                                                                                                   
+Path                           C:\sc\verb-logging\verb-logging\verb-logging.psm1                                                                                                                                                       
+RequiredVersion                1.4.1                                                                                                                                                                                                   
+whatif                         False                                                                                                                                                                                                   
+verbose                        False
+10:43:32: INFO:  (Version already updated to match)
+10:43:32: INFO:  $objReport
+Name                           Value                                                                                                                                                                                                   
+----                           -----                                                                                                                                                                                                   
+Version                        1.4.1                                                                                                                                                                                                   
+Valid                          False
+10:43:32: INFO:  (SET:$objReport.Valid = $true ;)
+10:43:32: INFO:  (PIPELINE:New-Object PSObject -Property $objReport | write-output)
+$objReport
+Name                           Value                                                                                                                                                                                                   
+----                           -----                                                                                                                                                                                                   
+Version                        1.4.1                                                                                                                                                                                                   
+Valid                          True
+10:43:32: INFO:  #*======^ confirm-ModulePsm1Version: C:\sc\verb-logging\verb-logging\verb-logging.psm1 ^======
+10:43:32: INFO:  (confirm-ModulePsm1Version:Success)
+10:43:32: INFO:  Checking sync of Psd1 module guid to the Pester Test Script: c:\sc\verb-logging\Tests\verb-logging.tests.ps1
+10:43:32: INFO:  confirm-ModuleTestPs1Guid w
+Name                           Value                                                                                                                                                                                                   
+----                           -----                                                                                                                                                                                                   
+Path                           c:\sc\verb-logging\Tests\verb-logging.tests.ps1                                                                                                                                                         
+RequiredGuid                   c3cd74fb-9df8-4d00-9c5e-ef0968372045                                                                                                                                                                    
+whatif                         False                                                                                                                                                                                                   
+verbose                        False
+10:43:32: INFO:  (Guid  already updated to match)
+10:43:32: INFO:  $objReport
+Name                           Value                                                                                                                                                                                                   
+----                           -----                                                                                                                                                                                                   
+Guid                           c3cd74fb-9df8-4d00-9c5e-ef0968372045                                                                                                                                                                    
+Valid                          False
+10:43:32: INFO:  (SET:$objReport.Valid = $true ;)
+10:43:32: INFO:  (PIPELINE:New-Object PSObject -Property $objReport | write-output)
+$objReport
+Name                           Value                                                                                                                                                                                                   
+----                           -----                                                                                                                                                                                                   
+Guid                           c3cd74fb-9df8-4d00-9c5e-ef0968372045                                                                                                                                                                    
+Valid                          True
+10:43:32: INFO:  (confirm-ModuleTestPs1Guid:Success)
+10:43:32: INFO:  $objReport
+Name                           Value                                                                                                                                                                                                   
+----                           -----                                                                                                                                                                                                   
+Manifest                       C:\sc\verb-logging\verb-logging\verb-logging.psd1                                                                                                                                                       
+Module                         C:\sc\verb-logging\verb-logging\verb-logging.psm1                                                                                                                                                       
+Pester                         c:\sc\verb-logging\Tests\verb-logging.tests.ps1                                                                                                                                                         
+Guid                           c3cd74fb-9df8-4d00-9c5e-ef0968372045                                                                                                                                                                    
+Version                        1.4.1                                                                                                                                                                                                   
+Valid                          False
+10:43:32: INFO:  (SET:$objReport.Valid = $true ;)
+10:43:33: INFO:  (PIPELINE:New-Object PSObject -Property $objReport | write-output)
+$objReport
+Name                           Value                                                                                                                                                                                                   
+----                           -----                                                                                                                                                                                                   
+Manifest                       C:\sc\verb-logging\verb-logging\verb-logging.psd1                                                                                                                                                       
+Module                         C:\sc\verb-logging\verb-logging\verb-logging.psm1                                                                                                                                                       
+Pester                         c:\sc\verb-logging\Tests\verb-logging.tests.ps1                                                                                                                                                         
+Guid                           c3cd74fb-9df8-4d00-9c5e-ef0968372045                                                                                                                                                                    
+Version                        1.4.1                                                                                                                                                                                                   
+Valid                          True
+10:43:33: INFO:  #*======^ confirm-ModuleBuildSync:  ^======
+10:43:33: INFO:  (confirm-ModuleBuildSync:Success)
+10:43:34: INFO:  Signing appropriate files...
+10:43:34: INFO:  Sign-file w
+Name                           Value                                                                                                                                                                                                   
+----                           -----                                                                                                                                                                                                   
+file                           {C:\sc\verb-logging\rebuild-module.ps1, C:\sc\verb-logging\requirements.psd1, C:\sc\verb-logging\Tests\PPoShScriptingStyle.psd1, C:\sc\verb-logging\Tests\ToddomationScriptingStyle-medium.psd1...}     
+ErrorAction                    Stop                                                                                                                                                                                                    
+showdebug                      False                                                                                                                                                                                                   
+whatif                         False
+
+
+    Directory: C:\sc\verb-logging
+
+
+SignerCertificate                         Status                                                                                         Path
+-----------------                         ------                                                                                         ----
+5F8F454A477F2C4539296F5E4EEE71FBB94CF5E5  Valid                                                                                          rebuild-module.ps1
+5F8F454A477F2C4539296F5E4EEE71FBB94CF5E5  Valid                                                                                          requirements.psd1
+
+
+    Directory: C:\sc\verb-logging\Tests
+
+
+SignerCertificate                         Status                                                                                         Path
+-----------------                         ------                                                                                         ----
+5F8F454A477F2C4539296F5E4EEE71FBB94CF5E5  Valid                                                                                          PPoShScriptingStyle.psd1
+5F8F454A477F2C4539296F5E4EEE71FBB94CF5E5  Valid                                                                                          ToddomationScriptingStyle-medium.psd1
+5F8F454A477F2C4539296F5E4EEE71FBB94CF5E5  Valid                                                                                          verb-logging.tests.ps1
+
+
+    Directory: C:\sc\verb-logging\verb-logging
+
+
+SignerCertificate                         Status                                                                                         Path
+-----------------                         ------                                                                                         ----
+5F8F454A477F2C4539296F5E4EEE71FBB94CF5E5  Valid                                                                                          verb-logging.psd1
+5F8F454A477F2C4539296F5E4EEE71FBB94CF5E5  Valid                                                                                          verb-logging.psm1
+10:43:35: INFO:  Removing existing profile verb-logging content...
+10:43:35: INFO:  Uninstall-ModuleForce w
+Name                           Value                                                                                                                                                                                                   
+----                           -----                                                                                                                                                                                                   
+ModuleName                     verb-logging                                                                                                                                                                                            
+Verbose                        False                                                                                                                                                                                                   
+whatif                         False
+10:43:57: INFO:  
+#*------v Uninstall PSGet Mod:verb-logging:v1.4.0 v------
+10:45:03: INFO:  
+#*------^ Uninstall PSGet Mod:verb-logging:v1.4.0 ^------
+10:45:03: INFO:  (Processing $env:PSModulePath paths, for surviving locked copies of verb-logging to *manually* purge...)
+10:45:03: INFO:  Checking: verb-logging below: C:\Users\kadritss\Documents\WindowsPowerShell\Modules...
+10:45:03:-GracefulFail specified, using EA:'Continue'
+10:45:03:No existing Match:test-path -path C:\Users\kadritss\Documents\WindowsPowerShell\Modules\verb-logging\*.*
+10:45:03: INFO:  Checking: verb-logging below: C:\ProgramData\Boxstarter...
+10:45:03:-GracefulFail specified, using EA:'Continue'
+10:45:03:No existing Match:test-path -path C:\ProgramData\Boxstarter\verb-logging\*.*
+10:45:03: INFO:  Checking: verb-logging below: C:\Program Files\WindowsPowerShell\Modules...
+10:45:03:-GracefulFail specified, using EA:'Continue'
+10:45:03:No existing Match:test-path -path C:\Program Files\WindowsPowerShell\Modules\verb-logging\*.*
+10:45:03: INFO:  Checking: verb-logging below: C:\Windows\system32\WindowsPowerShell\v1.0\Modules...
+10:45:03:-GracefulFail specified, using EA:'Continue'
+10:45:03:No existing Match:test-path -path C:\Windows\system32\WindowsPowerShell\v1.0\Modules\verb-logging\*.*
+10:45:03: INFO:  Checking: verb-logging below: C:\Program Files\Microsoft Message Analyzer\PowerShell\...
+10:45:04:-GracefulFail specified, using EA:'Continue'
+10:45:04:No existing Match:test-path -path C:\Program Files\Microsoft Message Analyzer\PowerShell\verb-logging\*.*
+10:45:04: INFO:  Copying module to profile (net of .git & .vscode dirs, and backed up content)...
+10:45:04: INFO:  $srcFiles:post-filter out:
+\\(Package|Tests|logs)\\|(\.ps[dm]1_(\d+-\d+[AP]M|TMP)|-LOG-BATCH-EXEC-\d+-\d+[AP]M-log\.txt|\\(fingerprint|Psd1filelist))$
+10:45:04: INFO:  Discovered mod-copy files ($srcFiles.fullname):w
+C:\sc\verb-logging\verb-logging\CHANGELOG.md
+C:\sc\verb-logging\verb-logging\Quick-Start-Installation-and-Example.md
+C:\sc\verb-logging\verb-logging\README.md
+C:\sc\verb-logging\verb-logging\verb-logging.psd1
+C:\sc\verb-logging\verb-logging\verb-logging.psm1
+10:45:04: INFO:  Non-Pre-existing:$to:C:\Users\kadritss\Documents\WindowsPowerShell\Modules\verb-logging\verb-logging
+Pre-creating before copy...
+VERBOSE: Performing the operation "Create Directory" on target "Destination: C:\Users\kadritss\Documents\WindowsPowerShell\Modules\verb-logging\verb-logging".
+10:45:04: INFO:  Mode   LastWriteTime         Length Name        
+----   -------------         ------ ----        
+d----- 7/16/2024 10:45:04 AM        verb-logging
+10:45:04: INFO:  -Merge:exclude $MergeBuildExcl \\(Public|Internal|External|Private)\\.*.ps1$ files from temp build copy
+10:45:04: INFO:  Recursively remove empty subdirs below C:\Users\kadritss\Documents\WindowsPowerShell\Modules\verb-logging\verb-logging...
+.
+10:45:04: INFO:  Move/Flatten Resource etc files into root of temp Build dir...
+10:45:04: INFO:  Unable to locate a problematic temp mod dir C:\Users\kadritss\Documents\WindowsPowerShell\Modules\verb-logging\verb-logging COPY of Quick-Start-Installation-and-Example.md
+10:45:04: INFO:  Unable to locate a problematic temp mod dir C:\Users\kadritss\Documents\WindowsPowerShell\Modules\verb-logging\verb-logging COPY of CHANGELOG.md
+10:45:04: INFO:  Unable to locate a problematic temp mod dir C:\Users\kadritss\Documents\WindowsPowerShell\Modules\verb-logging\verb-logging COPY of README.md
+10:45:04: INFO:  Unable to locate a problematic temp mod dir C:\Users\kadritss\Documents\WindowsPowerShell\Modules\verb-logging\verb-logging COPY of LICENSE.txt
+10:45:04: INFO:  copy/Flatten Resource etc files into source root c:\sc\verb-logging\verb-logging dir...
+10:45:05: INFO:  Resolved $ModPsdPath:
+C:\sc\verb-logging\verb-logging\verb-logging.psd1
+10:45:05: INFO:  
+==Verifying CU:Mods\verb-logging\verb-logging\Quick-Start-Installation-and-Example.md:
+validated Quick-Start-Installation-and-Example.md is found in C:\Users\kadritss\Documents\WindowsPowerShell\Modules\verb-logging\verb-logging\Quick-Start-Installation-and-Example.md
+10:45:05: INFO:  
+==Verifying CU:Mods\verb-logging\verb-logging\CHANGELOG.md:
+validated CHANGELOG.md is found in C:\Users\kadritss\Documents\WindowsPowerShell\Modules\verb-logging\verb-logging\CHANGELOG.md
+10:45:05: INFO:  
+==Verifying CU:Mods\verb-logging\verb-logging\README.md:
+validated README.md is found in C:\Users\kadritss\Documents\WindowsPowerShell\Modules\verb-logging\verb-logging\README.md
+10:45:05: INFO:  
+==Verifying CU:Mods\verb-logging\verb-logging\LICENSE.txt:
+
+10:45:05: WARNING:  FAILED TO LOCATE LICENSE.txt AT EXPECTED:C:\Users\kadritss\Documents\WindowsPowerShell\Modules\verb-logging\verb-logging\LICENSE.txt
+10:45:05: INFO:  RE-copy-item w
+Name                           Value                                                                                                                                                                                                   
+----                           -----                                                                                                                                                                                                   
+path                           C:\sc\verb-logging\verb-logging\LICENSE.txt                                                                                                                                                             
+destination                    C:\Users\kadritss\Documents\WindowsPowerShell\Modules\verb-logging\verb-logging\LICENSE.txt                                                                                                             
+force                          True                                                                                                                                                                                                    
+erroraction                    STOP                                                                                                                                                                                                    
+verbose                        True                                                                                                                                                                                                    
+whatif                         False
+--$pltCI.path:
+C:\sc\verb-logging\verb-logging\LICENSE.txt
+VERBOSE: Performing the operation "Copy File" on target "Item: C:\sc\verb-logging\verb-logging\LICENSE.txt Destination: C:\Users\kadritss\Documents\WindowsPowerShell\Modules\verb-logging\verb-logging\LICENSE.txt".
+
+10:45:05: WARNING:
+
+10:45:05: WARNING:
+
+10:45:05: WARNING:  # NOTE!:
+
+10:45:05: WARNING:
+
+10:45:05: WARNING:
+
+10:45:05: WARNING:
+
+10:45:05: WARNING:  AN ERROR WAS THROWN ON A MISSING FILE FROM THE $psd1.filelist, SPECIFICALLY:
+
+10:45:05: WARNING:
+
+10:45:05: WARNING:
+
+10:45:05: WARNING:
+
+10:45:05: WARNING:  C:\Users\kadritss\Documents\WindowsPowerShell\Modules\verb-logging\verb-logging\LICENSE.txt
+
+10:45:05: WARNING:
+
+10:45:05: WARNING:
+
+10:45:05: WARNING:
+
+10:45:05: WARNING:  ... and a RECOVERY RECOPY from source was undertaken.
+
+10:45:05: WARNING:
+
+10:45:05: WARNING:
+
+10:45:05: WARNING:
+
+10:45:05: WARNING:  => IF THE BUILD CONTINUES TO FAIL PUBLISH/INSTALL, DO THE FOLLOWING:
+
+10:45:05: WARNING:
+
+10:45:05: WARNING:
+
+10:45:05: WARNING:
+
+10:45:05: WARNING:  1. Reinstall _latest repo version_ of verb-logging to -scope:CurrentUser
+
+10:45:05: WARNING:
+
+10:45:05: WARNING:  2. Explorer the installed version at:
+
+10:45:05: WARNING:
+
+10:45:05: WARNING:
+
+10:45:05: WARNING:
+
+10:45:05: WARNING:      C:\Users\LOGON\Documents\WindowsPowerShell\Modules\verb-logging\n.n.n
+
+10:45:05: WARNING:
+
+10:45:05: WARNING:
+
+10:45:05: WARNING:
+
+10:45:05: WARNING:      ... and locate the verb-logging.psd1 & verb-logging.psm1, buffer to clipboard,
+
+10:45:05: WARNING:
+
+10:45:05: WARNING:
+
+10:45:05: WARNING:
+
+10:45:05: WARNING:  3. Explorer:
+
+10:45:05: WARNING:
+
+10:45:05: WARNING:      C:\sc\verb-logging\verb-logging
+
+10:45:05: WARNING:
+
+10:45:05: WARNING:
+
+10:45:05: WARNING:
+
+10:45:05: WARNING:      ... and paste the buffered .psd1 & .psm1 from the installed copy, into the dev version (resets the build set)
+
+10:45:05: WARNING:
+
+10:45:05: WARNING:
+
+10:45:05: WARNING:
+
+10:45:05: WARNING:  4. And then run a fresh pass at your:
+
+10:45:05: WARNING:
+
+10:45:05: WARNING:
+
+10:45:05: WARNING:
+
+10:45:05: WARNING:        .\processbulk-NewModule.ps1 -Modules verb-logging
+
+10:45:05: WARNING:
+
+10:45:05: WARNING:
+
+10:45:05: WARNING:
+
+10:45:05: WARNING:  The above *may* sort the error without further debugging (could reflect missing/incomplete/damaged content from prior build).
+
+10:45:05: WARNING:
+
+10:45:05: WARNING:
+10:45:06: INFO:  Running pre-Publish-Module .psd1 test:
+Test-ModuleManifest -path C:\sc\verb-logging\verb-logging\verb-logging.psd1
+10:45:06: INFO:  (Test-ModuleManifest:PASSED)
+10:45:06: INFO:  (Profiling Repo: get-PSRepository -name lyncRepo...)
+10:45:08: INFO:  
+Publish-Module w
+Name                           Value                                                                                                                                                                                                   
+----                           -----                                                                                                                                                                                                   
+Name                           verb-logging                                                                                                                                                                                            
+Repository                     lyncRepo                                                                                                                                                                                                
+RequiredVersion                1.4.1                                                                                                                                                                                                   
+Verbose                        True                                                                                                                                                                                                    
+ErrorAction                    Stop                                                                                                                                                                                                    
+errorVariable                  pbmo_Err                                                                                                                                                                                                
+whatif                         False
+VERBOSE: Suppressed Verbose Repository details, Name = 'lyncRepo', Location = '\\lynmsv10\lync_fs\scripts\sc'; IsTrusted = 'True'; IsRegistered = 'True'.
+VERBOSE: Repository details, Name = 'lyncRepo', Location = '\\lynmsv10\lync_fs\scripts\sc'; IsTrusted = 'True'; IsRegistered = 'True'.
+VERBOSE: Repository details, Name = 'lyncRepo', Location = '\\lynmsv10\lync_fs\scripts\sc'; IsTrusted = 'True'; IsRegistered = 'True'.
+VERBOSE: Publish Location:'\\lynmsv10\lync_fs\scripts\sc'.
+VERBOSE: Module 'verb-logging' was found in 'C:\Users\kadritss\Documents\WindowsPowerShell\Modules\verb-logging\verb-logging'.
+VERBOSE: Loading module from path 'C:\Users\kadritss\AppData\Local\Temp\1411108368\verb-logging\verb-logging.psm1'.
+VERBOSE: Suppressed Verbose Repository details, Name = 'lyncRepo', Location = '\\lynmsv10\lync_fs\scripts\sc'; IsTrusted = 'True'; IsRegistered = 'True'.
+VERBOSE: Repository details, Name = 'lyncRepo', Location = '\\lynmsv10\lync_fs\scripts\sc'; IsTrusted = 'True'; IsRegistered = 'True'.
+VERBOSE: Using the provider 'PowerShellGet' for searching packages.
+VERBOSE: Using the specified source names : 'lyncRepo'.
+VERBOSE: Getting the provider object for the PackageManagement Provider 'NuGet'.
+VERBOSE: The specified Location is '\\lynmsv10\lync_fs\scripts\sc' and PackageManagementProvider is 'NuGet'.
+VERBOSE: Total package yield:'0' for the specified package 'verb-logging'.
+VERBOSE: Suppressed Verbose Repository details, Name = 'lyncRepo', Location = '\\lynmsv10\lync_fs\scripts\sc'; IsTrusted = 'True'; IsRegistered = 'True'.
+VERBOSE: Repository details, Name = 'lyncRepo', Location = '\\lynmsv10\lync_fs\scripts\sc'; IsTrusted = 'True'; IsRegistered = 'True'.
+VERBOSE: Using the provider 'PowerShellGet' for searching packages.
+VERBOSE: Using the specified source names : 'lyncRepo'.
+VERBOSE: Getting the provider object for the PackageManagement Provider 'NuGet'.
+VERBOSE: The specified Location is '\\lynmsv10\lync_fs\scripts\sc' and PackageManagementProvider is 'NuGet'.
+VERBOSE: Total package yield:'1' for the specified package 'verb-logging'.
+VERBOSE: Performing the operation "Publish-Module" on target "Version '1.4.1' of module 'verb-logging'".
+VERBOSE: Calling Publish-PSArtifactUtility
+VERBOSE: Calling New-NuspecFile
+VERBOSE: Calling New-NugetPackage
+VERBOSE: Calling C:\ProgramData\chocolatey\bin\NuGet.exe pack "C:\Users\kadritss\AppData\Local\Temp\1411108368\verb-logging\verb-logging.nuspec" -outputdirectory "C:\Users\kadritss\AppData\Local\Temp\1411108368\verb-logging" -noninteractive
+VERBOSE: C:\ProgramData\chocolatey\bin\NuGet.exe output:
+VERBOSE: 	Attempting to build package from 'verb-logging.nuspec'.
+VERBOSE: 	Successfully created package 'C:\Users\kadritss\AppData\Local\Temp\1411108368\verb-logging\verb-logging.1.4.1.nupkg'.
+VERBOSE:
+VERBOSE: finished running C:\ProgramData\chocolatey\bin\NuGet.exe with exit code 0
+VERBOSE: Created Nuget Package C:\Users\kadritss\AppData\Local\Temp\1411108368\verb-logging\verb-logging.1.4.1.nupkg
+VERBOSE: Successfully created nuget package at C:\Users\kadritss\AppData\Local\Temp\1411108368\verb-logging\verb-logging.1.4.1.nupkg
+VERBOSE: Calling Publish-NugetPackage -NupkgPath C:\Users\kadritss\AppData\Local\Temp\1411108368\verb-logging\verb-logging.1.4.1.nupkg -Destination \\lynmsv10\lync_fs\scripts\sc -NugetExePath C:\ProgramData\chocolatey\bin\NuGet.exe -UseDotnetCli:False
+VERBOSE: Pushing verb-logging.1.4.1.nupkg to '\\lynmsv10\lync_fs\scripts\sc'...
+Your package was pushed.
+VERBOSE: Successfully published module 'verb-logging' to the module publish location '\\lynmsv10\lync_fs\scripts\sc'. Please allow few minutes for 'verb-logging' to show up in the search results.
+
+10:45:36: WARNING:
+
+10:45:36: WARNING:  FOUND $pbmo_Err: import-module HAD ERRORS! (no action, could be non-impacting)
+WARNING: ===:System.Management.Automation.StopUpstreamCommandsException: System error.
+   at Microsoft.PowerShell.Commands.SelectObjectCommand.ProcessRecord()
+   at System.Management.Automation.CommandProcessor.ProcessRecord()
+
+10:45:36: WARNING:
+
+10:45:36: WARNING:  Publish-Module PBMO UNDEFINED ERROR!
+
+10:45:36: WARNING:  System.Management.Automation.StopUpstreamCommandsException: System error.
+
+10:45:36: WARNING:
+
+10:45:36: WARNING:     at Microsoft.PowerShell.Commands.SelectObjectCommand.ProcessRecord()
+
+10:45:36: WARNING:
+
+10:45:36: WARNING:     at System.Management.Automation.CommandProcessor.ProcessRecord()
+
+10:45:36: WARNING:  (But PublishModule doesn't bother to return a functional Error object with an Exception, so we can't trust/parse or act on it. Just echo)
+10:45:37: INFO:  Waiting for:find-module -name verb-logging -Repository lyncRepo ...
+.
+10:45:45:-GracefulFail specified, using EA:'Continue'
+10:45:45:remove-item w
+Name                           Value                                                                                                                                                                                                   
+----                           -----                                                                                                                                                                                                   
+Path                           {C:\Users\kadritss\Documents\WindowsPowerShell\Modules\verb-logging\verb-logging\CHANGELOG.md, C:\Users\kadritss\Documents\WindowsPowerShell\Modules\verb-logging\verb-logging\LICENSE.txt, C:\Users\...
+Recurse                        True                                                                                                                                                                                                    
+ErrorAction                    Continue                                                                                                                                                                                                
+whatif                         False
+10:45:45: INFO:  Install-Module w
+Name                           Value                                                                                                                                                                                                   
+----                           -----                                                                                                                                                                                                   
+Name                           verb-logging                                                                                                                                                                                            
+Repository                     lyncRepo                                                                                                                                                                                                
+RequiredVersion                1.4.1                                                                                                                                                                                                   
+scope                          CurrentUser                                                                                                                                                                                             
+force                          True                                                                                                                                                                                                    
+AllowClobber                   True                                                                                                                                                                                                    
+errorVariable                  ismo_Err                                                                                                                                                                                                
+ErrorAction                    Stop                                                                                                                                                                                                    
+whatif                         False
+10:46:11: INFO:  Testing Module:Import-Module w
+Name                           Value                                                                                                                                                                                                   
+----                           -----                                                                                                                                                                                                   
+Name                           verb-logging                                                                                                                                                                                            
+ErrorAction                    Stop                                                                                                                                                                                                    
+errorVariable                  ipmo_Err                                                                                                                                                                                                
+force                          True                                                                                                                                                                                                    
+verbose                        True
+VERBOSE: Loading module from path 'C:\Users\kadritss\Documents\WindowsPowerShell\Modules\verb-logging\1.4.1\verb-logging.psd1'.
+VERBOSE: Populating RepositorySourceLocation property for module verb-logging.
+VERBOSE: Loading module from path 'C:\Users\kadritss\Documents\WindowsPowerShell\Modules\verb-logging\1.4.1\verb-logging.psm1'.
+WARNING: The names of some imported commands from the module 'verb-logging' include unapproved verbs that might make them less discoverable. To find the commands with unapproved verbs, run the Import-Module command again with the Verbose parameter. For a list of approved verbs, type Get-Verb.
+VERBOSE: The 'Archive-Log' command in the verb-logging' module was imported, but because its name does not include an approved verb, it might be difficult to find. For a list of approved verbs, type Get-Verb.
+VERBOSE: Importing function 'Archive-Log'.
+VERBOSE: Importing function 'Cleanup'.
+VERBOSE: Importing function 'get-ArchivePath'.
+VERBOSE: Importing function 'get-EventsFiltered'.
+VERBOSE: Importing function 'get-lastevent'.
+VERBOSE: Importing function 'get-lastlogon'.
+VERBOSE: Importing function 'get-lastshutdown'.
+VERBOSE: Importing function 'get-lastsleep'.
+VERBOSE: Importing function 'get-lastwake'.
+VERBOSE: Importing function 'get-winEventsLoopedIDs'.
+VERBOSE: Importing function 'Start-IseTranscript'.
+VERBOSE: Importing function 'Start-Log'.
+VERBOSE: Importing function 'start-TranscriptLog'.
+VERBOSE: Importing function 'Stop-TranscriptLog'.
+VERBOSE: Importing function 'Test-Transcribing'.
+VERBOSE: Importing function 'test-Transcribing2'.
+VERBOSE: Importing function 'Test-TranscriptionSupported'.
+VERBOSE: Importing function 'Write-Log'.
+VERBOSE: Importing alias 'gls'.
+10:46:12: INFO:  Retrieving matching Repo .nupkg file:
+gci \\lynmsv10\lync_fs\scripts\sc\verb-logging.1.4.1.nupkgl..
+10:46:12: INFO:  Proper updated .nupkg file found:verb-logging.1.4.1.nupkg, copying to local Pkg directory.
+10:46:12:Copy-Item w
+Name                           Value                                                                                                                                                                                                   
+----                           -----                                                                                                                                                                                                   
+path                           \\lynmsv10\lync_fs\scripts\sc\verb-logging.1.4.1.nupkg                                                                                                                                                  
+destination                    c:\sc\verb-logging\Package                                                                                                                                                                              
+whatif                         False
+10:46:12: INFO:  remove-UnneededFileVariants w
+Name                           Value                                                                                                                                                                                                   
+----                           -----                                                                                                                                                                                                   
+Path                           c:\sc\verb-logging\Package                                                                                                                                                                              
+Include                        verb-logging*.nupkg                                                                                                                                                                                     
+Pattern                                                                                                                                                                                                                                
+FilterOn                       CreationTime                                                                                                                                                                                            
+Keep                           2                                                                                                                                                                                                       
+KeepToday                      True                                                                                                                                                                                                    
+verbose                        True                                                                                                                                                                                                    
+whatif                         False
+10:46:12:gci w
+Name                           Value                                                                                                                                                                                                   
+----                           -----                                                                                                                                                                                                   
+path                           c:\sc\verb-logging\Package\*                                                                                                                                                                            
+include                        verb-logging*.nupkg                                                                                                                                                                                     
+ErrorAction                    Stop
+VERBOSE: $cuttime:07/16/2024 00:00:00
+VERBOSE: filtering on files prior to $cuttime:07/16/2024 00:00:00 AM, on CreationTime property
+(4 in set *before* filtering)
+(3 in set *after* filtering)
+VERBOSE: attempting to retain remaining 2 generations net of prior filtering
+(3 in set *before* filtering)
+(1 in set *after* filtering)
+(Note:net population is *below* target -Keep:2 spec - insufficient older files available)
+10:46:12:Reducing matched population from 4 to 1 files via:
+filtered files on CreationTime prior to 07/16/2024 00:00:00 AM
+10:46:12:Remove-Item w 
+Name                           Value                                                                                                                                                                                                   
+----                           -----                                                                                                                                                                                                   
+path                           C:\sc\verb-logging\Package\verb-logging.1.3.2.nupkg                                                                                                                                                     
+ErrorAction                    STOP                                                                                                                                                                                                    
+whatif                         False
+True
+10:46:12: INFO:  remove-UnneededFileVariants w
+Name                           Value                                                                                                                                                                                                   
+----                           -----                                                                                                                                                                                                   
+Path                           c:\sc\verb-logging\Tests                                                                                                                                                                                
+Include                        ScriptAnalyzer-Results-*.xml                                                                                                                                                                            
+Pattern                                                                                                                                                                                                                                
+FilterOn                       CreationTime                                                                                                                                                                                            
+Keep                           4                                                                                                                                                                                                       
+KeepToday                      True                                                                                                                                                                                                    
+verbose                        True                                                                                                                                                                                                    
+whatif                         False
+10:46:12:gci w
+Name                           Value                                                                                                                                                                                                   
+----                           -----                                                                                                                                                                                                   
+path                           c:\sc\verb-logging\Tests\*                                                                                                                                                                              
+include                        ScriptAnalyzer-Results-*.xml                                                                                                                                                                            
+ErrorAction                    Stop
+VERBOSE: $cuttime:07/16/2024 00:00:00
+VERBOSE: filtering on files prior to $cuttime:07/16/2024 00:00:00 AM, on CreationTime property
+(5 in set *before* filtering)
+(5 in set *after* filtering)
+VERBOSE: attempting to retain remaining 4 generations net of prior filtering
+(5 in set *before* filtering)
+(1 in set *after* filtering)
+(Note:net population is *below* target -Keep:4 spec - insufficient older files available)
+10:46:12:Reducing matched population from 5 to 1 files via:
+filtered files on CreationTime prior to 07/16/2024 00:00:00 AM
+10:46:12:Remove-Item w 
+Name                           Value                                                                                                                                                                                                   
+----                           -----                                                                                                                                                                                                   
+path                           C:\sc\verb-logging\Tests\ScriptAnalyzer-Results-20230203-1230PM.xml                                                                                                                                     
+ErrorAction                    STOP                                                                                                                                                                                                    
+whatif                         False
+True
+10:46:12: INFO:  -RunTest specified: Running Pester Test script:
+c:\sc\verb-logging\Tests\verb-logging.tests.ps1
+10:46:12:
+#*------v RUNNING c:\sc\verb-logging\Tests\verb-logging.tests.ps1: v------
+WARNING: The names of some imported commands from the module 'verb-logging' include unapproved verbs that might make them less discoverable. To find the commands with unapproved verbs, run the Import-Module command again with the Verbose parameter. For a list of approved verbs, type Get-Verb.
+
+Describing Module Information
+
+  Context Manifest Testing
+    [+] Valid Module Manifest
+ 73ms
+    [+] Valid Manifest Name
+ 32ms
+    [+] Generic Version Check
+ 13ms
+    [+] Valid Author
+ 13ms
+    [+] Valid Company Name
+ 9ms
+PS>TerminatingError(): "Expected a value, but got $null or empty."
+>> TerminatingError(): "Expected a value, but got $null or empty."
+>> TerminatingError(): "Expected a value, but got $null or empty."
+    [-] Valid License
+ 15ms
+      Expected a value, but got $null or empty.
+      154:             $ModuleInformation.LicenseURI | Should not BeNullOrEmpty
+      at <ScriptBlock>, C:\sc\verb-logging\Tests\verb-logging.tests.ps1: line 154
+    [+] Valid Manifest Description
+ 14ms
+    [+] Valid Manifest Root Module
+ 14ms
+    [+] Valid Manifest GUID
+ 25ms
+    [+] Required Modules
+ 10ms
+
+  Context Exported Functions
+PS>TerminatingError(): "Expected 19, but got 18."
+>> TerminatingError(): "Expected 19, but got 18."
+>> TerminatingError(): "Expected 19, but got 18."
+    [-] Proper Number of Functions Exported
+ 135ms
+      Expected 19, but got 18.
+      214:             $ExportedCount | Should be $FileCount
+      at <ScriptBlock>, C:\sc\verb-logging\Tests\verb-logging.tests.ps1: line 214
+PS>TerminatingError(): "Expected $true, but got $false."
+>> TerminatingError(): "Expected $true, but got $false."
+>> TerminatingError(): "Expected $true, but got $false."
+    [-] Exports All Public Functions
+ 221ms
+      Expected $true, but got $false.
+      224:                 $ExFunctions -contains $FunctionName | Should Be $true
+      at <ScriptBlock>, C:\sc\verb-logging\Tests\verb-logging.tests.ps1: line 224
+    [+] Compare Missing Functions
+ 5ms
+
+Describing Help
+
+  Context Function - Archive-Log
+    [+] Synopsis
+ 283ms
+    [+] Description
+ 307ms
+    [+] Examples
+ 220ms
+
+Describing Help
+
+  Context Function - Cleanup
+    [+] Synopsis
+ 86ms
+    [+] Description
+ 90ms
+    [+] Examples
+ 142ms
+
+Describing Help
+
+  Context Function - get-ArchivePath
+    [+] Synopsis
+ 235ms
+Select-Object : Property "Description" cannot be found.
+At C:\sc\verb-logging\Tests\verb-logging.tests.ps1:251 char:31
++ ...       Get-Help $_ | Select-Object -ExpandProperty Description | shoul ...
++                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidArgument: (@{examples=@{ex...e=verb-logging}:PSObject) [Select-Object], 
+PSArgumentException
+    + FullyQualifiedErrorId : ExpandPropertyNotFound,Microsoft.PowerShell.Commands.SelectObjectCommand
+Select-Object : Property "Description" cannot be found.
+At C:\sc\verb-logging\Tests\verb-logging.tests.ps1:251 char:31
++ ...       Get-Help $_ | Select-Object -ExpandProperty Description | shoul ...
++                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidArgument: (@{examples=@{ex...e=verb-logging}:PSObject) [Select-Object], PSArgumentException
+    + FullyQualifiedErrorId : ExpandPropertyNotFound,Microsoft.PowerShell.Commands.SelectObjectCommand
+
+PS>TerminatingError(): "Expected a value, but got $null or empty."
+>> TerminatingError(): "Expected a value, but got $null or empty."
+>> TerminatingError(): "Expected a value, but got $null or empty."
+    [-] Description
+ 1.16s
+      Expected a value, but got $null or empty.
+      251:                 Get-Help $_ | Select-Object -ExpandProperty Description | should not benullorempty
+      at <ScriptBlock>, C:\sc\verb-logging\Tests\verb-logging.tests.ps1: line 251
+    [+] Examples
+ 332ms
+
+Describing Help
+
+  Context Function - get-EventsFiltered
+    [+] Synopsis
+ 290ms
+    [+] Description
+ 189ms
+Select-Object : Property "Examples" cannot be found.
+At C:\sc\verb-logging\Tests\verb-logging.tests.ps1:254 char:43
++ ... amples = Get-Help $_ | Select-Object -ExpandProperty Examples | Measu ...
++                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidArgument: (@{inputTypes=@{...e=verb-logging}:PSObject) [Select-Object], 
+PSArgumentException
+    + FullyQualifiedErrorId : ExpandPropertyNotFound,Microsoft.PowerShell.Commands.SelectObjectCommand
+Select-Object : Property "Examples" cannot be found.
+At C:\sc\verb-logging\Tests\verb-logging.tests.ps1:254 char:43
++ ... amples = Get-Help $_ | Select-Object -ExpandProperty Examples | Measu ...
++                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidArgument: (@{inputTypes=@{...e=verb-logging}:PSObject) [Select-Object], PSArgumentException
+    + FullyQualifiedErrorId : ExpandPropertyNotFound,Microsoft.PowerShell.Commands.SelectObjectCommand
+
+PS>TerminatingError(): "Expected $true, but got $false."
+>> TerminatingError(): "Expected $true, but got $false."
+>> TerminatingError(): "Expected $true, but got $false."
+    [-] Examples
+ 1.04s
+      Expected $true, but got $false.
+      255:                 $Examples.Count -gt 0 | Should be $true
+      at <ScriptBlock>, C:\sc\verb-logging\Tests\verb-logging.tests.ps1: line 255
+
+Describing Help
+
+  Context Function - get-lastevent
+    [+] Synopsis
+ 343ms
+    [+] Description
+ 337ms
+    [+] Examples
+ 379ms
+
+Describing Help
+
+  Context Function - get-lastlogon
+    [+] Synopsis
+ 308ms
+PS>TerminatingError(): "Expected a value, but got $null or empty."
+>> TerminatingError(): "Expected a value, but got $null or empty."
+>> TerminatingError(): "Expected a value, but got $null or empty."
+    [-] Description
+ 334ms
+      Expected a value, but got $null or empty.
+      251:                 Get-Help $_ | Select-Object -ExpandProperty Description | should not benullorempty
+      at <ScriptBlock>, C:\sc\verb-logging\Tests\verb-logging.tests.ps1: line 251
+PS>TerminatingError(): "Expected $true, but got $false."
+>> TerminatingError(): "Expected $true, but got $false."
+>> TerminatingError(): "Expected $true, but got $false."
+    [-] Examples
+ 282ms
+      Expected $true, but got $false.
+      255:                 $Examples.Count -gt 0 | Should be $true
+      at <ScriptBlock>, C:\sc\verb-logging\Tests\verb-logging.tests.ps1: line 255
+
+Describing Help
+
+  Context Function - get-lastshutdown
+    [+] Synopsis
+ 394ms
+PS>TerminatingError(): "Expected a value, but got $null or empty."
+>> TerminatingError(): "Expected a value, but got $null or empty."
+>> TerminatingError(): "Expected a value, but got $null or empty."
+    [-] Description
+ 360ms
+      Expected a value, but got $null or empty.
+      251:                 Get-Help $_ | Select-Object -ExpandProperty Description | should not benullorempty
+      at <ScriptBlock>, C:\sc\verb-logging\Tests\verb-logging.tests.ps1: line 251
+PS>TerminatingError(): "Expected $true, but got $false."
+>> TerminatingError(): "Expected $true, but got $false."
+>> TerminatingError(): "Expected $true, but got $false."
+    [-] Examples
+ 323ms
+      Expected $true, but got $false.
+      255:                 $Examples.Count -gt 0 | Should be $true
+      at <ScriptBlock>, C:\sc\verb-logging\Tests\verb-logging.tests.ps1: line 255
+
+Describing Help
+
+  Context Function - get-lastsleep
+    [+] Synopsis
+ 229ms
+PS>TerminatingError(): "Expected a value, but got $null or empty."
+>> TerminatingError(): "Expected a value, but got $null or empty."
+>> TerminatingError(): "Expected a value, but got $null or empty."
+    [-] Description
+ 228ms
+      Expected a value, but got $null or empty.
+      251:                 Get-Help $_ | Select-Object -ExpandProperty Description | should not benullorempty
+      at <ScriptBlock>, C:\sc\verb-logging\Tests\verb-logging.tests.ps1: line 251
+PS>TerminatingError(): "Expected $true, but got $false."
+>> TerminatingError(): "Expected $true, but got $false."
+>> TerminatingError(): "Expected $true, but got $false."
+    [-] Examples
+ 223ms
+      Expected $true, but got $false.
+      255:                 $Examples.Count -gt 0 | Should be $true
+      at <ScriptBlock>, C:\sc\verb-logging\Tests\verb-logging.tests.ps1: line 255
+
+Describing Help
+
+  Context Function - get-lastwake
+    [+] Synopsis
+ 186ms
+PS>TerminatingError(): "Expected a value, but got $null or empty."
+>> TerminatingError(): "Expected a value, but got $null or empty."
+>> TerminatingError(): "Expected a value, but got $null or empty."
+    [-] Description
+ 203ms
+      Expected a value, but got $null or empty.
+      251:                 Get-Help $_ | Select-Object -ExpandProperty Description | should not benullorempty
+      at <ScriptBlock>, C:\sc\verb-logging\Tests\verb-logging.tests.ps1: line 251
+PS>TerminatingError(): "Expected $true, but got $false."
+>> TerminatingError(): "Expected $true, but got $false."
+>> TerminatingError(): "Expected $true, but got $false."
+    [-] Examples
+ 194ms
+      Expected $true, but got $false.
+      255:                 $Examples.Count -gt 0 | Should be $true
+      at <ScriptBlock>, C:\sc\verb-logging\Tests\verb-logging.tests.ps1: line 255
+
+Describing Help
+
+  Context Function - get-winEventsLoopedIDs
+    [+] Synopsis
+ 228ms
+    [+] Description
+ 289ms
+    [+] Examples
+ 222ms
+
+Describing Help
+
+  Context Function - Start-IseTranscript
+    [+] Synopsis
+ 253ms
+    [+] Description
+ 188ms
+    [+] Examples
+ 195ms
+
+Describing Help
+
+  Context Function - Start-Log
+    [+] Synopsis
+ 228ms
+    [+] Description
+ 164ms
+    [+] Examples
+ 214ms
+
+Describing Help
+
+  Context Function - start-TranscriptLog
+    [+] Synopsis
+ 199ms
+    [+] Description
+ 219ms
+    [+] Examples
+ 215ms
+
+Describing Help
+
+  Context Function - Stop-TranscriptLog
+    [+] Synopsis
+ 253ms
+Select-Object : Property "Description" cannot be found.
+At C:\sc\verb-logging\Tests\verb-logging.tests.ps1:251 char:31
++ ...       Get-Help $_ | Select-Object -ExpandProperty Description | shoul ...
++                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidArgument: (@{examples=@{ex...e=verb-logging}:PSObject) [Select-Object], 
+PSArgumentException
+    + FullyQualifiedErrorId : ExpandPropertyNotFound,Microsoft.PowerShell.Commands.SelectObjectCommand
+Select-Object : Property "Description" cannot be found.
+At C:\sc\verb-logging\Tests\verb-logging.tests.ps1:251 char:31
++ ...       Get-Help $_ | Select-Object -ExpandProperty Description | shoul ...
++                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidArgument: (@{examples=@{ex...e=verb-logging}:PSObject) [Select-Object], PSArgumentException
+    + FullyQualifiedErrorId : ExpandPropertyNotFound,Microsoft.PowerShell.Commands.SelectObjectCommand
+
+PS>TerminatingError(): "Expected a value, but got $null or empty."
+>> TerminatingError(): "Expected a value, but got $null or empty."
+>> TerminatingError(): "Expected a value, but got $null or empty."
+    [-] Description
+ 724ms
+      Expected a value, but got $null or empty.
+      251:                 Get-Help $_ | Select-Object -ExpandProperty Description | should not benullorempty
+      at <ScriptBlock>, C:\sc\verb-logging\Tests\verb-logging.tests.ps1: line 251
+    [+] Examples
+ 286ms
+
+Describing Help
+
+  Context Function - Test-Transcribing
+    [+] Synopsis
+ 199ms
+    [+] Description
+ 205ms
+    [+] Examples
+ 243ms
+
+Describing Help
+
+  Context Function - test-Transcribing2
+    [+] Synopsis
+ 201ms
+    [+] Description
+ 196ms
+    [+] Examples
+ 164ms
+
+Describing Help
+
+  Context Function - Test-TranscriptionSupported
+    [+] Synopsis
+ 181ms
+    [+] Description
+ 180ms
+    [+] Examples
+ 189ms
+
+Describing Help
+
+  Context Function - Write-Log
+    [+] Synopsis
+ 135ms
+    [+] Description
+ 122ms
+    [+] Examples
+ 135ms
+
+Describing General - Testing all scripts and modules against the Script Analyzer Rules
+
+  Context Checking files to test exist and Invoke-ScriptAnalyzer cmdLet is available
+    [+] Checking files exist to test.
+ 13ms
+    [+] Checking Invoke-ScriptAnalyzer exists.
+ 23ms
+
+Describing Testing against PSScriptAnalyzer rules
+
+  Context PSSA Standard Rules
+    [+] Should pass PSAlignAssignmentStatement
+ 24ms
+    [!] Should pass PSAvoidUsingCmdletAliases
+, is skipped
+ 0ms
+    [+] Should pass PSAvoidAssignmentToAutomaticVariable
+ 19ms
+PS>TerminatingError(): "Expected 0, but got 4."
+>> TerminatingError(): "Expected 0, but got 4."
+>> TerminatingError(): "Expected 0, but got 4."
+    [-] Should pass PSAvoidDefaultValueSwitchParameter
+ 10ms
+      Expected 0, but got 4.
+      318:                 ($Failures | Measure-Object).Count | Should Be 0
+      at <ScriptBlock>, C:\sc\verb-logging\Tests\verb-logging.tests.ps1: line 318
+    [+] Should pass PSAvoidDefaultValueForMandatoryParameter
+ 15ms
+PS>TerminatingError(): "Expected 0, but got 2."
+>> TerminatingError(): "Expected 0, but got 2."
+>> TerminatingError(): "Expected 0, but got 2."
+    [-] Should pass PSAvoidUsingEmptyCatchBlock
+ 13ms
+      Expected 0, but got 2.
+      318:                 ($Failures | Measure-Object).Count | Should Be 0
+      at <ScriptBlock>, C:\sc\verb-logging\Tests\verb-logging.tests.ps1: line 318
+    [+] Should pass PSAvoidGlobalAliases
+ 85ms
+    [+] Should pass PSAvoidGlobalFunctions
+ 181ms
+    [!] Should pass PSAvoidGlobalVars
+, is skipped
+ 0ms
+    [+] Should pass PSAvoidInvokingEmptyMembers
+ 48ms
+    [+] Should pass PSAvoidLongLines
+ 96ms
+    [+] Should pass PSAvoidNullOrEmptyHelpMessageAttribute
+ 40ms
+    [+] Should pass PSAvoidOverwritingBuiltInCmdlets
+ 36ms
+    [+] Should pass PSAvoidUsingPositionalParameters
+ 68ms
+    [+] Should pass PSReservedCmdletChar
+ 80ms
+    [+] Should pass PSReservedParams
+ 40ms
+    [+] Should pass PSAvoidShouldContinueWithoutForce
+ 35ms
+    [+] Should pass PSAvoidTrailingWhitespace
+ 39ms
+    [+] Should pass PSAvoidUsingUsernameAndPasswordParams
+ 73ms
+    [+] Should pass PSAvoidUsingComputerNameHardcoded
+ 36ms
+    [+] Should pass PSAvoidUsingConvertToSecureStringWithPlainText
+ 26ms
+    [+] Should pass PSAvoidUsingDeprecatedManifestFields
+ 51ms
+    [+] Should pass PSAvoidUsingDoubleQuotesForConstantString
+ 64ms
+PS>TerminatingError(): "Expected 0, but got 1."
+>> TerminatingError(): "Expected 0, but got 1."
+>> TerminatingError(): "Expected 0, but got 1."
+    [-] Should pass PSAvoidUsingInvokeExpression
+ 58ms
+      Expected 0, but got 1.
+      318:                 ($Failures | Measure-Object).Count | Should Be 0
+      at <ScriptBlock>, C:\sc\verb-logging\Tests\verb-logging.tests.ps1: line 318
+    [+] Should pass PSAvoidUsingPlainTextForPassword
+ 29ms
+PS>TerminatingError(): "Expected 0, but got 6."
+>> TerminatingError(): "Expected 0, but got 6."
+>> TerminatingError(): "Expected 0, but got 6."
+    [-] Should pass PSAvoidUsingWMICmdlet
+ 77ms
+      Expected 0, but got 6.
+      318:                 ($Failures | Measure-Object).Count | Should Be 0
+      at <ScriptBlock>, C:\sc\verb-logging\Tests\verb-logging.tests.ps1: line 318
+    [!] Should pass PSAvoidUsingWriteHost
+, is skipped
+ 0ms
+    [+] Should pass PSUseCompatibleCommands
+ 25ms
+    [+] Should pass PSUseCompatibleSyntax
+ 17ms
+    [+] Should pass PSUseCompatibleTypes
+ 17ms
+    [+] Should pass PSMisleadingBacktick
+ 21ms
+    [+] Should pass PSMissingModuleManifestField
+ 26ms
+PS>TerminatingError(): "Expected 0, but got 8."
+>> TerminatingError(): "Expected 0, but got 8."
+>> TerminatingError(): "Expected 0, but got 8."
+    [-] Should pass PSPlaceCloseBrace
+ 35ms
+      Expected 0, but got 8.
+      318:                 ($Failures | Measure-Object).Count | Should Be 0
+      at <ScriptBlock>, C:\sc\verb-logging\Tests\verb-logging.tests.ps1: line 318
+PS>TerminatingError(): "Expected 0, but got 1."
+>> TerminatingError(): "Expected 0, but got 1."
+>> TerminatingError(): "Expected 0, but got 1."
+    [-] Should pass PSPlaceOpenBrace
+ 39ms
+      Expected 0, but got 1.
+      318:                 ($Failures | Measure-Object).Count | Should Be 0
+      at <ScriptBlock>, C:\sc\verb-logging\Tests\verb-logging.tests.ps1: line 318
+PS>TerminatingError(): "Expected 0, but got 4."
+>> TerminatingError(): "Expected 0, but got 4."
+>> TerminatingError(): "Expected 0, but got 4."
+    [-] Should pass PSPossibleIncorrectComparisonWithNull
+ 47ms
+      Expected 0, but got 4.
+      318:                 ($Failures | Measure-Object).Count | Should Be 0
+      at <ScriptBlock>, C:\sc\verb-logging\Tests\verb-logging.tests.ps1: line 318
+    [+] Should pass PSPossibleIncorrectUsageOfAssignmentOperator
+ 56ms
+    [+] Should pass PSPossibleIncorrectUsageOfRedirectionOperator
+ 17ms
+    [!] Should pass PSProvideCommentHelp
+, is skipped
+ 0ms
+    [+] Should pass PSReviewUnusedParameter
+ 18ms
+    [!] Should pass PSUseApprovedVerbs
+, is skipped
+ 0ms
+    [+] Should pass PSUseBOMForUnicodeEncodedFile
+ 32ms
+    [!] Should pass PSUseCmdletCorrectly
+, is skipped
+ 0ms
+    [+] Should pass PSUseCompatibleCmdlets
+ 14ms
+    [+] Should pass PSUseConsistentIndentation
+ 15ms
+    [!] Should pass PSUseConsistentWhitespace
+, is skipped
+ 0ms
+    [+] Should pass PSUseCorrectCasing
+ 19ms
+    [!] Should pass PSUseDeclaredVarsMoreThanAssignments
+, is skipped
+ 0ms
+    [+] Should pass PSUseLiteralInitializerForHashtable
+ 24ms
+PS>TerminatingError(): "Expected 0, but got 10."
+>> TerminatingError(): "Expected 0, but got 10."
+>> TerminatingError(): "Expected 0, but got 10."
+    [-] Should pass PSUseOutputTypeCorrectly
+ 18ms
+      Expected 0, but got 10.
+      318:                 ($Failures | Measure-Object).Count | Should Be 0
+      at <ScriptBlock>, C:\sc\verb-logging\Tests\verb-logging.tests.ps1: line 318
+    [+] Should pass PSUseProcessBlockForPipelineCommand
+ 12ms
+    [+] Should pass PSUsePSCredentialType
+ 19ms
+    [+] Should pass PSShouldProcess
+ 16ms
+PS>TerminatingError(): "Expected 0, but got 8."
+>> TerminatingError(): "Expected 0, but got 8."
+>> TerminatingError(): "Expected 0, but got 8."
+    [-] Should pass PSUseShouldProcessForStateChangingFunctions
+ 17ms
+      Expected 0, but got 8.
+      318:                 ($Failures | Measure-Object).Count | Should Be 0
+      at <ScriptBlock>, C:\sc\verb-logging\Tests\verb-logging.tests.ps1: line 318
+PS>TerminatingError(): "Expected 0, but got 2."
+>> TerminatingError(): "Expected 0, but got 2."
+>> TerminatingError(): "Expected 0, but got 2."
+    [-] Should pass PSUseSingularNouns
+ 29ms
+      Expected 0, but got 2.
+      318:                 ($Failures | Measure-Object).Count | Should Be 0
+      at <ScriptBlock>, C:\sc\verb-logging\Tests\verb-logging.tests.ps1: line 318
+PS>TerminatingError(): "Expected 0, but got 4."
+>> TerminatingError(): "Expected 0, but got 4."
+>> TerminatingError(): "Expected 0, but got 4."
+    [-] Should pass PSUseSupportsShouldProcess
+ 32ms
+      Expected 0, but got 4.
+      318:                 ($Failures | Measure-Object).Count | Should Be 0
+      at <ScriptBlock>, C:\sc\verb-logging\Tests\verb-logging.tests.ps1: line 318
+    [+] Should pass PSUseToExportFieldsInManifest
+ 18ms
+    [+] Should pass PSUseUsingScopeModifierInNewRunspaces
+ 24ms
+    [+] Should pass PSUseUTF8EncodingForHelpFile
+ 24ms
+    [+] Should pass PSDSCDscExamplesPresent
+ 77ms
+    [+] Should pass PSDSCDscTestsPresent
+ 98ms
+    [+] Should pass PSDSCReturnCorrectTypesForDSCFunctions
+ 41ms
+    [+] Should pass PSDSCUseIdenticalMandatoryParametersForDSC
+ 38ms
+    [+] Should pass PSDSCUseIdenticalParametersForDSC
+ 37ms
+    [+] Should pass PSDSCStandardDSCFunctionsInResource
+ 18ms
+    [+] Should pass PSDSCUseVerboseMessageInDSCResource
+ 19ms
+10:47:05:
+#*------^ RUNNING c:\sc\verb-logging\Tests\verb-logging.tests.ps1: ^------
+10:47:05: INFO:  
+---------------------------------------------------------------------------------
+Processing completed: verb-logging :: c:\sc\verb-logging
+- Script is currently installed (from PsRep: with scope:CurrentUser, under TORO\kadritss profile
+
+- To update other scopes/accounts on same machine, or install on other machines:
+    1. Uninstall current module copies:
+
+        Uninstall-Module -Name verb-logging) -AllVersion -whatif ;
+
+    2. Install the current version (or higher) from the Repo:lyncRepo:
+
+        install-Module -name verb-logging -Repository lyncRepo -MinimumVersion 1.4.1 -scope currentuser -whatif ;
+
+    3. Reimport the module with -force, to ensure the current installed verison is loaded:
+
+        import-Module -name verb-logging -force -verbose ;
+
+#-=-Stacked list: Unwrap to create a 1-liner for the above: CURRENTUSER =-=-=-=-=-=-=
+$whatif=$false ; $tMod = 'verb-logging' ; $tVer = '1.4.1' ;  $tScop = 'CurrentUser' ;
+TRY {
+Remove-Module -Name $tmod -ea 0 ;
+Uninstall-Module -Name $tmod -AllVersion -whatif:$($whatif) ;
+install-Module -name $tmod -Repository 'lyncRepo' -MinimumVersion $tVer -scope $tScop -AllowClobber -whatif:$($whatif) ;
+import-Module -name $tmod -force -verbose ;
+} CATCH {
+Write-Warning "Failed processing $($_.Exception.ItemName). 
+Error Message: $($_.Exception.Message)
+Error Details: $($_)" ; Break ;
+} ;
+#-=-=-=-=-=-=-=-=
+#-=-Stacked list: Unwrap to create a 1-liner for the above: ALLUSERS =-=-=-=-=-=-=
+$whatif=$false ; $tMod = 'verb-logging' ; $tVer = '1.4.1' ;  $tScop = 'AllUsers' ;
+TRY {
+Remove-Module -Name $tmod -ea 0 ;
+Uninstall-Module -Name $tmod -AllVersion -whatif:$($whatif) ;
+install-Module -name $tmod -Repository 'lyncRepo' -MinimumVersion $tVer -scope $tScop -AllowClobber -whatif:$($whatif) ;
+import-Module -name $tmod -force -verbose ;
+} CATCH {
+Write-Warning "Failed processing $($_.Exception.ItemName). 
+Error Message: $($_.Exception.Message)
+Error Details: $($_)" ; Break ;
+} ;
+#-=-=-=-=-=-=-=-=
+
+- You may also want to run the configured Pester Tests of the new script:
+
+        . c:\sc\verb-logging\Tests\verb-logging.tests.ps1
+
+Full Processing Details can be found in:
+
+C:\sc\verb-dev\verb-dev\logs\VERB-dev-verb-logging-LOG-BATCH-EXEC-20240716-1043AM-log.txt
+
+---------------------------------------------------------------------------------
+10:47:05: INFO:  
+(Most recent processing log can be found at:c:\sc\verb-logging\VERB-dev-verb-logging-LOG-BATCH-EXEC-20240716-1043AM-log.txt)
+(perm copy stored at:C:\sc\verb-dev\verb-dev\logs\VERB-dev-verb-logging-LOG-BATCH-EXEC-20240716-1043AM-log.txt
+10:47:05: INFO:  remove-UnneededFileVariants w
+Name                           Value                                                                                                                                                                                                   
+----                           -----                                                                                                                                                                                                   
+Path                           c:\sc\verb-logging                                                                                                                                                                                      
+Include                        VERB-dev-verb-logging-LOG-BATCH-*-log.txt                                                                                                                                                               
+Pattern                                                                                                                                                                                                                                
+FilterOn                       CreationTime                                                                                                                                                                                            
+Keep                           2                                                                                                                                                                                                       
+KeepToday                      True                                                                                                                                                                                                    
+verbose                        True                                                                                                                                                                                                    
+whatif                         False
+10:47:05:gci w
+Name                           Value                                                                                                                                                                                                   
+----                           -----                                                                                                                                                                                                   
+path                           c:\sc\verb-logging\*                                                                                                                                                                                    
+include                        VERB-dev-verb-logging-LOG-BATCH-*-log.txt                                                                                                                                                               
+ErrorAction                    Stop
+VERBOSE: $cuttime:07/16/2024 00:00:00
+VERBOSE: filtering on files prior to $cuttime:07/16/2024 00:00:00 AM, on CreationTime property
+(2 in set *before* filtering)
+(1 in set *after* filtering)
+VERBOSE: attempting to retain remaining 2 generations net of prior filtering
+(1 in set *before* filtering)
+(0 in set *after* filtering)
+(Note:net population is *below* target -Keep:2 spec - insufficient older files available)
+10:47:05:Reducing matched population from 2 to 0 files via:
+filtered files on CreationTime prior to 07/16/2024 00:00:00 AM
+10:47:05:There are *no* files to be removed, as per the specified inputs. ($population:0)
+10:47:05: INFO:  #*======^ VERB-dev.psm1:verb-logging ^======
+10:47:05:
+#*------^ (1/1):PROC:verb-logging: ^------
+10:47:05:
+#*======^ RUNNING processbulk-NewModule.ps1 ^======
+
+
+
+▒
+▒
+▒
+░
+░
+
+LYN-8DCZ1G2
+ ▓▒▓
+TORO\kadritss
+ ▓▒▓
+Tue 07/16/2024 10:47
+ [00:04:52]
+
+▒
+▒
+▒
+▒
+▒
+
+[PS]
+:
+C:\u\w\p\scripts
+
+$
+
+
+
+

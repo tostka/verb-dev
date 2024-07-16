@@ -16,6 +16,7 @@ r.com/tostka
     Github      : https://github.com/tostka/verb-dev
     Tags        : Powershell,Module,Build,Development
     REVISIONS
+    * 4:12 PM 7/12/2024 fixed bad path in recovery copy for following too; missing file bug/recoverable down in 'Move/Flatten Resource etc files into root of temp Build dir...', added broad recovery instructions (reinstall from repo, latest vers, buffer in the .psd1/.psm1 from repo copy, rerun)
     * 8:52 AM 12/12/2023 fixed typo trailing log echo #2771 (and added ref to both currlog & perm copy stored at uwps\logs)
     * 3:14 PM 12/11/2023 added expl for reset-ModuleBuildFail.ps1 cleanup pass ; 
         vazure bombed on build, missing LICENSE.TXT, so used leaf 
@@ -2136,18 +2137,20 @@ $(if($Merge){'MERGE parm specified as well:`n-Merge Public|Internal|Classes incl
                             <#$ModPsdPath
                             C:\sc\verb-network\verb-network\verb-network.psd1
                             #>
+                            # 4:12 PM 7/12/2024 fix path source typo (need path of, not the psd1.fullname)
                             $pltCI=[ordered]@{
-                                path = (join-path -path $ModPsdPath -childpath $fl -ea STOP) ; 
+                                path = (join-path -path (split-path $ModPsdPath) -childpath $fl -ea STOP) ;
                                 destination = (join-path -path $CUModTestPath -childpath $fl -ea STOP) ; ; # fully leaf the dest
-                                force = $true ; 
+                                force = $true ;
                                 erroraction = 'STOP' ;
-                                verbose = $true ; # $($VerbosePreference -eq "Continue") ; 
+                                verbose = $true ; # $($VerbosePreference -eq "Continue") ;
                                 whatif = $($whatif) ;
                             } ;
                             $smsg = "RE-copy-item w`n$(($pltCI|out-string).trim())" ; 
                             $smsg += "`n--`$pltCI.path:`n$(($pltCI.path|out-string).trim())" ; 
                             if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
                             # it's flat file coying, just single-line it verbose
+                            
                             TRY{
                                 copy-item @pltCI ;
                             } CATCH {
@@ -2156,6 +2159,42 @@ $(if($Merge){'MERGE parm specified as well:`n-Merge Public|Internal|Classes incl
                                 if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN } #Error|Warn|Debug
                                 else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
                             } ; 
+
+                            $shMissingFileWarning = @"
+
+# NOTE!: 
+
+AN ERROR WAS THROWN ON A MISSING FILE FROM THE `$psd1.filelist, SPECIFICALLY:
+
+$($pltCI.destination)
+
+... and a RECOVERY RECOPY from source was undertaken. 
+
+=> IF THE BUILD CONTINUES TO FAIL PUBLISH/INSTALL, DO THE FOLLOWING:
+
+1. Reinstall _latest repo version_ of $($ModuleName) to -scope:CurrentUser
+2. Explorer the installed version at:
+
+    C:\Users\LOGON\Documents\WindowsPowerShell\Modules\$($ModuleName)\n.n.n
+
+    ... and locate the $($ModuleName).psd1 & $($ModuleName).psm1, buffer to clipboard, 
+
+3. Explorer:
+    $(split-path $ModPsdPath)
+
+    ... and paste the buffered .psd1 & .psm1 from the installed copy, into the dev version (resets the build set)
+
+4. And then run a fresh pass at your:
+
+      .\processbulk-NewModule.ps1 -Modules $($ModuleName)
+
+The above *may* sort the error without further debugging (could reflect missing/incomplete/damaged content from prior build).
+
+"@ ;       
+                            $smsg = $shMissingFileWarning ; 
+                            if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN -Indent} 
+                            else{ write-WARNING "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; 
+
                         } ; 
                     } ; 
                 } else { 
