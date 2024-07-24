@@ -1555,3 +1555,1356 @@ $
 
 
 
+PS>CommandInvocation(Set-PSBreakpoint): "Set-PSBreakpoint"
+>> ParameterBinding(Set-PSBreakpoint): name="Script"; value="C:\Users\kadritss\Documents\WindowsPowerShell\profile.ps1"
+>> ParameterBinding(Set-PSBreakpoint): name="Line"; value="313"
+
+  ID Script                                                  Line Command                                                 Variable                                               Action
+  -- ------                                                  ---- -------                                                 --------                                               ------
+   0 profile.ps1                                              313
+
+
+PS>CommandInvocation(Set-PSBreakpoint): "Set-PSBreakpoint"
+>> ParameterBinding(Set-PSBreakpoint): name="Script"; value="C:\Users\kadritss\Documents\WindowsPowerShell\profile.ps1"
+>> ParameterBinding(Set-PSBreakpoint): name="Line"; value="315"
+
+  ID Script                                                  Line Command                                                 Variable                                               Action
+  -- ------                                                  ---- -------                                                 --------                                               ------
+   1 profile.ps1                                              315
+
+
+PS>CommandInvocation(Set-PSBreakpoint): "Set-PSBreakpoint"
+>> ParameterBinding(Set-PSBreakpoint): name="Script"; value="C:\sc\powershell\PSProfileUID\tsk-prof.ps1"
+>> ParameterBinding(Set-PSBreakpoint): name="Line"; value="345"
+
+  ID Script                                                  Line Command                                                 Variable                                               Action
+  -- ------                                                  ---- -------                                                 --------                                               ------
+   2 tsk-prof.ps1                                             345
+
+
+PS>CommandInvocation(Set-PSBreakpoint): "Set-PSBreakpoint"
+>> ParameterBinding(Set-PSBreakpoint): name="Script"; value="C:\sc\powershell\PSProfileUID\tsk-prof.ps1"
+>> ParameterBinding(Set-PSBreakpoint): name="Line"; value="349"
+
+  ID Script                                                  Line Command                                                 Variable                                               Action
+  -- ------                                                  ---- -------                                                 --------                                               ------
+   3 tsk-prof.ps1                                             349
+
+
+PS>CommandInvocation(Set-PSBreakpoint): "Set-PSBreakpoint"
+>> ParameterBinding(Set-PSBreakpoint): name="Script"; value="C:\sc\powershell\PSProfileUID\tsk-prof.ps1"
+>> ParameterBinding(Set-PSBreakpoint): name="Line"; value="529"
+
+  ID Script                                                  Line Command                                                 Variable                                               Action
+  -- ------                                                  ---- -------                                                 --------                                               ------
+   4 tsk-prof.ps1                                             529
+
+
+PS>CommandInvocation(Set-PSBreakpoint): "Set-PSBreakpoint"
+>> ParameterBinding(Set-PSBreakpoint): name="Script"; value="C:\sc\powershell\PSProfileUID\tsk-prof.ps1"
+>> ParameterBinding(Set-PSBreakpoint): name="Line"; value="841"
+
+  ID Script                                                  Line Command                                                 Variable                                               Action
+  -- ------                                                  ---- -------                                                 --------                                               ------
+   5 tsk-prof.ps1                                             841
+
+
+PS>CommandInvocation(Set-PSBreakpoint): "Set-PSBreakpoint"
+>> ParameterBinding(Set-PSBreakpoint): name="Script"; value="C:\sc\powershell\PSProfileUID\tsk-prof.ps1"
+>> ParameterBinding(Set-PSBreakpoint): name="Line"; value="848"
+
+  ID Script                                                  Line Command                                                 Variable                                               Action
+  -- ------                                                  ---- -------                                                 --------                                               ------
+   6 tsk-prof.ps1                                             848
+
+
+PS>CommandInvocation(Set-PSBreakpoint): "Set-PSBreakpoint"
+>> ParameterBinding(Set-PSBreakpoint): name="Script"; value="C:\sc\powershell\PSProfileUID\tsk-prof.ps1"
+>> ParameterBinding(Set-PSBreakpoint): name="Line"; value="1031"
+
+  ID Script                                                  Line Command                                                 Variable                                               Action
+  -- ------                                                  ---- -------                                                 --------                                               ------
+   7 tsk-prof.ps1                                            1031
+
+
+PS>epbp
+Creating BP file:C:\sc\powershell\PSProfileUID\tsk-prof-ps1-BP.xml
+6 Breakpoints exported to C:\sc\powershell\PSProfileUID\tsk-prof-ps1-BP.xml
+Line Script                                    
+---- ------                                    
+ 345 C:\sc\powershell\PSProfileUID\tsk-prof.ps1
+ 349 C:\sc\powershell\PSProfileUID\tsk-prof.ps1
+ 529 C:\sc\powershell\PSProfileUID\tsk-prof.ps1
+ 841 C:\sc\powershell\PSProfileUID\tsk-prof.ps1
+ 848 C:\sc\powershell\PSProfileUID\tsk-prof.ps1
+1031 C:\sc\powershell\PSProfileUID\tsk-prof.ps1
+
+▒
+▒
+▒
+░
+░
+
+LYN-8DCZ1G2
+ ▓▒▓
+TORO\kadritss
+ ▓▒▓
+Tue 07/16/2024 12:34
+ [191ms]
+
+▒
+▒
+▒
+▒
+▒
+
+[PS]
+:
+C:\u\w\p\scripts
+
+$
+
+
+
+
+PS>split-path $porofile
+>> TerminatingError(Split-Path): "Cannot bind argument to parameter 'Path' because it is null."
+Split-Path : Cannot bind argument to parameter 'Path' because it is null.
+At line:1 char:12
++ split-path $porofile
++            ~~~~~~~~~
+    + CategoryInfo          : InvalidData: (:) [Split-Path], ParameterBindingValidationException
+    + FullyQualifiedErrorId : 
+ParameterArgumentValidationErrorNullNotAllowed,Microsoft.PowerShell.Commands.SplitPathCommand
+Split-Path : Cannot bind argument to parameter 'Path' because it is null.
+At line:1 char:12
++ split-path $porofile
++            ~~~~~~~~~
+    + CategoryInfo          : InvalidData: (:) [Split-Path], ParameterBindingValidationException
+    + FullyQualifiedErrorId : ParameterArgumentValidationErrorNullNotAllowed,Microsoft.PowerShell.Commands.SplitPathCommand
+
+
+▒
+▒
+▒
+░
+░
+
+LYN-8DCZ1G2
+ ▓▒▓
+TORO\kadritss
+ ▓▒▓
+Tue 07/16/2024 12:35
+ [975ms]
+
+▒
+▒
+▒
+▒
+▒
+
+[PS]
+:
+C:\u\w\p\scripts
+
+$
+
+
+
+
+PS>split-path $profile
+C:\Users\kadritss\Documents\WindowsPowerShell
+
+▒
+▒
+▒
+░
+░
+
+LYN-8DCZ1G2
+ ▓▒▓
+TORO\kadritss
+ ▓▒▓
+Tue 07/16/2024 12:35
+ [41ms]
+
+▒
+▒
+▒
+▒
+▒
+
+[PS]
+:
+C:\u\w\p\scripts
+
+$
+
+
+
+
+PS>$profile | gm
+
+
+   TypeName: System.String
+
+Name                   MemberType            Definition
+----                   ----------            ----------
+Clone                  Method                System.Object Clone(), System.Object ICloneable.Clone()
+CompareTo              Method                int CompareTo(System.Object value), int CompareTo(string strB), int IComparable.CompareTo(System.Object obj), int IComparable[string].CompareTo(string other)
+Contains               Method                bool Contains(string value)
+CopyTo                 Method                void CopyTo(int sourceIndex, char[] destination, int destinationIndex, int count)
+EndsWith               Method                bool EndsWith(string value), bool EndsWith(string value, System.StringComparison comparisonType), bool EndsWith(string value, bool ignoreCase, cultureinfo culture)
+Equals                 Method                bool Equals(System.Object obj), bool Equals(string value), bool Equals(string value, System.StringComparison comparisonType), bool IEquatable[string].Equals(string other)
+GetEnumerator          Method                System.CharEnumerator GetEnumerator(), System.Collections.IEnumerator IEnumerable.GetEnumerator(), System.Collections.Generic.IEnumerator[char] IEnumerable[char].GetEnumerator()
+GetHashCode            Method                int GetHashCode()
+GetType                Method                type GetType()
+GetTypeCode            Method                System.TypeCode GetTypeCode(), System.TypeCode IConvertible.GetTypeCode()
+IndexOf                Method                int IndexOf(char value), int IndexOf(char value, int startIndex), int IndexOf(string value), int IndexOf(string value, int startIndex), int IndexOf(string value, int startIndex, int c...
+IndexOfAny             Method                int IndexOfAny(char[] anyOf), int IndexOfAny(char[] anyOf, int startIndex), int IndexOfAny(char[] anyOf, int startIndex, int count)
+Insert                 Method                string Insert(int startIndex, string value)
+IsNormalized           Method                bool IsNormalized(), bool IsNormalized(System.Text.NormalizationForm normalizationForm)
+LastIndexOf            Method                int LastIndexOf(char value), int LastIndexOf(char value, int startIndex), int LastIndexOf(string value), int LastIndexOf(string value, int startIndex), int LastIndexOf(string value, i...
+LastIndexOfAny         Method                int LastIndexOfAny(char[] anyOf), int LastIndexOfAny(char[] anyOf, int startIndex), int LastIndexOfAny(char[] anyOf, int startIndex, int count)
+Normalize              Method                string Normalize(), string Normalize(System.Text.NormalizationForm normalizationForm)
+PadLeft                Method                string PadLeft(int totalWidth), string PadLeft(int totalWidth, char paddingChar)
+PadRight               Method                string PadRight(int totalWidth), string PadRight(int totalWidth, char paddingChar)
+Remove                 Method                string Remove(int startIndex, int count), string Remove(int startIndex)
+Replace                Method                string Replace(char oldChar, char newChar), string Replace(string oldValue, string newValue)
+Split                  Method                string[] Split(Params char[] separator), string[] Split(char[] separator, int count), string[] Split(char[] separator, System.StringSplitOptions options), string[] Split(char[] separa...
+StartsWith             Method                bool StartsWith(string value), bool StartsWith(string value, System.StringComparison comparisonType), bool StartsWith(string value, bool ignoreCase, cultureinfo culture)
+Substring              Method                string Substring(int startIndex), string Substring(int startIndex, int length)
+ToBoolean              Method                bool IConvertible.ToBoolean(System.IFormatProvider provider)
+ToByte                 Method                byte IConvertible.ToByte(System.IFormatProvider provider)
+ToChar                 Method                char IConvertible.ToChar(System.IFormatProvider provider)
+ToCharArray            Method                char[] ToCharArray(), char[] ToCharArray(int startIndex, int length)
+ToDateTime             Method                datetime IConvertible.ToDateTime(System.IFormatProvider provider)
+ToDecimal              Method                decimal IConvertible.ToDecimal(System.IFormatProvider provider)
+ToDouble               Method                double IConvertible.ToDouble(System.IFormatProvider provider)
+ToInt16                Method                int16 IConvertible.ToInt16(System.IFormatProvider provider)
+ToInt32                Method                int IConvertible.ToInt32(System.IFormatProvider provider)
+ToInt64                Method                long IConvertible.ToInt64(System.IFormatProvider provider)
+ToLower                Method                string ToLower(), string ToLower(cultureinfo culture)
+ToLowerInvariant       Method                string ToLowerInvariant()
+ToSByte                Method                sbyte IConvertible.ToSByte(System.IFormatProvider provider)
+ToSingle               Method                float IConvertible.ToSingle(System.IFormatProvider provider)
+ToString               Method                string ToString(), string ToString(System.IFormatProvider provider), string IConvertible.ToString(System.IFormatProvider provider)
+ToType                 Method                System.Object IConvertible.ToType(type conversionType, System.IFormatProvider provider)
+ToUInt16               Method                uint16 IConvertible.ToUInt16(System.IFormatProvider provider)
+ToUInt32               Method                uint32 IConvertible.ToUInt32(System.IFormatProvider provider)
+ToUInt64               Method                uint64 IConvertible.ToUInt64(System.IFormatProvider provider)
+ToUpper                Method                string ToUpper(), string ToUpper(cultureinfo culture)
+ToUpperInvariant       Method                string ToUpperInvariant()
+Trim                   Method                string Trim(Params char[] trimChars), string Trim()
+TrimEnd                Method                string TrimEnd(Params char[] trimChars)
+TrimStart              Method                string TrimStart(Params char[] trimChars)
+AllUsersAllHosts       NoteProperty          string AllUsersAllHosts=C:\Windows\System32\WindowsPowerShell\v1.0\profile.ps1
+AllUsersCurrentHost    NoteProperty          string AllUsersCurrentHost=C:\Windows\System32\WindowsPowerShell\v1.0\Microsoft.PowerShellISE_profile.ps1
+CurrentUserAllHosts    NoteProperty          string CurrentUserAllHosts=C:\Users\kadritss\Documents\WindowsPowerShell\profile.ps1
+CurrentUserCurrentHost NoteProperty          string CurrentUserCurrentHost=C:\Users\kadritss\Documents\WindowsPowerShell\Microsoft.PowerShellISE_profile.ps1
+Sources                NoteProperty          Object[] Sources=System.Object[]
+Chars                  ParameterizedProperty char Chars(int index) {get;}
+Length                 Property              int Length {get;}
+
+
+
+▒
+▒
+▒
+░
+░
+
+LYN-8DCZ1G2
+ ▓▒▓
+TORO\kadritss
+ ▓▒▓
+Tue 07/16/2024 12:35
+ [251ms]
+
+▒
+▒
+▒
+▒
+▒
+
+[PS]
+:
+C:\u\w\p\scripts
+
+$
+
+
+
+
+PS>$profile.gettype()
+
+IsPublic IsSerial Name                                     BaseType
+-------- -------- ----                                     --------
+True     True     String                                   System.Object
+
+
+
+▒
+▒
+▒
+░
+░
+
+LYN-8DCZ1G2
+ ▓▒▓
+TORO\kadritss
+ ▓▒▓
+Tue 07/16/2024 12:35
+ [66ms]
+
+▒
+▒
+▒
+▒
+▒
+
+[PS]
+:
+C:\u\w\p\scripts
+
+$
+
+
+
+
+PS>$profile | gm | ? membertype -eq 'NoteProperty'
+
+
+   TypeName: System.String
+
+Name                   MemberType   Definition
+----                   ----------   ----------
+AllUsersAllHosts       NoteProperty string AllUsersAllHosts=C:\Windows\System32\WindowsPowerShell\v1.0\profile.ps1
+AllUsersCurrentHost    NoteProperty string AllUsersCurrentHost=C:\Windows\System32\WindowsPowerShell\v1.0\Microsoft.PowerShellISE_profile.ps1
+CurrentUserAllHosts    NoteProperty string CurrentUserAllHosts=C:\Users\kadritss\Documents\WindowsPowerShell\profile.ps1
+CurrentUserCurrentHost NoteProperty string CurrentUserCurrentHost=C:\Users\kadritss\Documents\WindowsPowerShell\Microsoft.PowerShellISE_profile.ps1
+Sources                NoteProperty Object[] Sources=System.Object[]
+
+
+
+▒
+▒
+▒
+░
+░
+
+LYN-8DCZ1G2
+ ▓▒▓
+TORO\kadritss
+ ▓▒▓
+Tue 07/16/2024 12:36
+ [93ms]
+
+▒
+▒
+▒
+▒
+▒
+
+[PS]
+:
+C:\u\w\p\scripts
+
+$
+
+
+
+
+PS>$profile | gm | ? membertype -eq 'NoteProperty' %{$_} ; 
+>> TerminatingError(Where-Object): "A positional parameter cannot be found that accepts argument '%'."
+Where-Object : A positional parameter cannot be found that accepts argument '%'.
+At line:1 char:17
++ $profile | gm | ? membertype -eq 'NoteProperty' %{$_} ;
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidArgument: (:) [Where-Object], ParameterBindingException
+    + FullyQualifiedErrorId : PositionalParameterNotFound,Microsoft.PowerShell.Commands.WhereObjectCommand
+Where-Object : A positional parameter cannot be found that accepts argument '%'.
+At line:1 char:17
++ $profile | gm | ? membertype -eq 'NoteProperty' %{$_} ;
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidArgument: (:) [Where-Object], ParameterBindingException
+    + FullyQualifiedErrorId : PositionalParameterNotFound,Microsoft.PowerShell.Commands.WhereObjectCommand
+
+
+▒
+▒
+▒
+░
+░
+
+LYN-8DCZ1G2
+ ▓▒▓
+TORO\kadritss
+ ▓▒▓
+Tue 07/16/2024 12:36
+ [669ms]
+
+▒
+▒
+▒
+▒
+▒
+
+[PS]
+:
+C:\u\w\p\scripts
+
+$
+
+
+
+
+PS>$profile | gm | ? membertype -eq 'NoteProperty' |%{$_} ; 
+
+
+   TypeName: System.String
+
+Name                   MemberType   Definition
+----                   ----------   ----------
+AllUsersAllHosts       NoteProperty string AllUsersAllHosts=C:\Windows\System32\WindowsPowerShell\v1.0\profile.ps1
+AllUsersCurrentHost    NoteProperty string AllUsersCurrentHost=C:\Windows\System32\WindowsPowerShell\v1.0\Microsoft.PowerShellISE_profile.ps1
+CurrentUserAllHosts    NoteProperty string CurrentUserAllHosts=C:\Users\kadritss\Documents\WindowsPowerShell\profile.ps1
+CurrentUserCurrentHost NoteProperty string CurrentUserCurrentHost=C:\Users\kadritss\Documents\WindowsPowerShell\Microsoft.PowerShellISE_profile.ps1
+Sources                NoteProperty Object[] Sources=System.Object[]
+
+
+
+▒
+▒
+▒
+░
+░
+
+LYN-8DCZ1G2
+ ▓▒▓
+TORO\kadritss
+ ▓▒▓
+Tue 07/16/2024 12:36
+ [80ms]
+
+▒
+▒
+▒
+▒
+▒
+
+[PS]
+:
+C:\u\w\p\scripts
+
+$
+
+
+
+
+PS>$profile.CurrentUserAllHosts
+C:\Users\kadritss\Documents\WindowsPowerShell\profile.ps1
+
+▒
+▒
+▒
+░
+░
+
+LYN-8DCZ1G2
+ ▓▒▓
+TORO\kadritss
+ ▓▒▓
+Tue 07/16/2024 12:37
+ [183ms]
+
+▒
+▒
+▒
+▒
+▒
+
+[PS]
+:
+C:\u\w\p\scripts
+
+$
+
+
+
+
+PS>. $profile.CurrentUserAllHosts
+Transcript started, output file is C:\Users\kadritss\Documents\WindowsPowerShell\TORO-kadritss-profile-load-LASTPASS-trans-log.txt
+12:37:08:#*======v EXECUTING: profile.ps1 v======
+12:37:08:$binpath: c:\usr\local\bin
+TORO Domain...
+LYN-8DCZ1G2
+Using Existing Local Includes:C:\sc\powershell\PSProfileUID
+$LocalInclDir:C:\sc\powershell\PSProfileUID
+$LocalInclSIDDir:C:\sc\powershell\PSProfileSID
+12:37:09:LOADING INCLUDES:
+
+▒
+▒
+▒
+░
+░
+
+LYN-8DCZ1G2
+ ▓▒▓
+TORO\kadritss
+ ▓▒▓
+Tue 07/16/2024 12:37
+ [183ms]
+
+▒
+▒
+▒
+▒
+▒
+
+[PS]
+:
+C:\u\w\p\scripts
+
+$
+
+
+
+12:37:18:C:\sc\powershell\PSProfileUID\tsk-prof.ps1
+12:37:18:#*======v EXECUTING: tsk-prof.ps1 v======
+
+▒
+▒
+▒
+░
+░
+
+LYN-8DCZ1G2
+ ▓▒▓
+TORO\kadritss
+ ▓▒▓
+Tue 07/16/2024 12:37
+ [183ms]
+
+▒
+▒
+▒
+▒
+▒
+
+[PS]
+:
+C:\u\w\p\scripts
+
+$
+
+
+
+12:37:23:#*======v EXECUTING: tor-incl-infrastrings.ps1 v======
+12:37:23:LOADING INCLUDES:
+12:37:23:LOADING INCLUDES:
+12:37:23:C:\sc\powershell\PSProfileUID\tor-incl-infrastrings_kadritss.ps1
+12:37:23:#*======v EXECUTING: tor-incl-infrastrings_kadritss.ps1 v======
+tor-incl-infrastrings_USER.ps1:$localPSRepo:lyncRepo
+VERBOSE: 12:37:24:Setting WORK infra settings
+12:37:24:#*======^ EXECUTING: tor-incl-infrastrings_kadritss.ps1 ^======
+False
+(inherited $o365_TenOrgDefault (from USER infrastrings):TOR
+(charlesmachine\.works|(radiusdd|americanaugers|mtiequip|charlesmachineworks|ditchwitch|subsite|hhtrenchless)\.com)
+PS>CommandInvocation(Out-Null): "Out-Null"
+tor-incl-infrastrings_USER.ps1:$localPSRepo:lyncRepo
+12:37:27:#*======^ EXECUTING: tor-incl-infrastrings_kadritss.ps1 ^======
+TORO Domain...
+LYN-8DCZ1G2
+12:37:27:( processing $Name:verb-Auth	$BackupPath:C:\sc\verb-Auth\verb-Auth\verb-Auth.psm1	$CommandVerify:get-password )
+VERBOSE: (confirmed verb-Auth loaded: get-password present)
+12:37:28:( processing $Name:verb-logging	$BackupPath:C:\sc\verb-logging\verb-logging\verb-logging.psm1	$CommandVerify:write-log )
+VERBOSE: (confirmed verb-logging loaded: write-log present)
+12:37:29:( processing $Name:verb-IO	$BackupPath:C:\sc\verb-IO\verb-IO\verb-IO.psm1	$CommandVerify:Add-PSTitleBar )
+VERBOSE: (confirmed verb-IO loaded: Add-PSTitleBar present)
+12:37:30:( processing $Name:verb-Mods	$BackupPath:C:\sc\verb-Mods\verb-Mods\verb-Mods.psm1	$CommandVerify:check-ReqMods )
+VERBOSE: (confirmed verb-Mods loaded: check-ReqMods present)
+12:37:31:( processing $Name:verb-Text	$BackupPath:C:\sc\verb-Text\verb-Text\verb-Text.psm1	$CommandVerify:Remove-StringDiacritic )
+VERBOSE: (confirmed verb-Text loaded: Remove-StringDiacritic present)
+12:37:31:( processing $Name:verb-Desktop	$BackupPath:C:\sc\verb-Desktop\verb-Desktop\verb-Desktop.psm1	$CommandVerify:Speak-words )
+VERBOSE: (confirmed verb-Desktop loaded: Speak-words present)
+12:37:32:( processing $Name:verb-dev	$BackupPath:C:\sc\verb-dev\verb-dev\verb-dev.psm1	$CommandVerify:Get-CommentBlocks )
+VERBOSE: (confirmed verb-dev loaded: Get-CommentBlocks present)
+12:37:33:( processing $Name:verb-Network	$BackupPath:C:\sc\verb-Network\verb-Network\verb-Network.psm1	$CommandVerify:Send-EmailNotif )
+VERBOSE: (confirmed verb-Network loaded: Send-EmailNotif present)
+
+▒
+▒
+▒
+░
+░
+
+LYN-8DCZ1G2
+ ▓▒▓
+TORO\kadritss
+ ▓▒▓
+Tue 07/16/2024 12:37
+ [183ms]
+
+▒
+▒
+▒
+▒
+▒
+
+[PS]
+:
+C:\u\w\p\scripts
+
+$
+
+
+
+PS>CommandInvocation(Set-PSBreakpoint): "Set-PSBreakpoint"
+>> ParameterBinding(Set-PSBreakpoint): name="Script"; value="C:\sc\powershell\PSProfileUID\adminsid-incl-ServerCore.ps1"
+>> ParameterBinding(Set-PSBreakpoint): name="Line"; value="50"
+
+  ID Script                                                  Line Command                                                 Variable                                               Action
+  -- ------                                                  ---- -------                                                 --------                                               ------
+   8 adminsid-incl-ServerCore.ps1                              50
+
+
+PS>if ($VerbosePreference -is [System.Collections.IEnumerator]) 
+                    { 
+                        'System.Collections.IEnumerator'
+                    }
+                    else
+                    { 
+                        $VerbosePreference 
+                    }
+                    
+>> CommandInvocation(Out-String): "Out-String"
+>> ParameterBinding(Out-String): name="InputObject"; value="SilentlyContinue"
+SilentlyContinue
+12:37:50:#*======v EXECUTING: tsksid-incl-ServerCore.ps1 v======
+(deferring to local OhMyPsh tsk-incl-Desktop.ps1 cfg)
+12:37:53:Proc Org:charlesmachineworks
+12:37:53:Proc:$ServiceName:o365
+12:37:53:(charlesmachineworks has been migrated & retired, skipping maint on o365-related creds)
+12:37:53:Proc:$ServiceName:OP
+12:37:53:Processing creds:TAG:CMW::cmw.internal:Acct
+12:37:53:Checking for CMWMeta[OP_SIDAcct]
+12:37:53:CMW:checking creds:SID::CMW\d-todd.kadrie
+12:37:53:12:37:53:Processing creds:SID::CMW\d-todd.kadrie
+12:37:53:get-CredFile w
+Name                           Value                                                                                                                                                                                                   
+----                           -----                                                                                                                                                                                                   
+PrefixTag                      CMW                                                                                                                                                                                                     
+SignInAddress                  CMW\d-todd.kadrie                                                                                                                                                                                       
+ServiceName                    OP                                                                                                                                                                                                      
+UserRole                       SID                                                                                                                                                                                                     
+Credtype                       user                                                                                                                                                                                                    
+Reset                          False                                                                                                                                                                                                   
+showdebug                      True                                                                                                                                                                                                    
+whatif                         False
+12:37:54:get-CredFile w
+Name                           Value                                                                                                                                                                                                   
+----                           -----                                                                                                                                                                                                   
+PrefixTag                      CMW                                                                                                                                                                                                     
+SignInAddress                  CMW\d-todd.kadrie                                                                                                                                                                                       
+ServiceName                                                                                                                                                                                                                            
+UserRole                       SID                                                                                                                                                                                                     
+Credtype                       user                                                                                                                                                                                                    
+Reset                          False                                                                                                                                                                                                   
+showdebug                      True                                                                                                                                                                                                    
+whatif                         False
+12:37:54:Checking for CMWMeta[OP_ESVCAcct]
+12:37:54:CMW:checking creds:ESVC::CMW\d-svcExchMaintTasks
+12:37:54:12:37:54:Processing creds:ESVC::CMW\d-svcExchMaintTasks
+12:37:54:get-CredFile w
+Name                           Value                                                                                                                                                                                                   
+----                           -----                                                                                                                                                                                                   
+PrefixTag                      CMW                                                                                                                                                                                                     
+SignInAddress                  CMW\d-svcExchMaintTasks                                                                                                                                                                                 
+ServiceName                    OP                                                                                                                                                                                                      
+UserRole                       ESVC                                                                                                                                                                                                    
+Credtype                       user                                                                                                                                                                                                    
+Reset                          False                                                                                                                                                                                                   
+showdebug                      True                                                                                                                                                                                                    
+whatif                         False
+12:37:54:(skipping OP unsupported 'CSVC' cloud-first role)
+12:37:54:Checking for CMWMeta[OP_UIDAcct]
+12:37:54:CMW:checking creds:UID::
+12:37:54:(no match:CMWMeta:CMW: OP_UIDAcct
+12:37:54:Proc Org:Torolab
+12:37:54:Proc:$ServiceName:o365
+12:37:54:Processing creds:TAG:TOL::Torolab:UPN
+12:37:54:Checking for TOLMeta[o365_SIDUPN]
+12:37:55:TOL:checking creds:SID::s-todd.kadrie@torolab.com
+12:37:55:12:37:55:Processing creds:SID::s-todd.kadrie@torolab.com
+12:37:55:get-CredFile w
+Name                           Value                                                                                                                                                                                                   
+----                           -----                                                                                                                                                                                                   
+PrefixTag                      TOL                                                                                                                                                                                                     
+SignInAddress                  s-todd.kadrie@torolab.com                                                                                                                                                                               
+ServiceName                    o365                                                                                                                                                                                                    
+UserRole                       SID                                                                                                                                                                                                     
+Credtype                       user                                                                                                                                                                                                    
+Reset                          False                                                                                                                                                                                                   
+showdebug                      True                                                                                                                                                                                                    
+whatif                         False
+12:37:55:get-CredFile w
+Name                           Value                                                                                                                                                                                                   
+----                           -----                                                                                                                                                                                                   
+PrefixTag                      TOL                                                                                                                                                                                                     
+SignInAddress                  TORO-LAB\s-kadrits                                                                                                                                                                                      
+ServiceName                                                                                                                                                                                                                            
+UserRole                       SID                                                                                                                                                                                                     
+Credtype                       user                                                                                                                                                                                                    
+Reset                          False                                                                                                                                                                                                   
+showdebug                      True                                                                                                                                                                                                    
+whatif                         False
+12:37:55:Checking for TOLMeta[o365_CSIDUPN]
+12:37:55:TOL:checking creds:CSID::c-svcExchMaintTasks@Torolab.onmicrosoft.com
+12:37:55:12:37:55:Processing creds:CSID::c-svcExchMaintTasks@Torolab.onmicrosoft.com
+12:37:55:get-CredFile w
+Name                           Value                                                                                                                                                                                                   
+----                           -----                                                                                                                                                                                                   
+PrefixTag                      TOL                                                                                                                                                                                                     
+SignInAddress                  c-svcExchMaintTasks@Torolab.onmicrosoft.com                                                                                                                                                             
+ServiceName                    o365                                                                                                                                                                                                    
+UserRole                       CSID                                                                                                                                                                                                    
+Credtype                       user                                                                                                                                                                                                    
+Reset                          False                                                                                                                                                                                                   
+showdebug                      True                                                                                                                                                                                                    
+whatif                         False
+12:37:56:Checking for TOLMeta[o365_ESVCUPN]
+12:37:56:TOL:checking creds:ESVC::Admino365cloud@torolab.onmicrosoft.com
+12:37:56:12:37:56:Processing creds:ESVC::Admino365cloud@torolab.onmicrosoft.com
+12:37:56:get-CredFile w
+Name                           Value                                                                                                                                                                                                   
+----                           -----                                                                                                                                                                                                   
+PrefixTag                      TOL                                                                                                                                                                                                     
+SignInAddress                  Admino365cloud@torolab.onmicrosoft.com                                                                                                                                                                  
+ServiceName                    o365                                                                                                                                                                                                    
+UserRole                       ESVC                                                                                                                                                                                                    
+Credtype                       user                                                                                                                                                                                                    
+Reset                          False                                                                                                                                                                                                   
+showdebug                      True                                                                                                                                                                                                    
+whatif                         False
+12:37:56:Checking for TOLMeta[o365_CSVCUPN]
+12:37:56:TOL:checking creds:CSVC::Admino365cloud@torolab.onmicrosoft.com
+12:37:56:12:37:56:Processing creds:CSVC::Admino365cloud@torolab.onmicrosoft.com
+12:37:56:get-CredFile w
+Name                           Value                                                                                                                                                                                                   
+----                           -----                                                                                                                                                                                                   
+PrefixTag                      TOL                                                                                                                                                                                                     
+SignInAddress                  Admino365cloud@torolab.onmicrosoft.com                                                                                                                                                                  
+ServiceName                    o365                                                                                                                                                                                                    
+UserRole                       CSVC                                                                                                                                                                                                    
+Credtype                       user                                                                                                                                                                                                    
+Reset                          False                                                                                                                                                                                                   
+showdebug                      True                                                                                                                                                                                                    
+whatif                         False
+12:37:57:Checking for TOLMeta[o365_UIDUPN]
+12:37:57:TOL:checking creds:UID::
+12:37:57:(no match:TOLMeta:TOL: o365_UIDUPN
+12:37:57:Checking for TOLMeta[o365_ESvcCBACertTOL]
+12:37:57:TOL:checking creds:ESvcCBA::o365_ESvcCBACert-TOL
+12:37:57:12:37:57:Processing creds:ESvcCBA::o365_ESvcCBACert-TOL
+12:37:57:get-CredFile w
+Name                           Value                                                                                                                                                                                                   
+----                           -----                                                                                                                                                                                                   
+PrefixTag                      TOL                                                                                                                                                                                                     
+SignInAddress                  o365_ESvcCBACert-TOL                                                                                                                                                                                    
+ServiceName                    o365                                                                                                                                                                                                    
+UserRole                       ESvcCBA                                                                                                                                                                                                 
+Credtype                       Cert                                                                                                                                                                                                    
+Reset                          False                                                                                                                                                                                                   
+showdebug                      True                                                                                                                                                                                                    
+whatif                         False
+12:37:57:Checking for TOLMeta[o365_CSvcCBACertTOL]
+12:37:57:TOL:checking creds:CSvcCBA::o365_CSvcCBACert-TOL
+12:37:57:12:37:57:Processing creds:CSvcCBA::o365_CSvcCBACert-TOL
+12:37:57:get-CredFile w
+Name                           Value                                                                                                                                                                                                   
+----                           -----                                                                                                                                                                                                   
+PrefixTag                      TOL                                                                                                                                                                                                     
+SignInAddress                  o365_CSvcCBACert-TOL                                                                                                                                                                                    
+ServiceName                    o365                                                                                                                                                                                                    
+UserRole                       CSvcCBA                                                                                                                                                                                                 
+Credtype                       Cert                                                                                                                                                                                                    
+Reset                          False                                                                                                                                                                                                   
+showdebug                      True                                                                                                                                                                                                    
+whatif                         False
+12:37:58:Checking for TOLMeta[o365_SIDCBACertTOL]
+12:37:58:TOL:checking creds:SIDCBA::o365_SIDCBACert-TOL
+12:37:58:12:37:58:Processing creds:SIDCBA::o365_SIDCBACert-TOL
+12:37:58:get-CredFile w
+Name                           Value                                                                                                                                                                                                   
+----                           -----                                                                                                                                                                                                   
+PrefixTag                      TOL                                                                                                                                                                                                     
+SignInAddress                  o365_SIDCBACert-TOL                                                                                                                                                                                     
+ServiceName                    o365                                                                                                                                                                                                    
+UserRole                       SIDCBA                                                                                                                                                                                                  
+Credtype                       Cert                                                                                                                                                                                                    
+Reset                          False                                                                                                                                                                                                   
+showdebug                      True                                                                                                                                                                                                    
+whatif                         False
+12:37:58:Proc:$ServiceName:OP
+12:37:58:Processing creds:TAG:TOL::torolab.com:Acct
+12:37:58:Checking for TOLMeta[OP_SIDAcct]
+12:37:58:TOL:checking creds:SID::TORO-LAB\s-kadrits
+12:37:58:12:37:58:Processing creds:SID::TORO-LAB\s-kadrits
+12:37:58:get-CredFile w
+Name                           Value                                                                                                                                                                                                   
+----                           -----                                                                                                                                                                                                   
+PrefixTag                      TOL                                                                                                                                                                                                     
+SignInAddress                  TORO-LAB\s-kadrits                                                                                                                                                                                      
+ServiceName                    OP                                                                                                                                                                                                      
+UserRole                       SID                                                                                                                                                                                                     
+Credtype                       user                                                                                                                                                                                                    
+Reset                          False                                                                                                                                                                                                   
+showdebug                      True                                                                                                                                                                                                    
+whatif                         False
+12:37:59:get-CredFile w
+Name                           Value                                                                                                                                                                                                   
+----                           -----                                                                                                                                                                                                   
+PrefixTag                      TOL                                                                                                                                                                                                     
+SignInAddress                  TORO-LAB\s-kadrits                                                                                                                                                                                      
+ServiceName                                                                                                                                                                                                                            
+UserRole                       SID                                                                                                                                                                                                     
+Credtype                       user                                                                                                                                                                                                    
+Reset                          False                                                                                                                                                                                                   
+showdebug                      True                                                                                                                                                                                                    
+whatif                         False
+12:37:59:Checking for TOLMeta[OP_ESVCAcct]
+12:37:59:TOL:checking creds:ESVC::TORO-LAB\ExchangeAdmin
+12:37:59:12:37:59:Processing creds:ESVC::TORO-LAB\ExchangeAdmin
+12:37:59:get-CredFile w
+Name                           Value                                                                                                                                                                                                   
+----                           -----                                                                                                                                                                                                   
+PrefixTag                      TOL                                                                                                                                                                                                     
+SignInAddress                  TORO-LAB\ExchangeAdmin                                                                                                                                                                                  
+ServiceName                    OP                                                                                                                                                                                                      
+UserRole                       ESVC                                                                                                                                                                                                    
+Credtype                       user                                                                                                                                                                                                    
+Reset                          False                                                                                                                                                                                                   
+showdebug                      True                                                                                                                                                                                                    
+whatif                         False
+12:38:00:(skipping OP unsupported 'CSVC' cloud-first role)
+12:38:00:Checking for TOLMeta[OP_UIDAcct]
+12:38:00:TOL:checking creds:UID::
+12:38:00:(no match:TOLMeta:TOL: OP_UIDAcct
+12:38:00:Proc Org:Toroco
+12:38:00:Proc:$ServiceName:o365
+12:38:00:Processing creds:TAG:TOR::Toroco:UPN
+12:38:00:Checking for TORMeta[o365_SIDUPN]
+12:38:00:TOR:checking creds:SID::s-todd.kadrie@toro.com
+12:38:00:12:38:00:Processing creds:SID::s-todd.kadrie@toro.com
+12:38:00:get-CredFile w
+Name                           Value                                                                                                                                                                                                   
+----                           -----                                                                                                                                                                                                   
+PrefixTag                      TOR                                                                                                                                                                                                     
+SignInAddress                  s-todd.kadrie@toro.com                                                                                                                                                                                  
+ServiceName                    o365                                                                                                                                                                                                    
+UserRole                       SID                                                                                                                                                                                                     
+Credtype                       user                                                                                                                                                                                                    
+Reset                          False                                                                                                                                                                                                   
+showdebug                      True                                                                                                                                                                                                    
+whatif                         False
+EXEC:new-variable -name credo365 -value System.Management.Automation.PSVariable.value -scope global
+EXEC:(get-variable -name credo365 -scope global).Value.password.MakeReadOnly()
+EXEC:new-variable -name o365cred -value System.Management.Automation.PSVariable.value -scope global
+EXEC:(get-variable -name o365cred -scope global).Value.password.MakeReadOnly()
+12:38:01:get-CredFile w
+Name                           Value                                                                                                                                                                                                   
+----                           -----                                                                                                                                                                                                   
+PrefixTag                      TOR                                                                                                                                                                                                     
+SignInAddress                  TORO\kadritss                                                                                                                                                                                           
+ServiceName                                                                                                                                                                                                                            
+UserRole                       SID                                                                                                                                                                                                     
+Credtype                       user                                                                                                                                                                                                    
+Reset                          False                                                                                                                                                                                                   
+showdebug                      True                                                                                                                                                                                                    
+whatif                         False
+EXEC:new-variable -name SIDcred -value System.Management.Automation.PSVariable.value -scope global
+EXEC:(get-variable -name SIDcred -scope global).Value.password.MakeReadOnly()
+12:38:01:Checking for TORMeta[o365_CSIDUPN]
+12:38:01:TOR:checking creds:CSID::c-todd.kadrie@toroco.onmicrosoft.com
+12:38:01:12:38:01:Processing creds:CSID::c-todd.kadrie@toroco.onmicrosoft.com
+12:38:01:get-CredFile w
+Name                           Value                                                                                                                                                                                                   
+----                           -----                                                                                                                                                                                                   
+PrefixTag                      TOR                                                                                                                                                                                                     
+SignInAddress                  c-todd.kadrie@toroco.onmicrosoft.com                                                                                                                                                                    
+ServiceName                    o365                                                                                                                                                                                                    
+UserRole                       CSID                                                                                                                                                                                                    
+Credtype                       user                                                                                                                                                                                                    
+Reset                          False                                                                                                                                                                                                   
+showdebug                      True                                                                                                                                                                                                    
+whatif                         False
+12:38:02:Checking for TORMeta[o365_ESVCUPN]
+12:38:02:TOR:checking creds:ESVC::ExchangeAdminCloudOnly@toroco.onmicrosoft.com
+12:38:02:12:38:02:Processing creds:ESVC::ExchangeAdminCloudOnly@toroco.onmicrosoft.com
+12:38:02:get-CredFile w
+Name                           Value                                                                                                                                                                                                   
+----                           -----                                                                                                                                                                                                   
+PrefixTag                      TOR                                                                                                                                                                                                     
+SignInAddress                  ExchangeAdminCloudOnly@toroco.onmicrosoft.com                                                                                                                                                           
+ServiceName                    o365                                                                                                                                                                                                    
+UserRole                       ESVC                                                                                                                                                                                                    
+Credtype                       user                                                                                                                                                                                                    
+Reset                          False                                                                                                                                                                                                   
+showdebug                      True                                                                                                                                                                                                    
+whatif                         False
+12:38:02:Checking for TORMeta[o365_CSVCUPN]
+12:38:02:TOR:checking creds:CSVC::ExchangeAdminCloudOnly@toroco.onmicrosoft.com
+12:38:02:12:38:02:Processing creds:CSVC::ExchangeAdminCloudOnly@toroco.onmicrosoft.com
+12:38:02:get-CredFile w
+Name                           Value                                                                                                                                                                                                   
+----                           -----                                                                                                                                                                                                   
+PrefixTag                      TOR                                                                                                                                                                                                     
+SignInAddress                  ExchangeAdminCloudOnly@toroco.onmicrosoft.com                                                                                                                                                           
+ServiceName                    o365                                                                                                                                                                                                    
+UserRole                       CSVC                                                                                                                                                                                                    
+Credtype                       user                                                                                                                                                                                                    
+Reset                          False                                                                                                                                                                                                   
+showdebug                      True                                                                                                                                                                                                    
+whatif                         False
+12:38:03:Checking for TORMeta[o365_UIDUPN]
+12:38:03:TOR:checking creds:UID::todd.kadrie@toro.com
+12:38:03:12:38:03:Processing creds:UID::todd.kadrie@toro.com
+12:38:03:get-CredFile w
+Name                           Value                                                                                                                                                                                                   
+----                           -----                                                                                                                                                                                                   
+PrefixTag                      TOR                                                                                                                                                                                                     
+SignInAddress                  todd.kadrie@toro.com                                                                                                                                                                                    
+ServiceName                    o365                                                                                                                                                                                                    
+UserRole                       UID                                                                                                                                                                                                     
+Credtype                       user                                                                                                                                                                                                    
+Reset                          False                                                                                                                                                                                                   
+showdebug                      True                                                                                                                                                                                                    
+whatif                         False
+12:38:03:Checking for TORMeta[o365_ESvcCBACertTOR]
+12:38:03:TOR:checking creds:ESvcCBA::o365_ESvcCBACert-TOR
+12:38:03:12:38:03:Processing creds:ESvcCBA::o365_ESvcCBACert-TOR
+12:38:03:get-CredFile w
+Name                           Value                                                                                                                                                                                                   
+----                           -----                                                                                                                                                                                                   
+PrefixTag                      TOR                                                                                                                                                                                                     
+SignInAddress                  o365_ESvcCBACert-TOR                                                                                                                                                                                    
+ServiceName                    o365                                                                                                                                                                                                    
+UserRole                       ESvcCBA                                                                                                                                                                                                 
+Credtype                       Cert                                                                                                                                                                                                    
+Reset                          False                                                                                                                                                                                                   
+showdebug                      True                                                                                                                                                                                                    
+whatif                         False
+12:38:04:Checking for TORMeta[o365_CSvcCBACertTOR]
+12:38:04:TOR:checking creds:CSvcCBA::o365_CSvcCBACert-TOR
+12:38:04:12:38:04:Processing creds:CSvcCBA::o365_CSvcCBACert-TOR
+12:38:04:get-CredFile w
+Name                           Value                                                                                                                                                                                                   
+----                           -----                                                                                                                                                                                                   
+PrefixTag                      TOR                                                                                                                                                                                                     
+SignInAddress                  o365_CSvcCBACert-TOR                                                                                                                                                                                    
+ServiceName                    o365                                                                                                                                                                                                    
+UserRole                       CSvcCBA                                                                                                                                                                                                 
+Credtype                       Cert                                                                                                                                                                                                    
+Reset                          False                                                                                                                                                                                                   
+showdebug                      True                                                                                                                                                                                                    
+whatif                         False
+12:38:04:Checking for TORMeta[o365_SIDCBACertTOR]
+12:38:04:TOR:checking creds:SIDCBA::o365_SIDCBACert-TOR
+12:38:04:12:38:04:Processing creds:SIDCBA::o365_SIDCBACert-TOR
+12:38:04:get-CredFile w
+Name                           Value                                                                                                                                                                                                   
+----                           -----                                                                                                                                                                                                   
+PrefixTag                      TOR                                                                                                                                                                                                     
+SignInAddress                  o365_SIDCBACert-TOR                                                                                                                                                                                     
+ServiceName                    o365                                                                                                                                                                                                    
+UserRole                       SIDCBA                                                                                                                                                                                                  
+Credtype                       Cert                                                                                                                                                                                                    
+Reset                          False                                                                                                                                                                                                   
+showdebug                      True                                                                                                                                                                                                    
+whatif                         False
+12:38:05:Proc:$ServiceName:OP
+12:38:05:Processing creds:TAG:TOR::toro.com:Acct
+12:38:05:Checking for TORMeta[OP_SIDAcct]
+12:38:05:TOR:checking creds:SID::TORO\kadritss
+12:38:05:12:38:05:Processing creds:SID::TORO\kadritss
+12:38:05:get-CredFile w
+Name                           Value                                                                                                                                                                                                   
+----                           -----                                                                                                                                                                                                   
+PrefixTag                      TOR                                                                                                                                                                                                     
+SignInAddress                  TORO\kadritss                                                                                                                                                                                           
+ServiceName                    OP                                                                                                                                                                                                      
+UserRole                       SID                                                                                                                                                                                                     
+Credtype                       user                                                                                                                                                                                                    
+Reset                          False                                                                                                                                                                                                   
+showdebug                      True                                                                                                                                                                                                    
+whatif                         False
+EXEC:new-variable -name credo365 -value System.Management.Automation.PSVariable.value -scope global
+EXEC:(get-variable -name credo365 -scope global).Value.password.MakeReadOnly()
+EXEC:new-variable -name o365cred -value System.Management.Automation.PSVariable.value -scope global
+EXEC:(get-variable -name o365cred -scope global).Value.password.MakeReadOnly()
+12:38:05:get-CredFile w
+Name                           Value                                                                                                                                                                                                   
+----                           -----                                                                                                                                                                                                   
+PrefixTag                      TOR                                                                                                                                                                                                     
+SignInAddress                  TORO\kadritss                                                                                                                                                                                           
+ServiceName                                                                                                                                                                                                                            
+UserRole                       SID                                                                                                                                                                                                     
+Credtype                       user                                                                                                                                                                                                    
+Reset                          False                                                                                                                                                                                                   
+showdebug                      True                                                                                                                                                                                                    
+whatif                         False
+EXEC:new-variable -name SIDcred -value System.Management.Automation.PSVariable.value -scope global
+EXEC:(get-variable -name SIDcred -scope global).Value.password.MakeReadOnly()
+12:38:05:Checking for TORMeta[OP_ESVCAcct]
+12:38:06:TOR:checking creds:ESVC::toro\ExchangeAdmin
+12:38:06:12:38:06:Processing creds:ESVC::toro\ExchangeAdmin
+12:38:06:get-CredFile w
+Name                           Value                                                                                                                                                                                                   
+----                           -----                                                                                                                                                                                                   
+PrefixTag                      TOR                                                                                                                                                                                                     
+SignInAddress                  toro\ExchangeAdmin                                                                                                                                                                                      
+ServiceName                    OP                                                                                                                                                                                                      
+UserRole                       ESVC                                                                                                                                                                                                    
+Credtype                       user                                                                                                                                                                                                    
+Reset                          False                                                                                                                                                                                                   
+showdebug                      True                                                                                                                                                                                                    
+whatif                         False
+12:38:06:(skipping OP unsupported 'CSVC' cloud-first role)
+12:38:06:Checking for TORMeta[OP_UIDAcct]
+12:38:06:TOR:checking creds:UID::
+12:38:06:(no match:TORMeta:TOR: OP_UIDAcct
+(updating path to include C:\Users\kadritss\Documents\bat)
+12:38:06:#*======^ EXECUTING: tsksid-incl-ServerCore.ps1 ^======
+
+▒
+▒
+▒
+░
+░
+
+LYN-8DCZ1G2
+ ▓▒▓
+TORO\kadritss
+ ▓▒▓
+Tue 07/16/2024 12:38
+ [6ms]
+
+▒
+▒
+▒
+▒
+▒
+
+[PS]
+:
+C:\u\w\p\scripts
+
+$
+
+
+
+
+▒
+▒
+▒
+░
+░
+
+LYN-8DCZ1G2
+ ▓▒▓
+TORO\kadritss
+ ▓▒▓
+Tue 07/16/2024 12:38
+ [6ms]
+
+▒
+▒
+▒
+▒
+▒
+
+[PS]
+:
+C:\u\w\p\scripts
+
+$
+
+
+
+PS>if ($windowsIdentity -is [System.Collections.IEnumerator]) 
+                    { 
+                        'System.Collections.IEnumerator'
+                    }
+                    else
+                    { 
+                        $windowsIdentity 
+                    }
+                    
+>> CommandInvocation(Out-String): "Out-String"
+>> ParameterBinding(Out-String): name="InputObject"; value="System.Security.Principal.WindowsIdentity"
+
+
+AuthenticationType : Kerberos
+ImpersonationLevel : None
+IsAuthenticated    : True
+IsGuest            : False
+IsSystem           : False
+IsAnonymous        : False
+Name               : TORO\kadritss
+Owner              : S-1-5-32-544
+User               : S-1-5-21-2222296782-158576315-1096482972-75102
+Groups             : {S-1-5-21-2222296782-158576315-1096482972-513, S-1-1-0, S-1-5-21-1255778394-976049920-2241167321-1003, S-1-5-21-1255778394-976049920-2241167321-1006...}
+Token              : 13692
+AccessToken        : Microsoft.Win32.SafeHandles.SafeAccessTokenHandle
+UserClaims         : {http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name: TORO\kadritss, http://schemas.microsoft.com/ws/2008/06/identity/claims/primarysid: S-1-5-21-2222296782-158576315-1096482972-75102, 
+                     http://schemas.microsoft.com/ws/2008/06/identity/claims/primarygroupsid: S-1-5-21-2222296782-158576315-1096482972-513, http://schemas.microsoft.com/ws/2008/06/identity/claims/groupsid: 
+                     S-1-5-21-2222296782-158576315-1096482972-513...}
+DeviceClaims       : {}
+Claims             : {http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name: TORO\kadritss, http://schemas.microsoft.com/ws/2008/06/identity/claims/primarysid: S-1-5-21-2222296782-158576315-1096482972-75102, 
+                     http://schemas.microsoft.com/ws/2008/06/identity/claims/primarygroupsid: S-1-5-21-2222296782-158576315-1096482972-513, http://schemas.microsoft.com/ws/2008/06/identity/claims/groupsid: 
+                     S-1-5-21-2222296782-158576315-1096482972-513...}
+Actor              : 
+BootstrapContext   : 
+Label              : 
+NameClaimType      : http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name
+RoleClaimType      : http://schemas.microsoft.com/ws/2008/06/identity/claims/groupsid
+PS>if ($rgxAcctWAdmn -is [System.Collections.IEnumerator]) 
+                    { 
+                        'System.Collections.IEnumerator'
+                    }
+                    else
+                    { 
+                        $rgxAcctWAdmn 
+                    }
+                    
+>> CommandInvocation(Out-String): "Out-String"
+>> ParameterBinding(Out-String): name="InputObject"; value="^(TORO\\kadritss|TORO-LAB\\s-kadrits)$"
+^(TORO\\kadritss|TORO-LAB\\s-kadrits)$
+
+▒
+▒
+▒
+░
+░
+
+LYN-8DCZ1G2
+ ▓▒▓
+TORO\kadritss
+ ▓▒▓
+Tue 07/16/2024 12:39
+ [8ms]
+
+▒
+▒
+▒
+▒
+▒
+
+[PS]
+:
+C:\u\w\p\scripts
+
+$
+
+
+
+
+▒
+▒
+▒
+░
+░
+
+LYN-8DCZ1G2
+ ▓▒▓
+TORO\kadritss
+ ▓▒▓
+Tue 07/16/2024 12:39
+ [8ms]
+
+▒
+▒
+▒
+▒
+▒
+
+[PS]
+:
+C:\u\w\p\scripts
+
+$
+
+
+
+
+▒
+▒
+▒
+░
+░
+
+LYN-8DCZ1G2
+ ▓▒▓
+TORO\kadritss
+ ▓▒▓
+Tue 07/16/2024 12:39
+ [8ms]
+
+▒
+▒
+▒
+▒
+▒
+
+[PS]
+:
+C:\u\w\p\scripts
+
+$
+
+
+
+
+▒
+▒
+▒
+░
+░
+
+LYN-8DCZ1G2
+ ▓▒▓
+TORO\kadritss
+ ▓▒▓
+Tue 07/16/2024 12:39
+ [8ms]
+
+▒
+▒
+▒
+▒
+▒
+
+[PS]
+:
+C:\u\w\p\scripts
+
+$
+
+
+
+
+▒
+▒
+▒
+░
+░
+
+LYN-8DCZ1G2
+ ▓▒▓
+TORO\kadritss
+ ▓▒▓
+Tue 07/16/2024 12:39
+ [8ms]
+
+▒
+▒
+▒
+▒
+▒
+
+[PS]
+:
+C:\u\w\p\scripts
+
+$
+
+
+
+
+▒
+▒
+▒
+░
+░
+
+LYN-8DCZ1G2
+ ▓▒▓
+TORO\kadritss
+ ▓▒▓
+Tue 07/16/2024 12:39
+ [8ms]
+
+▒
+▒
+▒
+▒
+▒
+
+[PS]
+:
+C:\u\w\p\scripts
+
+$
+
+
+
+12:40:06:#*======v EXECUTING: tsksid-incl-ServerApp.ps1 v======
+(updating path to include C:\usr\work\o365\scripts\)
+(updating path to include c:\usr\work\lync\scripts\)
+12:40:19:#*======^ EXECUTING: tsksid-incl-ServerApp.ps1 ^======
+12:40:19:( processing $tModName:verb-AAD	$tModFile:C:\sc\verb-AAD\verb-AAD\verb-AAD.psm1	$tModCmdlet:Build-AADSignErrorsHash )
+VERBOSE: (confirmed verb-AAD loaded: Build-AADSignErrorsHash present)
+True
+12:40:21:( processing $tModName:verb-ADMS	$tModFile:C:\sc\verb-ADMS\verb-ADMS\verb-ADMS.psm1	$tModCmdlet:load-ADMS )
+VERBOSE: (confirmed verb-ADMS loaded: load-ADMS present)
+True
+12:40:22:( processing $tModName:verb-Ex2010	$tModFile:C:\sc\verb-Ex2010\verb-Ex2010\verb-Ex2010.psm1	$tModCmdlet:Connect-Ex2010 )
+VERBOSE: (confirmed verb-Ex2010 loaded: Connect-Ex2010 present)
+True
+12:40:23:( processing $tModName:verb-EXO	$tModFile:C:\sc\verb-EXO\verb-EXO\verb-EXO.psm1	$tModCmdlet:Connect-Exo )
+VERBOSE: (confirmed verb-EXO loaded: Connect-Exo present)
+True
+12:40:29:( processing $tModName:verb-L13	$tModFile:C:\sc\verb-L13\verb-L13\verb-L13.psm1	$tModCmdlet:Connect-L13 )
+VERBOSE: (confirmed verb-L13 loaded: Connect-L13 present)
+True
+12:40:29:( processing $tModName:verb-Network	$tModFile:C:\sc\verb-Network\verb-Network\verb-Network.psm1	$tModCmdlet:Send-EmailNotif )
+VERBOSE: (confirmed verb-Network loaded: Send-EmailNotif present)
+True
+12:40:30:#*======^ EXECUTING: tsksid-incl-ServerApp.ps1 ^======
+12:40:30:#*======^ EXECUTING: tsksid-incl-ServerApp.ps1 ^======
+Transcript stopped, output file is C:\Users\kadritss\Documents\WindowsPowerShell\TORO-kadritss-profile-load-LASTPASS-trans-log.txt
+
+▒
+▒
+▒
+░
+░
+
+LYN-8DCZ1G2
+ ▓▒▓
+TORO\kadritss
+ ▓▒▓
+Tue 07/16/2024 12:40
+ [00:03:22]
+
+▒
+▒
+▒
+▒
+▒
+
+[PS]
+:
+C:\u\l\bin
+
+$
+
+
+
+
+**********************
+Windows PowerShell transcript end
+End time: 20240716124126
+**********************
