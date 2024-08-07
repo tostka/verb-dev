@@ -18,6 +18,7 @@ function ConvertTo-ModuleMergedTDO {
     Tags        : Powershell,Module,Development
     AddedTwitter:
     REVISIONS
+    * 5:45 PM 8/7/2024 reformat params ; coerce $RequiredVersion from psd1.moduleversion, if blank ; add test for $rgxPurgeBlockEnd2, ExportModuleMembers syntax in later omds ; fixed/updated FunctionsToExport 
     * 2:04 PM 6/29/2022 rem'd out/removed the $psv2PubLine, $psv2PrivLine dyn exclude material - won't be needed once exop upgraded past psv2
     * 5:18 PM 6/1/2022 splice in support for confirm-ModuleBuildSync ; 
     * 5:16 PM 5/31/2022 add: -RequiredVersion; # 4:48 PM 5/31/2022 getting mismatch/revert in revision to prior spec, confirm/force set it here, call confirm-ModulePsd1Version()/confirm-ModulePsm1Version() (which handle _TMP versions, that stock tools *won't*)
@@ -98,21 +99,21 @@ function ConvertTo-ModuleMergedTDO {
     [Alias('Merge-Module')]
     PARAM (
         [Parameter(Mandatory = $True, HelpMessage = "Module Name (used to name the ModuleName.psm1 file)[-ModuleName verb-XXX]")]
-        [string] $ModuleName,
+            [string] $ModuleName,
         [Parameter(Mandatory = $True, HelpMessage = "Array of directory paths containing .ps1 function files to be combined [-ModuleSourcePath c:\path-to\module\Public]")]
-        [array] $ModuleSourcePath,
+            [array] $ModuleSourcePath,
         [Parameter(Mandatory = $True, HelpMessage = "Directory path in which the final .psm1 file should be constructed [-ModuleDestinationPath c:\path-to\module\module.psm1]")]
-        [string] $ModuleDestinationPath,
+            [string] $ModuleDestinationPath,
         [Parameter(HelpMessage="Optional Explicit 3-digit RequiredVersion specification (as contrasts with using current Manifest .psd1 ModuleVersion value)[-Version 2.0.3]")]
-        [version]$RequiredVersion,
+            [version]$RequiredVersion,
         [Parameter(Mandatory = $False, HelpMessage = "Logging spec object (output from start-log())[-LogSpec `$LogSpec]")]
-        $LogSpec,
+            $LogSpec,
         [Parameter(HelpMessage = "Flag that skips auto-inclusion of 'Export-ModuleMember -Alias * ' in merged file [-NoAliasExport]")]
-        [switch] $NoAliasExport,
+            [switch] $NoAliasExport,
         [Parameter(HelpMessage = "Debugging Flag [-showDebug]")]
-        [switch] $showDebug,
+            [switch] $showDebug,
         [Parameter(HelpMessage = "Whatif Flag  [-whatIf]")]
-        [switch] $whatIf
+            [switch] $whatIf
     ) ;
     # function self-name (equiv to script's: $MyInvocation.MyCommand.Path) ;
     ${CmdletName} = $PSCmdlet.MyInvocation.MyCommand.Name ;
@@ -164,7 +165,10 @@ function ConvertTo-ModuleMergedTDO {
     $PsdName="$ModuleDestinationPath\$ModuleName.psd1" ;
     $PsmNameTmp="$ModuleDestinationPath\$ModuleName.psm1_TMP" ;
     $PsdNameTmp="$ModuleDestinationPath\$ModuleName.psd1_TMP" ;
-
+    if(-not $RequiredVersion){
+        $psdProfile = Test-ModuleManifest -Path $PsdName -ErrorAction STOP ; 
+        [string]$RequiredVersion = $psdProfile.version
+    } ; 
 
     # backup existing & purge the dyn-include block
     if(test-path -path $PsmName){
@@ -205,8 +209,12 @@ function ConvertTo-ModuleMergedTDO {
         #$rgxPurgeBlockEnd = 'Export-ModuleMember\s-Function\s\$publicFunctions\s;';
         # updated version of dyn end, that also explicitly exports -alias *
         $rgxPurgeBlockEnd = 'Export-ModuleMember\s-Function\s\$publicFunctions\s-Alias\s\*\s;\s'
+        $rgxPurgeBlockEnd2 = 'Export-ModuleMember\s-Function\s\$Public\.Basename\s-Alias\s\*\s;'
         $dynIncludeOpen = ($rawsourcelines | select-string -Pattern $rgxPurgeblockStart).linenumber ;
         $dynIncludeClose = ($rawsourcelines | select-string -Pattern $rgxPurgeBlockEnd).linenumber ;
+        if(-not $dynIncludeClose){
+            $dynIncludeClose = ($rawsourcelines | select-string -Pattern $rgxPurgeBlockEnd2).linenumber ;
+        } ; 
         if(!$dynIncludeOpen){$dynIncludeClose = 0 } ;
         $updatedContent = @() ; $DropContent=@() ;
 
@@ -606,13 +614,36 @@ Export-ModuleMember -Function $(($ExportFunctions) -join ',') -Alias *
     # build a dummy name for testing .psm1|psd1
     #$testpsm1 = join-path -path (split-path $PsmNameTmp) -ChildPath "$(new-guid).psm1" ; 
 
+    <# 1:57 PM 8/7/2024
+    if(-not (test-path $PsdNameTmp) -And (test-path $PsdName)){
+        $smsg = "no pre-existing `$PsdNameTmp ; sourcing `$PsdNameTmp as stock copy of $($PsdName) " ; 
+        if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } 
+        else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+        #Levels:Error|Warn|Info|H1|H2|H3|H4|H5|Debug|Verbose|Prompt|Success   
+        $srcPsd = $PsdName ; 
+        $destPsed = $PsdNameTmp ; 
+    } ; 
     $tf = $PsdNameTmp ;
     # switch back to manual local updates
-    $pltSCFE=[ordered]@{Path = $tf ; PassThru=$true ;Verbose=$($verbose) ;whatif= $($whatif) ; } 
-    if($psd1ExpMatch = Get-ChildItem $tf | select-string -Pattern $rgxFuncs2Export ){
+    # 1:57 PM 8/7/2024
+    # issue: $psmNameTmp has been constructed bit by bit accumlating thge migrated content
+    # but $psdNameTmp has never been touched. Should be read off of the source psd1
+    # set-content => $tf/$psdNameTmp
+    # the source will need to be the $PsdName
+    #>
+    $pltSCFE=[ordered]@{
+        Path = $PsdNameTmp ; # $tf ;
+        PassThru=$true ;
+        Verbose=$($verbose) ;
+        whatif= $($whatif) ;
+    } 
+    #if($psd1ExpMatch = Get-ChildItem $tf | select-string -Pattern $rgxFuncs2Export ){
+    if($psd1ExpMatch = Get-ChildItem $PsdName | select-string -Pattern $rgxFuncs2Export ){
         # 2-step it, we're getting only $value[-1] through the pipeline
         # add | out-string to collapse object arrays
-        $newContent = (Get-Content $tf) | Foreach-Object {
+        #$newContent = (Get-Content $tf) | Foreach-Object {
+        # 1:58 PM 8/7/2024 switch src to orig $psdName
+        $newContent = (Get-Content $PsdName) | Foreach-Object {
             $_ -replace $rgxFuncs2Export , ("FunctionsToExport = " + "@('" + $($ExportFunctions -join "','") + "')")
         } | out-string ; 
         # this writes to $PsdNameTmp
