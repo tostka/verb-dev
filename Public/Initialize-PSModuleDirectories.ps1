@@ -19,6 +19,7 @@ Function Initialize-PSModuleDirectories {
     AddedWebsite: https://www.powershellgallery.com/packages/ISEScriptingGeek/3.4.1
     AddedTwitter: 
     REVISIONS
+    * 12:23 PM 8/7/2024 removed erroneous [ValidateScript( {Test-Path $_})] from $DefaultModDirs param
     * 12:18 PM 10/12/2023 correct .\Resources -> Resource that's in use 
     * 11:21 AM 10/3/2023 added LICENSES & LIBS & RESOURCES to DefaultModDirs
    * 9:35 AM 5/9/2022 init, split out from merge/unmerge-module, have a single maintainable func, rather than trying to sync the variants
@@ -62,27 +63,13 @@ Function Initialize-PSModuleDirectories {
     [cmdletbinding()]
     Param(
         [Parameter(Mandatory = $True, HelpMessage = "Array of directory paths containing .ps1 function files to be combined [-ModuleSourcePath c:\path-to\module\Public]")]
-        [array] $ModuleSourcePath,
-        [Parameter(Mandatory = $True, HelpMessage = "Directory path in which the final .psm1 file should be constructed [-ModuleDestinationPath c:\path-to\module\module.psm1]")]
+            [array] $ModuleSourcePath,
+            [Parameter(Mandatory = $True, HelpMessage = "Directory path in which the final .psm1 file should be constructed [-ModuleDestinationPath c:\path-to\module\module.psm1]")]
         [string] $ModuleDestinationPath,
         [Parameter(HelpMessage = "Array of new module subdirectory names to be created")]
-            [ValidateScript( {Test-Path $_})]
             [string[]]$DefaultModDirs = @('Public','Internal','Classes','Libs','Tests','Licenses','Resource','Docs','Docs\Cab','Docs\en-US','Docs\Markdown'),
         [Parameter(HelpMessage = "Whatif Flag  [-whatIf]")]
-        [switch] $whatIf
-        <#
-        [Parameter(Mandatory = $False,Position = 0,ValueFromPipeline = $True, HelpMessage = 'Path [-path c:\path-to\]')]
-        [Alias('PsPath')]
-        [ValidateScript({Test-Path $_ -PathType 'Container'})]
-        [system.io.fileinfo[]]$Path,
-        
-        [Parameter(Position = 0, HelpMessage = "Enter the path of a PowerShell script")]
-        [ValidateScript( {Test-Path $_})][ValidatePattern( "\.(ps1|psm1|txt)$")]
-        [string]$Path = $(Read-Host "Enter the filename and path to a PowerShell script"),
-        [Parameter(HelpMessage = "Report output directory")]
-        [ValidateScript( {Test-Path $_})][Alias("fp", "out")]
-        [string]$FilePath = "$env:userprofile\Documents\WindowsPowerShell"
-        #>
+            [switch] $whatIf
     )
     BEGIN { 
         #region CONSTANTS-AND-ENVIRO #*======v CONSTANTS-AND-ENVIRO v======
