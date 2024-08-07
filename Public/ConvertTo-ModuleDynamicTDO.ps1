@@ -18,6 +18,7 @@ function ConvertTo-ModuleDynamicTDO {
     Tags        : Powershell,Module,Development
     AddedTwitter:
     REVISIONS
+    * 5:45 PM 8/7/2024 reformat params 
     * 2:08 PM 6/29/2022 # scrap the entire $psv2Publine etc block - it's causing corruption, and I won't need it post upgrade off of exop
     * 8:34 AM 5/16/2022 typo: used Aliases for Alias
     * 3:07 PM 5/13/2022ren unmerge-Module -> ConvertTo-ModuleDynamicTDO() (use std verb; adopt keyword to unique my work from 3rd-party funcs); added Unmerge-Module to Aliases; 
@@ -67,19 +68,19 @@ function ConvertTo-ModuleDynamicTDO {
     [Alias('Unmerge-Module')]
     PARAM (
         [Parameter(Mandatory = $True, HelpMessage = "Module Name (used to name the ModuleName.psm1 file)[-ModuleName verb-XXX]")]
-        [string] $ModuleName,
+            [string] $ModuleName,
         [Parameter(Mandatory = $True, HelpMessage = "Array of directory paths containing .ps1 function files to be combined [-ModuleSourcePath c:\path-to\module\Public]")]
-        [array] $ModuleSourcePath,
+            [array] $ModuleSourcePath,
         [Parameter(Mandatory = $True, HelpMessage = "Directory path in which the final .psm1 file should be constructed [-ModuleDestinationPath c:\path-to\module\module.psm1]")]
-        [string] $ModuleDestinationPath,
+            [string] $ModuleDestinationPath,
         [Parameter(Mandatory = $False, HelpMessage = "Logging spec object (output from start-log())[-LogSpec `$LogSpec]")]
-        $LogSpec,
+            $LogSpec,
         [Parameter(HelpMessage = "Flag that skips auto-inclusion of 'Export-ModuleMember -Alias * ' in merged file [-NoAliasExport]")]
-        [switch] $NoAliasExport,
+            [switch] $NoAliasExport,
         [Parameter(HelpMessage = "Debugging Flag [-showDebug]")]
-        [switch] $showDebug,
+            [switch] $showDebug,
         [Parameter(HelpMessage = "Whatif Flag  [-whatIf]")]
-        [switch] $whatIf
+            [switch] $whatIf
     ) ;
     # function self-name (equiv to script's: $MyInvocation.MyCommand.Path) ;
     ${CmdletName} = $PSCmdlet.MyInvocation.MyCommand.Name ;
