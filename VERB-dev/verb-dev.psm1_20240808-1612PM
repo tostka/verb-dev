@@ -5,7 +5,7 @@
 .SYNOPSIS
 VERB-dev - Development PS Module-related generic functions
 .NOTES
-Version     : 1.5.46
+Version     : 1.5.48
 Author      : Todd Kadrie
 Website     :	https://www.toddomation.com
 Twitter     :	@tostka
@@ -4474,6 +4474,169 @@ Function convertTo-WrappedPS {
 #*------^ convertTo-WrappedPS.ps1 ^------
 
 
+#*------v copy-ISETabFileToLocal.ps1 v------
+function copy-ISETabFileToLocal {
+    <#
+    .SYNOPSIS
+    copy-ISETabFileToLocal - Copy the currently open ISE tab file, to local machine (RDP remote only), prompting for local path. The filename copied is either the intact local name, or, if -stripFunc is used, the filename with any _func substring removed. 
+    .NOTES
+    Version     : 1.0.0
+    Author      : Todd Kadrie
+    Website     : http://www.toddomation.com
+    Twitter     : @tostka / http://twitter.com/tostka
+    CreatedDate : 2024-05-22
+    FileName    : copy-ISETabFileToLocal
+    License     : MIT License
+    Copyright   : (c) 2024 Todd Kadrie
+    Github      : https://github.com/tostka/verb-dev
+    Tags        : Powershell,ISE,development,debugging,backup
+    REVISIONS
+    * 2:15 PM 5/29/2024 add: c:\sc dev repo dest test, prompt for optional -nofunc use (avoid mistakes copying into repo with _func.ps1 source name intact)
+    * 1:22 PM 5/22/2024init
+    .DESCRIPTION
+    copy-ISETabFileToLocal - Copy the currently open ISE tab file, to local machine (RDP remote only), prompting for local path. The filename copied is either the intact local name, or, if -stripFunc is used, the filename with any _func substring removed. 
+    This also checks for a matching exported breakpoint file (name matches target script .ps1, with trailing name ...-ps1-BP.xml), and prompts to also move that file along with the .ps1. 
+
+    .PARAMETER Path
+    Path to source file (defaults to `$psise.CurrentFile.FullPath)[-Path 'D:\scripts\copy-ISETabFileToLocal_func.ps1']
+    .PARAMETER LocalDestination
+    Localized destination directory path[-path c:\pathto\]
+    .PARAMETER noFunc
+    Switch to remove any '_func' substring from the original file name, while copying (used for copying to final module .\Public directory for publishing[-noFunc]
+    .PARAMETER whatIf
+    Whatif switch [-whatIf]
+    .EXAMPLE
+    PS> copy-ISETabFileToLocal -verbose -whatif
+    Copy the current tab file to prompted local destination, whatif, with verbose output
+    .EXAMPLE
+    PS> copy-ISETabFileToLocal -verbose -localdest C:\sc\verb-dev\public\ -noFunc -whatif
+    Copy the current tab file to explicit specified -LocalDesetination, replacing any _func substring from filename, with whatif, with verbose output
+    .LINK
+    https://github.com/tostka/verb-dev
+    #>
+    [CmdletBinding()]
+    [Alias('cpIseFileLocal')]
+    PARAM(
+        [Parameter(Mandatory = $false,Position=0,HelpMessage="Path to source file (defaults to `$psise.CurrentFile.FullPath)[-Path 'D:\scripts\copy-ISETabFileToLocal_func.ps1']")]
+            [ValidateScript({Test-Path $_ -PathType 'Container'})]
+            #[string]
+            [system.io.fileinfo]$Path=$psise.CurrentFile.FullPath,
+        [Parameter(Mandatory = $true,Position = 1,HelpMessage = 'Localized destination directory path[-path c:\pathto\]')]
+            #[Alias('PsPath')]
+            #[ValidateScript({Test-Path $_ -PathType 'Container'})]
+            [ValidateScript({
+                if([uri]$_ |?{ $_.IsUNC}){
+                    throw "UNC Path specified: Please specify a 'localized' path!" ; 
+                }elseif([uri]$_ |?{$_.AbsolutePath -AND $_.LocalPath -AND $_.IsFile -AND -not $_.IsUNC}){
+                    $true ;
+                }else{
+                    throw "Invalid path!" ; 
+                }
+            })]
+            #[System.IO.DirectoryInfo]
+            [string]$LocalDestination,
+        [Parameter(HelpMessage="Switch to remove any '_func' substring from the original file name, while copying (used for copying to final module .\Public directory for publishing[-noFunc])")]
+            [switch]$noFunc,
+        [Parameter(HelpMessage="Whatif switch [-whatIf]")]
+            [switch] $whatIf
+    ) ;
+    BEGIN {
+        ${CmdletName} = $PSCmdlet.MyInvocation.MyCommand.Name ;
+        $verbose = $($VerbosePreference -eq "Continue")
+        $sBnr="#*======v $($CmdletName): v======" ;
+        write-verbose  "$((get-date).ToString('HH:mm:ss')):$($sBnr)" ;
+        $moveBP = $false ; 
+    }
+    PROCESS {
+        if ($psise){
+            if($env:SESSIONNAME  -match 'RDP-Tcp#\d+'){
+                TRY{
+                    if($path){
+                        [system.io.fileinfo[]]$source = @($path) ; 
+                        if(-not $noFunc -AND $LocalDestination -match '^C:\\sc\\'){
+                            $smsg = "Note: Copying to `$LocalDestination prefixed with C:\sc\ (dev repo)" ; 
+                            $smsg += "`nWITHOUT specifying -NoFunc!" ; 
+                            $smsg += "`nDO YOU WANT TO USE -NOFUNC (suppress _func.ps1 on copy)?" ; 
+                            write-warning $smsg ; 
+                            $bRet=Read-Host "Enter YYY to continue. Anything else will exit"  ; 
+                            if ($bRet.ToUpper() -eq "YYY") {
+                                $smsg = "(specifying -NoFunc)" ; 
+                                write-host -foregroundcolor green $smsg  ;
+                                $noFunc = $true ; 
+                            } else {
+                                $smsg = "(*skip* copying -BP.xml file)" ; 
+                                write-host -foregroundcolor yellow $smsg  ;
+                            } ; 
+                        } ; 
+                        if($LocalDestination.substring(0,1) -ne 'c'){
+                            $Destination = $LocalDestination.replace(':','$') ; 
+                            $Destination = (join-path -path "\\$($mybox[0])\" -childpath $Destination) ; 
+                        }else{
+                            $Destination = $LocalDestination.replace(':','') ; 
+                            $Destination = (join-path -path "\\tsclient\" -childpath $Destination) ; 
+                        } ; 
+                        write-verbose "resolved `$Destination:$($Destination)" ; 
+                        if(-not (test-path -path $Destination)){
+                            $smsg = "Missing/invalid converted `$Destination:"
+                            $smsg += "`n$($Destination)" ; 
+                            write-warning $smsg ; 
+                            throw $smsg ; 
+                            break ; 
+                        } ;
+                        # check for matching local ps1-BP.xml file to also copy
+                        if($bpp = get-childitem -path ($path.fullname.replace('.ps1','-ps1-BP.xml')) -ea 0){
+                            $smsg = "Matching Breakpoint export file found:`n$(($bpp |out-string).trim())" ; 
+                            $smsg += "`nDo you want to move this file with the .ps1?" ; 
+                            if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Prompt } 
+                            else{ write-host -foregroundcolor YELLOW "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                            $bRet=Read-Host "Enter Y to continue. Anything else will exit"  ; 
+                            if ($bRet.ToUpper() -eq "Y") {
+                                $smsg = "(copying -BP.xml file)" ; 
+                                write-host -foregroundcolor green $smsg  ;
+                                $moveBP = $true ; 
+                                $source += @($bpp)
+                            } else {
+                                $smsg = "(*skip* copying -BP.xml file)" ; 
+                                write-host -foregroundcolor yellow $smsg  ;
+                            } ; 
+                        } ; 
+                        $pltCI=[ordered]@{
+                            path = $null ; 
+                            destination = $null ; 
+                            erroraction = 'STOP' ;
+                            verbose = $true ; 
+                            whatif = $($whatif) ;
+                        } ;
+                        foreach($src in $source){
+                            $pltCI.path = $src.fullname ; 
+                            if($noFunc){
+                                $pltCI.destination = (join-path -path $Destination -childpath $src.name.replace('_func','') -EA stop)
+                            } else { 
+                                $pltCI.destination = (join-path -path $Destination -childpath $_.name  -EA stop); 
+                            } ; 
+                            $smsg = "copy-item w`n$(($pltCI|out-string).trim())" ; 
+                            write-host -foregroundcolor green $smsg  ;
+                            copy-item @pltCI ; 
+                        } ; 
+                    } else { 
+                        throw "NO POPULATED `$psise.CurrentFile.FullPath!`n(PSISE-only, with a target file tab selected)" ; 
+                    } ; 
+                } CATCH {
+                    $ErrTrapd=$Error[0] ;
+                    $smsg = "`n$(($ErrTrapd | fl * -Force|out-string).trim())" ;
+                    write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" ;
+                } ;             
+            } else {  write-warning "This script only functions within PS ISE, with a script file open for editing" };
+        } else {  write-warning "This script only functions within an RDP remote session (non-local)" };
+    } # PROC-E
+    END{
+        write-verbose  "$((get-date).ToString('HH:mm:ss')):$($sBnr.replace('=v','=^').replace('v=','^='))" ;
+    }
+}
+
+#*------^ copy-ISETabFileToLocal.ps1 ^------
+
+
 #*------v export-ISEBreakPoints.ps1 v------
 function export-ISEBreakPoints {
     <#
@@ -4491,6 +4654,7 @@ function export-ISEBreakPoints {
     Github      : https://github.com/tostka
     Tags        : Powershell,ISE,development,debugging
     REVISIONS
+    * 8:27 AM 3/26/2024 chg eIseBp -> epIseBp
     * 2:35 PM 5/24/2023 add: prompt for force deletion of existing .xml if no psbreakpoints defined in loaded ISE copy for script.
     * 10:20 AM 5/11/2022 added whatif support; updated CBH ; expanded echos; cleanedup
     * 8:58 AM 5/9/2022 add: test for bps before exporting
@@ -4514,7 +4678,7 @@ function export-ISEBreakPoints {
     Github      : https://github.com/tostka
     #>
     [CmdletBinding()]
-    [Alias('eIseBp','epBP')]
+    [Alias('epIseBp','epBP')]
     PARAM(
         [Parameter(HelpMessage="Default Path for export (when `$Script directory is unavailable)[-PathDefault c:\path-to\]")]
         [ValidateScript({Test-Path $_ -PathType 'Container'})]
@@ -4605,6 +4769,7 @@ function export-ISEBreakPointsALL {
     Github      : https://github.com/tostka/verb-dev
     Tags        : Powershell,ISE,development,debugging
     REVISIONS
+    * 8:27 AM 3/26/2024 chg eIseBpAll -> epIseBpAll
     * 1:22 PM 2/28/2024 add: 'epBpAll' alias
     * 12:23 PM 5/23/2022 added try/catch: failed out hard on Untitled.ps1's
     * 9:19 AM 5/20/2022 add: eIseBpAll alias (using these a lot lately)
@@ -4622,7 +4787,7 @@ function export-ISEBreakPointsALL {
     https://github.com/tostka/verb-dev
     #>
     [CmdletBinding()]
-    [Alias('eIseBpAll','epBpAll')]
+    [Alias('epIseBpAll','epBpAll')]
     PARAM(
         [Parameter(HelpMessage="Whatif Flag  [-whatIf]")]
         [switch] $whatIf
@@ -4682,6 +4847,7 @@ function export-ISEOpenFiles {
     Github      : https://github.com/tostka/verb-dev
     Tags        : Powershell,ISE,development,debugging
     REVISIONS
+    * 8:31 AM 3/26/2024 chg eIseOpen -> epIseOpen
     * 3:28 PM 6/23/2022 add -Tag param to permit running interger-suffixed variants (ie. mult ise sessions open & stored from same desktop). 
     * 9:19 AM 5/20/2022 add: eIseOpen alias (using these a lot lately; w freq crashouts of ise, and need to recover all files open & BPs to quickly get back to function)
     * 12:12 PM 5/11/2022 init
@@ -4702,7 +4868,7 @@ function export-ISEOpenFiles {
     https://github.com/tostka/verb-dev
     #>
     [CmdletBinding()]
-    [Alias('eIseOpen')]
+    [Alias('epIseOpen')]
     PARAM(
         [Parameter(Position=0,HelpMessage="Optional Tag to apply to filename[-Tag MFA]")]
         [string]$Tag,
@@ -6428,6 +6594,54 @@ function get-HelpParsed {
 #*------^ get-HelpParsed.ps1 ^------
 
 
+#*------v get-ISEBreakPoints.ps1 v------
+function get-ISEBreakPoints {
+    <#
+    .SYNOPSIS
+    get-ISEBreakPoints - Get-PSBreakPoints for solely the current focused ISE Open Tab
+    .NOTES
+    Version     : 1.0.0
+    Author      : Todd Kadrie
+    Website     : http://www.toddomation.com
+    Twitter     : @tostka / http://twitter.com/tostka
+    CreatedDate : 2024-07-11
+    FileName    : get-ISEBreakPoints
+    License     : MIT License
+    Copyright   : (c) 2024 Todd Kadrie
+    Github      : https://github.com/tostka/verb-dev
+    Tags        : Powershell,ISE,development,debugging
+    REVISIONS
+    * 2:27 PM 7/11/2024 init
+    .DESCRIPTION
+    get-ISEBreakPoints - Get-PSBreakPoints for solely the current focused ISE Open Tab (fltered on -script param)
+    .EXAMPLE
+    PS> get-isebreakpoints | ft -a ; 
+
+        ID Script                        Line Command Variable Action
+        -- ------                        ---- ------- -------- ------
+        70 test-ExoDnsRecordTDO_func.ps1  237                        
+        71 test-ExoDnsRecordTDO_func.ps1  256                        
+        ...                       
+
+    Export all 'line'-type breakpoints on the current open ISE tab, to a matching xml file
+    .LINK
+    Github      : https://github.com/tostka
+    #>
+    [CmdletBinding()]
+    [Alias('gIseBp')]
+    PARAM() ;
+    PROCESS {
+        if ($psise){
+            if($psise.CurrentFile.FullPath){
+                get-psbreakpoint -script $psise.CurrentFile.FullPath | write-output ; 
+            } else { throw "ISE has no current file open. Open a file before using this script" } ; 
+        } else {  write-warning "This script only functions within PS ISE, with a script file open for editing" };
+    } # PROC-E
+}
+
+#*------^ get-ISEBreakPoints.ps1 ^------
+
+
 #*------v get-ISEOpenFilesExported.ps1 v------
 function get-ISEOpenFilesExported {
     <#
@@ -7849,6 +8063,7 @@ function import-ISEBreakPoints {
     Github      : https://github.com/tostka
     Tags        : Powershell,ISE,development,debugging
     REVISIONS
+    * 8:28 AM 3/26/2024 chg iIseBp -> ipIseBP
     * 10:20 AM 5/11/2022 added whatif support
     * 8:58 AM 5/9/2022 err suppress: test for bps before importing (emtpy bp xml files happen)
     * 8:43 AM 8/26/2020 fixed typo $ibp[0]->$ibps[0]
@@ -7872,7 +8087,7 @@ function import-ISEBreakPoints {
     Github      : https://github.com/tostka
     #>
     [CmdletBinding()]
-    [Alias('iIseBp','ipbp')]
+    [Alias('ipIseBp','ipbp')]
 
     #[ValidateScript({Test-Path $_})]
     PARAM(
@@ -7984,6 +8199,7 @@ function import-ISEBreakPointsALL {
     Github      : https://github.com/tostka/verb-dev
     Tags        : Powershell,ISE,development,debugging
     REVISIONS
+    * 8:28 AM 3/26/2024 chg iIseBpAll -> ipIseBpAll
     * 1:21 PM 2/28/2024 add ipbpAll alias
     * 12:23 PM 5/23/2022 added try/catch: failed out hard on Untitled.ps1's
     * 9:19 AM 5/20/2022 add: iIseBpAll alias (using these a lot lately; w freq crashouts of ise, and need to recover all files open & BPs to quickly get back to function)
@@ -8001,7 +8217,7 @@ function import-ISEBreakPointsALL {
     https://github.com/tostka/verb-dev
     #>
     [CmdletBinding()]
-    [Alias('iIseBpAll','ipbpAll')]
+    [Alias('ipIseBpAll','ipbpAll')]
     PARAM(
         #[Parameter(HelpMessage="Whatif Flag  [-whatIf]")]
         #[switch] $whatIf
@@ -8126,6 +8342,7 @@ function import-ISEOpenFiles {
     Github      : https://github.com/tostka/verb-dev
     Tags        : Powershell,ISE,development,debugging
     REVISIONS
+    * 8:30 AM 3/26/2024 chg iIseOpen -> ipIseOpen
     * 3:31 PM 1/17/2024 typo fix: lacking $ on () (dumping $ISES obj into pipeline/console)
     * 1:20 PM 3/27/2023 bugfix: coerce $txmlf into [system.io.fileinfo], to make it match $fileinfo's type.
     * 9:35 AM 3/8/2023 added -filepath (with pipeline support), explicit pathed file support (to pipeline in from get-IseOpenFilesExported()).
@@ -8149,7 +8366,7 @@ function import-ISEOpenFiles {
     https://github.com/tostka/verb-dev
     #>
     [CmdletBinding()]
-    [Alias('iIseOpen')]
+    [Alias('ipIseOpen')]
     PARAM(
         [Parameter(Position=0,HelpMessage="Optional Tag to apply to filename[-Tag MFA]")]
         [string]$Tag,
@@ -10050,6 +10267,112 @@ Function save-ISEConsoleColors {
 #*------^ save-ISEConsoleColors.ps1 ^------
 
 
+#*------v show-ISEOpenTab.ps1 v------
+function show-ISEOpenTab {
+    <#
+    .SYNOPSIS
+    show-ISEOpenTab - Display a list of all currently open ISE tab files, prompt for selection, and then foreground selected tab file
+    .NOTES
+    Version     : 1.0.0
+    Author      : Todd Kadrie
+    Website     : http://www.toddomation.com
+    Twitter     : @tostka / http://twitter.com/tostka
+    CreatedDate : 2022-05-11
+    FileName    : show-ISEOpenTab
+    License     : MIT License
+    Copyright   : (c) 2024 Todd Kadrie
+    Github      : https://github.com/tostka/verb-dev
+    Tags        : Powershell,ISE,development,debugging
+    REVISIONS
+    * 10:09 AM 5/14/2024 init
+    .DESCRIPTION
+    show-ISEOpenTab - Display a list of all currently open ISE tab files, prompt for selection, and then foreground selected tab file
+    Alternately supports a -Path param, that permits ISE Console use to direct switch active Tab File. 
+
+    This is really only useful when you run a massive number of open file tabs, and visually scanning them unsorted is too much work. 
+    Opens them in a sortable grid view, with both Displayname & fullpath, and you can rapidly zoom in on the target tab file you're seeking. 
+
+    .PARAMETER Path
+    Optional Path to filter against the ISE .files Fullname string (for direct ISE console use)[-Path ' D:\scripts\show-ISEOpenTab_func.ps1']
+    .EXAMPLE
+    PS> show-ISEOpenTab -verbose -whatif
+    Intereactive pass, uses out-grid as a picker select a prompted target file tab, from full list. 
+    .EXAMPLE
+    PS> show-ISEOpenTab -Path 'D:\scripts\get-MailHeaderSenderIDKeys.ps1' -verbose ;
+    ISE Console direct switch open files in ISE to the file tab with the specified path as it's FullName
+    .LINK
+    https://github.com/tostka/verb-dev
+    #>
+    [CmdletBinding()]
+    [Alias('shIseTab')]
+    PARAM(
+        [Parameter(Position=0,HelpMessage="Optional Path to filter against the ISE .files Fullname string (for direct ISE console use)[-Path ' D:\scripts\show-ISEOpenTab_func.ps1']")]
+        [string]$Path
+    ) ;
+    BEGIN {
+        ${CmdletName} = $PSCmdlet.MyInvocation.MyCommand.Name ;
+        $verbose = $($VerbosePreference -eq "Continue")
+        $sBnr="#*======v $($CmdletName): v======" ;
+        write-verbose  "$((get-date).ToString('HH:mm:ss')):$($sBnr)" ;
+    }
+    PROCESS {
+        if ($psise){
+            #$AllUsrsScripts = "$($env:ProgramFiles)\WindowsPowerShell\Scripts" ;
+            #$CUScripts = "$([Environment]::GetFolderPath('MyDocuments'))\WindowsPowershell\Scripts" ;
+            $allISEFiles = $psise.powershelltabs.files #.fullpath ;
+
+            if($Path){
+                $tFile = $allISEFiles | ?{$_.Fullpath -eq $Path} 
+            } else{$tFile = $allISEFiles | select DisplayName,FullPath | out-gridview -Title "Pick Tab to focus:" -passthru};
+            If($tFile){
+                $Name = $tFile.DisplayName ; 
+                write-verbose "Searching for $($tFile.DisplayName)" ; 
+                #loop tabs for target displayname
+                # Get the tab using the name
+                # Finds the tab, but there's version bug in the SelectedPowerShellTab, doesn't like setting to the discovered $tab…
+                if( $Name )  {
+                    $found = 0 ;
+                    if($host.version.major -lt 3){
+                        for( $i = 0; $i -lt $psise.PowerShellTabs.Count; $i++){
+                            write-verbose $psise.PowerShellTabs[$i].DisplayName ;
+                            if( $psise.PowerShellTabs[$i].DisplayName -eq $Name ){
+                                $tab = $psise.PowerShellTabs[$i] ;
+                                $found++ ;
+                            } ;
+                        } ;
+                        if($found -eq 0) {Throw ("Could not find a tab named " + $Name) } else {
+                            $psISE.PowerShellTabs.SelectedPowerShellTab = $tab | select -first 1 ;
+                        } ;
+                    } else {
+                        for( $i = 0; $i -lt $psise.PowerShellTabs.files.Count; $i++){
+                            write-verbose $psise.PowerShellTabs.files[$i].DisplayName ;
+                            if( $psise.PowerShellTabs.files[$i].DisplayName -eq $Name ){
+                                $tab = $psise.PowerShellTabs.files[$i] ;
+                                # it's doubtful you really need to cycle the 'files', vs postfilter; but postfilter works fine for $psISE.CurrentPowerShellTab.Files.SetSelectedFile
+                                # (and SelectedPowerShellTab explicitly *doesnt* work anymore under ps5 at least, as written above in the ms learn exampls)
+                                $targetFileTab =  $psise.PowerShellTabs.files | ?{$_.displayname -eq $Name} ;
+                                $found++ ;
+                            } ;
+                        } ;
+                        if($found -eq 0) {Throw ("Could not find a tab named " + $Name) } else {
+                            #$psISE.PowerShellTabs.files.SelectedPowerShellTab = $tab | select -first 1 ;
+                            $psISE.CurrentPowerShellTab.Files.SetSelectedFile(($targetFileTab | select -first 1))
+                        } ;
+                    } ;
+                } ;
+            } else {
+                write-warning "No matching file in existing Tabs Files list found" ; 
+            } ; 
+        } else {  write-warning "This script only functions within PS ISE, with a script file open for editing" };
+    } # PROC-E
+    END{
+        write-verbose  "$((get-date).ToString('HH:mm:ss')):$($sBnr.replace('=v','=^').replace('v=','^='))" ;
+    }
+}
+
+#*------^ show-ISEOpenTab.ps1 ^------
+
+
 #*------v show-Verbs.ps1 v------
 Function show-Verbs {
     <#
@@ -11687,6 +12010,7 @@ r.com/tostka
     Github      : https://github.com/tostka/verb-dev
     Tags        : Powershell,Module,Build,Development
     REVISIONS
+    * 4:12 PM 7/12/2024 fixed bad path in recovery copy for following too; missing file bug/recoverable down in 'Move/Flatten Resource etc files into root of temp Build dir...', added broad recovery instructions (reinstall from repo, latest vers, buffer in the .psd1/.psm1 from repo copy, rerun)
     * 8:52 AM 12/12/2023 fixed typo trailing log echo #2771 (and added ref to both currlog & perm copy stored at uwps\logs)
     * 3:14 PM 12/11/2023 added expl for reset-ModuleBuildFail.ps1 cleanup pass ; 
         vazure bombed on build, missing LICENSE.TXT, so used leaf 
@@ -13807,18 +14131,20 @@ $(if($Merge){'MERGE parm specified as well:`n-Merge Public|Internal|Classes incl
                             <#$ModPsdPath
                             C:\sc\verb-network\verb-network\verb-network.psd1
                             #>
+                            # 4:12 PM 7/12/2024 fix path source typo (need path of, not the psd1.fullname)
                             $pltCI=[ordered]@{
-                                path = (join-path -path $ModPsdPath -childpath $fl -ea STOP) ; 
+                                path = (join-path -path (split-path $ModPsdPath) -childpath $fl -ea STOP) ;
                                 destination = (join-path -path $CUModTestPath -childpath $fl -ea STOP) ; ; # fully leaf the dest
-                                force = $true ; 
+                                force = $true ;
                                 erroraction = 'STOP' ;
-                                verbose = $true ; # $($VerbosePreference -eq "Continue") ; 
+                                verbose = $true ; # $($VerbosePreference -eq "Continue") ;
                                 whatif = $($whatif) ;
                             } ;
                             $smsg = "RE-copy-item w`n$(($pltCI|out-string).trim())" ; 
                             $smsg += "`n--`$pltCI.path:`n$(($pltCI.path|out-string).trim())" ; 
                             if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
                             # it's flat file coying, just single-line it verbose
+                            
                             TRY{
                                 copy-item @pltCI ;
                             } CATCH {
@@ -13827,6 +14153,42 @@ $(if($Merge){'MERGE parm specified as well:`n-Merge Public|Internal|Classes incl
                                 if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN } #Error|Warn|Debug
                                 else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
                             } ; 
+
+                            $shMissingFileWarning = @"
+
+# NOTE!: 
+
+AN ERROR WAS THROWN ON A MISSING FILE FROM THE `$psd1.filelist, SPECIFICALLY:
+
+$($pltCI.destination)
+
+... and a RECOVERY RECOPY from source was undertaken. 
+
+=> IF THE BUILD CONTINUES TO FAIL PUBLISH/INSTALL, DO THE FOLLOWING:
+
+1. Reinstall _latest repo version_ of $($ModuleName) to -scope:CurrentUser
+2. Explorer the installed version at:
+
+    C:\Users\LOGON\Documents\WindowsPowerShell\Modules\$($ModuleName)\n.n.n
+
+    ... and locate the $($ModuleName).psd1 & $($ModuleName).psm1, buffer to clipboard, 
+
+3. Explorer:
+    $(split-path $ModPsdPath)
+
+    ... and paste the buffered .psd1 & .psm1 from the installed copy, into the dev version (resets the build set)
+
+4. And then run a fresh pass at your:
+
+      .\processbulk-NewModule.ps1 -Modules $($ModuleName)
+
+The above *may* sort the error without further debugging (could reflect missing/incomplete/damaged content from prior build).
+
+"@ ;       
+                            $smsg = $shMissingFileWarning ; 
+                            if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN -Indent} 
+                            else{ write-WARNING "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; 
+
                         } ; 
                     } ; 
                 } else { 
@@ -14480,7 +14842,7 @@ $($logfile)
 
 #*======^ END FUNCTIONS ^======
 
-Export-ModuleMember -Function backup-ModuleBuild,check-PsLocalRepoRegistration,confirm-ModuleBuildSync,confirm-ModulePsd1Version,confirm-ModulePsm1Version,confirm-ModuleTestPs1Guid,convert-CommandLine2VSCDebugJson,convertFrom-EscapedPSText,Convert-HelpToHtmlFile,convert-ISEOpenSession,converto-VSCConfig,ConvertTo-Breakpoint,_extractBreakpoint,convertTo-EscapedPSText,ConvertTo-ModuleDynamicTDO,ConvertTo-ModuleMergedTDO,convertTo-UnwrappedPS,convertTo-WrappedPS,export-ISEBreakPoints,export-ISEBreakPointsALL,export-ISEOpenFiles,find-NounAliasesTDO,get-AliasAssignsAST,get-CodeProfileAST,get-CodeRiskProfileAST,Get-CommentBlocks,get-FunctionBlock,get-FunctionBlocks,get-HelpParsed,get-ISEOpenFilesExported,get-ModuleRevisedCommands,get-NounAliasTDO,get-ProjectNameTDO,Get-PSBreakpointSorted,Get-PSModuleFile,get-StrictMode,Version,ToString,get-VariableAssignsAST,get-VerbAliasTDO,get-VersionInfo,import-ISEBreakPoints,import-ISEBreakPointsALL,import-ISEConsoleColors,import-ISEOpenFiles,Initialize-ModuleFingerprint,Get-PSModuleFile,Initialize-PSModuleDirectories,move-ISEBreakPoints,new-CBH,New-GitHubGist,pop-FunctionDev,push-FunctionDev,restore-ISEConsoleColors,restore-ModuleBuild,save-ISEConsoleColors,show-Verbs,Split-CommandLine,Step-ModuleVersionCalculated,Get-PSModuleFile,Test-ModuleTMPFiles,test-VerbStandard,Uninstall-ModuleForce,update-NewModule,get-FolderEmpty,reset-ModulePublishingDirectory,populate-ModulePublishingDirectory -Alias *
+Export-ModuleMember -Function backup-ModuleBuild,check-PsLocalRepoRegistration,confirm-ModuleBuildSync,confirm-ModulePsd1Version,confirm-ModulePsm1Version,confirm-ModuleTestPs1Guid,convert-CommandLine2VSCDebugJson,convertFrom-EscapedPSText,Convert-HelpToHtmlFile,convert-ISEOpenSession,converto-VSCConfig,ConvertTo-Breakpoint,_extractBreakpoint,convertTo-EscapedPSText,ConvertTo-ModuleDynamicTDO,ConvertTo-ModuleMergedTDO,convertTo-UnwrappedPS,convertTo-WrappedPS,copy-ISETabFileToLocal,export-ISEBreakPoints,export-ISEBreakPointsALL,export-ISEOpenFiles,find-NounAliasesTDO,get-AliasAssignsAST,get-CodeProfileAST,get-CodeRiskProfileAST,Get-CommentBlocks,get-FunctionBlock,get-FunctionBlocks,get-HelpParsed,get-ISEBreakPoints,get-ISEOpenFilesExported,get-ModuleRevisedCommands,get-NounAliasTDO,get-ProjectNameTDO,Get-PSBreakpointSorted,Get-PSModuleFile,get-StrictMode,Version,ToString,get-VariableAssignsAST,get-VerbAliasTDO,get-VersionInfo,import-ISEBreakPoints,import-ISEBreakPointsALL,import-ISEConsoleColors,import-ISEOpenFiles,Initialize-ModuleFingerprint,Get-PSModuleFile,Initialize-PSModuleDirectories,move-ISEBreakPoints,new-CBH,New-GitHubGist,pop-FunctionDev,push-FunctionDev,restore-ISEConsoleColors,restore-ModuleBuild,save-ISEConsoleColors,show-ISEOpenTab,show-Verbs,Split-CommandLine,Step-ModuleVersionCalculated,Get-PSModuleFile,Test-ModuleTMPFiles,test-VerbStandard,Uninstall-ModuleForce,update-NewModule,get-FolderEmpty,reset-ModulePublishingDirectory,populate-ModulePublishingDirectory -Alias *
 
 
 
@@ -14488,8 +14850,8 @@ Export-ModuleMember -Function backup-ModuleBuild,check-PsLocalRepoRegistration,c
 # SIG # Begin signature block
 # MIIELgYJKoZIhvcNAQcCoIIEHzCCBBsCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUsBh+lpw7vFdPVfHPCKDI+OCf
-# f/6gggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUefIs3d5HdT8MoPT5Kl/uQ69y
+# bOWgggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
 # MCwxKjAoBgNVBAMTIVBvd2VyU2hlbGwgTG9jYWwgQ2VydGlmaWNhdGUgUm9vdDAe
 # Fw0xNDEyMjkxNzA3MzNaFw0zOTEyMzEyMzU5NTlaMBUxEzARBgNVBAMTClRvZGRT
 # ZWxmSUkwgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBALqRVt7uNweTkZZ+16QG
@@ -14504,9 +14866,9 @@ Export-ModuleMember -Function backup-ModuleBuild,check-PsLocalRepoRegistration,c
 # AWAwggFcAgEBMEAwLDEqMCgGA1UEAxMhUG93ZXJTaGVsbCBMb2NhbCBDZXJ0aWZp
 # Y2F0ZSBSb290AhBaydK0VS5IhU1Hy6E1KUTpMAkGBSsOAwIaBQCgeDAYBgorBgEE
 # AYI3AgEMMQowCKACgAChAoAAMBkGCSqGSIb3DQEJAzEMBgorBgEEAYI3AgEEMBwG
-# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBRnrKVv
-# 7CzMROwZeYguFI8DEg4WADANBgkqhkiG9w0BAQEFAASBgKvccAvEG7CL8+BktknS
-# cp849t55HMselsiA6+RGHOceRWUSoBy2bvCVP+96eEBgbp7WjH3enexeL2wlu22B
-# g6PMNCFliO08x3y/8gR1+kcVtJw+3nJGz6BA5xB+18akj8sJmCrtv0PFYyq1mxX1
-# k6YgGRO6iCxV6nRbxlIPTkG3
+# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBS7Iqza
+# Do9Xdmxhcp6GJsFeehAgYTANBgkqhkiG9w0BAQEFAASBgA9g23eT98EA9Q+bTqKp
+# RnxlHfLB05fsRckO35XohTuLmB4i1Q1uRAmVb+cRBXlL20uXEETGYyO0xO1H6FAH
+# 9cHvFTpgtmOA/GdvzzI4DHMFXpmjEfKvnXxv63MbA4jHqjo+pdNSIEy4FXOQs42c
+# GobaB7/q7yAk6L7HSM/y9+i3
 # SIG # End signature block
