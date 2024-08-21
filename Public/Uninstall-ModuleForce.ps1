@@ -16,6 +16,7 @@ Function Uninstall-ModuleForce {
     Github      : https://github.com/tostka/verb-dev
     Tags        : Powershell,Module,Management,Lifecycle
     REVISIONS
+    # 4:06 PM 8/21/2024 #135:empty PSModulePath entry causes this to crash out, post filter only populated!
     * 12:33 PM 1/17/2024 added RunAA pretest, and folder perms seize code
     * 10:10 AM 5/17/2022 updated post test, also don't want it to abort/break, on any single failure.
     * 11:11 AM 5/10/2022 init, split out process-NewModule #773: $smsg= "Removing existing profile $($ModuleName) content..."  block, to have a single maintainable shared func
@@ -131,7 +132,9 @@ Function Uninstall-ModuleForce {
             if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info }  #Error|Warn|Debug
             else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
 
-            $modpaths = $env:PSModulePath.split(';') ;
+            #$modpaths = $env:PSModulePath.split(';') ;
+            # 4:06 PM 8/21/2024 empty PSModulePath entry causes this to crash out, post filter only populated!
+            $modpaths = $env:PSModulePath.split(';') |?{$_} ;
             foreach($modpath in $modpaths){
                 $smsg= "Checking: $($Mod) below: $($modpath)..." ;
                 if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info }  #Error|Warn|Debug

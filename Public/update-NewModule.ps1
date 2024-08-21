@@ -16,6 +16,7 @@ r.com/tostka
     Github      : https://github.com/tostka/verb-dev
     Tags        : Powershell,Module,Build,Development
     REVISIONS
+    * 10:19 AM 8/19/2024 updated w-h to use full export-clixml, where was referring to custom local alias
     * 4:12 PM 7/12/2024 fixed bad path in recovery copy for following too; missing file bug/recoverable down in 'Move/Flatten Resource etc files into root of temp Build dir...', added broad recovery instructions (reinstall from repo, latest vers, buffer in the .psd1/.psm1 from repo copy, rerun)
     * 8:52 AM 12/12/2023 fixed typo trailing log echo #2771 (and added ref to both currlog & perm copy stored at uwps\logs)
     * 3:14 PM 12/11/2023 added expl for reset-ModuleBuildFail.ps1 cleanup pass ; 
@@ -1722,7 +1723,8 @@ $(if($Merge){'MERGE parm specified as well:`n-Merge Public|Internal|Classes incl
     # export the list extensionless xml, to let it drop off of the Psd1filelist 
     $rgxPsd1FileListLine = '((#\s)*)FileList((\s)*)=((\s)*).*' ;
     if($Psd1filelist){
-        $smsg = "`$Psd1filelist populated: xXML:$($ModDirPath)\Psd1filelist" ; 
+        $smsg = "`$Psd1filelist populated: export-cliXML:$($ModDirPath)\Psd1filelist" ; 
+        # 10:18 AM 8/19/2024 xxml isn't either a stock alias, or a proper verb-alias (export == ep, not x); use the stock expanded call to avoid long term issues
         if($verbose){if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level VERBOSE } 
         else{ write-verbose "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; } ; $smsg = "" ; 
         $Psd1filelist | sort | export-clixml -path "$($ModDirPath)\Psd1filelist" ;

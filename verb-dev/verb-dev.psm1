@@ -5,7 +5,7 @@
 .SYNOPSIS
 VERB-dev - Development PS Module-related generic functions
 .NOTES
-Version     : 1.5.49
+Version     : 1.5.50
 Author      : Todd Kadrie
 Website     :	https://www.toddomation.com
 Twitter     :	@tostka
@@ -11862,6 +11862,7 @@ Function Uninstall-ModuleForce {
     Github      : https://github.com/tostka/verb-dev
     Tags        : Powershell,Module,Management,Lifecycle
     REVISIONS
+    # 4:06 PM 8/21/2024 #135:empty PSModulePath entry causes this to crash out, post filter only populated!
     * 12:33 PM 1/17/2024 added RunAA pretest, and folder perms seize code
     * 10:10 AM 5/17/2022 updated post test, also don't want it to abort/break, on any single failure.
     * 11:11 AM 5/10/2022 init, split out process-NewModule #773: $smsg= "Removing existing profile $($ModuleName) content..."  block, to have a single maintainable shared func
@@ -11977,7 +11978,9 @@ Function Uninstall-ModuleForce {
             if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info }  #Error|Warn|Debug
             else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
 
-            $modpaths = $env:PSModulePath.split(';') ;
+            #$modpaths = $env:PSModulePath.split(';') ;
+            # 4:06 PM 8/21/2024 empty PSModulePath entry causes this to crash out, post filter only populated!
+            $modpaths = $env:PSModulePath.split(';') |?{$_} ;
             foreach($modpath in $modpaths){
                 $smsg= "Checking: $($Mod) below: $($modpath)..." ;
                 if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info }  #Error|Warn|Debug
@@ -12029,6 +12032,7 @@ r.com/tostka
     Github      : https://github.com/tostka/verb-dev
     Tags        : Powershell,Module,Build,Development
     REVISIONS
+    * 10:19 AM 8/19/2024 updated w-h to use full export-clixml, where was referring to custom local alias
     * 4:12 PM 7/12/2024 fixed bad path in recovery copy for following too; missing file bug/recoverable down in 'Move/Flatten Resource etc files into root of temp Build dir...', added broad recovery instructions (reinstall from repo, latest vers, buffer in the .psd1/.psm1 from repo copy, rerun)
     * 8:52 AM 12/12/2023 fixed typo trailing log echo #2771 (and added ref to both currlog & perm copy stored at uwps\logs)
     * 3:14 PM 12/11/2023 added expl for reset-ModuleBuildFail.ps1 cleanup pass ; 
@@ -13735,7 +13739,8 @@ $(if($Merge){'MERGE parm specified as well:`n-Merge Public|Internal|Classes incl
     # export the list extensionless xml, to let it drop off of the Psd1filelist 
     $rgxPsd1FileListLine = '((#\s)*)FileList((\s)*)=((\s)*).*' ;
     if($Psd1filelist){
-        $smsg = "`$Psd1filelist populated: xXML:$($ModDirPath)\Psd1filelist" ; 
+        $smsg = "`$Psd1filelist populated: export-cliXML:$($ModDirPath)\Psd1filelist" ; 
+        # 10:18 AM 8/19/2024 xxml isn't either a stock alias, or a proper verb-alias (export == ep, not x); use the stock expanded call to avoid long term issues
         if($verbose){if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level VERBOSE } 
         else{ write-verbose "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; } ; $smsg = "" ; 
         $Psd1filelist | sort | export-clixml -path "$($ModDirPath)\Psd1filelist" ;
@@ -14869,8 +14874,8 @@ Export-ModuleMember -Function backup-ModuleBuild,check-PsLocalRepoRegistration,c
 # SIG # Begin signature block
 # MIIELgYJKoZIhvcNAQcCoIIEHzCCBBsCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUUXB4oIawJXIvPJLxoXAhzSbp
-# AGugggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUf47me2u+cZWS395SJS95C0EC
+# tM2gggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
 # MCwxKjAoBgNVBAMTIVBvd2VyU2hlbGwgTG9jYWwgQ2VydGlmaWNhdGUgUm9vdDAe
 # Fw0xNDEyMjkxNzA3MzNaFw0zOTEyMzEyMzU5NTlaMBUxEzARBgNVBAMTClRvZGRT
 # ZWxmSUkwgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBALqRVt7uNweTkZZ+16QG
@@ -14885,9 +14890,9 @@ Export-ModuleMember -Function backup-ModuleBuild,check-PsLocalRepoRegistration,c
 # AWAwggFcAgEBMEAwLDEqMCgGA1UEAxMhUG93ZXJTaGVsbCBMb2NhbCBDZXJ0aWZp
 # Y2F0ZSBSb290AhBaydK0VS5IhU1Hy6E1KUTpMAkGBSsOAwIaBQCgeDAYBgorBgEE
 # AYI3AgEMMQowCKACgAChAoAAMBkGCSqGSIb3DQEJAzEMBgorBgEEAYI3AgEEMBwG
-# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBTzfBOU
-# TRlkzLpKJjy9AFEbwe16kjANBgkqhkiG9w0BAQEFAASBgFoVEno/HQarNmE1EjEW
-# I0nk0ia6fg69lNDN8ovZ+tNNmDrw7YHjVDmrtcKdI1RKv6dm3pTWfjcUwuS+EyeH
-# 8BEJlaxX/Z1KcOVP8sOMa1JYcPf5nGRKQjOCkB8iY0bQvYqtf/K2E/mVndiikNAr
-# Yy98/kMrxqmHXZCnua3o4ExR
+# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBTL5BC+
+# ZVOhPxi2PHynGN+0lV2qxDANBgkqhkiG9w0BAQEFAASBgI1V8eCff+M0ebgYTXEs
+# PMlLIXbDDhYJj6xVRONSLwoeL0pzKhHCdxFEk39jGssTSgWsV+/LuJ7jzOdELOeK
+# JNWAOrrzCK84VJX8U/uvvJ++UBkk/SXz18IANfsTUXZW+yy+Y1J3eJWACJIECZvm
+# mI46TGyGiieGYL/fr67SI9PL
 # SIG # End signature block
