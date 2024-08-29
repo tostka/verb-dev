@@ -5,7 +5,7 @@
 .SYNOPSIS
 VERB-dev - Development PS Module-related generic functions
 .NOTES
-Version     : 1.5.47
+Version     : 1.5.50
 Author      : Todd Kadrie
 Website     :	https://www.toddomation.com
 Twitter     :	@tostka
@@ -2917,6 +2917,7 @@ function ConvertTo-ModuleDynamicTDO {
     Tags        : Powershell,Module,Development
     AddedTwitter:
     REVISIONS
+    * 5:45 PM 8/7/2024 reformat params 
     * 2:08 PM 6/29/2022 # scrap the entire $psv2Publine etc block - it's causing corruption, and I won't need it post upgrade off of exop
     * 8:34 AM 5/16/2022 typo: used Aliases for Alias
     * 3:07 PM 5/13/2022ren unmerge-Module -> ConvertTo-ModuleDynamicTDO() (use std verb; adopt keyword to unique my work from 3rd-party funcs); added Unmerge-Module to Aliases; 
@@ -2966,19 +2967,19 @@ function ConvertTo-ModuleDynamicTDO {
     [Alias('Unmerge-Module')]
     PARAM (
         [Parameter(Mandatory = $True, HelpMessage = "Module Name (used to name the ModuleName.psm1 file)[-ModuleName verb-XXX]")]
-        [string] $ModuleName,
+            [string] $ModuleName,
         [Parameter(Mandatory = $True, HelpMessage = "Array of directory paths containing .ps1 function files to be combined [-ModuleSourcePath c:\path-to\module\Public]")]
-        [array] $ModuleSourcePath,
+            [array] $ModuleSourcePath,
         [Parameter(Mandatory = $True, HelpMessage = "Directory path in which the final .psm1 file should be constructed [-ModuleDestinationPath c:\path-to\module\module.psm1]")]
-        [string] $ModuleDestinationPath,
+            [string] $ModuleDestinationPath,
         [Parameter(Mandatory = $False, HelpMessage = "Logging spec object (output from start-log())[-LogSpec `$LogSpec]")]
-        $LogSpec,
+            $LogSpec,
         [Parameter(HelpMessage = "Flag that skips auto-inclusion of 'Export-ModuleMember -Alias * ' in merged file [-NoAliasExport]")]
-        [switch] $NoAliasExport,
+            [switch] $NoAliasExport,
         [Parameter(HelpMessage = "Debugging Flag [-showDebug]")]
-        [switch] $showDebug,
+            [switch] $showDebug,
         [Parameter(HelpMessage = "Whatif Flag  [-whatIf]")]
-        [switch] $whatIf
+            [switch] $whatIf
     ) ;
     # function self-name (equiv to script's: $MyInvocation.MyCommand.Path) ;
     ${CmdletName} = $PSCmdlet.MyInvocation.MyCommand.Name ;
@@ -3559,6 +3560,7 @@ function ConvertTo-ModuleMergedTDO {
     Tags        : Powershell,Module,Development
     AddedTwitter:
     REVISIONS
+    * 5:45 PM 8/7/2024 reformat params ; coerce $RequiredVersion from psd1.moduleversion, if blank ; add test for $rgxPurgeBlockEnd2, ExportModuleMembers syntax in later omds ; fixed/updated FunctionsToExport 
     * 2:04 PM 6/29/2022 rem'd out/removed the $psv2PubLine, $psv2PrivLine dyn exclude material - won't be needed once exop upgraded past psv2
     * 5:18 PM 6/1/2022 splice in support for confirm-ModuleBuildSync ; 
     * 5:16 PM 5/31/2022 add: -RequiredVersion; # 4:48 PM 5/31/2022 getting mismatch/revert in revision to prior spec, confirm/force set it here, call confirm-ModulePsd1Version()/confirm-ModulePsm1Version() (which handle _TMP versions, that stock tools *won't*)
@@ -3639,21 +3641,21 @@ function ConvertTo-ModuleMergedTDO {
     [Alias('Merge-Module')]
     PARAM (
         [Parameter(Mandatory = $True, HelpMessage = "Module Name (used to name the ModuleName.psm1 file)[-ModuleName verb-XXX]")]
-        [string] $ModuleName,
+            [string] $ModuleName,
         [Parameter(Mandatory = $True, HelpMessage = "Array of directory paths containing .ps1 function files to be combined [-ModuleSourcePath c:\path-to\module\Public]")]
-        [array] $ModuleSourcePath,
+            [array] $ModuleSourcePath,
         [Parameter(Mandatory = $True, HelpMessage = "Directory path in which the final .psm1 file should be constructed [-ModuleDestinationPath c:\path-to\module\module.psm1]")]
-        [string] $ModuleDestinationPath,
+            [string] $ModuleDestinationPath,
         [Parameter(HelpMessage="Optional Explicit 3-digit RequiredVersion specification (as contrasts with using current Manifest .psd1 ModuleVersion value)[-Version 2.0.3]")]
-        [version]$RequiredVersion,
+            [version]$RequiredVersion,
         [Parameter(Mandatory = $False, HelpMessage = "Logging spec object (output from start-log())[-LogSpec `$LogSpec]")]
-        $LogSpec,
+            $LogSpec,
         [Parameter(HelpMessage = "Flag that skips auto-inclusion of 'Export-ModuleMember -Alias * ' in merged file [-NoAliasExport]")]
-        [switch] $NoAliasExport,
+            [switch] $NoAliasExport,
         [Parameter(HelpMessage = "Debugging Flag [-showDebug]")]
-        [switch] $showDebug,
+            [switch] $showDebug,
         [Parameter(HelpMessage = "Whatif Flag  [-whatIf]")]
-        [switch] $whatIf
+            [switch] $whatIf
     ) ;
     # function self-name (equiv to script's: $MyInvocation.MyCommand.Path) ;
     ${CmdletName} = $PSCmdlet.MyInvocation.MyCommand.Name ;
@@ -3705,7 +3707,10 @@ function ConvertTo-ModuleMergedTDO {
     $PsdName="$ModuleDestinationPath\$ModuleName.psd1" ;
     $PsmNameTmp="$ModuleDestinationPath\$ModuleName.psm1_TMP" ;
     $PsdNameTmp="$ModuleDestinationPath\$ModuleName.psd1_TMP" ;
-
+    if(-not $RequiredVersion){
+        $psdProfile = Test-ModuleManifest -Path $PsdName -ErrorAction STOP ; 
+        [string]$RequiredVersion = $psdProfile.version
+    } ; 
 
     # backup existing & purge the dyn-include block
     if(test-path -path $PsmName){
@@ -3746,8 +3751,12 @@ function ConvertTo-ModuleMergedTDO {
         #$rgxPurgeBlockEnd = 'Export-ModuleMember\s-Function\s\$publicFunctions\s;';
         # updated version of dyn end, that also explicitly exports -alias *
         $rgxPurgeBlockEnd = 'Export-ModuleMember\s-Function\s\$publicFunctions\s-Alias\s\*\s;\s'
+        $rgxPurgeBlockEnd2 = 'Export-ModuleMember\s-Function\s\$Public\.Basename\s-Alias\s\*\s;'
         $dynIncludeOpen = ($rawsourcelines | select-string -Pattern $rgxPurgeblockStart).linenumber ;
         $dynIncludeClose = ($rawsourcelines | select-string -Pattern $rgxPurgeBlockEnd).linenumber ;
+        if(-not $dynIncludeClose){
+            $dynIncludeClose = ($rawsourcelines | select-string -Pattern $rgxPurgeBlockEnd2).linenumber ;
+        } ; 
         if(!$dynIncludeOpen){$dynIncludeClose = 0 } ;
         $updatedContent = @() ; $DropContent=@() ;
 
@@ -4147,13 +4156,36 @@ Export-ModuleMember -Function $(($ExportFunctions) -join ',') -Alias *
     # build a dummy name for testing .psm1|psd1
     #$testpsm1 = join-path -path (split-path $PsmNameTmp) -ChildPath "$(new-guid).psm1" ; 
 
+    <# 1:57 PM 8/7/2024
+    if(-not (test-path $PsdNameTmp) -And (test-path $PsdName)){
+        $smsg = "no pre-existing `$PsdNameTmp ; sourcing `$PsdNameTmp as stock copy of $($PsdName) " ; 
+        if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } 
+        else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+        #Levels:Error|Warn|Info|H1|H2|H3|H4|H5|Debug|Verbose|Prompt|Success   
+        $srcPsd = $PsdName ; 
+        $destPsed = $PsdNameTmp ; 
+    } ; 
     $tf = $PsdNameTmp ;
     # switch back to manual local updates
-    $pltSCFE=[ordered]@{Path = $tf ; PassThru=$true ;Verbose=$($verbose) ;whatif= $($whatif) ; } 
-    if($psd1ExpMatch = Get-ChildItem $tf | select-string -Pattern $rgxFuncs2Export ){
+    # 1:57 PM 8/7/2024
+    # issue: $psmNameTmp has been constructed bit by bit accumlating thge migrated content
+    # but $psdNameTmp has never been touched. Should be read off of the source psd1
+    # set-content => $tf/$psdNameTmp
+    # the source will need to be the $PsdName
+    #>
+    $pltSCFE=[ordered]@{
+        Path = $PsdNameTmp ; # $tf ;
+        PassThru=$true ;
+        Verbose=$($verbose) ;
+        whatif= $($whatif) ;
+    } 
+    #if($psd1ExpMatch = Get-ChildItem $tf | select-string -Pattern $rgxFuncs2Export ){
+    if($psd1ExpMatch = Get-ChildItem $PsdName | select-string -Pattern $rgxFuncs2Export ){
         # 2-step it, we're getting only $value[-1] through the pipeline
         # add | out-string to collapse object arrays
-        $newContent = (Get-Content $tf) | Foreach-Object {
+        #$newContent = (Get-Content $tf) | Foreach-Object {
+        # 1:58 PM 8/7/2024 switch src to orig $psdName
+        $newContent = (Get-Content $PsdName) | Foreach-Object {
             $_ -replace $rgxFuncs2Export , ("FunctionsToExport = " + "@('" + $($ExportFunctions -join "','") + "')")
         } | out-string ; 
         # this writes to $PsdNameTmp
@@ -8810,6 +8842,7 @@ Function Initialize-PSModuleDirectories {
     AddedWebsite: https://www.powershellgallery.com/packages/ISEScriptingGeek/3.4.1
     AddedTwitter: 
     REVISIONS
+    * 12:23 PM 8/7/2024 removed erroneous [ValidateScript( {Test-Path $_})] from $DefaultModDirs param
     * 12:18 PM 10/12/2023 correct .\Resources -> Resource that's in use 
     * 11:21 AM 10/3/2023 added LICENSES & LIBS & RESOURCES to DefaultModDirs
    * 9:35 AM 5/9/2022 init, split out from merge/unmerge-module, have a single maintainable func, rather than trying to sync the variants
@@ -8853,27 +8886,13 @@ Function Initialize-PSModuleDirectories {
     [cmdletbinding()]
     Param(
         [Parameter(Mandatory = $True, HelpMessage = "Array of directory paths containing .ps1 function files to be combined [-ModuleSourcePath c:\path-to\module\Public]")]
-        [array] $ModuleSourcePath,
-        [Parameter(Mandatory = $True, HelpMessage = "Directory path in which the final .psm1 file should be constructed [-ModuleDestinationPath c:\path-to\module\module.psm1]")]
+            [array] $ModuleSourcePath,
+            [Parameter(Mandatory = $True, HelpMessage = "Directory path in which the final .psm1 file should be constructed [-ModuleDestinationPath c:\path-to\module\module.psm1]")]
         [string] $ModuleDestinationPath,
         [Parameter(HelpMessage = "Array of new module subdirectory names to be created")]
-            [ValidateScript( {Test-Path $_})]
             [string[]]$DefaultModDirs = @('Public','Internal','Classes','Libs','Tests','Licenses','Resource','Docs','Docs\Cab','Docs\en-US','Docs\Markdown'),
         [Parameter(HelpMessage = "Whatif Flag  [-whatIf]")]
-        [switch] $whatIf
-        <#
-        [Parameter(Mandatory = $False,Position = 0,ValueFromPipeline = $True, HelpMessage = 'Path [-path c:\path-to\]')]
-        [Alias('PsPath')]
-        [ValidateScript({Test-Path $_ -PathType 'Container'})]
-        [system.io.fileinfo[]]$Path,
-        
-        [Parameter(Position = 0, HelpMessage = "Enter the path of a PowerShell script")]
-        [ValidateScript( {Test-Path $_})][ValidatePattern( "\.(ps1|psm1|txt)$")]
-        [string]$Path = $(Read-Host "Enter the filename and path to a PowerShell script"),
-        [Parameter(HelpMessage = "Report output directory")]
-        [ValidateScript( {Test-Path $_})][Alias("fp", "out")]
-        [string]$FilePath = "$env:userprofile\Documents\WindowsPowerShell"
-        #>
+            [switch] $whatIf
     )
     BEGIN { 
         #region CONSTANTS-AND-ENVIRO #*======v CONSTANTS-AND-ENVIRO v======
@@ -11843,6 +11862,7 @@ Function Uninstall-ModuleForce {
     Github      : https://github.com/tostka/verb-dev
     Tags        : Powershell,Module,Management,Lifecycle
     REVISIONS
+    # 4:06 PM 8/21/2024 #135:empty PSModulePath entry causes this to crash out, post filter only populated!
     * 12:33 PM 1/17/2024 added RunAA pretest, and folder perms seize code
     * 10:10 AM 5/17/2022 updated post test, also don't want it to abort/break, on any single failure.
     * 11:11 AM 5/10/2022 init, split out process-NewModule #773: $smsg= "Removing existing profile $($ModuleName) content..."  block, to have a single maintainable shared func
@@ -11958,7 +11978,9 @@ Function Uninstall-ModuleForce {
             if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info }  #Error|Warn|Debug
             else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
 
-            $modpaths = $env:PSModulePath.split(';') ;
+            #$modpaths = $env:PSModulePath.split(';') ;
+            # 4:06 PM 8/21/2024 empty PSModulePath entry causes this to crash out, post filter only populated!
+            $modpaths = $env:PSModulePath.split(';') |?{$_} ;
             foreach($modpath in $modpaths){
                 $smsg= "Checking: $($Mod) below: $($modpath)..." ;
                 if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info }  #Error|Warn|Debug
@@ -12010,6 +12032,8 @@ r.com/tostka
     Github      : https://github.com/tostka/verb-dev
     Tags        : Powershell,Module,Build,Development
     REVISIONS
+    * 10:19 AM 8/19/2024 updated w-h to use full export-clixml, where was referring to custom local alias
+    * 4:12 PM 7/12/2024 fixed bad path in recovery copy for following too; missing file bug/recoverable down in 'Move/Flatten Resource etc files into root of temp Build dir...', added broad recovery instructions (reinstall from repo, latest vers, buffer in the .psd1/.psm1 from repo copy, rerun)
     * 8:52 AM 12/12/2023 fixed typo trailing log echo #2771 (and added ref to both currlog & perm copy stored at uwps\logs)
     * 3:14 PM 12/11/2023 added expl for reset-ModuleBuildFail.ps1 cleanup pass ; 
         vazure bombed on build, missing LICENSE.TXT, so used leaf 
@@ -13715,7 +13739,8 @@ $(if($Merge){'MERGE parm specified as well:`n-Merge Public|Internal|Classes incl
     # export the list extensionless xml, to let it drop off of the Psd1filelist 
     $rgxPsd1FileListLine = '((#\s)*)FileList((\s)*)=((\s)*).*' ;
     if($Psd1filelist){
-        $smsg = "`$Psd1filelist populated: xXML:$($ModDirPath)\Psd1filelist" ; 
+        $smsg = "`$Psd1filelist populated: export-cliXML:$($ModDirPath)\Psd1filelist" ; 
+        # 10:18 AM 8/19/2024 xxml isn't either a stock alias, or a proper verb-alias (export == ep, not x); use the stock expanded call to avoid long term issues
         if($verbose){if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level VERBOSE } 
         else{ write-verbose "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; } ; $smsg = "" ; 
         $Psd1filelist | sort | export-clixml -path "$($ModDirPath)\Psd1filelist" ;
@@ -14130,18 +14155,20 @@ $(if($Merge){'MERGE parm specified as well:`n-Merge Public|Internal|Classes incl
                             <#$ModPsdPath
                             C:\sc\verb-network\verb-network\verb-network.psd1
                             #>
+                            # 4:12 PM 7/12/2024 fix path source typo (need path of, not the psd1.fullname)
                             $pltCI=[ordered]@{
-                                path = (join-path -path $ModPsdPath -childpath $fl -ea STOP) ; 
+                                path = (join-path -path (split-path $ModPsdPath) -childpath $fl -ea STOP) ;
                                 destination = (join-path -path $CUModTestPath -childpath $fl -ea STOP) ; ; # fully leaf the dest
-                                force = $true ; 
+                                force = $true ;
                                 erroraction = 'STOP' ;
-                                verbose = $true ; # $($VerbosePreference -eq "Continue") ; 
+                                verbose = $true ; # $($VerbosePreference -eq "Continue") ;
                                 whatif = $($whatif) ;
                             } ;
                             $smsg = "RE-copy-item w`n$(($pltCI|out-string).trim())" ; 
                             $smsg += "`n--`$pltCI.path:`n$(($pltCI.path|out-string).trim())" ; 
                             if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
                             # it's flat file coying, just single-line it verbose
+                            
                             TRY{
                                 copy-item @pltCI ;
                             } CATCH {
@@ -14150,6 +14177,42 @@ $(if($Merge){'MERGE parm specified as well:`n-Merge Public|Internal|Classes incl
                                 if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN } #Error|Warn|Debug
                                 else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
                             } ; 
+
+                            $shMissingFileWarning = @"
+
+# NOTE!: 
+
+AN ERROR WAS THROWN ON A MISSING FILE FROM THE `$psd1.filelist, SPECIFICALLY:
+
+$($pltCI.destination)
+
+... and a RECOVERY RECOPY from source was undertaken. 
+
+=> IF THE BUILD CONTINUES TO FAIL PUBLISH/INSTALL, DO THE FOLLOWING:
+
+1. Reinstall _latest repo version_ of $($ModuleName) to -scope:CurrentUser
+2. Explorer the installed version at:
+
+    C:\Users\LOGON\Documents\WindowsPowerShell\Modules\$($ModuleName)\n.n.n
+
+    ... and locate the $($ModuleName).psd1 & $($ModuleName).psm1, buffer to clipboard, 
+
+3. Explorer:
+    $(split-path $ModPsdPath)
+
+    ... and paste the buffered .psd1 & .psm1 from the installed copy, into the dev version (resets the build set)
+
+4. And then run a fresh pass at your:
+
+      .\processbulk-NewModule.ps1 -Modules $($ModuleName)
+
+The above *may* sort the error without further debugging (could reflect missing/incomplete/damaged content from prior build).
+
+"@ ;       
+                            $smsg = $shMissingFileWarning ; 
+                            if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN -Indent} 
+                            else{ write-WARNING "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; 
+
                         } ; 
                     } ; 
                 } else { 
@@ -14811,8 +14874,8 @@ Export-ModuleMember -Function backup-ModuleBuild,check-PsLocalRepoRegistration,c
 # SIG # Begin signature block
 # MIIELgYJKoZIhvcNAQcCoIIEHzCCBBsCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUfn8aZNwlCyA9W7E7uSK+gIvO
-# LmugggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUf47me2u+cZWS395SJS95C0EC
+# tM2gggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
 # MCwxKjAoBgNVBAMTIVBvd2VyU2hlbGwgTG9jYWwgQ2VydGlmaWNhdGUgUm9vdDAe
 # Fw0xNDEyMjkxNzA3MzNaFw0zOTEyMzEyMzU5NTlaMBUxEzARBgNVBAMTClRvZGRT
 # ZWxmSUkwgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBALqRVt7uNweTkZZ+16QG
@@ -14827,9 +14890,9 @@ Export-ModuleMember -Function backup-ModuleBuild,check-PsLocalRepoRegistration,c
 # AWAwggFcAgEBMEAwLDEqMCgGA1UEAxMhUG93ZXJTaGVsbCBMb2NhbCBDZXJ0aWZp
 # Y2F0ZSBSb290AhBaydK0VS5IhU1Hy6E1KUTpMAkGBSsOAwIaBQCgeDAYBgorBgEE
 # AYI3AgEMMQowCKACgAChAoAAMBkGCSqGSIb3DQEJAzEMBgorBgEEAYI3AgEEMBwG
-# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBSQIrIN
-# GE+wdqry2CfRCNjRwZ8lXjANBgkqhkiG9w0BAQEFAASBgIYNUT2Gd0ueGYw7wS3T
-# Uz8bc3nXp1UdiIoA7YOyvUxm7HeckN4ylhSUCqFasSJoZTIx+yyC9qVrUQ/7tE2C
-# ULzspe5mrFd8u7WtKbRpK8e/vTiaBdr3PGQPMXOpEPHoqV8XKpeSltf0ZLUxVohG
-# cD4xWo1qZbfExn6QPcjDLNIo
+# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBTL5BC+
+# ZVOhPxi2PHynGN+0lV2qxDANBgkqhkiG9w0BAQEFAASBgI1V8eCff+M0ebgYTXEs
+# PMlLIXbDDhYJj6xVRONSLwoeL0pzKhHCdxFEk39jGssTSgWsV+/LuJ7jzOdELOeK
+# JNWAOrrzCK84VJX8U/uvvJ++UBkk/SXz18IANfsTUXZW+yy+Y1J3eJWACJIECZvm
+# mI46TGyGiieGYL/fr67SI9PL
 # SIG # End signature block
