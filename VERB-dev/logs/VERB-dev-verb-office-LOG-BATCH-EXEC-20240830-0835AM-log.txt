@@ -1,0 +1,650 @@
+﻿2024-08-30 08:35:50 INFO:  : #*======v VERB-dev.psm1:verb-office v======
+2024-08-30 08:35:50 VERBOSE:  : $modRoot is blank, assigning from mandetory param:$ModDirPath
+2024-08-30 08:35:50 INFO:  : Run: reset-ModulePublishingDirectory -ModuleName verb-office
+2024-08-30 08:35:50 ##  : 
+#*------v PROCESSING : verb-office v------
+2024-08-30 08:35:50 INFO:  : Pre-purge (CHANGELOG|README)\.md$ Root dir matches from :
+2024-08-30 08:35:50 INFO:  : verb-office resolved $ModPubPath:C:\sc\verb-office\verb-office\
+$ModResPath:C:\sc\verb-office\Resource\
+2024-08-30 08:35:50 VERBOSE:  : Reset module Resource files (purge from C:\sc\verb-office\verb-office\)
+2024-08-30 08:35:50 INFO:  : verb-office resolved $ModPubPath:C:\sc\verb-office\verb-office\
+$ModResPath:C:\sc\verb-office\Licenses\
+2024-08-30 08:35:50 VERBOSE:  : Reset module Licenses files (purge from C:\sc\verb-office\verb-office\)
+2024-08-30 08:35:50 INFO:  : verb-office resolved $ModPubPath:C:\sc\verb-office\verb-office\
+$ModResPath:C:\sc\verb-office\Docs\
+2024-08-30 08:35:50 VERBOSE:  : Reset module Docs files (purge from C:\sc\verb-office\verb-office\)
+2024-08-30 08:35:50 INFO:  : ==C:\sc\verb-office\CHANGELOG.md:
+2024-08-30 08:35:50 INFO:  : ==C:\sc\verb-office\README.md:
+2024-08-30 08:35:50 INFO:  : ==C:\sc\verb-office\Docs\Quick-Start-Installation-and-Example.md:
+2024-08-30 08:35:50 ##  : 
+#*------^ PROCESSING : verb-office ^------
+2024-08-30 08:35:50 INFO:  : Run: populate-ModulePublishingDirectory -ModuleName verb-office
+2024-08-30 08:35:50 ##  : 
+#*------v PROCESSING : verb-office v------
+2024-08-30 08:35:50 INFO:  : Locating (CHANGELOG|README)\.md$ Root dir matches from :
+2024-08-30 08:35:50 INFO:  : verb-office resolved $ModPubPath:C:\sc\verb-office\verb-office\
+$ModResPath:C:\sc\verb-office\Resource\
+2024-08-30 08:35:50 VERBOSE:  : Recopy module Resource files (copy from C:\sc\verb-office\verb-office\)
+2024-08-30 08:35:50 INFO:  : verb-office resolved $ModPubPath:C:\sc\verb-office\verb-office\
+$ModResPath:C:\sc\verb-office\Licenses\
+2024-08-30 08:35:50 VERBOSE:  : Recopy module Licenses files (copy from C:\sc\verb-office\verb-office\)
+2024-08-30 08:35:50 INFO:  : verb-office resolved $ModPubPath:C:\sc\verb-office\verb-office\
+$ModResPath:C:\sc\verb-office\Docs\
+2024-08-30 08:35:50 VERBOSE:  : Recopy module Docs files (copy from C:\sc\verb-office\verb-office\)
+2024-08-30 08:35:50 INFO:  : copy-item w
+Name                           Value                                                                                                                                                                                
+----                           -----                                                                                                                                                                                
+path                           {C:\sc\verb-office\CHANGELOG.md, C:\sc\verb-office\README.md, C:\sc\verb-office\Docs\Quick-Start-Installation-and-Example.md}                                                        
+destination                    C:\sc\verb-office\verb-office\                                                                                                                                                       
+force                          True                                                                                                                                                                                 
+erroraction                    STOP                                                                                                                                                                                 
+verbose                        True                                                                                                                                                                                 
+whatif                         False
+--$pltCI.path:
+C:\sc\verb-office\CHANGELOG.md
+C:\sc\verb-office\README.md
+C:\sc\verb-office\Docs\Quick-Start-Installation-and-Example.md
+2024-08-30 08:35:50 ##  : 
+#*------^ PROCESSING : verb-office ^------
+2024-08-30 08:35:50 INFO:  : Validate updated verb-office\verb-office dir contents against Manifest:
+Run: test-modulemanifest -Path C:\sc\verb-office\verb-office\verb-office.psd1
+2024-08-30 08:35:50 VERBOSE:  : (no $ttmm_Err: test-ModuleManifest had no errors)
+2024-08-30 08:35:50 INFO:  : NON-Republish pass detected:
+MERGE parm specified as well:`n-Merge Public|Internal|Classes include subdirs module content into updated .psm1
+-Sign updated files.
+-Uninstall/Remove existing profile module
+-Copy new module to profile
+-Confirm: Get-Module -ListAvailable
+-Check/Update existing Psd1 Version
+-Publish-Module
+-Remove existing installed profile module
+-Test Install-Module
+-Test Import-Module
+2024-08-30 08:35:50 INFO:  : -Merge specified...
+2024-08-30 08:35:50 INFO:  : ConvertTo-ModuleMergedTDO w
+Name                           Value                                                                                                                                                                                
+----                           -----                                                                                                                                                                                
+ModuleName                     verb-office                                                                                                                                                                          
+ModuleSourcePath               {c:\sc\verb-office\Public, c:\sc\verb-office\Internal}                                                                                                                               
+ModuleDestinationPath          c:\sc\verb-office\verb-office                                                                                                                                                        
+RequiredVersion                1.0.5                                                                                                                                                                                
+LogSpec                        {logging, logfile, transcript}                                                                                                                                                       
+NoAliasExport                                                                                                                                                                                                       
+ErrorAction                    Stop                                                                                                                                                                                 
+showdebug                      False                                                                                                                                                                                
+whatif                         False
+2024-08-30 08:35:51 INFO:  : ConvertTo-ModuleMergedTDO w
+Name                           Value                                                                                                                                                                                
+----                           -----                                                                                                                                                                                
+ModuleName                     verb-office                                                                                                                                                                          
+ModuleSourcePath               {c:\sc\verb-office\Public, c:\sc\verb-office\Internal}                                                                                                                               
+ModuleDestinationPath          c:\sc\verb-office\verb-office                                                                                                                                                        
+RequiredVersion                1.0.5                                                                                                                                                                                
+LogSpec                        {logging, logfile, transcript}                                                                                                                                                       
+NoAliasExport                                                                                                                                                                                                       
+ErrorAction                    Stop                                                                                                                                                                                 
+showdebug                      False                                                                                                                                                                                
+whatif                         False
+2024-08-30 08:35:51 INFO:  : (NON-dyn psm1 detected - purging existing non-CBH content...)
+2024-08-30 08:35:51 INFO:  : Initialize-PSModuleDirectories w
+Name                           Value                                                                                                                                                                                
+----                           -----                                                                                                                                                                                
+ModuleSourcePath               {c:\sc\verb-office\Public, c:\sc\verb-office\Internal}                                                                                                                               
+ModuleDestinationPath          c:\sc\verb-office\verb-office                                                                                                                                                        
+ErrorAction                    Stop                                                                                                                                                                                 
+whatif                         False
+2024-08-30 08:35:51 INFO:  : 
+#*------v (1/2):C:\sc\verb-office\Public v------
+2024-08-30 08:35:51 INFO:  : Processing 6 $ComponentScripts files through Remove-AuthenticodeSignature...
+2024-08-30 08:35:51 INFO:  : Remove-AuthenticodeSignature w
+Name                           Value                                                                                                                                                                                
+----                           -----                                                                                                                                                                                
+Path                           {C:\sc\verb-office\Public\restart-MSOutlookTDO.ps1, C:\sc\verb-office\Public\restart-MSTeamsTDO.ps1, C:\sc\verb-office\Public\start-MSOutlookTDO.ps1, C:\sc\verb-office\Public\sta...
+whatif                         False                                                                                                                                                                                
+verbose                        True
+2024-08-30 08:35:51 INFO:  : Processing (1/6):C:\sc\verb-office\Public\restart-MSOutlookTDO.ps1...
+2024-08-30 08:35:51 INFO:  : Processing (2/6):C:\sc\verb-office\Public\restart-MSTeamsTDO.ps1...
+2024-08-30 08:35:51 INFO:  : Processing (3/6):C:\sc\verb-office\Public\start-MSOutlookTDO.ps1...
+2024-08-30 08:35:51 INFO:  : Processing (4/6):C:\sc\verb-office\Public\start-MSTeamsTDO.ps1...
+2024-08-30 08:35:51 INFO:  : Processing (5/6):C:\sc\verb-office\Public\stop-MSOutlookTDO.ps1...
+2024-08-30 08:35:51 INFO:  : Processing (6/6):C:\sc\verb-office\Public\stop-MSTeamsTDO.ps1...
+2024-08-30 08:35:51 INFO:  : 
+#*------^ (1/2):C:\sc\verb-office\Public ^------
+2024-08-30 08:35:51 INFO:  : 
+#*------v (2/2):C:\sc\verb-office\Internal v------
+2024-08-30 08:35:51 INFO:  : Processing 0 $ComponentScripts files through Remove-AuthenticodeSignature...
+2024-08-30 08:35:51 INFO:  : Remove-AuthenticodeSignature w
+Name                           Value                                                                                                                                                                                
+----                           -----                                                                                                                                                                                
+Path                                                                                                                                                                                                                
+whatif                         False                                                                                                                                                                                
+verbose                        True
+2024-08-30 08:35:51 INFO:  : 
+#*------^ (2/2):C:\sc\verb-office\Internal ^------
+2024-08-30 08:35:51 INFO:  : (Updating Psm1 Export-ModuleMember -Function to reflect Public modules)
+2024-08-30 08:35:51 INFO:  : Adding:FooterBlock...
+2024-08-30 08:35:51 INFO:  : Updating the Psd1 FunctionsToExport to match
+2024-08-30 08:35:51 INFO:  : confirm-ModuleBuildSync w
+Name                           Value                                                                                                                                                                                
+----                           -----                                                                                                                                                                                
+ModPsdPath                     c:\sc\verb-office\verb-office\verb-office.psd1_TMP                                                                                                                                   
+RequiredVersion                1.0.5                                                                                                                                                                                
+NoTest                         True                                                                                                                                                                                 
+whatif                         False                                                                                                                                                                                
+verbose                        True
+2024-08-30 08:35:51 INFO:  : #*======v confirm-ModuleBuildSync:  v======
+2024-08-30 08:35:51 INFO:  : (test-path confirms $ModPsm1 & $ModTestPs1)
+2024-08-30 08:35:51 INFO:  : Import-PowerShellDataFile w
+Name                           Value                                                                                                                                                                                
+----                           -----                                                                                                                                                                                
+Path                           c:\sc\verb-office\verb-office\verb-office.psd1_TMP                                                                                                                                   
+ErrorAction                    Stop                                                                                                                                                                                 
+verbose                        True
+2024-08-30 08:35:51 INFO:  : (resolved Module attributes:
+$ModuleName:	verb-office
+$ModRoot:	c:\sc\verb-office
+$ModPsd1:	c:\sc\verb-office\verb-office\verb-office.psd1_TMP
+$ModPsm1:	c:\sc\verb-office\verb-office\verb-office.psm1_TMP
+$ModTestPs1:	c:\sc\verb-office\Tests\verb-office.tests.ps1
+$psd1Vers:	1.0.5
+$psd1guid:	e568728b-2ba8-44f2-90ce-3f419b868a08)
+2024-08-30 08:35:51 INFO:  : confirm-ModulePsd1Version w
+Name                           Value                                                                                                                                                                                
+----                           -----                                                                                                                                                                                
+Path                           c:\sc\verb-office\verb-office\verb-office.psd1_TMP                                                                                                                                   
+RequiredVersion                1.0.5                                                                                                                                                                                
+whatif                         False                                                                                                                                                                                
+verbose                        True
+2024-08-30 08:35:51 INFO:  : #*======v confirm-ModulePsd1Version: c:\sc\verb-office\verb-office\verb-office.psd1_TMP v======
+2024-08-30 08:35:51 INFO:  : (Version already updated to match)
+2024-08-30 08:35:51 INFO:  : $objReport
+Name                           Value                                                                                                                                                                                
+----                           -----                                                                                                                                                                                
+Version                        1.0.5                                                                                                                                                                                
+Valid                          False
+2024-08-30 08:35:51 INFO:  : (SET:$objReport.Valid = $true ;)
+2024-08-30 08:35:51 INFO:  : (PIPELINE:New-Object PSObject -Property $objReport | write-output)
+$objReport
+Name                           Value                                                                                                                                                                                
+----                           -----                                                                                                                                                                                
+Version                        1.0.5                                                                                                                                                                                
+Valid                          True
+2024-08-30 08:35:51 INFO:  : #*======^ confirm-ModulePsd1Version: c:\sc\verb-office\verb-office\verb-office.psd1_TMP ^======
+2024-08-30 08:35:51 INFO:  : (confirm-ModulePsd1Version:Success)
+2024-08-30 08:35:51 INFO:  : confirm-ModulePsm1Version w
+Name                           Value                                                                                                                                                                                
+----                           -----                                                                                                                                                                                
+Path                           c:\sc\verb-office\verb-office\verb-office.psm1_TMP                                                                                                                                   
+RequiredVersion                1.0.5                                                                                                                                                                                
+whatif                         False                                                                                                                                                                                
+verbose                        True
+2024-08-30 08:35:51 INFO:  : #*======v confirm-ModulePsm1Version: c:\sc\verb-office\verb-office\verb-office.psm1_TMP v======
+2024-08-30 08:35:51 WARNING:  : In:c:\sc\verb-office\verb-office\verb-office.psm1_TMP
+Version present:(1.0.3)
+*does not* properly match:1.0.5
+FORCING MATCHING UPDATE!
+2024-08-30 08:35:51 INFO:  : $objReport
+Name                           Value                                                                                                                                                                                
+----                           -----                                                                                                                                                                                
+Version                        1.0.5                                                                                                                                                                                
+Valid                          False
+2024-08-30 08:35:51 INFO:  : (SET:$objReport.Valid = $true ;)
+2024-08-30 08:35:51 INFO:  : (PIPELINE:New-Object PSObject -Property $objReport | write-output)
+$objReport
+Name                           Value                                                                                                                                                                                
+----                           -----                                                                                                                                                                                
+Version                        1.0.5                                                                                                                                                                                
+Valid                          True
+2024-08-30 08:35:51 INFO:  : #*======^ confirm-ModulePsm1Version: c:\sc\verb-office\verb-office\verb-office.psm1_TMP ^======
+2024-08-30 08:35:51 INFO:  : (confirm-ModulePsm1Version:Success)
+2024-08-30 08:35:51 INFO:  : (-NoTest: skipping confirm-ModuleTestPs1Guid)
+2024-08-30 08:35:51 INFO:  : $objReport
+Name                           Value                                                                                                                                                                                
+----                           -----                                                                                                                                                                                
+Manifest                       c:\sc\verb-office\verb-office\verb-office.psd1_TMP                                                                                                                                   
+Module                         c:\sc\verb-office\verb-office\verb-office.psm1_TMP                                                                                                                                   
+Pester                         (SKIPPED)                                                                                                                                                                            
+Guid                           (SKIPPED)                                                                                                                                                                            
+Version                        1.0.5                                                                                                                                                                                
+Valid                          False
+2024-08-30 08:35:51 INFO:  : (SET:$objReport.Valid = $true ;)
+2024-08-30 08:35:51 INFO:  : (PIPELINE:New-Object PSObject -Property $objReport | write-output)
+$objReport
+Name                           Value                                                                                                                                                                                
+----                           -----                                                                                                                                                                                
+Manifest                       c:\sc\verb-office\verb-office\verb-office.psd1_TMP                                                                                                                                   
+Module                         c:\sc\verb-office\verb-office\verb-office.psm1_TMP                                                                                                                                   
+Pester                         (SKIPPED)                                                                                                                                                                            
+Guid                           (SKIPPED)                                                                                                                                                                            
+Version                        1.0.5                                                                                                                                                                                
+Valid                          True
+2024-08-30 08:35:51 INFO:  : #*======^ confirm-ModuleBuildSync:  ^======
+2024-08-30 08:35:51 INFO:  : (confirm-ModuleBuildSync:Success)
+2024-08-30 08:35:51 INFO:  : Test-ModuleTMPFiles w
+Name                           Value                                                                                                                                                                                
+----                           -----                                                                                                                                                                                
+ModuleNamePSM1Path             c:\sc\verb-office\verb-office\verb-office.psm1_TMP                                                                                                                                   
+verbose                        True
+2024-08-30 08:35:51 INFO:  : #*======v Test-ModuleTMPFiles: c:\sc\verb-office\verb-office\verb-office.psm1_TMP v======
+2024-08-30 08:35:51 INFO:  : 
+Psm1:c:\sc\verb-office\verb-office\verb-office.psm1_TMP
+Psd1:c:\sc\verb-office\verb-office\verb-office.psd1_TMP
+2024-08-30 08:35:51 INFO:  : Creating Testable c:\sc\verb-office\verb-office\a9723f3a-c0aa-4686-8efe-5525579f4440.psd1
+ to validate c:\sc\verb-office\verb-office\verb-office.psd1_TMP will Test-ModuleManifest
+2024-08-30 08:35:51 INFO:  : Test-ModuleManifest w
+Name                           Value                                                                                                                                                                                
+----                           -----                                                                                                                                                                                
+verbose                        True                                                                                                                                                                                 
+Path                           c:\sc\verb-office\verb-office\a9723f3a-c0aa-4686-8efe-5525579f4440.psd1                                                                                                              
+ErrorVariable                  vManiErr                                                                                                                                                                             
+ErrorAction                    STOP
+2024-08-30 08:35:51 INFO:  : Test-ModuleManifest:PASSED
+2024-08-30 08:35:51 INFO:  : Creating Testable c:\sc\verb-office\verb-office\a9723f3a-c0aa-4686-8efe-5525579f4440.psm1
+ to validate c:\sc\verb-office\verb-office\verb-office.psm1_TMP will Import-Module
+2024-08-30 08:35:51 INFO:  : n import-module w
+Name                           Value                                                                                                                                                                                
+----                           -----                                                                                                                                                                                
+Name                           c:\sc\verb-office\verb-office\a9723f3a-c0aa-4686-8efe-5525579f4440.psm1                                                                                                              
+Force                          True                                                                                                                                                                                 
+verbose                        True                                                                                                                                                                                 
+ErrorAction                    STOP                                                                                                                                                                                 
+ErrorVariable                  vIpMoErr                                                                                                                                                                             
+PassThru                       True
+2024-08-30 08:35:51 INFO:  : Ipmo: PASSED
+2024-08-30 08:35:51 INFO:  : (remove-module -name c:\sc\verb-office\verb-office\a9723f3a-c0aa-4686-8efe-5525579f4440.psm1 -force)
+2024-08-30 08:35:51 INFO:  : (remove-item -path c:\sc\verb-office\verb-office\a9723f3a-c0aa-4686-8efe-5525579f4440.psm1 -ErrorAction SilentlyContinue ; 
+2024-08-30 08:35:51 INFO:  : (remove-item -path c:\sc\verb-office\verb-office\a9723f3a-c0aa-4686-8efe-5525579f4440.psd1 -ErrorAction SilentlyContinue ; 
+2024-08-30 08:35:51 INFO:  : $objReport
+Name                           Value                                                                                                                                                                                
+----                           -----                                                                                                                                                                                
+Manifest                       a9723f3a-c0aa-4686-8efe-5525579f4440                                                                                                                                                 
+Module                         a9723f3a-c0aa-4686-8efe-5525579f4440                                                                                                                                                 
+Valid                          False
+2024-08-30 08:35:51 INFO:  : (SET:$objReport.Valid = $true ;)
+2024-08-30 08:35:51 INFO:  : (PIPELINE:New-Object PSObject -Property $objReport | write-output)
+$objReport
+Name                           Value                                                                                                                                                                                
+----                           -----                                                                                                                                                                                
+Manifest                       a9723f3a-c0aa-4686-8efe-5525579f4440                                                                                                                                                 
+Module                         a9723f3a-c0aa-4686-8efe-5525579f4440                                                                                                                                                 
+Valid                          True
+2024-08-30 08:35:51 INFO:  : #*======^ Test-ModuleTMPFiles: c:\sc\verb-office\verb-office\verb-office.psm1_TMP ^======
+2024-08-30 08:35:51 INFO:  : Processing error free: Overwriting temp .psm1 with temp copy
+copy-item w
+Name                           Value                                                                                                                                                                                
+----                           -----                                                                                                                                                                                
+Destination                    c:\sc\verb-office\verb-office\verb-office.psm1                                                                                                                                       
+Path                           c:\sc\verb-office\verb-office\verb-office.psm1_TMP                                                                                                                                   
+whatif                         False                                                                                                                                                                                
+ErrorAction                    STOP
+2024-08-30 08:35:51 INFO:  : Processing error free: Overwriting temp .psd1 with temp copy
+copy-item w
+Name                           Value                                                                                                                                                                                
+----                           -----                                                                                                                                                                                
+Destination                    c:\sc\verb-office\verb-office\verb-office.psd1                                                                                                                                       
+Path                           c:\sc\verb-office\verb-office\verb-office.psd1_TMP                                                                                                                                   
+whatif                         False                                                                                                                                                                                
+ErrorAction                    STOP
+2024-08-30 08:35:51 INFO:  : #*======^ ConvertTo-ModuleMergedTDO: ^======
+2024-08-30 08:35:51 VERBOSE:  : (no $ttmm_Err: test-ModuleManifest had no errors)
+2024-08-30 08:35:51 INFO:  : (Test-ModuleManifest:PASSED)
+2024-08-30 08:35:51 INFO:  : Checking sync of Psd1 module guid to the Pester Test Script: c:\sc\verb-office\Tests\verb-office.tests.ps1
+2024-08-30 08:35:51 INFO:  : confirm-ModuleBuildSync w
+Name                           Value                                                                                                                                                                                
+----                           -----                                                                                                                                                                                
+ModPsdPath                     C:\sc\verb-office\verb-office\verb-office.psd1                                                                                                                                       
+RequiredVersion                1.0.5                                                                                                                                                                                
+whatif                         False                                                                                                                                                                                
+verbose                        True
+2024-08-30 08:35:51 INFO:  : #*======v confirm-ModuleBuildSync:  v======
+2024-08-30 08:35:51 INFO:  : (test-path confirms $ModPsm1 & $ModTestPs1)
+2024-08-30 08:35:51 INFO:  : Import-PowerShellDataFile w
+Name                           Value                                                                                                                                                                                
+----                           -----                                                                                                                                                                                
+Path                           C:\sc\verb-office\verb-office\verb-office.psd1                                                                                                                                       
+ErrorAction                    Stop                                                                                                                                                                                 
+verbose                        True
+2024-08-30 08:35:51 INFO:  : (resolved Module attributes:
+$ModuleName:	verb-office
+$ModRoot:	c:\sc\verb-office
+$ModPsd1:	C:\sc\verb-office\verb-office\verb-office.psd1
+$ModPsm1:	C:\sc\verb-office\verb-office\verb-office.psm1
+$ModTestPs1:	c:\sc\verb-office\Tests\verb-office.tests.ps1
+$psd1Vers:	1.0.5
+$psd1guid:	e568728b-2ba8-44f2-90ce-3f419b868a08)
+2024-08-30 08:35:51 INFO:  : confirm-ModulePsd1Version w
+Name                           Value                                                                                                                                                                                
+----                           -----                                                                                                                                                                                
+Path                           C:\sc\verb-office\verb-office\verb-office.psd1                                                                                                                                       
+RequiredVersion                1.0.5                                                                                                                                                                                
+whatif                         False                                                                                                                                                                                
+verbose                        True
+2024-08-30 08:35:51 INFO:  : #*======v confirm-ModulePsd1Version: C:\sc\verb-office\verb-office\verb-office.psd1 v======
+2024-08-30 08:35:51 INFO:  : (Version already updated to match)
+2024-08-30 08:35:51 INFO:  : $objReport
+Name                           Value                                                                                                                                                                                
+----                           -----                                                                                                                                                                                
+Version                        1.0.5                                                                                                                                                                                
+Valid                          False
+2024-08-30 08:35:51 INFO:  : (SET:$objReport.Valid = $true ;)
+2024-08-30 08:35:51 INFO:  : (PIPELINE:New-Object PSObject -Property $objReport | write-output)
+$objReport
+Name                           Value                                                                                                                                                                                
+----                           -----                                                                                                                                                                                
+Version                        1.0.5                                                                                                                                                                                
+Valid                          True
+2024-08-30 08:35:51 INFO:  : #*======^ confirm-ModulePsd1Version: C:\sc\verb-office\verb-office\verb-office.psd1 ^======
+2024-08-30 08:35:51 INFO:  : (confirm-ModulePsd1Version:Success)
+2024-08-30 08:35:52 INFO:  : confirm-ModulePsm1Version w
+Name                           Value                                                                                                                                                                                
+----                           -----                                                                                                                                                                                
+Path                           C:\sc\verb-office\verb-office\verb-office.psm1                                                                                                                                       
+RequiredVersion                1.0.5                                                                                                                                                                                
+whatif                         False                                                                                                                                                                                
+verbose                        True
+2024-08-30 08:35:52 INFO:  : #*======v confirm-ModulePsm1Version: C:\sc\verb-office\verb-office\verb-office.psm1 v======
+2024-08-30 08:35:52 INFO:  : (Version already updated to match)
+2024-08-30 08:35:52 INFO:  : $objReport
+Name                           Value                                                                                                                                                                                
+----                           -----                                                                                                                                                                                
+Version                        1.0.5                                                                                                                                                                                
+Valid                          False
+2024-08-30 08:35:52 INFO:  : (SET:$objReport.Valid = $true ;)
+2024-08-30 08:35:52 INFO:  : (PIPELINE:New-Object PSObject -Property $objReport | write-output)
+$objReport
+Name                           Value                                                                                                                                                                                
+----                           -----                                                                                                                                                                                
+Version                        1.0.5                                                                                                                                                                                
+Valid                          True
+2024-08-30 08:35:52 INFO:  : #*======^ confirm-ModulePsm1Version: C:\sc\verb-office\verb-office\verb-office.psm1 ^======
+2024-08-30 08:35:52 INFO:  : (confirm-ModulePsm1Version:Success)
+2024-08-30 08:35:52 INFO:  : Checking sync of Psd1 module guid to the Pester Test Script: c:\sc\verb-office\Tests\verb-office.tests.ps1
+2024-08-30 08:35:52 INFO:  : confirm-ModuleTestPs1Guid w
+Name                           Value                                                                                                                                                                                
+----                           -----                                                                                                                                                                                
+Path                           c:\sc\verb-office\Tests\verb-office.tests.ps1                                                                                                                                        
+RequiredGuid                   e568728b-2ba8-44f2-90ce-3f419b868a08                                                                                                                                                 
+whatif                         False                                                                                                                                                                                
+verbose                        True
+2024-08-30 08:35:52 INFO:  : #*======v confirm-ModuleTestPs1Guid: c:\sc\verb-office\Tests\verb-office.tests.ps1 v======
+2024-08-30 08:35:52 INFO:  : (Guid  already updated to match)
+2024-08-30 08:35:52 INFO:  : $objReport
+Name                           Value                                                                                                                                                                                
+----                           -----                                                                                                                                                                                
+Guid                           e568728b-2ba8-44f2-90ce-3f419b868a08                                                                                                                                                 
+Valid                          False
+2024-08-30 08:35:52 INFO:  : (SET:$objReport.Valid = $true ;)
+2024-08-30 08:35:52 INFO:  : (PIPELINE:New-Object PSObject -Property $objReport | write-output)
+$objReport
+Name                           Value                                                                                                                                                                                
+----                           -----                                                                                                                                                                                
+Guid                           e568728b-2ba8-44f2-90ce-3f419b868a08                                                                                                                                                 
+Valid                          True
+2024-08-30 08:35:52 INFO:  : #*======^ confirm-ModuleTestPs1Guid: c:\sc\verb-office\Tests\verb-office.tests.ps1 ^======
+2024-08-30 08:35:52 INFO:  : (confirm-ModuleTestPs1Guid:Success)
+2024-08-30 08:35:52 INFO:  : $objReport
+Name                           Value                                                                                                                                                                                
+----                           -----                                                                                                                                                                                
+Manifest                       C:\sc\verb-office\verb-office\verb-office.psd1                                                                                                                                       
+Module                         C:\sc\verb-office\verb-office\verb-office.psm1                                                                                                                                       
+Pester                         c:\sc\verb-office\Tests\verb-office.tests.ps1                                                                                                                                        
+Guid                           e568728b-2ba8-44f2-90ce-3f419b868a08                                                                                                                                                 
+Version                        1.0.5                                                                                                                                                                                
+Valid                          False
+2024-08-30 08:35:52 INFO:  : (SET:$objReport.Valid = $true ;)
+2024-08-30 08:35:52 INFO:  : (PIPELINE:New-Object PSObject -Property $objReport | write-output)
+$objReport
+Name                           Value                                                                                                                                                                                
+----                           -----                                                                                                                                                                                
+Manifest                       C:\sc\verb-office\verb-office\verb-office.psd1                                                                                                                                       
+Module                         C:\sc\verb-office\verb-office\verb-office.psm1                                                                                                                                       
+Pester                         c:\sc\verb-office\Tests\verb-office.tests.ps1                                                                                                                                        
+Guid                           e568728b-2ba8-44f2-90ce-3f419b868a08                                                                                                                                                 
+Version                        1.0.5                                                                                                                                                                                
+Valid                          True
+2024-08-30 08:35:52 INFO:  : #*======^ confirm-ModuleBuildSync:  ^======
+2024-08-30 08:35:52 INFO:  : (confirm-ModuleBuildSync:Success)
+2024-08-30 08:35:52 VERBOSE:  : $Psd1filelist populated: export-cliXML:c:\sc\verb-office\Psd1filelist
+2024-08-30 08:35:52 INFO:  : Updating the Psd1 FileList to with populated $Psd1filelist...
+2024-08-30 08:35:52 INFO:  : Signing appropriate files...
+2024-08-30 08:35:52 INFO:  : set-AuthenticodeSignatureTDO w
+Name                           Value                                                                                                                                                                                
+----                           -----                                                                                                                                                                                
+file                           {C:\sc\verb-office\rebuild-module.ps1, C:\sc\verb-office\requirements.psd1, C:\sc\verb-office\Tests\PPoShScriptingStyle.psd1, C:\sc\verb-office\Tests\ToddomationScriptingStyle-me...
+ErrorAction                    Stop                                                                                                                                                                                 
+whatif                         False
+2024-08-30 08:35:52 INFO:  : Removing existing profile verb-office content...
+2024-08-30 08:35:52 INFO:  : Uninstall-ModuleForce w
+Name                           Value                                                                                                                                                                                
+----                           -----                                                                                                                                                                                
+ModuleName                     verb-office                                                                                                                                                                          
+Verbose                        True                                                                                                                                                                                 
+whatif                         False
+2024-08-30 08:35:55 INFO:  : 
+#*------v Uninstall PSGet Mod:verb-Office:v1.0.2 v------
+2024-08-30 08:35:55 INFO:  : Uninstall-Script w
+Name                           Value                                                                                                                                                                                
+----                           -----                                                                                                                                                                                
+Force                          True                                                                                                                                                                                 
+Whatif                         False                                                                                                                                                                                
+Verbose                        True
+2024-08-30 08:36:08 INFO:  : 
+#*------^ Uninstall PSGet Mod:verb-Office:v1.0.2 ^------
+2024-08-30 08:36:09 INFO:  : (Processing $env:PSModulePath paths, for surviving locked copies of verb-office to *manually* purge...)
+2024-08-30 08:36:09 INFO:  : Checking: verb-office below: C:\Users\kadritss\Documents\WindowsPowerShell\Modules...
+2024-08-30 08:36:09 INFO:  : Checking: verb-office below: C:\ProgramData\Boxstarter...
+2024-08-30 08:36:09 INFO:  : Checking: verb-office below: C:\Program Files\WindowsPowerShell\Modules...
+2024-08-30 08:36:09 INFO:  : Checking: verb-office below: C:\WINDOWS\system32\WindowsPowerShell\v1.0\Modules...
+2024-08-30 08:36:09 INFO:  : Checking: verb-office below: C:\Program Files (x86)\AutoIt3\AutoItX...
+2024-08-30 08:36:09 INFO:  : (no $sRet returned on call)
+2024-08-30 08:36:09 INFO:  : Copying module to profile (net of .git & .vscode dirs, and backed up content)...
+2024-08-30 08:36:09 INFO:  : $srcFiles:post-filter out:
+\\(Package|Tests|logs)\\|(\.ps[dm]1_(\d+-\d+[AP]M|TMP)|-LOG-BATCH-EXEC-\d+-\d+[AP]M-log\.txt|\\(fingerprint|Psd1filelist))$
+2024-08-30 08:36:09 INFO:  : Discovered mod-copy files ($srcFiles.fullname):w
+C:\sc\verb-office\verb-Office\CHANGELOG.md
+C:\sc\verb-office\verb-Office\LICENSE.txt
+C:\sc\verb-office\verb-Office\Quick-Start-Installation-and-Example.md
+C:\sc\verb-office\verb-Office\README.md
+C:\sc\verb-office\verb-Office\verb-Office.psd1
+C:\sc\verb-office\verb-Office\verb-Office.psd1.bak
+C:\sc\verb-office\verb-Office\verb-Office.psd1.bak1
+C:\sc\verb-office\verb-Office\verb-Office.psd1.bak2
+C:\sc\verb-office\verb-Office\verb-Office.psd1.bak3
+C:\sc\verb-office\verb-Office\verb-Office.psd1.bak4
+C:\sc\verb-office\verb-Office\verb-Office.psd1.bak5
+C:\sc\verb-office\verb-Office\verb-Office.psd1.bak6
+C:\sc\verb-office\verb-Office\verb-Office.psd1.bak7
+C:\sc\verb-office\verb-Office\verb-Office.psd1.bak8
+C:\sc\verb-office\verb-Office\verb-Office.psm1
+C:\sc\verb-office\verb-Office\verb-Office.psm1.bak
+C:\sc\verb-office\verb-Office\verb-Office.psm1.bak1
+C:\sc\verb-office\verb-Office\verb-Office.psm1.bak2
+C:\sc\verb-office\verb-Office\verb-Office.psm1.bak3
+C:\sc\verb-office\verb-Office\verb-Office.psm1.bak4
+C:\sc\verb-office\verb-Office\verb-Office.psm1.bak5
+2024-08-30 08:36:09 INFO:  : Non-Pre-existing:$to:C:\Users\kadritss\Documents\WindowsPowerShell\Modules\verb-office\verb-office
+Pre-creating before copy...
+2024-08-30 08:36:09 INFO:  : Mode   LastWriteTime        Length Name       
+----   -------------        ------ ----       
+d----- 8/30/2024 8:36:09 AM        verb-office
+2024-08-30 08:36:09 INFO:  : -Merge:exclude $MergeBuildExcl \\(Public|Internal|External|Private)\\.*.ps1$ files from temp build copy
+2024-08-30 08:36:09 INFO:  : Recursively remove empty subdirs below C:\Users\kadritss\Documents\WindowsPowerShell\Modules\verb-office\verb-office...
+2024-08-30 08:36:09 INFO:  : Move/Flatten Resource etc files into root of temp Build dir...
+2024-08-30 08:36:09 INFO:  : Unable to locate a problematic temp mod dir C:\Users\kadritss\Documents\WindowsPowerShell\Modules\verb-office\verb-office COPY of Quick-Start-Installation-and-Example.md
+2024-08-30 08:36:09 INFO:  : Unable to locate a problematic temp mod dir C:\Users\kadritss\Documents\WindowsPowerShell\Modules\verb-office\verb-office COPY of CHANGELOG.md
+2024-08-30 08:36:09 INFO:  : Unable to locate a problematic temp mod dir C:\Users\kadritss\Documents\WindowsPowerShell\Modules\verb-office\verb-office COPY of LICENSE.txt
+2024-08-30 08:36:09 INFO:  : Unable to locate a problematic temp mod dir C:\Users\kadritss\Documents\WindowsPowerShell\Modules\verb-office\verb-office COPY of README.md
+2024-08-30 08:36:09 INFO:  : copy/Flatten Resource etc files into source root c:\sc\verb-office\verb-office dir...
+2024-08-30 08:36:09 INFO:  : Resolved $ModPsdPath:
+C:\sc\verb-office\verb-office\verb-office.psd1
+2024-08-30 08:36:09 VERBOSE:  : resolve-path the CUMods verb-office.psd1 location
+2024-08-30 08:36:09 INFO:  : 
+==Verifying CU:Mods\verb-office\verb-office\Quick-Start-Installation-and-Example.md:
+2024-08-30 08:36:09 INFO:  : 
+==Verifying CU:Mods\verb-office\verb-office\CHANGELOG.md:
+2024-08-30 08:36:09 INFO:  : 
+==Verifying CU:Mods\verb-office\verb-office\LICENSE.txt:
+2024-08-30 08:36:09 INFO:  : 
+==Verifying CU:Mods\verb-office\verb-office\README.md:
+2024-08-30 08:36:09 INFO:  : Running pre-Publish-Module .psd1 test:
+Test-ModuleManifest -path C:\sc\verb-office\verb-office\verb-office.psd1
+2024-08-30 08:36:09 VERBOSE:  : (no $ttmm_Err: test-ModuleManifest had no errors)
+2024-08-30 08:36:09 INFO:  : (Test-ModuleManifest:PASSED)
+2024-08-30 08:36:09 INFO:  : (Profiling Repo: get-PSRepository -name lyncRepo...)
+2024-08-30 08:36:10 VERBOSE:  : (confirmed:$tRepo.PublishLocation accessible)
+2024-08-30 08:36:10 INFO:  : 
+Publish-Module w
+Name                           Value                                                                                                                                                                                
+----                           -----                                                                                                                                                                                
+Name                           verb-office                                                                                                                                                                          
+Repository                     lyncRepo                                                                                                                                                                             
+RequiredVersion                1.0.5                                                                                                                                                                                
+Verbose                        True                                                                                                                                                                                 
+ErrorAction                    Stop                                                                                                                                                                                 
+errorVariable                  pbmo_Err                                                                                                                                                                             
+whatif                         False
+2024-08-30 08:36:13 WARNING:  :  FOUND $pbmo_Err: import-module HAD ERRORS! (no action, could be non-impacting)
+2024-08-30 08:36:13 WARNING:  :  Publish-Module PBMO UNDEFINED ERROR! System.Management.Automation.StopUpstreamCommandsException: System error.     at Microsoft.PowerShell.Commands.SelectObjectCommand.ProcessRecord()     at System.Management.Automation.CommandProcessor.ProcessRecord() (But PublishModule doesn't bother to return a functional Error object with an Exception, so we can't trust/parse or act on it. Just echo)
+2024-08-30 08:36:13 INFO:  : Waiting for:find-module -name verb-office -Repository lyncRepo ...
+2024-08-30 08:36:14 INFO:  : Install-Module w
+Name                           Value                                                                                                                                                                                
+----                           -----                                                                                                                                                                                
+Name                           verb-office                                                                                                                                                                          
+Repository                     lyncRepo                                                                                                                                                                             
+RequiredVersion                1.0.5                                                                                                                                                                                
+scope                          CurrentUser                                                                                                                                                                          
+force                          True                                                                                                                                                                                 
+AllowClobber                   True                                                                                                                                                                                 
+errorVariable                  ismo_Err                                                                                                                                                                             
+ErrorAction                    Stop                                                                                                                                                                                 
+whatif                         False
+2024-08-30 08:36:18 VERBOSE:  : (no $ismo_Err: Install-Module had no errors)
+2024-08-30 08:36:18 INFO:  : Testing Module:Import-Module w
+Name                           Value                                                                                                                                                                                
+----                           -----                                                                                                                                                                                
+Name                           verb-office                                                                                                                                                                          
+ErrorAction                    Stop                                                                                                                                                                                 
+errorVariable                  ipmo_Err                                                                                                                                                                             
+force                          True                                                                                                                                                                                 
+verbose                        True
+2024-08-30 08:36:18 VERBOSE:  : (no $ipmo_Err: test-ModuleManifest had no errors)
+2024-08-30 08:36:18 INFO:  : Retrieving matching Repo .nupkg file:
+gci \\lynmsv10\lync_fs\scripts\sc\verb-office.1.0.5.nupkgl..
+2024-08-30 08:36:18 INFO:  : Proper updated .nupkg file found:verb-office.1.0.5.nupkg, copying to local Pkg directory.
+2024-08-30 08:36:18 INFO:  : remove-UnneededFileVariants w
+Name                           Value                                                                                                                                                                                
+----                           -----                                                                                                                                                                                
+Path                           c:\sc\verb-office\Package                                                                                                                                                            
+Include                        verb-office*.nupkg                                                                                                                                                                   
+Pattern                                                                                                                                                                                                             
+FilterOn                       CreationTime                                                                                                                                                                         
+Keep                           2                                                                                                                                                                                    
+KeepToday                      True                                                                                                                                                                                 
+verbose                        True                                                                                                                                                                                 
+whatif                         False
+2024-08-30 08:36:18 INFO:  : remove-UnneededFileVariants w
+Name                           Value                                                                                                                                                                                
+----                           -----                                                                                                                                                                                
+Path                           c:\sc\verb-office\Tests                                                                                                                                                              
+Include                        ScriptAnalyzer-Results-*.xml                                                                                                                                                         
+Pattern                                                                                                                                                                                                             
+FilterOn                       CreationTime                                                                                                                                                                         
+Keep                           4                                                                                                                                                                                    
+KeepToday                      True                                                                                                                                                                                 
+verbose                        True                                                                                                                                                                                 
+whatif                         False
+2024-08-30 08:36:18 INFO:  : -RunTest specified: Running Pester Test script:
+c:\sc\verb-office\Tests\verb-office.tests.ps1
+
+2024-08-30 08:36:23 INFO:  : 
+---------------------------------------------------------------------------------
+Processing completed: verb-office :: c:\sc\verb-office
+- Script is currently installed (from PsRep: with scope:CurrentUser, under TORO\kadritss profile
+
+- To update other scopes/accounts on same machine, or install on other machines:
+    1. Uninstall current module copies:
+
+        Uninstall-Module -Name verb-office) -AllVersion -whatif ;
+
+    2. Install the current version (or higher) from the Repo:lyncRepo:
+
+        install-Module -name verb-office -Repository lyncRepo -MinimumVersion 1.0.5 -scope currentuser -whatif ;
+
+    3. Reimport the module with -force, to ensure the current installed verison is loaded:
+
+        import-Module -name verb-office -force -verbose ;
+
+#-=-=-Stacked list for the above: CURRENTUSER=-=-=-=-=-=
+$whatif=$false ;  $tScop = 'CurrentUser' ; $tMod = 'verb-office' ; $tVer = '1.0.5' ;
+TRY {
+    switch($tScop){
+        'CurrentUser'{$ModPath = "$(split-path $profile)\Modules\$($tmod)" }
+        'AllUsers' {$ModPath = "$($env:ProgramFiles)\WindowsPowerShell\Modules)\$($tmod)"} ; 
+    } ;
+    if($Repository = (Get-PSRepository -Name $localPSRepo -ea 'STOP').name){
+        rmo -Name $tmod -ea 0 ;
+        Uninstall-Module -Name $tmod -AllVersion -ea 0 -whatif:$($whatif);
+        gi -path $ModPath -ea 0 |ri -Recurse -force -verbose  -whatif:$($whatif) ;
+        install-Module -name $tmod -Repository $Repository -MinimumVersion $tVer -scope $tScop -AllowClobber -ea 'STOP' -whatif:$($whatif) ;
+        ipmo -name $tmod -force -verbose -ea 'STOP'  ;
+        gmo -name $tmod -list ;
+    } else {
+        throw "Unable to resolve `lyncRepo to a configured local PSRepository" ;
+    } ;
+} CATCH {
+    $ErrTrapd=$Error[0] ;
+    $smsg = "
+$(($ErrTrapd | fl * -Force|out-string).trim())" ;
+    write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" ;
+} ;
+#-=-=-=-=-=-=-=-=
+#-=-=-Stacked list for the above: ALLUSERS=-=-=-=-=-=
+$whatif=$false ; $tScop = 'AllUsers' ; $tMod = 'verb-office' ; $tVer = '1.0.5' ;  
+TRY {
+    switch($tScop){
+        'CurrentUser'{$ModPath = "$(split-path $profile)\Modules\$($tmod)" }
+        'AllUsers' {$ModPath = "$($env:ProgramFiles)\WindowsPowerShell\Modules)\$($tmod)"} ; 
+    } ;
+    if($Repository = (Get-PSRepository -Name $localPSRepo -ea 'STOP').name){
+        rmo -Name $tmod -ea 0 ;
+        Uninstall-Module -Name $tmod -AllVersion -ea 0 -whatif:$($whatif);
+        gi -path $ModPath -ea 0 |ri -Recurse -force -verbose  -whatif:$($whatif) ;
+        install-Module -name $tmod -Repository $Repository -MinimumVersion $tVer -scope $tScop -AllowClobber -ea 'STOP' -whatif:$($whatif) ;
+        ipmo -name $tmod -force -verbose -ea 'STOP'  ;
+        gmo -name $tmod -list ;
+    } else {
+        throw "Unable to resolve `lyncRepo to a configured local PSRepository" ;
+    } ;
+} CATCH {
+    $ErrTrapd=$Error[0] ;
+    $smsg = "
+$(($ErrTrapd | fl * -Force|out-string).trim())" ;
+    write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" ;
+} ;
+#-=-=-=-=-=-=-=-=
+
+- You may also want to run the configured Pester Tests of the new script:
+
+        . c:\sc\verb-office\Tests\verb-office.tests.ps1
+
+Full Processing Details can be found in:
+
+C:\sc\verb-dev\verb-dev\logs\VERB-dev-verb-office-LOG-BATCH-EXEC-20240830-0835AM-log.txt
+
+---------------------------------------------------------------------------------
+
+2024-08-30 08:36:23 INFO:  : 
+(Most recent processing log can be found at:c:\sc\verb-office\VERB-dev-verb-office-LOG-BATCH-EXEC-20240830-0835AM-log.txt)
+(perm copy stored at:C:\sc\verb-dev\verb-dev\logs\VERB-dev-verb-office-LOG-BATCH-EXEC-20240830-0835AM-log.txt
+2024-08-30 08:36:23 INFO:  : remove-UnneededFileVariants w
+Name                           Value                                                                                                                                                                                
+----                           -----                                                                                                                                                                                
+Path                           c:\sc\verb-office                                                                                                                                                                    
+Include                        VERB-dev-verb-office-LOG-BATCH-*-log.txt                                                                                                                                             
+Pattern                                                                                                                                                                                                             
+FilterOn                       CreationTime                                                                                                                                                                         
+Keep                           2                                                                                                                                                                                    
+KeepToday                      True                                                                                                                                                                                 
+verbose                        True                                                                                                                                                                                 
+whatif                         False
+2024-08-30 08:36:23 INFO:  : #*======^ VERB-dev.psm1:verb-office ^======
