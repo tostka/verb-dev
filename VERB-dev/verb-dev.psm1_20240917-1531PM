@@ -5,7 +5,7 @@
 .SYNOPSIS
 VERB-dev - Development PS Module-related generic functions
 .NOTES
-Version     : 1.5.55
+Version     : 1.5.54
 Author      : Todd Kadrie
 Website     :	https://www.toddomation.com
 Twitter     :	@tostka
@@ -12032,7 +12032,7 @@ r.com/tostka
     Github      : https://github.com/tostka/verb-dev
     Tags        : Powershell,Module,Build,Development
     REVISIONS
-    * 3:30 PM 9/17/2024 added ps7 test & warning;  retooled trailing process (new WinTerm install eating into ps7 by default -> confusion)  added gmo -name `$tmod | ? version -ne `$tVer | rmo -Force -Verbose  to update procedure output (ensure old in-mem obso copies are out of memory)
+    * 3:07 PM 9/17/2024 retooled trailing process (new WinTerm install eating into ps7 by default -> confusion)  added gmo -name `$tmod | ? version -ne `$tVer | rmo -Force -Verbose  to update procedure output (ensure old in-mem obso copies are out of memory)
     * 2:59 PM 8/29/2024 recoded post install report output, found on LYN-9C5CTV3 an 
         obsolete copy of verb-io 11.x that didn't show from uninstall-module, but did 
         for gcm xxx ; added code to force delete the whole \Modules\[verb-xxx] tree 
@@ -14758,11 +14758,6 @@ Processing completed: $($ModuleName) :: $($ModDirPath)
 
 #-=-=-Stacked list for the above: CURRENTUSER=-=-=-=-=-=
 `$whatif=`$false ;  `$tScop = 'CurrentUser' ; `$tMod = '$($ModuleName)' ; `$tVer = '$($psd1Vers)' ;
-if(`$env:WT_SESSION){
-    write-warning "WARNING YOU'RE INSTALLING INTO POWERSHELL7!`nTHE MODULE WILL GO INTO \DOCS\POWERSHELL\MODULES`n(vs \DOCS\WINDOWSPOWERSHELL\MODULES)!" ; 
-    `$bRet=Read-Host "Enter YYY to continue. Anything else will exit"  ; 
-    if (`$bRet.ToUpper() -eq "YYY") {} else {WRITE-WARNING "HALTING!" ; BREAK} ; 
-} ; 
 TRY {
     switch(`$tScop){
         'CurrentUser'{`$ModPath = "`$(split-path `$profile)\Modules\`$(`$tmod)" }
@@ -14794,11 +14789,6 @@ TRY {
 #-=-=-=-=-=-=-=-=
 #-=-=-Stacked list for the above: ALLUSERS=-=-=-=-=-=
 `$whatif=`$false ; `$tScop = 'AllUsers' ; `$tMod = '$($ModuleName)' ; `$tVer = '$($psd1Vers)' ;  
-if(`$env:WT_SESSION){
-    write-warning "WARNING YOU'RE INSTALLING INTO POWERSHELL7!`nTHE MODULE WILL GO INTO \DOCS\POWERSHELL\MODULES`n(vs \DOCS\WINDOWSPOWERSHELL\MODULES)!" ; 
-    `$bRet=Read-Host "Enter YYY to continue. Anything else will exit"  ; 
-    if (`$bRet.ToUpper() -eq "YYY") {} else {WRITE-WARNING "HALTING!" ; BREAK} ; 
-} ; 
 TRY {
     switch(`$tScop){
         'CurrentUser'{`$ModPath = "`$(split-path `$profile)\Modules\`$(`$tmod)" }
@@ -14905,3 +14895,29 @@ Export-ModuleMember -Function backup-ModuleBuild,check-PsLocalRepoRegistration,c
 
 
 
+
+# SIG # Begin signature block
+# MIIELgYJKoZIhvcNAQcCoIIEHzCCBBsCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
+# gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQU6jaeLrYbdc4r24TQWM1v8A4E
+# CPqgggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
+# MCwxKjAoBgNVBAMTIVBvd2VyU2hlbGwgTG9jYWwgQ2VydGlmaWNhdGUgUm9vdDAe
+# Fw0xNDEyMjkxNzA3MzNaFw0zOTEyMzEyMzU5NTlaMBUxEzARBgNVBAMTClRvZGRT
+# ZWxmSUkwgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBALqRVt7uNweTkZZ+16QG
+# a+NnFYNRPPa8Bnm071ohGe27jNWKPVUbDfd0OY2sqCBQCEFVb5pqcIECRRnlhN5H
+# +EEJmm2x9AU0uS7IHxHeUo8fkW4vm49adkat5gAoOZOwbuNntBOAJy9LCyNs4F1I
+# KKphP3TyDwe8XqsEVwB2m9FPAgMBAAGjdjB0MBMGA1UdJQQMMAoGCCsGAQUFBwMD
+# MF0GA1UdAQRWMFSAEL95r+Rh65kgqZl+tgchMuKhLjAsMSowKAYDVQQDEyFQb3dl
+# clNoZWxsIExvY2FsIENlcnRpZmljYXRlIFJvb3SCEGwiXbeZNci7Rxiz/r43gVsw
+# CQYFKw4DAh0FAAOBgQB6ECSnXHUs7/bCr6Z556K6IDJNWsccjcV89fHA/zKMX0w0
+# 6NefCtxas/QHUA9mS87HRHLzKjFqweA3BnQ5lr5mPDlho8U90Nvtpj58G9I5SPUg
+# CspNr5jEHOL5EdJFBIv3zI2jQ8TPbFGC0Cz72+4oYzSxWpftNX41MmEsZkMaADGC
+# AWAwggFcAgEBMEAwLDEqMCgGA1UEAxMhUG93ZXJTaGVsbCBMb2NhbCBDZXJ0aWZp
+# Y2F0ZSBSb290AhBaydK0VS5IhU1Hy6E1KUTpMAkGBSsOAwIaBQCgeDAYBgorBgEE
+# AYI3AgEMMQowCKACgAChAoAAMBkGCSqGSIb3DQEJAzEMBgorBgEEAYI3AgEEMBwG
+# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBQ4zrHu
+# IDyOORKkaza0OCZ+6U4UrTANBgkqhkiG9w0BAQEFAASBgHTblOLwdIJ3NRB020rY
+# 2M42c6LiktLwBl5by2CVBVvJ5eUHURmGmi07sBK6h6rg0GcBgAlfJOcBfeH9/dkX
+# X5rqQtBhGmind/9f39wdsJkpKXw/q8Wp4qsLN+h1iXQCrfmgDXdc0MllGZ7S1e1E
+# uYjGcTK7bM+7z9qz8VkkDYAG
+# SIG # End signature block

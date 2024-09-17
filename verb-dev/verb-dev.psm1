@@ -5,7 +5,7 @@
 .SYNOPSIS
 VERB-dev - Development PS Module-related generic functions
 .NOTES
-Version     : 1.5.51
+Version     : 1.5.55
 Author      : Todd Kadrie
 Website     :	https://www.toddomation.com
 Twitter     :	@tostka
@@ -12032,6 +12032,7 @@ r.com/tostka
     Github      : https://github.com/tostka/verb-dev
     Tags        : Powershell,Module,Build,Development
     REVISIONS
+    * 3:30 PM 9/17/2024 added ps7 test & warning;  retooled trailing process (new WinTerm install eating into ps7 by default -> confusion)  added gmo -name `$tmod | ? version -ne `$tVer | rmo -Force -Verbose  to update procedure output (ensure old in-mem obso copies are out of memory)
     * 2:59 PM 8/29/2024 recoded post install report output, found on LYN-9C5CTV3 an 
         obsolete copy of verb-io 11.x that didn't show from uninstall-module, but did 
         for gcm xxx ; added code to force delete the whole \Modules\[verb-xxx] tree 
@@ -14749,7 +14750,7 @@ Processing completed: $($ModuleName) :: $($ModDirPath)
 
     2. Install the current version (or higher) from the Repo:$($Repository):
 
-        install-Module -name $($ModuleName) -Repository $($Repository) -MinimumVersion $($psd1Vers) -scope currentuser -whatif ;
+        install-Module -name $($ModuleName) -Repository $($Repository) -RequiredVersion $($psd1Vers) -scope currentuser -whatif ;
 
     3. Reimport the module with -force, to ensure the current installed verison is loaded:
 
@@ -14757,6 +14758,11 @@ Processing completed: $($ModuleName) :: $($ModDirPath)
 
 #-=-=-Stacked list for the above: CURRENTUSER=-=-=-=-=-=
 `$whatif=`$false ;  `$tScop = 'CurrentUser' ; `$tMod = '$($ModuleName)' ; `$tVer = '$($psd1Vers)' ;
+if(`$env:WT_SESSION){
+    write-warning "WARNING YOU'RE INSTALLING INTO POWERSHELL7!`nTHE MODULE WILL GO INTO \DOCS\POWERSHELL\MODULES`n(vs \DOCS\WINDOWSPOWERSHELL\MODULES)!" ; 
+    `$bRet=Read-Host "Enter YYY to continue. Anything else will exit"  ; 
+    if (`$bRet.ToUpper() -eq "YYY") {} else {WRITE-WARNING "HALTING!" ; BREAK} ; 
+} ; 
 TRY {
     switch(`$tScop){
         'CurrentUser'{`$ModPath = "`$(split-path `$profile)\Modules\`$(`$tmod)" }
@@ -14764,10 +14770,18 @@ TRY {
     } ;
     if(`$Repository = (Get-PSRepository -Name `$localPSRepo -ea 'STOP').name){
         rmo -Name `$tmod -ea 0 ;
-        Uninstall-Module -Name `$tmod -AllVersion -ea 0 -whatif:`$(`$whatif);
+        Uninstall-Module -Name `$tmod -AllVersion -force -ea 0 -whatif:`$(`$whatif);
         gi -path `$ModPath -ea 0 |ri -Recurse -force -verbose  -whatif:`$(`$whatif) ;
-        install-Module -name `$tmod -Repository `$Repository -MinimumVersion `$tVer -scope `$tScop -AllowClobber -ea 'STOP' -whatif:`$(`$whatif) ;
+        if(`$thisVers = find-module -name `$tmod -Repository `$Repository -RequiredVersion `$tVer){
+            `$thisvers  | ft -a Name,Version,Repository ; 
+            `$thisVers | install-Module -scope `$tScop -Force -AllowClobber -ea 'STOP' -whatif:`$(`$whatif) ;
+        }else {
+            throw "Unable to:find-module -name `$(`$tmod) -Repository `$(`$Repository) -RequiredVersion `$(`$tVer)"
+            break ; 
+        } ; 
+        rmo -Name `$tmod -force -ea 0 ;
         ipmo -name `$tmod -force -verbose -ea 'STOP'  ;
+        gmo -name `$tmod | ? version -ne `$tVer | rmo -Force -Verbose ; 
         gmo -name `$tmod -list ;
     } else {
         throw "Unable to resolve ``$localPSRepo to a configured local PSRepository" ;
@@ -14780,6 +14794,11 @@ TRY {
 #-=-=-=-=-=-=-=-=
 #-=-=-Stacked list for the above: ALLUSERS=-=-=-=-=-=
 `$whatif=`$false ; `$tScop = 'AllUsers' ; `$tMod = '$($ModuleName)' ; `$tVer = '$($psd1Vers)' ;  
+if(`$env:WT_SESSION){
+    write-warning "WARNING YOU'RE INSTALLING INTO POWERSHELL7!`nTHE MODULE WILL GO INTO \DOCS\POWERSHELL\MODULES`n(vs \DOCS\WINDOWSPOWERSHELL\MODULES)!" ; 
+    `$bRet=Read-Host "Enter YYY to continue. Anything else will exit"  ; 
+    if (`$bRet.ToUpper() -eq "YYY") {} else {WRITE-WARNING "HALTING!" ; BREAK} ; 
+} ; 
 TRY {
     switch(`$tScop){
         'CurrentUser'{`$ModPath = "`$(split-path `$profile)\Modules\`$(`$tmod)" }
@@ -14787,10 +14806,18 @@ TRY {
     } ;
     if(`$Repository = (Get-PSRepository -Name `$localPSRepo -ea 'STOP').name){
         rmo -Name `$tmod -ea 0 ;
-        Uninstall-Module -Name `$tmod -AllVersion -ea 0 -whatif:`$(`$whatif);
+        Uninstall-Module -Name `$tmod -AllVersion -force -ea 0 -whatif:`$(`$whatif);
         gi -path `$ModPath -ea 0 |ri -Recurse -force -verbose  -whatif:`$(`$whatif) ;
-        install-Module -name `$tmod -Repository `$Repository -MinimumVersion `$tVer -scope `$tScop -AllowClobber -ea 'STOP' -whatif:`$(`$whatif) ;
+        if(`$thisVers = find-module -name `$tmod -Repository `$Repository -RequiredVersion `$tVer){
+            `$thisvers  | ft -a Name,Version,Repository ; 
+            `$thisVers | install-Module -scope `$tScop -Force -AllowClobber -ea 'STOP' -whatif:`$(`$whatif) ;
+        }else {
+            throw "Unable to:find-module -name `$(`$tmod) -Repository `$(`$Repository) -RequiredVersion `$(`$tVer)"
+            break ; 
+        } ; 
+        rmo -Name `$tmod -force -ea 0 ;
         ipmo -name `$tmod -force -verbose -ea 'STOP'  ;
+        gmo -name `$tmod | ? version -ne `$tVer | rmo -Force -Verbose ; 
         gmo -name `$tmod -list ;
     } else {
         throw "Unable to resolve ``$localPSRepo to a configured local PSRepository" ;
@@ -14882,8 +14909,8 @@ Export-ModuleMember -Function backup-ModuleBuild,check-PsLocalRepoRegistration,c
 # SIG # Begin signature block
 # MIIELgYJKoZIhvcNAQcCoIIEHzCCBBsCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUIlHsGTq+2xl09ZojAF7RcZJT
-# uzGgggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQU3eEKrYieh18isqX88ygj4r1l
+# jHugggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
 # MCwxKjAoBgNVBAMTIVBvd2VyU2hlbGwgTG9jYWwgQ2VydGlmaWNhdGUgUm9vdDAe
 # Fw0xNDEyMjkxNzA3MzNaFw0zOTEyMzEyMzU5NTlaMBUxEzARBgNVBAMTClRvZGRT
 # ZWxmSUkwgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBALqRVt7uNweTkZZ+16QG
@@ -14898,9 +14925,9 @@ Export-ModuleMember -Function backup-ModuleBuild,check-PsLocalRepoRegistration,c
 # AWAwggFcAgEBMEAwLDEqMCgGA1UEAxMhUG93ZXJTaGVsbCBMb2NhbCBDZXJ0aWZp
 # Y2F0ZSBSb290AhBaydK0VS5IhU1Hy6E1KUTpMAkGBSsOAwIaBQCgeDAYBgorBgEE
 # AYI3AgEMMQowCKACgAChAoAAMBkGCSqGSIb3DQEJAzEMBgorBgEEAYI3AgEEMBwG
-# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBRK70CN
-# oxBkXc9C6zUhaHaPInPqAjANBgkqhkiG9w0BAQEFAASBgF1r6wKaD4cHvd2hO+Ef
-# uBZ2LbZIe5jknedCAPqf6A12qmOeheliDnZbw+M2nZocdBAgATHXmkDFDghlE/Zu
-# 8m/9TNxVxhk3v9fUOChBaN7xOZ8ijLlP8eUbbhSjHXEwkNUekZF3CeDFh7K+Rm+Z
-# RGN10WL3g2Spe4x85H7rnhtF
+# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBRsdzq9
+# C3fCGUddcxe2/7ZN06td7zANBgkqhkiG9w0BAQEFAASBgCzdyHctbFMPsmtuSEOm
+# mhAACtljinlJFWY5Kz+tWkrIwtep8X+a9zqfjzPmrcO+t+ZGJfB10sWML7KmqLUG
+# MWEwbOZz80GxUAOmPFau7+Cfi2uYRUWmwEU4bcTYchPoutFXK2htmFCJVFjm1rtc
+# QyUGZk0tFIFbEt6UjK43jb45
 # SIG # End signature block

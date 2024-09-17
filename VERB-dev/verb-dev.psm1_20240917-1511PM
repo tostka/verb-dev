@@ -5,7 +5,7 @@
 .SYNOPSIS
 VERB-dev - Development PS Module-related generic functions
 .NOTES
-Version     : 1.5.48
+Version     : 1.5.53
 Author      : Todd Kadrie
 Website     :	https://www.toddomation.com
 Twitter     :	@tostka
@@ -2917,6 +2917,7 @@ function ConvertTo-ModuleDynamicTDO {
     Tags        : Powershell,Module,Development
     AddedTwitter:
     REVISIONS
+    * 5:45 PM 8/7/2024 reformat params 
     * 2:08 PM 6/29/2022 # scrap the entire $psv2Publine etc block - it's causing corruption, and I won't need it post upgrade off of exop
     * 8:34 AM 5/16/2022 typo: used Aliases for Alias
     * 3:07 PM 5/13/2022ren unmerge-Module -> ConvertTo-ModuleDynamicTDO() (use std verb; adopt keyword to unique my work from 3rd-party funcs); added Unmerge-Module to Aliases; 
@@ -2966,19 +2967,19 @@ function ConvertTo-ModuleDynamicTDO {
     [Alias('Unmerge-Module')]
     PARAM (
         [Parameter(Mandatory = $True, HelpMessage = "Module Name (used to name the ModuleName.psm1 file)[-ModuleName verb-XXX]")]
-        [string] $ModuleName,
+            [string] $ModuleName,
         [Parameter(Mandatory = $True, HelpMessage = "Array of directory paths containing .ps1 function files to be combined [-ModuleSourcePath c:\path-to\module\Public]")]
-        [array] $ModuleSourcePath,
+            [array] $ModuleSourcePath,
         [Parameter(Mandatory = $True, HelpMessage = "Directory path in which the final .psm1 file should be constructed [-ModuleDestinationPath c:\path-to\module\module.psm1]")]
-        [string] $ModuleDestinationPath,
+            [string] $ModuleDestinationPath,
         [Parameter(Mandatory = $False, HelpMessage = "Logging spec object (output from start-log())[-LogSpec `$LogSpec]")]
-        $LogSpec,
+            $LogSpec,
         [Parameter(HelpMessage = "Flag that skips auto-inclusion of 'Export-ModuleMember -Alias * ' in merged file [-NoAliasExport]")]
-        [switch] $NoAliasExport,
+            [switch] $NoAliasExport,
         [Parameter(HelpMessage = "Debugging Flag [-showDebug]")]
-        [switch] $showDebug,
+            [switch] $showDebug,
         [Parameter(HelpMessage = "Whatif Flag  [-whatIf]")]
-        [switch] $whatIf
+            [switch] $whatIf
     ) ;
     # function self-name (equiv to script's: $MyInvocation.MyCommand.Path) ;
     ${CmdletName} = $PSCmdlet.MyInvocation.MyCommand.Name ;
@@ -3559,6 +3560,7 @@ function ConvertTo-ModuleMergedTDO {
     Tags        : Powershell,Module,Development
     AddedTwitter:
     REVISIONS
+    * 5:45 PM 8/7/2024 reformat params ; coerce $RequiredVersion from psd1.moduleversion, if blank ; add test for $rgxPurgeBlockEnd2, ExportModuleMembers syntax in later omds ; fixed/updated FunctionsToExport 
     * 2:04 PM 6/29/2022 rem'd out/removed the $psv2PubLine, $psv2PrivLine dyn exclude material - won't be needed once exop upgraded past psv2
     * 5:18 PM 6/1/2022 splice in support for confirm-ModuleBuildSync ; 
     * 5:16 PM 5/31/2022 add: -RequiredVersion; # 4:48 PM 5/31/2022 getting mismatch/revert in revision to prior spec, confirm/force set it here, call confirm-ModulePsd1Version()/confirm-ModulePsm1Version() (which handle _TMP versions, that stock tools *won't*)
@@ -3639,21 +3641,21 @@ function ConvertTo-ModuleMergedTDO {
     [Alias('Merge-Module')]
     PARAM (
         [Parameter(Mandatory = $True, HelpMessage = "Module Name (used to name the ModuleName.psm1 file)[-ModuleName verb-XXX]")]
-        [string] $ModuleName,
+            [string] $ModuleName,
         [Parameter(Mandatory = $True, HelpMessage = "Array of directory paths containing .ps1 function files to be combined [-ModuleSourcePath c:\path-to\module\Public]")]
-        [array] $ModuleSourcePath,
+            [array] $ModuleSourcePath,
         [Parameter(Mandatory = $True, HelpMessage = "Directory path in which the final .psm1 file should be constructed [-ModuleDestinationPath c:\path-to\module\module.psm1]")]
-        [string] $ModuleDestinationPath,
+            [string] $ModuleDestinationPath,
         [Parameter(HelpMessage="Optional Explicit 3-digit RequiredVersion specification (as contrasts with using current Manifest .psd1 ModuleVersion value)[-Version 2.0.3]")]
-        [version]$RequiredVersion,
+            [version]$RequiredVersion,
         [Parameter(Mandatory = $False, HelpMessage = "Logging spec object (output from start-log())[-LogSpec `$LogSpec]")]
-        $LogSpec,
+            $LogSpec,
         [Parameter(HelpMessage = "Flag that skips auto-inclusion of 'Export-ModuleMember -Alias * ' in merged file [-NoAliasExport]")]
-        [switch] $NoAliasExport,
+            [switch] $NoAliasExport,
         [Parameter(HelpMessage = "Debugging Flag [-showDebug]")]
-        [switch] $showDebug,
+            [switch] $showDebug,
         [Parameter(HelpMessage = "Whatif Flag  [-whatIf]")]
-        [switch] $whatIf
+            [switch] $whatIf
     ) ;
     # function self-name (equiv to script's: $MyInvocation.MyCommand.Path) ;
     ${CmdletName} = $PSCmdlet.MyInvocation.MyCommand.Name ;
@@ -3705,7 +3707,10 @@ function ConvertTo-ModuleMergedTDO {
     $PsdName="$ModuleDestinationPath\$ModuleName.psd1" ;
     $PsmNameTmp="$ModuleDestinationPath\$ModuleName.psm1_TMP" ;
     $PsdNameTmp="$ModuleDestinationPath\$ModuleName.psd1_TMP" ;
-
+    if(-not $RequiredVersion){
+        $psdProfile = Test-ModuleManifest -Path $PsdName -ErrorAction STOP ; 
+        [string]$RequiredVersion = $psdProfile.version
+    } ; 
 
     # backup existing & purge the dyn-include block
     if(test-path -path $PsmName){
@@ -3746,8 +3751,12 @@ function ConvertTo-ModuleMergedTDO {
         #$rgxPurgeBlockEnd = 'Export-ModuleMember\s-Function\s\$publicFunctions\s;';
         # updated version of dyn end, that also explicitly exports -alias *
         $rgxPurgeBlockEnd = 'Export-ModuleMember\s-Function\s\$publicFunctions\s-Alias\s\*\s;\s'
+        $rgxPurgeBlockEnd2 = 'Export-ModuleMember\s-Function\s\$Public\.Basename\s-Alias\s\*\s;'
         $dynIncludeOpen = ($rawsourcelines | select-string -Pattern $rgxPurgeblockStart).linenumber ;
         $dynIncludeClose = ($rawsourcelines | select-string -Pattern $rgxPurgeBlockEnd).linenumber ;
+        if(-not $dynIncludeClose){
+            $dynIncludeClose = ($rawsourcelines | select-string -Pattern $rgxPurgeBlockEnd2).linenumber ;
+        } ; 
         if(!$dynIncludeOpen){$dynIncludeClose = 0 } ;
         $updatedContent = @() ; $DropContent=@() ;
 
@@ -4147,13 +4156,36 @@ Export-ModuleMember -Function $(($ExportFunctions) -join ',') -Alias *
     # build a dummy name for testing .psm1|psd1
     #$testpsm1 = join-path -path (split-path $PsmNameTmp) -ChildPath "$(new-guid).psm1" ; 
 
+    <# 1:57 PM 8/7/2024
+    if(-not (test-path $PsdNameTmp) -And (test-path $PsdName)){
+        $smsg = "no pre-existing `$PsdNameTmp ; sourcing `$PsdNameTmp as stock copy of $($PsdName) " ; 
+        if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } 
+        else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+        #Levels:Error|Warn|Info|H1|H2|H3|H4|H5|Debug|Verbose|Prompt|Success   
+        $srcPsd = $PsdName ; 
+        $destPsed = $PsdNameTmp ; 
+    } ; 
     $tf = $PsdNameTmp ;
     # switch back to manual local updates
-    $pltSCFE=[ordered]@{Path = $tf ; PassThru=$true ;Verbose=$($verbose) ;whatif= $($whatif) ; } 
-    if($psd1ExpMatch = Get-ChildItem $tf | select-string -Pattern $rgxFuncs2Export ){
+    # 1:57 PM 8/7/2024
+    # issue: $psmNameTmp has been constructed bit by bit accumlating thge migrated content
+    # but $psdNameTmp has never been touched. Should be read off of the source psd1
+    # set-content => $tf/$psdNameTmp
+    # the source will need to be the $PsdName
+    #>
+    $pltSCFE=[ordered]@{
+        Path = $PsdNameTmp ; # $tf ;
+        PassThru=$true ;
+        Verbose=$($verbose) ;
+        whatif= $($whatif) ;
+    } 
+    #if($psd1ExpMatch = Get-ChildItem $tf | select-string -Pattern $rgxFuncs2Export ){
+    if($psd1ExpMatch = Get-ChildItem $PsdName | select-string -Pattern $rgxFuncs2Export ){
         # 2-step it, we're getting only $value[-1] through the pipeline
         # add | out-string to collapse object arrays
-        $newContent = (Get-Content $tf) | Foreach-Object {
+        #$newContent = (Get-Content $tf) | Foreach-Object {
+        # 1:58 PM 8/7/2024 switch src to orig $psdName
+        $newContent = (Get-Content $PsdName) | Foreach-Object {
             $_ -replace $rgxFuncs2Export , ("FunctionsToExport = " + "@('" + $($ExportFunctions -join "','") + "')")
         } | out-string ; 
         # this writes to $PsdNameTmp
@@ -8810,6 +8842,7 @@ Function Initialize-PSModuleDirectories {
     AddedWebsite: https://www.powershellgallery.com/packages/ISEScriptingGeek/3.4.1
     AddedTwitter: 
     REVISIONS
+    * 12:23 PM 8/7/2024 removed erroneous [ValidateScript( {Test-Path $_})] from $DefaultModDirs param
     * 12:18 PM 10/12/2023 correct .\Resources -> Resource that's in use 
     * 11:21 AM 10/3/2023 added LICENSES & LIBS & RESOURCES to DefaultModDirs
    * 9:35 AM 5/9/2022 init, split out from merge/unmerge-module, have a single maintainable func, rather than trying to sync the variants
@@ -8853,27 +8886,13 @@ Function Initialize-PSModuleDirectories {
     [cmdletbinding()]
     Param(
         [Parameter(Mandatory = $True, HelpMessage = "Array of directory paths containing .ps1 function files to be combined [-ModuleSourcePath c:\path-to\module\Public]")]
-        [array] $ModuleSourcePath,
-        [Parameter(Mandatory = $True, HelpMessage = "Directory path in which the final .psm1 file should be constructed [-ModuleDestinationPath c:\path-to\module\module.psm1]")]
+            [array] $ModuleSourcePath,
+            [Parameter(Mandatory = $True, HelpMessage = "Directory path in which the final .psm1 file should be constructed [-ModuleDestinationPath c:\path-to\module\module.psm1]")]
         [string] $ModuleDestinationPath,
         [Parameter(HelpMessage = "Array of new module subdirectory names to be created")]
-            [ValidateScript( {Test-Path $_})]
             [string[]]$DefaultModDirs = @('Public','Internal','Classes','Libs','Tests','Licenses','Resource','Docs','Docs\Cab','Docs\en-US','Docs\Markdown'),
         [Parameter(HelpMessage = "Whatif Flag  [-whatIf]")]
-        [switch] $whatIf
-        <#
-        [Parameter(Mandatory = $False,Position = 0,ValueFromPipeline = $True, HelpMessage = 'Path [-path c:\path-to\]')]
-        [Alias('PsPath')]
-        [ValidateScript({Test-Path $_ -PathType 'Container'})]
-        [system.io.fileinfo[]]$Path,
-        
-        [Parameter(Position = 0, HelpMessage = "Enter the path of a PowerShell script")]
-        [ValidateScript( {Test-Path $_})][ValidatePattern( "\.(ps1|psm1|txt)$")]
-        [string]$Path = $(Read-Host "Enter the filename and path to a PowerShell script"),
-        [Parameter(HelpMessage = "Report output directory")]
-        [ValidateScript( {Test-Path $_})][Alias("fp", "out")]
-        [string]$FilePath = "$env:userprofile\Documents\WindowsPowerShell"
-        #>
+            [switch] $whatIf
     )
     BEGIN { 
         #region CONSTANTS-AND-ENVIRO #*======v CONSTANTS-AND-ENVIRO v======
@@ -11843,6 +11862,7 @@ Function Uninstall-ModuleForce {
     Github      : https://github.com/tostka/verb-dev
     Tags        : Powershell,Module,Management,Lifecycle
     REVISIONS
+    # 4:06 PM 8/21/2024 #135:empty PSModulePath entry causes this to crash out, post filter only populated!
     * 12:33 PM 1/17/2024 added RunAA pretest, and folder perms seize code
     * 10:10 AM 5/17/2022 updated post test, also don't want it to abort/break, on any single failure.
     * 11:11 AM 5/10/2022 init, split out process-NewModule #773: $smsg= "Removing existing profile $($ModuleName) content..."  block, to have a single maintainable shared func
@@ -11958,7 +11978,9 @@ Function Uninstall-ModuleForce {
             if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info }  #Error|Warn|Debug
             else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
 
-            $modpaths = $env:PSModulePath.split(';') ;
+            #$modpaths = $env:PSModulePath.split(';') ;
+            # 4:06 PM 8/21/2024 empty PSModulePath entry causes this to crash out, post filter only populated!
+            $modpaths = $env:PSModulePath.split(';') |?{$_} ;
             foreach($modpath in $modpaths){
                 $smsg= "Checking: $($Mod) below: $($modpath)..." ;
                 if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info }  #Error|Warn|Debug
@@ -12010,6 +12032,16 @@ r.com/tostka
     Github      : https://github.com/tostka/verb-dev
     Tags        : Powershell,Module,Build,Development
     REVISIONS
+    * 12:45 PM 9/17/2024 added gmo -name `$tmod | ? version -ne `$tVer | rmo -Force -Verbose  to update procedure output (ensure old in-mem obso copies are out of memory)
+    * 2:59 PM 8/29/2024 recoded post install report output, found on LYN-9C5CTV3 an 
+        obsolete copy of verb-io 11.x that didn't show from uninstall-module, but did 
+        for gcm xxx ; added code to force delete the whole \Modules\[verb-xxx] tree 
+        recursive before installing repo copy. Also added dyn repo discovery (from 
+        $pslocalRepo in profile) and autosteering on scope. It's same SB on both 
+        scopes, w differnt scop input. 
+    * 5:10 PM 8/28/2024 still throwing oddball param errs calling set-AuthenticodeSignatureTDO (says showedebug doesn't exist, though I added it and have iflv'd the update); rem the splat showdebug.
+    * 5:00 PM 8/26/2024 also rplc sign-file -> set-AuthenticodeSignatureTDO, that should keep it from pulling obsolete sign-file out of the built mod, mid pass ; swapped out all existing catch blocks with the -force block, to try to get usable errors out (and avoid need to step dbg issues)
+    * 10:19 AM 8/19/2024 updated w-h to use full export-clixml, where was referring to custom local alias
     * 4:12 PM 7/12/2024 fixed bad path in recovery copy for following too; missing file bug/recoverable down in 'Move/Flatten Resource etc files into root of temp Build dir...', added broad recovery instructions (reinstall from repo, latest vers, buffer in the .psd1/.psm1 from repo copy, rerun)
     * 8:52 AM 12/12/2023 fixed typo trailing log echo #2771 (and added ref to both currlog & perm copy stored at uwps\logs)
     * 3:14 PM 12/11/2023 added expl for reset-ModuleBuildFail.ps1 cleanup pass ; 
@@ -12223,7 +12255,7 @@ r.com/tostka
     .PARAMETER ShowDebug
     Parameter to display Debugging messages [-ShowDebug switch]
     .PARAMETER Republish
-    Flag that indicates Module should be republished into local Repo (skips ConvertTo-ModuleDynamicTDO & Sign-file steps) [-Republish]
+    Flag that indicates Module should be republished into local Repo (skips ConvertTo-ModuleDynamicTDO & set-AuthenticodeSignatureTDO steps) [-Republish]
     .PARAMETER Whatif
     Parameter to run a Test no-change pass [-Whatif switch]
     .EXAMPLE
@@ -12281,7 +12313,7 @@ r.com/tostka
             [string]$Repository,
         [Parameter(HelpMessage="Flag that indicates Module should be Merged into a monoolithic .psm1 [-Merge]")]
             [switch] $Merge,
-        [Parameter(HelpMessage="Flag that indicates Module should be republished into local Repo (skips ConvertTo-ModuleDynamicTDO & Sign-file steps) [-Republish]")]
+        [Parameter(HelpMessage="Flag that indicates Module should be republished into local Repo (skips ConvertTo-ModuleDynamicTDO & set-AuthenticodeSignatureTDO steps) [-Republish]")]
             [switch] $Republish,
         [Parameter(HelpMessage="Flag that indicates Pester test script should be run, at end of processing [-RunTest]")]
             [switch] $RunTest,
@@ -13110,13 +13142,12 @@ r.com/tostka
         } else {throw "Unable to configure logging!" } ;
     } CATCH {
         $ErrTrapd=$Error[0] ;
-        $smsg = "Failed processing $($ErrTrapd.Exception.ItemName). `nError Message: $($ErrTrapd.Exception.Message)`nError Details: $($ErrTrapd)" ;
-        if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug
+        $smsg = "`n$(($ErrTrapd | fl * -Force|out-string).trim())" ;
+        if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN } #Error|Warn|Debug
         else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
-        $smsg = $ErrTrapd.Exception.Message ;
-        if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN }
-        else{ write-WARNING "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
-    } ;
+        $PassStatus += ";ERROR";
+        Break ; 
+    } ; 
     
     $sBnr="#*======v $($ScriptBaseName):$($ModuleName) v======" ;
     $smsg= "$($sBnr)" ;
@@ -13232,15 +13263,12 @@ r.com/tostka
 
         } CATCH {
             $ErrTrapd=$Error[0] ;
-            $PassStatus += ";ERROR";
-            $smsg= "Failed processing $($ErrTrapd.Exception.ItemName). `nError Message: $($ErrTrapd.Exception.Message)`nError Details: $($ErrTrapd)" ;
-            if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN }  #Error|Warn|Debug
+            $smsg = "`n$(($ErrTrapd | fl * -Force|out-string).trim())" ;
+            if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN } #Error|Warn|Debug
             else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
-            $smsg = $ErrTrapd.Exception.Message ;
-            if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN }
-            else{ write-WARNING "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
-            Break ;
-        } ;
+            $PassStatus += ";ERROR";
+            Break ; 
+        } ; 
         if($RequiredVersion.tostring() -AND  $psd1Profile){
             if($psd1Profile.Version.tostring() -eq $RequiredVersion.tostring()){
                 $psd1UpdatedVers = $psd1Vers = $psd1Profile.Version.tostring() ;
@@ -13307,14 +13335,14 @@ r.com/tostka
         $psd1UpdatedVers = (Import-PowerShellDataFile -Path $ModPsdPath).ModuleVersion.tostring() ;
     } CATCH {
         $ErrTrapd=$Error[0] ;
-        $PassStatus += ";ERROR";
-        $smsg = "Import-PowerShellDataFile:Failed processing $($ErrTrapd.Exception.ItemName). `nError Message: $($ErrTrapd.Exception.Message)`nError Details: $($ErrTrapd)" ;
-        if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN }  #Error|Warn|Debug
+        $smsg = "`n$(($ErrTrapd | fl * -Force|out-string).trim())" ;
+        if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN } #Error|Warn|Debug
         else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
-        $smsg = $ErrTrapd.Exception.Message ;
-        write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" ;
-        Break ;
-    } ;
+        $smsg = "Import-PowerShellDataFile:Failed processing ^ " ;
+        if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN }  #Error|Warn|Debug
+        $PassStatus += ";ERROR";
+        Break ; 
+    } ; 
     if($RequiredVersion.tostring() -AND $psd1UpdatedVers){
         if($psd1UpdatedVers.tostring() -eq $RequiredVersion.tostring()){
             $psd1Vers = $psd1UpdatedVers.tostring() ;
@@ -13631,17 +13659,14 @@ $(if($Merge){'MERGE parm specified as well:`n-Merge Public|Internal|Classes incl
             else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
         }
     } CATCH {
-         $ErrTrapd=$Error[0] ;
-        $PassStatus += ";ERROR";
-        $smsg = "Failed processing $($ErrTrapd.Exception.ItemName). `nError Message: $($ErrTrapd.Exception.Message)`nError Details: $($ErrTrapd)" ;
-        if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN }  #Error|Warn|Debug
+        $ErrTrapd=$Error[0] ;
+        $smsg = "`n$(($ErrTrapd | fl * -Force|out-string).trim())" ;
+        if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN } #Error|Warn|Debug
         else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
-        $smsg = $ErrTrapd.Exception.Message ;
-        write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" ;
-        Break ;
-    } ;
-
-
+        $PassStatus += ";ERROR";
+        Break ; 
+    } ; 
+    
     $psd1Vers = $psd1Profile.Version.tostring() ;
     $psd1guid = $psd1Profile.Guid.tostring() ;
     if(test-path $TestScriptPath){
@@ -13716,7 +13741,8 @@ $(if($Merge){'MERGE parm specified as well:`n-Merge Public|Internal|Classes incl
     # export the list extensionless xml, to let it drop off of the Psd1filelist 
     $rgxPsd1FileListLine = '((#\s)*)FileList((\s)*)=((\s)*).*' ;
     if($Psd1filelist){
-        $smsg = "`$Psd1filelist populated: xXML:$($ModDirPath)\Psd1filelist" ; 
+        $smsg = "`$Psd1filelist populated: export-cliXML:$($ModDirPath)\Psd1filelist" ; 
+        # 10:18 AM 8/19/2024 xxml isn't either a stock alias, or a proper verb-alias (export == ep, not x); use the stock expanded call to avoid long term issues
         if($verbose){if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level VERBOSE } 
         else{ write-verbose "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; } ; $smsg = "" ; 
         $Psd1filelist | sort | export-clixml -path "$($ModDirPath)\Psd1filelist" ;
@@ -13807,24 +13833,28 @@ $(if($Merge){'MERGE parm specified as well:`n-Merge Public|Internal|Classes incl
         $pltSignFile=[ordered]@{
             file=$files.fullname ;
             ErrorAction="Stop" ;
-            showdebug=$($showdebug);
+            #showdebug=$($showdebug);
             whatif=$($whatif);
         } ;
-        $smsg= "Sign-file w`n$(($pltSignFile|out-string).trim())" ;
+        $smsg= "set-AuthenticodeSignatureTDO w`n$(($pltSignFile|out-string).trim())" ;
         if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info }  #Error|Warn|Debug
         else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+        # dbg, temp, forceup the proper _func for signing
+        if( ((get-date ).Date -match '8/28/2024') -AND (-not (gcm set-AuthenticodeSignatureTDO |?{$_.module -eq $null -AND $Source -eq $null } ) ) ){
+            write-warning "DBG:Invalid source found for set-AuthenticodeSignatureTDO, forcing fresh ipmo -fo -verb" ;  
+            C:\usr\work\ps\Scripts\set-AuthenticodeSignatureTDO_func.ps1 | ipmo -fo -verb ; 
+        } ; 
         TRY {
-            sign-file @pltSignFile ;
+            set-AuthenticodeSignatureTDO @pltSignFile ;
+        # 4:34 PM 8/26/2024 catch isn't catching anything, upgrade the block
         } CATCH {
             $ErrTrapd=$Error[0] ;
-            $PassStatus += ";ERROR";
-            $smsg = "Failed processing $($ErrTrapd.Exception.ItemName). `nError Message: $($ErrTrapd.Exception.Message)`nError Details: $($ErrTrapd)" ;
-            if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN }  #Error|Warn|Debug
+            $smsg = "`n$(($ErrTrapd | fl * -Force|out-string).trim())" ;
+            if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN } #Error|Warn|Debug
             else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
-            $smsg = $ErrTrapd.Exception.Message ;
-            write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" ;
-            Break ;
-        } ;
+            $PassStatus += ";ERROR";
+            Break ; 
+        } ; 
     } else {
         $smsg= "(no matching signable files)" ;
         if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info }  #Error|Warn|Debug
@@ -13943,22 +13973,13 @@ $(if($Merge){'MERGE parm specified as well:`n-Merge Public|Internal|Classes incl
             #>
             $Exit = $Retries ;
         } CATCH {
-            $smsg = $_.Exception.Message ;
-            Start-Sleep -Seconds $RetrySleep ;
-            # reconnect-exo/reconnect-ex2010
-            $Exit ++ ;
-            if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN }
-            else{ write-WARNING "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
-            $smsg= "Try #: $($Exit)" ;
-            if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Error }  #Error|Warn|Debug 
-            else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
-            If ($Exit -eq $Retries) {
-                $smsg= "Unable to exec cmd!" ;
-                if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Error }  #Error|Warn|Debug 
-            else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
-                BREAK ; 
-            } ;
-        }  ;
+            $ErrTrapd=$Error[0] ;
+            $smsg = "`n$(($ErrTrapd | fl * -Force|out-string).trim())" ;
+            if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN } #Error|Warn|Debug
+            else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+            $PassStatus += ";ERROR";
+            Break ; 
+        } ; 
     } Until ($Exit -eq $Retries) ;
 
     # if we've run a copy all, we need to loop back and pull the items that *arent* ext -match $rgxModExtIncl
@@ -13983,14 +14004,12 @@ $(if($Merge){'MERGE parm specified as well:`n-Merge Public|Internal|Classes incl
             Remove-Item @pltRItm ;
         } CATCH {
             $ErrTrapd=$Error[0] ;
-            $smsg = "Failed processing $($ErrTrapd.Exception.ItemName). `nError Message: $($ErrTrapd.Exception.Message)`nError Details: $($ErrTrapd)" ;
-            if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN }  #Error|Warn|Debug
+            $smsg = "`n$(($ErrTrapd | fl * -Force|out-string).trim())" ;
+            if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN } #Error|Warn|Debug
             else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
-            $smsg = $ErrTrapd.Exception.Message ;
-            write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" ;
             $PassStatus += ";ERROR";
-            Break #STOP(debug)|EXIT(close)|Continue(move on in loop cycle) ;
-        } ;
+            Break ; 
+        } ; 
     } ;
 
     # 3:51 PM 10/11/2023 remove empty sub folders
@@ -14045,12 +14064,13 @@ $(if($Merge){'MERGE parm specified as well:`n-Merge Public|Internal|Classes incl
                 } ; 
                 move-item -Path $ffile -Destination (join-path -path $to -childpath $ModuleName) -verbose:$($VerbosePreference -eq "Continue") ; 
             } CATCH {
-                $ErrTrapd = $Error[0] ;
-                $smsg = "$('*'*5)`nFailed processing $($ErrTrapd.Exception.ItemName). `nError Message: $($ErrTrapd.Exception.Message)`nError Details: `n$(($ErrTrapd|out-string).trim())`n$('-'*5)" ;
-                if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN } 
-                else{ write-WARNING "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; 
-                CONTINUE ;        
-            } ;
+                $ErrTrapd=$Error[0] ;
+                $smsg = "`n$(($ErrTrapd | fl * -Force|out-string).trim())" ;
+                if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN } #Error|Warn|Debug
+                else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                $PassStatus += ";ERROR";
+                CONTINUE ; 
+            } ; 
         } else {
             $smsg = "Unable to locate a problematic temp mod dir $($to) COPY of $($fl)" ; 
             if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } 
@@ -14078,12 +14098,13 @@ $(if($Merge){'MERGE parm specified as well:`n-Merge Public|Internal|Classes incl
             } ; 
             COPY-item -Path $fl -Destination (join-path -path $ModDirPath -childpath $ModuleName) -force -verbose:$($VerbosePreference -eq "Continue") ;
         } CATCH {
-            $ErrTrapd = $Error[0] ;
-            $smsg = "$('*'*5)`nFailed processing $($ErrTrapd.Exception.ItemName). `nError Message: $($ErrTrapd.Exception.Message)`nError Details: `n$(($ErrTrapd|out-string).trim())`n$('-'*5)" ;
-            if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN } 
-            else{ write-WARNING "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; 
-            CONTINUE ;        
-        } ;
+            $ErrTrapd=$Error[0] ;
+            $smsg = "`n$(($ErrTrapd | fl * -Force|out-string).trim())" ;
+            if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN } #Error|Warn|Debug
+            else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+            $PassStatus += ";ERROR";
+            CONTINUE ; 
+        } ; 
     } ; 
     #
 
@@ -14247,19 +14268,12 @@ The above *may* sort the error without further debugging (could reflect missing/
                 } ; 
             } CATCH {
                 $ErrTrapd=$Error[0] ;
-                $PassStatus += ";ERROR";
-                $smsg= "Failed processing $($ErrTrapd.Exception.ItemName). `nError Message: $($ErrTrapd.Exception.Message)`nError Details: $($ErrTrapd)" ;
-                if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN }  #Error|Warn|Debug
+                $smsg = "`n$(($ErrTrapd | fl * -Force|out-string).trim())" ;
+                if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN } #Error|Warn|Debug
                 else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
-                $smsg = $ErrTrapd.Exception.Message ;
-                if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN }
-                else{ write-WARNING "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
-                $smsg = "FULL ERROR TRAPPED (EXPLICIT CATCH BLOCK WOULD LOOK LIKE): } catch[$($ErrTrapd.Exception.GetType().FullName)]{" ;
-                if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level ERROR } #Error|Warn|Debug
-                else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
-                Break ;
-            } ;
-
+                $PassStatus += ";ERROR";
+                Break ; 
+            } ; 
 
             <# check for an existing repo pkg that will conflict with the version of the local copy
             $localMod.version : 1.2.0
@@ -14281,13 +14295,13 @@ The above *may* sort the error without further debugging (could reflect missing/
             TRY {
                 $tRepo = get-PSRepository -name $localPSRepo ; 
             } CATCH {
-                $ErrorTrapped = $Error[0] ;
-                $PassStatus += ";ERROR";
-                $smsg= "Failed processing $($ErrorTrapped.Exception.ItemName). `nError Message: $($ErrorTrapped.Exception.Message)`nError Details: $($ErrorTrapped)" ;
-                if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Error } #Error|Warn
+                $ErrTrapd=$Error[0] ;
+                $smsg = "`n$(($ErrTrapd | fl * -Force|out-string).trim())" ;
+                if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN } #Error|Warn|Debug
                 else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
-                Break ;
-            } ;
+                $PassStatus += ";ERROR";
+                Break ; 
+            } ; 
 
             if($tRepo){
 
@@ -14458,20 +14472,15 @@ And then re-run update-NewModule.
                         $smsg = "(no `$pbmo_Err: Publish-Module had no errors)" ;
                         if($verbose){if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level VERBOSE }
                         else{ write-verbose "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; } ;
-                    } ;                
+                    } ;   
             } CATCH {
-                $ErrorTrapped = $Error[0] ;
-                $PassStatus += ";ERROR";
-                $smsg= "Failed processing $($ErrorTrapped.Exception.ItemName). `nError Message: $($ErrorTrapped.Exception.Message)`nError Details: $($ErrorTrapped)" ;
-                if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Error } #Error|Warn
+                $ErrTrapd=$Error[0] ;
+                $smsg = "`n$(($ErrTrapd | fl * -Force|out-string).trim())" ;
+                if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN } #Error|Warn|Debug
                 else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
-                if($ErrorTrapped.Exception.Message -match 'The\sversion\smust\sexceed\sthe\scurrent\sversion'){
-                    $smsg= "NOTE: If the psdVers ($($psd1Vers)) *is* > prior rev ($($localmod)) (e.g. publish-Module has bad SemanticVersion code),`nbump the rev a minor level`nStep-ModuleVersion -Path $($ModPsdPath) -by minor" ;
-                    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Error } #Error|Warn
-                    else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
-                } ;
-                Break ;
-            } ;
+                $PassStatus += ";ERROR";
+                Break ; 
+            } ;              
 
             $smsg= "Waiting for:find-module -name $($ModuleName) -Repository $Repository ..." ;
             if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info }  #Error|Warn|Debug
@@ -14490,13 +14499,13 @@ And then re-run update-NewModule.
                     $tfiles = Get-ChildItem -Recurse -Path "$($env:userprofile)\Documents\WindowsPowerShell\Modules\$($ModuleName)\*.*" |Where-Object{ ! $_.PSIsContainer } ;
                     #$tfiles | remove-item @pltRemoveItem ;
                 } CATCH {
-                    $ErrorTrapped = $Error[0] ;
-                    $PassStatus += ";ERROR";
-                    $smsg= "Failed processing $($ErrorTrapped.Exception.ItemName). `nError Message: $($ErrorTrapped.Exception.Message)`nError Details: $($ErrorTrapped)" ;
-                    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Error } #Error|Warn
+                    $ErrTrapd=$Error[0] ;
+                    $smsg = "`n$(($ErrTrapd | fl * -Force|out-string).trim())" ;
+                    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN } #Error|Warn|Debug
                     else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
-                    $bRetry=$true ;
-                } ;
+                    $PassStatus += ";ERROR";
+                    Break ; 
+                } ; 
 
                 $bRet = remove-ItemRetry -Path $tFiles -Recurse -showdebug:$($showdebug) -whatif:$($whatif) -GracefulFail ;
                 if (!$bRet) {throw "FAILURE" ; Break ; } ;
@@ -14541,11 +14550,14 @@ And then re-run update-NewModule.
                         if($verbose){if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level VERBOSE }
                         else{ write-verbose "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; } ;
                     } ; 
-                } CATCH {$smsg = $_.Exception.Message ;
-                    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN }
-                    else{ write-WARNING "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
-                    BREAK ;
-                } ;
+                } CATCH {
+                    $ErrTrapd=$Error[0] ;
+                    $smsg = "`n$(($ErrTrapd | fl * -Force|out-string).trim())" ;
+                    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN } #Error|Warn|Debug
+                    else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                    $PassStatus += ";ERROR";
+                    Break ; 
+                } ; 
 
                 # test import-module with ea, force (hard reload curr version) & verbose output
                 # 11:45 am 12/4/2023:should update ipmo w -errorvariable
@@ -14583,13 +14595,13 @@ And then re-run update-NewModule.
                         else{ write-verbose "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; } ;
                     } ; 
                 } CATCH {
-                    $ErrorTrapped = $Error[0] ;
-                    $PassStatus += ";ERROR";
-                    $smsg= "Failed processing $($ErrorTrapped.Exception.ItemName). `nError Message: $($ErrorTrapped.Exception.Message)`nError Details: $($ErrorTrapped)" ;
-                    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Error } #Error|Warn
+                    $ErrTrapd=$Error[0] ;
+                    $smsg = "`n$(($ErrTrapd | fl * -Force|out-string).trim())" ;
+                    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN } #Error|Warn|Debug
                     else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
-                    Break ;
-                } ;
+                    $PassStatus += ";ERROR";
+                    Break ; 
+                } ; 
 
                 # finally, lets grab the .nukpg that was created on the repo, and cached it in the sc dir (for direct copying to stock other repos, home etc)
                 #if($tNewPkg = get-childitem "$($tRepo.ScriptPublishLocation)\$($ModuleName).$($psd1Vers).nupkg" -ea 0){
@@ -14622,14 +14634,12 @@ And then re-run update-NewModule.
                             New-Item @pltNItm ;
                         } CATCH {
                             $ErrTrapd=$Error[0] ;
-                            $smsg = "Failed processing $($ErrTrapd.Exception.ItemName). `nError Message: $($ErrTrapd.Exception.Message)`nError Details: $($ErrTrapd)" ;
-                            if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN }  #Error|Warn|Debug
+                            $smsg = "`n$(($ErrTrapd | fl * -Force|out-string).trim())" ;
+                            if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN } #Error|Warn|Debug
                             else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
                             $PassStatus += ";ERROR";
-                            $smsg = $ErrTrapd.Exception.Message ;
-                            write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" ;
-                            Break #STOP(debug)|EXIT(close)|Continue(move on in loop cycle) ;
-                        } ;
+                            Break ; 
+                        } ; 
                     } ;
                     write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):Copy-Item w`n$(($pltCItm|out-string).trim())" ;
                     $error.clear() ;
@@ -14637,14 +14647,12 @@ And then re-run update-NewModule.
                         copy-Item @pltCItm ;
                     } CATCH {
                         $ErrTrapd=$Error[0] ;
-                        $smsg = "Failed processing $($ErrTrapd.Exception.ItemName). `nError Message: $($ErrTrapd.Exception.Message)`nError Details: $($ErrTrapd)" ;
-                        if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN }  #Error|Warn|Debug
+                        $smsg = "`n$(($ErrTrapd | fl * -Force|out-string).trim())" ;
+                        if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN } #Error|Warn|Debug
                         else{ write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
-                        $smsg = $ErrTrapd.Exception.Message ;
-                        write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" ;
                         $PassStatus += ";ERROR";
-                        Break #STOP(debug)|EXIT(close)|Continue(move on in loop cycle) ;
-                    } ;
+                        Break ; 
+                    } ; 
 
                 } else {
                     $smsg = "No Nupkg File Found To Cache Locally!" ; 
@@ -14727,6 +14735,7 @@ And then re-run update-NewModule.
 
                 } ;
 
+                # 12:26 PM 8/29/2024 FOR cu, ON LYN-9C5CTV3 found module that doesn't gmo -list, but ipmos as a module, post unisntall, blow away entire CU\Modules\verb-XXX tree
                 # POST REPORT
                 $FinalReport=@"
 
@@ -14747,26 +14756,52 @@ Processing completed: $($ModuleName) :: $($ModDirPath)
 
         import-Module -name $($ModuleName) -force -verbose ;
 
-#-=-Stacked list: Unwrap to create a 1-liner for the above: CURRENTUSER =-=-=-=-=-=-=
-`$whatif=`$false ; `$tMod = '$($ModuleName)' ; `$tVer = '$($psd1Vers)' ;  `$tScop = 'CurrentUser' ;
+#-=-=-Stacked list for the above: CURRENTUSER=-=-=-=-=-=
+`$whatif=`$false ;  `$tScop = 'CurrentUser' ; `$tMod = '$($ModuleName)' ; `$tVer = '$($psd1Vers)' ;
 TRY {
-Remove-Module -Name `$tmod -ea 0 ;
-Uninstall-Module -Name `$tmod -AllVersion -whatif:`$(`$whatif) ;
-install-Module -name `$tmod -Repository '$($Repository)' -MinimumVersion `$tVer -scope `$tScop -AllowClobber -whatif:`$(`$whatif) ;
-import-Module -name `$tmod -force -verbose ;
+    switch(`$tScop){
+        'CurrentUser'{`$ModPath = "`$(split-path `$profile)\Modules\`$(`$tmod)" }
+        'AllUsers' {`$ModPath = "`$(`$env:ProgramFiles)\WindowsPowerShell\Modules)\`$(`$tmod)"} ; 
+    } ;
+    if(`$Repository = (Get-PSRepository -Name `$localPSRepo -ea 'STOP').name){
+        rmo -Name `$tmod -ea 0 ;
+        Uninstall-Module -Name `$tmod -AllVersion -ea 0 -whatif:`$(`$whatif);
+        gi -path `$ModPath -ea 0 |ri -Recurse -force -verbose  -whatif:`$(`$whatif) ;
+        install-Module -name `$tmod -Repository `$Repository -MinimumVersion `$tVer -scope `$tScop -AllowClobber -ea 'STOP' -whatif:`$(`$whatif) ;
+        ipmo -name `$tmod -force -verbose -ea 'STOP'  ;
+        gmo -name `$tmod | ? version -ne `$tVer | rmo -Force -Verbose ; 
+        gmo -name `$tmod -list ;
+    } else {
+        throw "Unable to resolve ``$localPSRepo to a configured local PSRepository" ;
+    } ;
 } CATCH {
-Write-Warning "Failed processing `$(`$_.Exception.ItemName). `nError Message: `$(`$_.Exception.Message)`nError Details: `$(`$_)" ; Break ;
+    `$ErrTrapd=`$Error[0] ;
+    `$smsg = "`n`$((`$ErrTrapd | fl * -Force|out-string).trim())" ;
+    write-warning "`$((get-date).ToString('HH:mm:ss')):`$(`$smsg)" ;
 } ;
 #-=-=-=-=-=-=-=-=
-#-=-Stacked list: Unwrap to create a 1-liner for the above: ALLUSERS =-=-=-=-=-=-=
-`$whatif=`$false ; `$tMod = '$($ModuleName)' ; `$tVer = '$($psd1Vers)' ;  `$tScop = 'AllUsers' ;
+#-=-=-Stacked list for the above: ALLUSERS=-=-=-=-=-=
+`$whatif=`$false ; `$tScop = 'AllUsers' ; `$tMod = '$($ModuleName)' ; `$tVer = '$($psd1Vers)' ;  
 TRY {
-Remove-Module -Name `$tmod -ea 0 ;
-Uninstall-Module -Name `$tmod -AllVersion -whatif:`$(`$whatif) ;
-install-Module -name `$tmod -Repository '$($Repository)' -MinimumVersion `$tVer -scope `$tScop -AllowClobber -whatif:`$(`$whatif) ;
-import-Module -name `$tmod -force -verbose ;
+    switch(`$tScop){
+        'CurrentUser'{`$ModPath = "`$(split-path `$profile)\Modules\`$(`$tmod)" }
+        'AllUsers' {`$ModPath = "`$(`$env:ProgramFiles)\WindowsPowerShell\Modules)\`$(`$tmod)"} ; 
+    } ;
+    if(`$Repository = (Get-PSRepository -Name `$localPSRepo -ea 'STOP').name){
+        rmo -Name `$tmod -ea 0 ;
+        Uninstall-Module -Name `$tmod -AllVersion -ea 0 -whatif:`$(`$whatif);
+        gi -path `$ModPath -ea 0 |ri -Recurse -force -verbose  -whatif:`$(`$whatif) ;
+        install-Module -name `$tmod -Repository `$Repository -MinimumVersion `$tVer -scope `$tScop -AllowClobber -ea 'STOP' -whatif:`$(`$whatif) ;
+        ipmo -name `$tmod -force -verbose -ea 'STOP'  ;
+        gmo -name `$tmod | ? version -ne `$tVer | rmo -Force -Verbose ; 
+        gmo -name `$tmod -list ;
+    } else {
+        throw "Unable to resolve ``$localPSRepo to a configured local PSRepository" ;
+    } ;
 } CATCH {
-Write-Warning "Failed processing `$(`$_.Exception.ItemName). `nError Message: `$(`$_.Exception.Message)`nError Details: `$(`$_)" ; Break ;
+    `$ErrTrapd=`$Error[0] ;
+    `$smsg = "`n`$((`$ErrTrapd | fl * -Force|out-string).trim())" ;
+    write-warning "`$((get-date).ToString('HH:mm:ss')):`$(`$smsg)" ;
 } ;
 #-=-=-=-=-=-=-=-=
 
@@ -14850,8 +14885,8 @@ Export-ModuleMember -Function backup-ModuleBuild,check-PsLocalRepoRegistration,c
 # SIG # Begin signature block
 # MIIELgYJKoZIhvcNAQcCoIIEHzCCBBsCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUefIs3d5HdT8MoPT5Kl/uQ69y
-# bOWgggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUNNTI9nWpC7PphsdkLw2UWRz/
+# dY2gggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
 # MCwxKjAoBgNVBAMTIVBvd2VyU2hlbGwgTG9jYWwgQ2VydGlmaWNhdGUgUm9vdDAe
 # Fw0xNDEyMjkxNzA3MzNaFw0zOTEyMzEyMzU5NTlaMBUxEzARBgNVBAMTClRvZGRT
 # ZWxmSUkwgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBALqRVt7uNweTkZZ+16QG
@@ -14866,9 +14901,9 @@ Export-ModuleMember -Function backup-ModuleBuild,check-PsLocalRepoRegistration,c
 # AWAwggFcAgEBMEAwLDEqMCgGA1UEAxMhUG93ZXJTaGVsbCBMb2NhbCBDZXJ0aWZp
 # Y2F0ZSBSb290AhBaydK0VS5IhU1Hy6E1KUTpMAkGBSsOAwIaBQCgeDAYBgorBgEE
 # AYI3AgEMMQowCKACgAChAoAAMBkGCSqGSIb3DQEJAzEMBgorBgEEAYI3AgEEMBwG
-# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBS7Iqza
-# Do9Xdmxhcp6GJsFeehAgYTANBgkqhkiG9w0BAQEFAASBgA9g23eT98EA9Q+bTqKp
-# RnxlHfLB05fsRckO35XohTuLmB4i1Q1uRAmVb+cRBXlL20uXEETGYyO0xO1H6FAH
-# 9cHvFTpgtmOA/GdvzzI4DHMFXpmjEfKvnXxv63MbA4jHqjo+pdNSIEy4FXOQs42c
-# GobaB7/q7yAk6L7HSM/y9+i3
+# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBT3KxvG
+# LQc8CXoysoLXFQEoliKFBDANBgkqhkiG9w0BAQEFAASBgEpT1scUxwzlCfDp5T4O
+# yJXAOSMh3kbG67aB5Z8W+cvu59Et/SY/we9owkpBXufLC00IBWw/6xtDYIHO7PIS
+# KSKBrsyeQ3QKQBKVxdnDekrYFLDhyZxBbvWlLr2CKrcQ87Fd+i94RzZTD4tZ+ecp
+# 7flQycoJotQJnouUw0W0sqXO
 # SIG # End signature block
