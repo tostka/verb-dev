@@ -5,7 +5,7 @@
 .SYNOPSIS
 VERB-dev - Development PS Module-related generic functions
 .NOTES
-Version     : 1.5.55
+Version     : 1.5.56
 Author      : Todd Kadrie
 Website     :	https://www.toddomation.com
 Twitter     :	@tostka
@@ -4510,33 +4510,39 @@ Function convertTo-WrappedPS {
 function copy-ISETabFileToLocal {
     <#
     .SYNOPSIS
-    copy-ISETabFileToLocal - Copy the currently open ISE tab file, to local machine (RDP remote only), prompting for local path. The filename copied is either the intact local name, or, if -stripFunc is used, the filename with any _func substring removed. 
+    copy-ISETabFileToLocal.ps1 - Copy the currently open ISE tab file, to local machine (RDP remote only), prompting for local path. The filename copied is either the intact local name, or, if -stripFunc is used, the filename with any _func substring removed. 
     .NOTES
-    Version     : 1.0.0
+    Version     : 0.0.
     Author      : Todd Kadrie
     Website     : http://www.toddomation.com
     Twitter     : @tostka / http://twitter.com/tostka
     CreatedDate : 2024-05-22
-    FileName    : copy-ISETabFileToLocal
-    License     : MIT License
-    Copyright   : (c) 2024 Todd Kadrie
-    Github      : https://github.com/tostka/verb-dev
-    Tags        : Powershell,ISE,development,debugging,backup
-    REVISIONS
-    * 2:15 PM 5/29/2024 add: c:\sc dev repo dest test, prompt for optional -nofunc use (avoid mistakes copying into repo with _func.ps1 source name intact)
-    * 1:22 PM 5/22/2024init
+        FileName    : copy-ISETabFileToLocal
+        License     : MIT License
+        Copyright   : (c) 2024 Todd Kadrie
+        Github      : https://github.com/tostka/verb-dev
+        Tags        : Powershell,ISE,development,debugging,backup
+        REVISIONS
+        * 12:10 PM 9/19/2024 rebuild CBH (wasn't gh parsing properly)
+        * 2:15 PM 5/29/2024 add: c:\sc dev repo dest test, prompt for optional -nofunc use (avoid mistakes copying into repo with _func.ps1 source name intact)
+        * 1:22 PM 5/22/2024init
     .DESCRIPTION
-    copy-ISETabFileToLocal - Copy the currently open ISE tab file, to local machine (RDP remote only), prompting for local path. The filename copied is either the intact local name, or, if -stripFunc is used, the filename with any _func substring removed. 
-    This also checks for a matching exported breakpoint file (name matches target script .ps1, with trailing name ...-ps1-BP.xml), and prompts to also move that file along with the .ps1. 
+    copy-ISETabFileToLocal.ps1 - Copy the currently open ISE tab file, to local machine (RDP remote only), prompting for local path. The filename copied is either the intact local name, or, if -stripFunc is used, the filename with any _func substring removed. 
 
     .PARAMETER Path
     Path to source file (defaults to `$psise.CurrentFile.FullPath)[-Path 'D:\scripts\copy-ISETabFileToLocal_func.ps1']
     .PARAMETER LocalDestination
     Localized destination directory path[-path c:\pathto\]
     .PARAMETER noFunc
-    Switch to remove any '_func' substring from the original file name, while copying (used for copying to final module .\Public directory for publishing[-noFunc]
+    Switch to remove any '_func' substring from the original file name, while copying (used for copying to final module .\Public directory for publishing[-noFunc])
     .PARAMETER whatIf
     Whatif switch [-whatIf]
+    .INPUTS
+    None. Does not accepted piped input.(.NET types, can add description)
+    .OUTPUTS
+    None. Returns no objects or output (.NET types)
+    System.Boolean
+    [| get-member the output to see what .NET obj TypeName is returned, to use here]
     .EXAMPLE
     PS> copy-ISETabFileToLocal -verbose -whatif
     Copy the current tab file to prompted local destination, whatif, with verbose output

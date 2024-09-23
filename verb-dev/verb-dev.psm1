@@ -5,7 +5,7 @@
 .SYNOPSIS
 VERB-dev - Development PS Module-related generic functions
 .NOTES
-Version     : 1.5.55
+Version     : 1.5.56
 Author      : Todd Kadrie
 Website     :	https://www.toddomation.com
 Twitter     :	@tostka
@@ -4510,33 +4510,39 @@ Function convertTo-WrappedPS {
 function copy-ISETabFileToLocal {
     <#
     .SYNOPSIS
-    copy-ISETabFileToLocal - Copy the currently open ISE tab file, to local machine (RDP remote only), prompting for local path. The filename copied is either the intact local name, or, if -stripFunc is used, the filename with any _func substring removed. 
+    copy-ISETabFileToLocal.ps1 - Copy the currently open ISE tab file, to local machine (RDP remote only), prompting for local path. The filename copied is either the intact local name, or, if -stripFunc is used, the filename with any _func substring removed. 
     .NOTES
-    Version     : 1.0.0
+    Version     : 0.0.
     Author      : Todd Kadrie
     Website     : http://www.toddomation.com
     Twitter     : @tostka / http://twitter.com/tostka
     CreatedDate : 2024-05-22
-    FileName    : copy-ISETabFileToLocal
-    License     : MIT License
-    Copyright   : (c) 2024 Todd Kadrie
-    Github      : https://github.com/tostka/verb-dev
-    Tags        : Powershell,ISE,development,debugging,backup
-    REVISIONS
-    * 2:15 PM 5/29/2024 add: c:\sc dev repo dest test, prompt for optional -nofunc use (avoid mistakes copying into repo with _func.ps1 source name intact)
-    * 1:22 PM 5/22/2024init
+        FileName    : copy-ISETabFileToLocal
+        License     : MIT License
+        Copyright   : (c) 2024 Todd Kadrie
+        Github      : https://github.com/tostka/verb-dev
+        Tags        : Powershell,ISE,development,debugging,backup
+        REVISIONS
+        * 12:10 PM 9/19/2024 rebuild CBH (wasn't gh parsing properly)
+        * 2:15 PM 5/29/2024 add: c:\sc dev repo dest test, prompt for optional -nofunc use (avoid mistakes copying into repo with _func.ps1 source name intact)
+        * 1:22 PM 5/22/2024init
     .DESCRIPTION
-    copy-ISETabFileToLocal - Copy the currently open ISE tab file, to local machine (RDP remote only), prompting for local path. The filename copied is either the intact local name, or, if -stripFunc is used, the filename with any _func substring removed. 
-    This also checks for a matching exported breakpoint file (name matches target script .ps1, with trailing name ...-ps1-BP.xml), and prompts to also move that file along with the .ps1. 
+    copy-ISETabFileToLocal.ps1 - Copy the currently open ISE tab file, to local machine (RDP remote only), prompting for local path. The filename copied is either the intact local name, or, if -stripFunc is used, the filename with any _func substring removed. 
 
     .PARAMETER Path
     Path to source file (defaults to `$psise.CurrentFile.FullPath)[-Path 'D:\scripts\copy-ISETabFileToLocal_func.ps1']
     .PARAMETER LocalDestination
     Localized destination directory path[-path c:\pathto\]
     .PARAMETER noFunc
-    Switch to remove any '_func' substring from the original file name, while copying (used for copying to final module .\Public directory for publishing[-noFunc]
+    Switch to remove any '_func' substring from the original file name, while copying (used for copying to final module .\Public directory for publishing[-noFunc])
     .PARAMETER whatIf
     Whatif switch [-whatIf]
+    .INPUTS
+    None. Does not accepted piped input.(.NET types, can add description)
+    .OUTPUTS
+    None. Returns no objects or output (.NET types)
+    System.Boolean
+    [| get-member the output to see what .NET obj TypeName is returned, to use here]
     .EXAMPLE
     PS> copy-ISETabFileToLocal -verbose -whatif
     Copy the current tab file to prompted local destination, whatif, with verbose output
@@ -14909,8 +14915,8 @@ Export-ModuleMember -Function backup-ModuleBuild,check-PsLocalRepoRegistration,c
 # SIG # Begin signature block
 # MIIELgYJKoZIhvcNAQcCoIIEHzCCBBsCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQU3eEKrYieh18isqX88ygj4r1l
-# jHugggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUxTCsrGHcqMXyRFik458o8pte
+# X4SgggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
 # MCwxKjAoBgNVBAMTIVBvd2VyU2hlbGwgTG9jYWwgQ2VydGlmaWNhdGUgUm9vdDAe
 # Fw0xNDEyMjkxNzA3MzNaFw0zOTEyMzEyMzU5NTlaMBUxEzARBgNVBAMTClRvZGRT
 # ZWxmSUkwgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBALqRVt7uNweTkZZ+16QG
@@ -14925,9 +14931,9 @@ Export-ModuleMember -Function backup-ModuleBuild,check-PsLocalRepoRegistration,c
 # AWAwggFcAgEBMEAwLDEqMCgGA1UEAxMhUG93ZXJTaGVsbCBMb2NhbCBDZXJ0aWZp
 # Y2F0ZSBSb290AhBaydK0VS5IhU1Hy6E1KUTpMAkGBSsOAwIaBQCgeDAYBgorBgEE
 # AYI3AgEMMQowCKACgAChAoAAMBkGCSqGSIb3DQEJAzEMBgorBgEEAYI3AgEEMBwG
-# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBRsdzq9
-# C3fCGUddcxe2/7ZN06td7zANBgkqhkiG9w0BAQEFAASBgCzdyHctbFMPsmtuSEOm
-# mhAACtljinlJFWY5Kz+tWkrIwtep8X+a9zqfjzPmrcO+t+ZGJfB10sWML7KmqLUG
-# MWEwbOZz80GxUAOmPFau7+Cfi2uYRUWmwEU4bcTYchPoutFXK2htmFCJVFjm1rtc
-# QyUGZk0tFIFbEt6UjK43jb45
+# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBRERkt4
+# 5z6B9NaR6+6tZIzNJXG0uzANBgkqhkiG9w0BAQEFAASBgEkK2/yO7B+QahFCtsX+
+# fP/dqM48Chd15Ng/l2Ezz0b1m4I69XwttPtmSbTfK92VyDozHhV+li5+49i0GJ+c
+# KwJ5B7SLRKmt+9ho/3YqMB0zwIScG36qfvfkKZ5g9d6PCOylVPVtm8R0dSbpE6WZ
+# d5uvEdSdxQP7N7icUvX6Rzsq
 # SIG # End signature block
