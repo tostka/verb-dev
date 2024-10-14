@@ -4070,3 +4070,793 @@ $
 
 
 
+PS>cwkill
+
+
+▒
+▒
+▒
+░
+░
+
+LYN-9C5CTV3
+ ▓▒▓
+TORO\kadritss
+ ▓▒▓
+Tue 09/24/2024 08:22
+ [209ms]
+
+▒
+▒
+▒
+▒
+▒
+
+[PS]
+:
+C:\u\w\p\scripts
+
+$
+
+
+
+
+PS>cwkill
+
+
+▒
+▒
+▒
+░
+░
+
+LYN-9C5CTV3
+ ▓▒▓
+TORO\kadritss
+ ▓▒▓
+Tue 09/24/2024 08:22
+ [171ms]
+
+▒
+▒
+▒
+▒
+▒
+
+[PS]
+:
+C:\u\w\p\scripts
+
+$
+
+
+
+
+PS>pslist trebuchet
+
+
+▒
+▒
+▒
+░
+░
+
+LYN-9C5CTV3
+ ▓▒▓
+TORO\kadritss
+ ▓▒▓
+Tue 09/24/2024 08:23
+ [858ms]
+
+▒
+▒
+▒
+▒
+▒
+
+[PS]
+:
+C:\u\w\p\scripts
+
+$
+
+
+
+
+PS>pskill 25116
+
+
+▒
+▒
+▒
+░
+░
+
+LYN-9C5CTV3
+ ▓▒▓
+TORO\kadritss
+ ▓▒▓
+Tue 09/24/2024 08:23
+ [332ms]
+
+▒
+▒
+▒
+▒
+▒
+
+[PS]
+:
+C:\u\w\p\scripts
+
+$
+
+
+
+
+PS>.\get-Uptime.ps1
+Time: 08:26:21
+LYN-9C5CTV3
+
+Days Hours Minutes
+---- ----- -------
+   7    23      53
+
+
+
+▒
+▒
+▒
+░
+░
+
+LYN-9C5CTV3
+ ▓▒▓
+TORO\kadritss
+ ▓▒▓
+Fri 09/27/2024 08:26
+ [257ms]
+
+▒
+▒
+▒
+▒
+▒
+
+[PS]
+:
+C:\u\w\p\scripts
+
+$
+
+
+
+
+PS>get-Uptime
+
+
+Uptime       : 7.23:53:59.2619385
+Minutes      : 53
+Days         : 7
+Computername : LYN-9C5CTV3
+Seconds      : 59
+UptimeStr    : LYN-9C5CTV3:7d:23h:53m:59s
+Hours        : 23
+
+
+
+
+▒
+▒
+▒
+░
+░
+
+LYN-9C5CTV3
+ ▓▒▓
+TORO\kadritss
+ ▓▒▓
+Fri 09/27/2024 08:26
+ [113ms]
+
+▒
+▒
+▒
+▒
+▒
+
+[PS]
+:
+C:\u\w\p\scripts
+
+$
+
+
+
+
+PS>gv verbosep*
+
+Name                           Value
+----                           -----
+VerbosePreference              SilentlyContinue
+
+
+
+▒
+▒
+▒
+░
+░
+
+LYN-9C5CTV3
+ ▓▒▓
+TORO\kadritss
+ ▓▒▓
+Fri 09/27/2024 13:24
+ [21ms]
+
+▒
+▒
+▒
+▒
+▒
+
+[PS]
+:
+C:\u\w\p\scripts
+
+$
+
+
+
+
+PS>$VerbosePreference
+SilentlyContinue
+
+▒
+▒
+▒
+░
+░
+
+LYN-9C5CTV3
+ ▓▒▓
+TORO\kadritss
+ ▓▒▓
+Fri 09/27/2024 13:25
+ [10ms]
+
+▒
+▒
+▒
+▒
+▒
+
+[PS]
+:
+C:\u\w\p\scripts
+
+$
+
+
+
+
+PS>get-lastwake
+08:18:00:
+#*======v LAST 7 Wake Events: v======
+Time                   Message                                                                                              
+----                   -------                                                                                              
+Mon 10/07/2024 8:07 AM This computer was not able to set up a secure session with a domain controller in domain TORO due ...
+Fri 09/27/2024 8:17 AM This computer was not able to set up a secure session with a domain controller in domain TORO due ...
+Thu 09/26/2024 8:09 AM This computer was not able to set up a secure session with a domain controller in domain TORO due ...
+Wed 09/25/2024 5:39 PM This computer was not able to set up a secure session with a domain controller in domain TORO due ...
+Wed 09/25/2024 8:09 AM This computer was not able to set up a secure session with a domain controller in domain TORO due ...
+Tue 09/24/2024 8:10 AM This computer was not able to set up a secure session with a domain controller in domain TORO due ...
+Mon 09/23/2024 8:04 AM This computer was not able to set up a secure session with a domain controller in domain TORO due ...
+Fri 09/20/2024 8:15 AM This computer was not able to set up a secure session with a domain controller in domain TORO due ...
+08:18:00:
+#*======^ LAST 7 Wake Events: ^======
+
+▒
+▒
+▒
+░
+░
+
+LYN-9C5CTV3
+ ▓▒▓
+TORO\kadritss
+ ▓▒▓
+Mon 10/07/2024 08:18
+ [2s]
+
+▒
+▒
+▒
+▒
+▒
+
+[PS]
+:
+C:\u\w\p\scripts
+
+$
+
+
+
+
+PS>get-lastwake
+08:17:01:
+#*======v LAST 7 Wake Events: v======
+Time                   Message                                                                                              
+----                   -------                                                                                              
+Tue 10/08/2024 8:07 AM This computer was not able to set up a secure session with a domain controller in domain TORO due ...
+Mon 10/07/2024 8:07 AM This computer was not able to set up a secure session with a domain controller in domain TORO due ...
+Fri 09/27/2024 8:17 AM This computer was not able to set up a secure session with a domain controller in domain TORO due ...
+Thu 09/26/2024 8:09 AM This computer was not able to set up a secure session with a domain controller in domain TORO due ...
+Wed 09/25/2024 5:39 PM This computer was not able to set up a secure session with a domain controller in domain TORO due ...
+Wed 09/25/2024 8:09 AM This computer was not able to set up a secure session with a domain controller in domain TORO due ...
+Tue 09/24/2024 8:10 AM This computer was not able to set up a secure session with a domain controller in domain TORO due ...
+Mon 09/23/2024 8:04 AM This computer was not able to set up a secure session with a domain controller in domain TORO due ...
+08:17:01:
+#*======^ LAST 7 Wake Events: ^======
+
+▒
+▒
+▒
+░
+░
+
+LYN-9C5CTV3
+ ▓▒▓
+TORO\kadritss
+ ▓▒▓
+Tue 10/08/2024 08:17
+ [406ms]
+
+▒
+▒
+▒
+▒
+▒
+
+[PS]
+:
+C:\u\w\p\scripts
+
+$
+
+
+
+
+PS>get-uptime
+
+
+Uptime       : 18.23:44:27.9620405
+Minutes      : 44
+Days         : 18
+Computername : LYN-9C5CTV3
+Seconds      : 27
+UptimeStr    : LYN-9C5CTV3:18d:23h:44m:27s
+Hours        : 23
+
+
+
+
+▒
+▒
+▒
+░
+░
+
+LYN-9C5CTV3
+ ▓▒▓
+TORO\kadritss
+ ▓▒▓
+Tue 10/08/2024 08:17
+ [141ms]
+
+▒
+▒
+▒
+▒
+▒
+
+[PS]
+:
+C:\u\w\p\scripts
+
+$
+
+
+
+
+PS>gcm resolve-user
+
+CommandType     Name                                               Version    Source
+-----------     ----                                               -------    ------
+Function        resolve-user                                       8.1.1      verb-exo
+
+
+
+▒
+▒
+▒
+░
+░
+
+LYN-9C5CTV3
+ ▓▒▓
+TORO\kadritss
+ ▓▒▓
+Wed 10/09/2024 14:43
+ [254ms]
+
+▒
+▒
+▒
+▒
+▒
+
+[PS]
+:
+C:\u\w\p\scripts
+
+$
+
+
+
+
+PS>get-lastwake
+08:15:29:
+#*======v LAST 7 Wake Events: v======
+Time                   Message                                                                                              
+----                   -------                                                                                              
+Thu 10/10/2024 8:08 AM This computer was not able to set up a secure session with a domain controller in domain TORO due ...
+Wed 10/09/2024 4:51 PM This computer was not able to set up a secure session with a domain controller in domain TORO due ...
+Wed 10/09/2024 8:13 AM This computer was not able to set up a secure session with a domain controller in domain TORO due ...
+Tue 10/08/2024 8:07 AM This computer was not able to set up a secure session with a domain controller in domain TORO due ...
+Mon 10/07/2024 8:07 AM This computer was not able to set up a secure session with a domain controller in domain TORO due ...
+Fri 09/27/2024 8:17 AM This computer was not able to set up a secure session with a domain controller in domain TORO due ...
+Thu 09/26/2024 8:09 AM This computer was not able to set up a secure session with a domain controller in domain TORO due ...
+Wed 09/25/2024 5:39 PM This computer was not able to set up a secure session with a domain controller in domain TORO due ...
+08:15:29:
+#*======^ LAST 7 Wake Events: ^======
+
+▒
+▒
+▒
+░
+░
+
+LYN-9C5CTV3
+ ▓▒▓
+TORO\kadritss
+ ▓▒▓
+Thu 10/10/2024 08:15
+ [472ms]
+
+▒
+▒
+▒
+▒
+▒
+
+[PS]
+:
+C:\u\w\p\scripts
+
+$
+
+
+
+
+PS>gci c:\usr\work\exch\scripts\import-ExCertPfxTBA.ps1
+gci : Cannot find path 'C:\usr\work\exch\scripts\import-ExCertPfxTBA.ps1' because it does not exist.
+At line:1 char:1
++ gci c:\usr\work\exch\scripts\import-ExCertPfxTBA.ps1
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (C:\usr\work\exc...xCertPfxTBA.ps1:String) [Get-ChildItem], 
+ItemNotFoundException
+    + FullyQualifiedErrorId : PathNotFound,Microsoft.PowerShell.Commands.GetChildItemCommand
+gci : Cannot find path 'C:\usr\work\exch\scripts\import-ExCertPfxTBA.ps1' because it does not exist.
+At line:1 char:1
++ gci c:\usr\work\exch\scripts\import-ExCertPfxTBA.ps1
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (C:\usr\work\exc...xCertPfxTBA.ps1:String) [Get-ChildItem], ItemNotFoundExcep
+   tion
+    + FullyQualifiedErrorId : PathNotFound,Microsoft.PowerShell.Commands.GetChildItemCommand
+
+
+▒
+▒
+▒
+░
+░
+
+LYN-9C5CTV3
+ ▓▒▓
+TORO\kadritss
+ ▓▒▓
+Thu 10/10/2024 16:12
+ [637ms]
+
+▒
+▒
+▒
+▒
+▒
+
+[PS]
+:
+C:\u\w\p\scripts
+
+$
+
+
+
+
+PS>gcm import-ExCertPfxTBA.ps1
+gcm : The term 'import-ExCertPfxTBA.ps1' is not recognized as the name of a cmdlet, function, script file, or operable 
+program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:1
++ gcm import-ExCertPfxTBA.ps1
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (import-ExCertPfxTBA.ps1:String) [Get-Command], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException,Microsoft.PowerShell.Commands.GetCommandCommand
+gcm : The term 'import-ExCertPfxTBA.ps1' is not recognized as the name of a cmdlet, function, script file, or operable
+program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:1
++ gcm import-ExCertPfxTBA.ps1
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (import-ExCertPfxTBA.ps1:String) [Get-Command], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException,Microsoft.PowerShell.Commands.GetCommandCommand
+
+
+▒
+▒
+▒
+░
+░
+
+LYN-9C5CTV3
+ ▓▒▓
+TORO\kadritss
+ ▓▒▓
+Thu 10/10/2024 16:12
+ [228ms]
+
+▒
+▒
+▒
+▒
+▒
+
+[PS]
+:
+C:\u\w\p\scripts
+
+$
+
+
+
+
+PS>gcm import-ExCertPfxTBA
+gcm : The term 'import-ExCertPfxTBA' is not recognized as the name of a cmdlet, function, script file, or operable 
+program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:1
++ gcm import-ExCertPfxTBA
++ ~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (import-ExCertPfxTBA:String) [Get-Command], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException,Microsoft.PowerShell.Commands.GetCommandCommand
+gcm : The term 'import-ExCertPfxTBA' is not recognized as the name of a cmdlet, function, script file, or operable program.
+Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:1
++ gcm import-ExCertPfxTBA
++ ~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (import-ExCertPfxTBA:String) [Get-Command], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException,Microsoft.PowerShell.Commands.GetCommandCommand
+
+
+▒
+▒
+▒
+░
+░
+
+LYN-9C5CTV3
+ ▓▒▓
+TORO\kadritss
+ ▓▒▓
+Thu 10/10/2024 16:13
+ [191ms]
+
+▒
+▒
+▒
+▒
+▒
+
+[PS]
+:
+C:\u\w\p\scripts
+
+$
+
+
+
+
+PS>gci import-exc*
+
+▒
+▒
+▒
+░
+░
+
+LYN-9C5CTV3
+ ▓▒▓
+TORO\kadritss
+ ▓▒▓
+Thu 10/10/2024 16:13
+ [10ms]
+
+▒
+▒
+▒
+▒
+▒
+
+[PS]
+:
+C:\u\w\p\scripts
+
+$
+
+
+
+
+PS>gci c:\usr\work\exch\scripts\import-ex*
+
+
+    Directory: C:\usr\work\exch\scripts
+
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a----         7/29/2024   1:01 PM           6805 Import-ExopCertTDO.ps1
+
+
+
+▒
+▒
+▒
+░
+░
+
+LYN-9C5CTV3
+ ▓▒▓
+TORO\kadritss
+ ▓▒▓
+Thu 10/10/2024 16:13
+ [35ms]
+
+▒
+▒
+▒
+▒
+▒
+
+[PS]
+:
+C:\u\w\p\scripts
+
+$
+
+
+
+
+PS>cwkill
+
+
+▒
+▒
+▒
+░
+░
+
+LYN-9C5CTV3
+ ▓▒▓
+TORO\kadritss
+ ▓▒▓
+Fri 10/11/2024 08:48
+ [299ms]
+
+▒
+▒
+▒
+▒
+▒
+
+[PS]
+:
+C:\u\w\p\scripts
+
+$
+
+
+
+
+PS>cwkill
+
+
+▒
+▒
+▒
+░
+░
+
+LYN-9C5CTV3
+ ▓▒▓
+TORO\kadritss
+ ▓▒▓
+Fri 10/11/2024 13:35
+ [269ms]
+
+▒
+▒
+▒
+▒
+▒
+
+[PS]
+:
+C:\u\w\p\scripts
+
+$
+
+
+
+
+PS>get-uptime
+
+
+Uptime       : 24.23:42:41.6864644
+Minutes      : 42
+Days         : 24
+Computername : LYN-9C5CTV3
+Seconds      : 41
+UptimeStr    : LYN-9C5CTV3:24d:23h:42m:41s
+Hours        : 23
+
+
+
+
+▒
+▒
+▒
+░
+░
+
+LYN-9C5CTV3
+ ▓▒▓
+TORO\kadritss
+ ▓▒▓
+Mon 10/14/2024 08:15
+ [211ms]
+
+▒
+▒
+▒
+▒
+▒
+
+[PS]
+:
+C:\u\w\p\scripts
+
+$
+
+
+
+
