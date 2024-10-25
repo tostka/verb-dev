@@ -2,45 +2,43 @@
 function copy-ISETabFileToLocal {
     <#
     .SYNOPSIS
-    copy-ISETabFileToLocal.ps1 - Copy the currently open ISE tab file, to local machine (RDP remote only), prompting for local path. The filename copied is either the intact local name, or, if -stripFunc is used, the filename with any _func substring removed. 
+    copy-ISETabFileToLocal - Copy the currently open ISE tab file, to local machine (RDP remote only), prompting for local path. The filename copied is either the intact local name, or, if -stripFunc is used, the filename with any _func substring removed. 
     .NOTES
-    Version     : 0.0.
+    Version     : 1.0.0
     Author      : Todd Kadrie
     Website     : http://www.toddomation.com
     Twitter     : @tostka / http://twitter.com/tostka
     CreatedDate : 2024-05-22
-        FileName    : copy-ISETabFileToLocal
-        License     : MIT License
-        Copyright   : (c) 2024 Todd Kadrie
-        Github      : https://github.com/tostka/verb-dev
-        Tags        : Powershell,ISE,development,debugging,backup
-        REVISIONS
-        * 12:10 PM 9/19/2024 rebuild CBH (wasn't gh parsing properly)
-        * 2:15 PM 5/29/2024 add: c:\sc dev repo dest test, prompt for optional -nofunc use (avoid mistakes copying into repo with _func.ps1 source name intact)
-        * 1:22 PM 5/22/2024init
+    FileName    : copy-ISETabFileToLocal
+    License     : MIT License
+    Copyright   : (c) 2024 Todd Kadrie
+    Github      : https://github.com/tostka/verb-dev
+    Tags        : Powershell,ISE,development,debugging,backup
+    REVISIONS
+    * 3:55 PM 10/25/2024 added cbh demo using -path ; pulled -path container validator (should always be a file) ;  fixed unupdated -nofunc else echo
+    * 2:15 PM 5/29/2024 add: c:\sc dev repo dest test, prompt for optional -nofunc use (avoid mistakes copying into repo with _func.ps1 source name intact)
+    * 1:22 PM 5/22/2024init
     .DESCRIPTION
-    copy-ISETabFileToLocal.ps1 - Copy the currently open ISE tab file, to local machine (RDP remote only), prompting for local path. The filename copied is either the intact local name, or, if -stripFunc is used, the filename with any _func substring removed. 
+    copy-ISETabFileToLocal - Copy the currently open ISE tab file, to local machine (RDP remote only), prompting for local path. The filename copied is either the intact local name, or, if -stripFunc is used, the filename with any _func substring removed. 
+    This also checks for a matching exported breakpoint file (name matches target script .ps1, with trailing name ...-ps1-BP.xml), and prompts to also move that file along with the .ps1. 
 
     .PARAMETER Path
     Path to source file (defaults to `$psise.CurrentFile.FullPath)[-Path 'D:\scripts\copy-ISETabFileToLocal_func.ps1']
     .PARAMETER LocalDestination
     Localized destination directory path[-path c:\pathto\]
     .PARAMETER noFunc
-    Switch to remove any '_func' substring from the original file name, while copying (used for copying to final module .\Public directory for publishing[-noFunc])
+    Switch to remove any '_func' substring from the original file name, while copying (used for copying to final module .\Public directory for publishing[-noFunc]
     .PARAMETER whatIf
     Whatif switch [-whatIf]
-    .INPUTS
-    None. Does not accepted piped input.(.NET types, can add description)
-    .OUTPUTS
-    None. Returns no objects or output (.NET types)
-    System.Boolean
-    [| get-member the output to see what .NET obj TypeName is returned, to use here]
     .EXAMPLE
     PS> copy-ISETabFileToLocal -verbose -whatif
     Copy the current tab file to prompted local destination, whatif, with verbose output
     .EXAMPLE
     PS> copy-ISETabFileToLocal -verbose -localdest C:\sc\verb-dev\public\ -noFunc -whatif
     Copy the current tab file to explicit specified -LocalDesetination, replacing any _func substring from filename, with whatif, with verbose output
+    .EXAMPLE
+    PS> copy-ISETabFileToLocal -verbose -localdest C:\sc\verb-dev\public\ -noFunc -whatif
+    Copy specified -path source file to explicit specified -LocalDesetination, replacing any _func substring from filename, with whatif, with verbose output (used for debugging, when current tab file switch to be another file)
     .LINK
     https://github.com/tostka/verb-dev
     #>
@@ -48,12 +46,9 @@ function copy-ISETabFileToLocal {
     [Alias('cpIseFileLocal')]
     PARAM(
         [Parameter(Mandatory = $false,Position=0,HelpMessage="Path to source file (defaults to `$psise.CurrentFile.FullPath)[-Path 'D:\scripts\copy-ISETabFileToLocal_func.ps1']")]
-            [ValidateScript({Test-Path $_ -PathType 'Container'})]
-            #[string]
+            [ValidateScript({Test-Path $_ })]
             [system.io.fileinfo]$Path=$psise.CurrentFile.FullPath,
         [Parameter(Mandatory = $true,Position = 1,HelpMessage = 'Localized destination directory path[-path c:\pathto\]')]
-            #[Alias('PsPath')]
-            #[ValidateScript({Test-Path $_ -PathType 'Container'})]
             [ValidateScript({
                 if([uri]$_ |?{ $_.IsUNC}){
                     throw "UNC Path specified: Please specify a 'localized' path!" ; 
@@ -63,7 +58,6 @@ function copy-ISETabFileToLocal {
                     throw "Invalid path!" ; 
                 }
             })]
-            #[System.IO.DirectoryInfo]
             [string]$LocalDestination,
         [Parameter(HelpMessage="Switch to remove any '_func' substring from the original file name, while copying (used for copying to final module .\Public directory for publishing[-noFunc])")]
             [switch]$noFunc,
@@ -94,7 +88,7 @@ function copy-ISETabFileToLocal {
                                 write-host -foregroundcolor green $smsg  ;
                                 $noFunc = $true ; 
                             } else {
-                                $smsg = "(*skip* copying -BP.xml file)" ; 
+                                $smsg = "(*skip* use of -NoFunc)" ; 
                                 write-host -foregroundcolor yellow $smsg  ;
                             } ; 
                         } ; 
