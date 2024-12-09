@@ -17,6 +17,7 @@ Function get-VerbAliasTDO {
     Github      : https://github.com/tostka/verb-dev
     Tags        : Powershell,development,verbs
     REVISION
+    * 9:37 AM 12/9/2024 corrected CBH/comment typo get-NounAlias -> get-VerbAlias
     * 3:00 PM 7/20/2022 init
     .DESCRIPTION
     get-VerbAliasTDO.ps1 - Returns the 'standard' alias prefix for a given Powershell verb (according to MS documentation). (E.g. the common verb 'copy' has uses the standard alias prefix 'cp')
@@ -249,7 +250,7 @@ wr | Write
     .OUTPUTS
     System.string
     .EXAMPLE
-    PS> 'Compare' | get-NounAliasTDO ;
+    PS> 'Compare' | get-verbAliasTDO ;
     Return the 'standard' MS alias for the 'Compare' verb (returns 'cr')
     .LINK
     https://github.com/tostka/verb-dev
@@ -300,4 +301,4 @@ wr | Write
     } ;  # PROC-E
     END {} ; # END-E
 }
-#*------^ get-NounAliasTDO.ps1 ^------
+#*------^ get-verbAliasTDO.ps1 ^------
