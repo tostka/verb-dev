@@ -17,6 +17,7 @@ Function get-VerbAliasTDO {
     Github      : https://github.com/tostka/verb-dev
     Tags        : Powershell,development,verbs
     REVISION
+    * 11:57 AM 12/10/2024 confirmed it already covers Build(bd) & Deploy (dp) added under Ps6 (though not present in ps5)
     * 9:37 AM 12/9/2024 corrected CBH/comment typo get-NounAlias -> get-VerbAlias
     * 3:00 PM 7/20/2022 init
     .DESCRIPTION
