@@ -20,6 +20,7 @@ Function Get-VerbSynonymTDO {
     AddedWebsite: http://tommymaynard.com
     AddedTwitter: @thetommymaynard / http://twitter.com/thetommymaynard
     REVISION
+    * 8:23 AM 12/13/2024 add: Alias 'Get-VerbSyn'
     * 11:55 AM 12/10/2024 add: Alias to output (queried via my verb-dev\get-VerbAliasTDO()) add: pretest input Verb, for ApprovedVerb status and pre-echo it into the outputs ; add -AllowMultiWord, otherwise, it now auto-skips multiword returned Synonyms ; 
         looked at adding theaurus.com support, by splicing over code from kpatnayakuni's get-synonym.ps1, but found it doesn't parse properly anymore (html revisions in theaurus.com output) ; 
         replaced TMs key ('fkS0rTuZ62Duag0bYgwn') with my own (simply requires a google logon, to obtain a free key).
@@ -164,7 +165,7 @@ Function Get-VerbSynonymTDO {
     https://github.com/tostka/verb-dev
     #>
     [CmdletBinding()]
-    [Alias('Get-VerbSynonym','Get-TMVerbSynonym')]
+    [Alias('Get-VerbSynonym','Get-TMVerbSynonym','Get-VerbSyn')]
     #[OutputType([boolean])]
     PARAM (
         [Parameter(Mandatory = $true,Position=0,ValueFromPipeline=$true,HelpMessage="String array of verbs for which the function will find synonyms.[-verb 'Report','publish']")]
