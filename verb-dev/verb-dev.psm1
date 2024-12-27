@@ -5,7 +5,7 @@
 .SYNOPSIS
 VERB-dev - Development PS Module-related generic functions
 .NOTES
-Version     : 1.5.58
+Version     : 1.5.59
 Author      : Todd Kadrie
 Website     :	https://www.toddomation.com
 Twitter     :	@tostka
@@ -8301,6 +8301,7 @@ Function Get-VerbSynonymTDO {
     AddedWebsite: http://tommymaynard.com
     AddedTwitter: @thetommymaynard / http://twitter.com/thetommymaynard
     REVISION
+    * 8:23 AM 12/13/2024 add: Alias 'Get-VerbSyn'
     * 11:55 AM 12/10/2024 add: Alias to output (queried via my verb-dev\get-VerbAliasTDO()) add: pretest input Verb, for ApprovedVerb status and pre-echo it into the outputs ; add -AllowMultiWord, otherwise, it now auto-skips multiword returned Synonyms ; 
         looked at adding theaurus.com support, by splicing over code from kpatnayakuni's get-synonym.ps1, but found it doesn't parse properly anymore (html revisions in theaurus.com output) ; 
         replaced TMs key ('fkS0rTuZ62Duag0bYgwn') with my own (simply requires a google logon, to obtain a free key).
@@ -8445,7 +8446,7 @@ Function Get-VerbSynonymTDO {
     https://github.com/tostka/verb-dev
     #>
     [CmdletBinding()]
-    [Alias('Get-VerbSynonym','Get-TMVerbSynonym')]
+    [Alias('Get-VerbSynonym','Get-TMVerbSynonym','Get-VerbSyn')]
     #[OutputType([boolean])]
     PARAM (
         [Parameter(Mandatory = $true,Position=0,ValueFromPipeline=$true,HelpMessage="String array of verbs for which the function will find synonyms.[-verb 'Report','publish']")]
@@ -15521,8 +15522,8 @@ Export-ModuleMember -Function backup-ModuleBuild,check-PsLocalRepoRegistration,c
 # SIG # Begin signature block
 # MIIELgYJKoZIhvcNAQcCoIIEHzCCBBsCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUIwQ2U3gfdgbsVVUcjYiJ5Apd
-# CIOgggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUiROLFvAgWrt0pOxPN7at0Lch
+# 62OgggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
 # MCwxKjAoBgNVBAMTIVBvd2VyU2hlbGwgTG9jYWwgQ2VydGlmaWNhdGUgUm9vdDAe
 # Fw0xNDEyMjkxNzA3MzNaFw0zOTEyMzEyMzU5NTlaMBUxEzARBgNVBAMTClRvZGRT
 # ZWxmSUkwgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBALqRVt7uNweTkZZ+16QG
@@ -15537,9 +15538,9 @@ Export-ModuleMember -Function backup-ModuleBuild,check-PsLocalRepoRegistration,c
 # AWAwggFcAgEBMEAwLDEqMCgGA1UEAxMhUG93ZXJTaGVsbCBMb2NhbCBDZXJ0aWZp
 # Y2F0ZSBSb290AhBaydK0VS5IhU1Hy6E1KUTpMAkGBSsOAwIaBQCgeDAYBgorBgEE
 # AYI3AgEMMQowCKACgAChAoAAMBkGCSqGSIb3DQEJAzEMBgorBgEEAYI3AgEEMBwG
-# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBSNKYwJ
-# EP7ooroMx2OP96HhtuMP1zANBgkqhkiG9w0BAQEFAASBgD8wrllNoyLe5u+Qz6qQ
-# wIU+F7Coq1OoLbQXMVfmPJzo8YfG33Pe6euA2RUndFk4y09RiXs8bfaCDMUlbaWn
-# 7W+VXXQ0/6mIggd3R8ee4gJMwDP5am20886Qcg/my8BvkYOqel2zjXLyxSHYSdqX
-# rReawVq3ojceSLv49zyg2UiZ
+# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBRcWbJC
+# GxHyrk635VDK1masmdQmfjANBgkqhkiG9w0BAQEFAASBgC2nzI5p/3BhjHAUWq2f
+# Rb47+udxEgJS4yp9y+QttXNIm+1J0fQ6aAiqHbIgDgH8a3nYsVKxotpgyaQqX8Mu
+# e1+xLR48NTU6hWe31nkJQEoiITgvToFGD+Z88TrBHVvlc+bC5A+z1yKZG+kMndO7
+# KqaGnA9slqed9z0MSXA2ekx1
 # SIG # End signature block
