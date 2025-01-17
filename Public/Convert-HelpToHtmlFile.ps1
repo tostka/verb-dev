@@ -53,7 +53,7 @@ function Convert-HelpToHtmlFile {
     .PARAMETER CodeObject
     Name of module or path to script [-CodeObject myMod]
     .PARAMETER Destination
-    Directoy into which 'genericly-named output files should be written, or the full path to a specified output file[-Destination c:\pathto\MyModuleHelp.html]
+    Directory into which 'genericly-named output files should be written, or the full path to a specified output file[-Destination c:\pathto\MyModuleHelp.html]
     .PARAMETER SkipDependencyCheck
     Skip dependency check[-SkipDependencyCheck] 
     .PARAMETER Script
