@@ -24,20 +24,28 @@ function export-CommentBasedHelpToFileTDO{
     The name of the command for which to export the help content.
     .PARAMETER Destination
     Destination path for output xxx.help.txt file [-path c:\path-to\]"
+    .PARAMETER noReview
+    switch to suppress post-open in Editor[-noReview]
+    .PARAMETER LengthThreshold
+    Minimum Length threshold (to recognize populated CBH)(defaults 200)[-LengthThreshold 1000]
     .INPUTS
-    None. The function accepts pipeline input.
+    String. The function accepts pipeline input.
     .OUTPUTS
     None. The function writes the help content to a file.
     .EXAMPLE
-    PS> export-CommentBasedHelpToFileTDO -Command "Get-Process"
+    PS> export-CommentBasedHelpToFileTDO -Command "Get-Process" ; 
+    Demos export of the get-process command full help to a Get-Process.help.txt file (the destionation directory will be interactively prompted for)
     .EXAMPLE
-$tmod = 'verb-dev' ; 
-if($modroot = (join-path -path $GIT_REPOSROOT -child $tmod)){
-    if(-not (test-path "$modroot\Help")){ mkdir "$modroot\Help" -verbose } ;
-    $hlpRoot = (Resolve-Path -Path "$modroot\Help" -ea STOP).path ; 
-    gcm -mod verb-dev | select -expand name | select -first 1 | export-CommentBasedHelpToFileTDO -destination $hlpRoot -verbose ;
-} ; 
+    PS> $tmod = 'verb-dev' ;
+    PS> if($GIT_REPOSROOT -AND ($modroot = (join-path -path $GIT_REPOSROOT -child $tmod))){
+    PS>     if(-not (test-path "$modroot\Help")){ mkdir "$modroot\Help" -verbose } ;
+    PS>     $hlpRoot = (Resolve-Path -Path "$modroot\Help" -ea STOP).path ;
+    PS>     gcm -mod verb-dev | select -expand name | select -first 5 | export-CommentBasedHelpToFileTDO -destination $hlpRoot -NoReview -verbose ;
+    PS> } ; 
     PS> 
+    Demo that runs a module and exports each get-command-discovered command within the module, to a [name].help.txt file output to the Module's Help directory 
+    (which is discovered as a subdir of the `$GIT_REPOSROOT autovariable). Creates the Help directory if not pre-existing. Suppresses notepad post open, via -NoReview param. 
+    (creates the directory, if not found) 
     .LINK
     https://github.com/tostka/verb-dev
     #>
@@ -51,16 +59,20 @@ if($modroot = (join-path -path $GIT_REPOSROOT -child $tmod)){
             [ValidateScript({Test-Path $_ -PathType 'Container'})]
             [System.IO.DirectoryInfo[]]$Destination,
         [Parameter(HelpMessage="switch to suppress post-open in Editor[-noReview]")]
-            [switch]$noReview            
+            [switch]$noReview,            
         [Parameter(HelpMessage="Minimum Length threshold (to recognize populated CBH)(defaults 200)[-LengthThreshold 1000]")]
             [int]$LengthThreshold=200
     );
     BEGIN {
-      [string[]]$Aggrfails = @() ; 
+        [string[]]$Aggrfails = @() ; 
+        $Prcd = 0 ;
     }
     PROCESS{
         foreach($item in $command){
             TRY{
+                $Prcd++ ; 
+                $sBnrS="`n#*------v PROCESSING #$($Prcd) :$($item) v------" ; 
+                write-host -foregroundcolor green $sBnrS ;
                 write-verbose "get-command ($item)" ; 
                 $gcmd = get-command $item -ErrorAction STOP ;
                 $ofhelp = (join-path -path $Destination -childpath "$($gcmd.name).help.txt" -ErrorAction STOP) ;
@@ -72,7 +84,7 @@ if($modroot = (join-path -path $GIT_REPOSROOT -child $tmod)){
                 #if($hlp.length -gt $LengthThreshold){
                 #if( (($hlp | out-string).ToCharArray() |  measure).count -gt $LengthThreshold){
                 if($hlpChars -gt $LengthThreshold){
-                    write-host "Out-File -FilePath ($ofhelp)" ; 
+                    write-host "Out-File -FilePath $($ofhelp)" ; 
                     $hlp| Out-File -FilePath $ofhelp -verbose ; 
                 } else { 
                     $smsg =  "get-help $($gcmd.name) -full returned an tiny output`n$(($hlp|out-string).trim())" ; 
@@ -93,13 +105,15 @@ if($modroot = (join-path -path $GIT_REPOSROOT -child $tmod)){
             } CATCH {
                 $ErrTrapd=$Error[0] ;
                 $smsg = "`n$(($ErrTrapd | fl * -Force|out-string).trim())" ;
-                write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" ;
+                write-warning $smsg ;
                 Continue ; 
             } ; 
+            write-host -foregroundcolor green $sBnrS.replace('-v','-^').replace('v-','^-') ;
         } ; 
     } ; 
     END{
         if(($Aggrfails|  measure).count){
+            write-warning "RETURNING (NAME,#CHARS) of tested sources that failed to execute get-help -full > [output].help.txt" ; 
             $Aggrfails | write-output ; 
         } ; 
     }

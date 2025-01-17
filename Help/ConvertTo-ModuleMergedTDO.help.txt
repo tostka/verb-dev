@@ -1,0 +1,202 @@
+﻿
+NAME
+    ConvertTo-ModuleMergedTDO
+    
+SYNOPSIS
+    ConvertTo-ModuleMergedTDO.ps1 - Merge function .ps1 files into a monolisthic module.psm1 module file, returns a hash with status:$true/$false, and PsmNameBU:The name of a backup of 
+    the original .psm1 file (for restoring on failures)
+    
+    
+SYNTAX
+    ConvertTo-ModuleMergedTDO [-ModuleName] <String> [-ModuleSourcePath] <Array> [-ModuleDestinationPath] <String> [[-RequiredVersion] <Version>] [[-LogSpec] <Object>] [-NoAliasExport] 
+    [-showDebug] [-whatIf] [<CommonParameters>]
+    
+    
+DESCRIPTION
+    ConvertTo-ModuleMergedTDO.ps1 - Merge function .ps1 files into a monolisthic module.psm1 module file, returns a hash with status:$true/$false, and PsmNameBU:The name of a backup of 
+    the original .psm1 file (for restoring on failures)
+    
+
+PARAMETERS
+    -ModuleName <String>
+        Module Name (used to name the ModuleName.psm1 file)[-ModuleName verb-XXX]
+        
+        Required?                    true
+        Position?                    1
+        Default value                
+        Accept pipeline input?       false
+        Accept wildcard characters?  false
+        
+    -ModuleSourcePath <Array>
+        Directory containing .ps1 function files to be combined [-ModuleSourcePath c:\path-to\module\Public]
+        
+        Required?                    true
+        Position?                    2
+        Default value                
+        Accept pipeline input?       false
+        Accept wildcard characters?  false
+        
+    -ModuleDestinationPath <String>
+        Final monolithic module .psm1 file name to be populated [-ModuleDestinationPath c:\path-to\module\module.psm1]
+        
+        Required?                    true
+        Position?                    3
+        Default value                
+        Accept pipeline input?       false
+        Accept wildcard characters?  false
+        
+    -RequiredVersion <Version>
+        Optional Explicit 3-digit RequiredVersion specification (as contrasts with using current Manifest .psd1 ModuleVersion value)[-Version 2.0.3]
+        
+        Required?                    false
+        Position?                    4
+        Default value                
+        Accept pipeline input?       false
+        Accept wildcard characters?  false
+        
+    -LogSpec <Object>
+        
+        Required?                    false
+        Position?                    5
+        Default value                
+        Accept pipeline input?       false
+        Accept wildcard characters?  false
+        
+    -NoAliasExport [<SwitchParameter>]
+        Flag that skips auto-inclusion of 'Export-ModuleMember -Alias * ' in merged file [-NoAliasExport]
+        
+        Required?                    false
+        Position?                    named
+        Default value                False
+        Accept pipeline input?       false
+        Accept wildcard characters?  false
+        
+    -showDebug [<SwitchParameter>]
+        Parameter to display Debugging messages [-ShowDebug switch]
+        
+        Required?                    false
+        Position?                    named
+        Default value                False
+        Accept pipeline input?       false
+        Accept wildcard characters?  false
+        
+    -whatIf [<SwitchParameter>]
+        Parameter to run a Test no-change pass [-Whatif switch]
+        
+        Required?                    false
+        Position?                    named
+        Default value                False
+        Accept pipeline input?       false
+        Accept wildcard characters?  false
+        
+    <CommonParameters>
+        This cmdlet supports the common parameters: Verbose, Debug,
+        ErrorAction, ErrorVariable, WarningAction, WarningVariable,
+        OutBuffer, PipelineVariable, and OutVariable. For more information, see 
+        about_CommonParameters (https:/go.microsoft.com/fwlink/?LinkID=113216). 
+    
+INPUTS
+    None
+    
+    
+OUTPUTS
+    Outputs a hashtable object containing: Status[$true/$false], PsmNameBU [the name of the backup of the original psm1 file]
+    
+    
+NOTES
+    
+    
+        Version     : 1.0.0
+        Author      : Todd Kadrie
+        Website     : https://www.toddomation.com
+        Twitter     : @tostka / http://twitter.com/tostka
+        CreatedDate : 2019-12-10
+        FileName    : ConvertTo-ModuleMergedTDO.ps1
+        License     : MIT License
+        Copyright   : (c) 2019 Todd Kadrie
+        Github      : https://github.com/tostka
+        AddedCredit : Przemyslaw Klys
+        AddedWebsite: https://evotec.xyz/powershell-single-psm1-file-versus-multi-file-modules/
+        Tags        : Powershell,Module,Development
+        AddedTwitter:
+        REVISIONS
+        * 5:45 PM 8/7/2024 reformat params ; coerce $RequiredVersion from psd1.moduleversion, if blank ; add test for $rgxPurgeBlockEnd2, ExportModuleMembers syntax in later omds ; 
+        fixed/updated FunctionsToExport 
+        * 2:04 PM 6/29/2022 rem'd out/removed the $psv2PubLine, $psv2PrivLine dyn exclude material - won't be needed once exop upgraded past psv2
+        * 5:18 PM 6/1/2022 splice in support for confirm-ModuleBuildSync ; 
+        * 5:16 PM 5/31/2022 add: -RequiredVersion; # 4:48 PM 5/31/2022 getting mismatch/revert in revision to prior spec, confirm/force set it here, call 
+        confirm-ModulePsd1Version()/confirm-ModulePsm1Version() (which handle _TMP versions, that stock tools *won't*)
+        * 4:38 PM 5/27/2022 update all Set-ContentFixEncoding & Add-ContentFixEncoding -values to pre |out-string to collapse arrays into single writes
+        * 8:34 AM 5/16/2022 sub backupfile -> backup-FileTDO ; typo: used Aliases for Alias
+        * 3:07 PM 5/13/2022ren Merge-Module -> ConvertTo-ModuleMergedTDOTDO() (use std verb; adopt keyword to unique my work from 3rd-party funcs); added Merge-Module to Aliases; 
+        * 4:08 PM 5/12/2022 got through a full non -Dyn pass, to publish and ipmo -for. Still need to port over latest merge-module.ps1 chgs -> unmerge-module.ps1. ; updated CBH expl ; 
+        cleanedup, duped over minor items from unmerge-module()
+        * 2:24 PM 5/9/2022 backed in, untested, updates from unmerge-module, to bring roughly back into sync.
+        * 3:40 PM 5/3/2022 coded in, untested, remove-authenticodesignature(), and Psv2 DYN exclude $PostCBHBlock content
+        * 11:25 AM 9/21/2021 added code to remove obsolete gens of .nupkgs & build log files (calls to new verb-io:remove-UnneededFileVariants()); CBH:added Tags; fixed missing 
+        CmdletBinding (which breaks functional verbose); added brcketing Banr (easier to tell where breaks occur)
+        * 12:15 PM 4/21/2021 expanded select-string aliases
+        * 11:42 AM 6/30/2020 fixed Public\_CommonCode.ps1, -ea 0 when not present
+        * 1:13 PM 6/29/2020 add support for .Public\_CommonCode.ps1 - module-spanning code that should follow the Function block in the .psm1
+        * 3:27 PM 3/15/2020 load-Module: added $PsmNameTmp, $PsdNameTmp and shifted updating to a _TMP file of each, which at end, if error free, overwrites the current functional copy 
+        (correcting prior issue with corruption of existing copy, when there were processing errors).
+        * failing to load verb-io content, added a forceload if get-fileencoding isn't present, added new PassStatus tests and passed back in output, also now does the build in a 
+        .psm1_TMP file, to avoid damaging last functional copy
+        * 12:42 PM 3/3/2020 fixed missing trailing sbnr (Internal)
+        * 10:36 AM 3/3/2020 added pre-check & echo when unable to locate the psd1 FunctionsToExport value
+        * 1:58 PM 3/2/2020 as Set-ModuleFunction isn't properly setting *all* exported, go back to collecting and updating the psm1 & psd1 *both* via regx
+        * 9:12 AM 2/29/2020 shift export-modulemember/FooterBlock to bottom, added FUNCTIONS delimiter lines
+        * 9:17 AM 2/27/2020 added new -NoAliasExport param, and added the missing
+        * 3:44 PM 2/26/2020 Merge-Module: added -LogSpec param (feed it the object returned by a Start-Log() pass).
+        * 11:27 AM Merge-Module 2/24/2020 suppress block dumps to console, unless -showdebug or -verbose in use
+        * 7:24 AM 1/3/2020 #936: trimmed errant trailing ;- byproduct of fix-encoding pass
+        * 10:33 AM 12/30/2019 Merge-Module():951,952 assert sorts into alpha order (make easier to find in the psm1)
+        * 10:20 AM 12/30/2019 Merge-Module(): fixed/debugged monolithic build options, now works. Could use some code to autoupdate all .NOTES:Version fields, but that's for future.
+        * 8:59 AM 12/30/2019 Merge-Module(): Added code to update against monolithic/non-dyn-incl psm1s. Parses CBH & meta blocks out & constructs a new psm1 from the content.
+        * 9:51 AM 12/28/2019 Merge-Module fixed $sBnrSStart/End typo
+        * 1:23 PM 12/27/2019 pulled regex sig replace with simple start/end detect and throw error (was leaving dangling curlies in psm1)
+        * 12:11 PM 12/27/2019 swapped write-error in catch blocks with write-warning - we seems to be failing to exec the bal of the catch
+        * 7:46 AM 12/27/2019 Merge-Module(): added included file demarc comments to improve merged file visual parsing, accumulating $PrivateFunctions now as well, explicit echos
+        * 8:51 AM 12/20/2019 removed plural from ModuleSourcePaths -> ModuleSourcePath (matches all the calls etc)
+        *8:50 PM 12/18/2019 sorted hard-coded verb-aad typo
+        2:54 PM 12/11/2019 rewrote, added backup of psm1, parsing out the stock dyn-include code from the orig psm1, leverages fault-tolerant set-fileContent(), switched sourcepaths to 
+        array type, and looped, detecting public/internal by path and prepping for the export list.
+        * 2018/11/06 Przemyslaw Klys posted version
+    
+    -------------------------- EXAMPLE 1 --------------------------
+    
+    PS C:\>.\ConvertTo-ModuleMergedTDO.ps1 -ModuleName verb-AAD -ModuleSourcePath C:\sc\verb-AAD\Public -ModuleDestinationPath C:\sc\verb-AAD\verb-AAD -showdebug -whatif ;
+    
+    Command line process
+    
+    
+    
+    
+    -------------------------- EXAMPLE 2 --------------------------
+    
+    PS>$pltmergeModule=[ordered]@{
+    
+    PS>     ModuleName="verb-AAD" ;
+    PS>     ModuleSourcePath="C:\sc\verb-AAD\Public","C:\sc\verb-AAD\Internal" ;
+    PS>     ModuleDestinationPath="C:\sc\verb-AAD\verb-AAD" ;
+    PS>     LogSpec = $logspec ;
+    PS>     NoAliasExport=$($NoAliasExport) ;
+    PS>     ErrorAction="Stop" ;
+    PS>     showdebug=$($showdebug);
+    PS>     whatif=$($whatif);
+    PS> } ;
+    PS> $smsg= "ConvertTo-ModuleMergedTDO w`n$(($pltmergeModule|out-string).trim())" ;
+    PS> if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info }  #Error|Warn|Debug
+    PS> else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+    PS> $ReportObj = ConvertTo-ModuleMergedTDO @pltmergeModule ;
+    Splatted example (from process-NewModule.ps1)
+    
+    
+    
+    
+    
+RELATED LINKS
+    https://www.toddomation.com
+
+
+

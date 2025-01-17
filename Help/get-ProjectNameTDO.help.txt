@@ -1,0 +1,106 @@
+﻿
+NAME
+    get-ProjectNameTDO
+    
+SYNOPSIS
+    get-ProjectNameTDO.ps1 - Get the name for this project (lifted from BuildHelpers module, and renamed to avoid collisions
+    
+    
+SYNTAX
+    get-ProjectNameTDO [-Path] <String> [[-GitPath] <Object>] [<CommonParameters>]
+    
+    
+DESCRIPTION
+    Get the name for this project
+    
+        Evaluates based on the following scenarios:
+            * Subfolder with the same name as the current folder
+            * Subfolder with a <subfolder-name>.psd1 file in it
+            * Current folder with a <currentfolder-name>.psd1 file in it
+            + Subfolder called "Source" or "src" (not case-sensitive) with a psd1 file in it
+    
+        If no suitable project name is discovered, the function will return
+        the name of the root folder as the project name.
+        
+         We assume you are in the project root, for several of the fallback options
+         
+         [How to Write a PowerShell Module Manifest - PowerShell | Microsoft Docs - 
+    docs.microsoft.com/](https://docs.microsoft.com/en-us/powershell/scripting/developer/module/how-to-write-a-powershell-module-manifest?view=powershell-7.1)
+         "You link a manifest file to a module by naming the manifest the same as the module, and storing the manifest in the module's root directory."
+         
+         [Understanding a Windows PowerShell Module - PowerShell | Microsoft Docs - 
+    docs.microsoft.com/](https://docs.microsoft.com/en-us/powershell/scripting/developer/module/understanding-a-windows-powershell-module?view=powershell-7.1)
+          "A module is a set of related Windows PowerShell functionalities, grouped together as a convenient unit (usually saved in a single directory)."
+          "Regardless, the path of the folder is referred to as the base of the module (ModuleBase), and the name of the script, binary, or manifest module file (.psm1) should be the 
+    same as the module folder name, with the following exceptions:..."
+    
+
+PARAMETERS
+    -Path <String>
+        Path to project root. Defaults to the current working path [-path 'C:\sc\PowerShell-Statistics\']
+        
+        Required?                    true
+        Position?                    1
+        Default value                $PWD.Path
+        Accept pipeline input?       true (ByValue, ByPropertyName)
+        Accept wildcard characters?  false
+        
+    -GitPath <Object>
+        
+        Required?                    false
+        Position?                    2
+        Default value                git
+        Accept pipeline input?       false
+        Accept wildcard characters?  false
+        
+    <CommonParameters>
+        This cmdlet supports the common parameters: Verbose, Debug,
+        ErrorAction, ErrorVariable, WarningAction, WarningVariable,
+        OutBuffer, PipelineVariable, and OutVariable. For more information, see 
+        about_CommonParameters (https:/go.microsoft.com/fwlink/?LinkID=113216). 
+    
+INPUTS
+    
+OUTPUTS
+    
+NOTES
+    
+    
+        Version     : 1.0.0
+        Author      : Todd Kadrie
+        Website     : http://www.toddomation.com
+        Twitter     : @tostka / http://twitter.com/tostka
+        CreatedDate : 2021-10-15
+        FileName    : get-ProjectNameTDO.ps1
+        License     : MIT License 
+        Copyright   : (none asserted)
+        Github      : https://github.com/tostka/verb-dev
+        Tags        : Powershell
+        AddedCredit :  RamblingCookieMonster (Warren Frame)
+        AddedWebsite: https://github.com/RamblingCookieMonster
+        AddedTwitter: @pscookiemonster
+        AddedWebsite: https://github.com/RamblingCookieMonster/BuildHelpers
+        REVISIONS
+        * 11:20 AM 12/12/2022 completely purged rem'd require stmts, confusing, when they echo in build...
+        * 11:51 AM 10/16/2021 init version, minor CBH mods, put into OTB format. 
+        * 1/1/2019 BuildHelpers most recent rev of the get-PsModuleManifest function.
+    
+    -------------------------- EXAMPLE 1 --------------------------
+    
+    PS C:\>$ModuleName = get-ProjectNameTDO -path c:\sc\someproj\
+    
+    Retrieve the Name from the specified project, and assign it to the $ModuleName variable
+    
+    
+    
+    
+    
+RELATED LINKS
+    https://github.com/tostka/verb-dev
+    https://github.com/RamblingCookieMonster/BuildHelpers
+    Get-BuildVariable 
+    Set-BuildEnvironment 
+    about_BuildHelpers 
+
+
+

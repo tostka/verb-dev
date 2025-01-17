@@ -1,0 +1,244 @@
+﻿
+NAME
+    Step-ModuleVersionCalculated
+    
+SYNOPSIS
+    Step-ModuleVersionCalculated.ps1 - Increment a fresh revision of specified module via profiled changes compared to prior semantic-version 'fingerprint' (or Percentage change).
+    
+    
+SYNTAX
+    Step-ModuleVersionCalculated [-Path] <String> [[-Method] <String>] [-MinVersionIncrement] [[-MinVersionIncrementBump] <Object>] [-applyChange] [-Silent] [-whatIf] 
+    [<CommonParameters>]
+    
+    
+DESCRIPTION
+    Step-ModuleVersionCalculated.ps1 - Profile a fresh revision of specified module for changes compared to prior semantic-version 'fingerprint'.
+    
+    ## relies on BuildHelpers module, and it's Set-BuildEnvironment profiling tool, and Step-ModuleVersion manifest .psd1-file revision-incrementing tool. 
+    
+    - step-ModuleVersion() supports -By: "Major", "Minor", "Build","Patch"
+    
+    ## -Method: Default via 'Fingerprint': 
+        
+        'Fingerprint' assumes a prior pass of the Initialize-ModuleFingerpring function:
+        
+        ```powershell
+        Initialize-ModuleFingerprint -path 'C:\sc\Get-MediaInfo' -whatif -verbose ;
+        ```
+    
+        ... which creates & populates a 'fingerprint' file in the root of the module, summarizing the commands and parameters within the module. 
+    
+        When Step-ModuleVersionCalculated is run, with default Method:Fingerprint, 
+        the prior fingerprint file contents are compared to the current module content, 
+        and the choice between Major|Module|Patch revision step level is made on the following basis:
+            - Major reflets breaking changes - removed commands and parameters that previously existed
+            - Minor reflects enhancements - new commands and parameters that did not previously exist
+            - Patch lesser modifications that neither add functions/commands or parameters, nor remove same. 
+            
+            Semantic versioning (aka SemVer), supports an optional pre-release tag and optional build meta tag (1.2.0-a.1)
+            [Semantic Versioning 2.0.0 | Semantic Versioning - semver.org/](https://semver.org/)
+    
+    ## Optional Method is via 'Percentage'
+    
+        'Percentage' profiles all files in the Module, for changes after the LastWriteDate after the existing .psd1 file. 
+        Changes as a percentage of all of the files, are caldulated on the following basis:
+    
+            - Major, 50% or more changes to files 
+            - Minor, 10 - 25% changes to files 
+            - Patch, 10% or less % or more changes to files 
+            Semantic Variable standard also supports Builds, and logic is in place in this 
+            function (sub 5%), but BuildHelper:Step-ModuleVersion() does not currently 
+            support Build level revisions.
+    
+
+PARAMETERS
+    -Path <String>
+        Path to root directory of the Module[-path 'C:\sc\PowerShell-Statistics\']
+        
+        Required?                    true
+        Position?                    1
+        Default value                
+        Accept pipeline input?       true (ByValue, ByPropertyName)
+        Accept wildcard characters?  false
+        
+    -Method <String>
+        Version level calculation basis (Fingerprint[default]|Percentage)[-Method Percentage]
+        
+        Required?                    false
+        Position?                    2
+        Default value                Fingerprint
+        Accept pipeline input?       true (ByValue, ByPropertyName)
+        Accept wildcard characters?  false
+        
+    -MinVersionIncrement [<SwitchParameter>]
+        Switch to force-increment ModuleVersion by minimum step (Patch), regardless of calculated changes[-MinVersionIncrement]
+        
+        Required?                    false
+        Position?                    named
+        Default value                False
+        Accept pipeline input?       false
+        Accept wildcard characters?  false
+        
+    -MinVersionIncrementBump <Object>
+        Step increment level used with -MinVersionIncrementBump parameter (Major|Minor|Build|Patch, defaults to 'Build')[-MinVersionIncrementBump 'Patch']
+        
+        Required?                    false
+        Position?                    3
+        Default value                Build
+        Accept pipeline input?       false
+        Accept wildcard characters?  false
+        
+    -applyChange [<SwitchParameter>]
+        switch to apply the Version Update (execute step-moduleversion cmd)[-applyChange]
+        
+        Required?                    false
+        Position?                    named
+        Default value                False
+        Accept pipeline input?       false
+        Accept wildcard characters?  false
+        
+    -Silent [<SwitchParameter>]
+        Suppress all but error-related outputs[-Silent]
+        
+        Required?                    false
+        Position?                    named
+        Default value                False
+        Accept pipeline input?       false
+        Accept wildcard characters?  false
+        
+    -whatIf [<SwitchParameter>]
+        Parameter to run a Test no-change pass [-Whatif switch]
+        
+        Required?                    false
+        Position?                    named
+        Default value                False
+        Accept pipeline input?       false
+        Accept wildcard characters?  false
+        
+    <CommonParameters>
+        This cmdlet supports the common parameters: Verbose, Debug,
+        ErrorAction, ErrorVariable, WarningAction, WarningVariable,
+        OutBuffer, PipelineVariable, and OutVariable. For more information, see 
+        about_CommonParameters (https:/go.microsoft.com/fwlink/?LinkID=113216). 
+    
+INPUTS
+    None. Does not accepted piped input.(.NET types, can add description)
+    
+    
+OUTPUTS
+    None. Returns no objects or output (.NET types)
+    System.Boolean
+    
+    
+NOTES
+    
+    
+        Version     : 1.0.0
+        Author      : Todd Kadrie
+        Website     : http://www.toddomation.com
+        Twitter     : @tostka / http://twitter.com/tostka
+        CreatedDate : 2021-10-09
+        FileName    : 
+        License     : (none asserted)
+        Copyright   : (none asserted)
+        Github      : https://github.com/tostka/verb-dev
+        Tags        : Powershell
+        AddedCredit : Kevin Marquette
+        AddedWebsite: https://powershellexplained.com/2017-10-14-Powershell-module-semantic-version/
+        AddedTwitter: 
+        AddedCredit : Martin Pugh (revision code on file change percent)
+        AddedWebsite: www.thesurlyadmin.com
+        AddedTwitter: @thesurlyadm1n
+        REVISIONS
+        * 8:16 AM 1/16/2024 added gcm commands return shortage comment in re: in-line internal funcs throwing off the count (as raw goes after those as full blown funcs, while gcm 
+        doesn't return/count them)
+        * 3:32 PM 11/29/2023 add test-modulemanifest error testing (cap -errorvariable and eval), it doesn't actually returna $false test, just the parsed xml, where there's an 
+        unresolvable FileList entry. 
+        * 8:02 AM 6/23/2023 fix: #433: # 2:20 PM 6/22/2023 if you're going to use a param with boolean, they have to be colon'd: -PassThru:$true (built into v1.5.26)
+        * 2:18 PM 6/2/2023 added: Try/Catch around all critical items; added test for .psm1 diverge <<<<<< HEAD tags; expanded ipmo -fo -verb tests to include ErrorVariable and 
+        Passthru, capture into variable, for info tracking down compile fails.
+        * 11:20 AM 12/12/2022 completely purged verb-* require stmts too risky w recursive load triggers:,verb-IO, verb-logging, verb-Mods, verb-Text
+        * 3:57 PM 5/26/2022 backstop profile rgxs ; implment pre-cache & post-reload of installed modules ; 
+            found can rmo the temp module ipmo, by targeting gmo | path, rather than common name (like verb-io). ; 
+            fixed asset of $bumpVersionType = $MinVersionIncrementBump (was dropping 'Patch' through, rather than 'build')
+        * 10:56 AM 5/20/2022 WIP: add: validator for ... ; -MinVersionIncrementBump (coerce Min fail through rev to Build; or use as explicit step driver, constant, rather than 
+        hard-coded in code) ; 
+            address gcm bug where failing to return any but 3 old renamed funcs from verb-io.psm1: 
+            add $ASTMatchThreshold (reps min percentage match gcm to sls -pattern parse of function lines in .psm1), along with a raft of new eval testing code. 
+            tried running AST profiling to pull functions & aliases, but takes _3Mins_ to run. Simpler, and 90% effective to do an sls parse.
+        * 2:29 PM 5/16/2022 add: backup-fileTDO of the fingerprintfile
+        * 9:42 AM 1/18/2022 added test for recursed nested #requires -module [modname] 
+            strings - this one's a brute to recover from, just like the version clash, both 
+            hard-break build and require reverting installed rev of module to get past. 
+            Everything works, bbuild, publish, install, except the trailing ipmo dies 
+            *hard* ; updated $rgxRequreVersionLine prefix (\s|^) to suppress returns of double-#'d rem'd requires lines.
+        * 2:09 PM 10/26/2021 requires vers code: only run if $PsFilesWVers populated ; shifted 'good' exit to within bumpvers test, and output $false otherwise ; updated mult #requires 
+        code to profile -version variants, and look for -gt 1; added verbose dump of Minor/Major changes in trailing outputs. 
+        * 3:46 PM 10/25/2021 fingerprint code was dropping matches into pipeline, and blowing up returned bumprev string (ingested the outputs) ; added .psm1 test for multi '#requires 
+        -version' (crashes all ipmos) ; add verbose support into all the splats
+        * 2:19 PM 10/16/2021 actually implemented the new -Silent param ; updated ModuleName locater; 
+        * 6:11 PM 10/15/2021 rem'd # raa, replaced psd1/psm1-location code with Get-PSModuleFile(), which is a variant of BuildHelpers get-psModuleManifest. 
+        * 2:51 PM 10/13/2021 subbed pswls's for wv's ; added else block to catch mods with inconsistent names between root dir, and .psm1 file, (or even .psm1 location); added path to 
+        sBnr
+        * 3:55 PM 10/10/2021 added output of final psd1 info on applychange ; recoded to use buildhelper; added -applyChange to exec step-moduleversion, and -NoBuildInfo to bypass 
+        reliance on BuildHelpers mod (where acting up for a module). 
+        * 9:08 PM 10/9/2021 init version
+    
+    -------------------------- EXAMPLE 1 --------------------------
+    
+    PS>Step-ModuleVersionCalculated -path 'C:\sc\Get-MediaInfo' -whatif -verbose ;
+    
+    Fingerprint the specified module path, with whatif and verbose specified
+    
+    
+    
+    
+    -------------------------- EXAMPLE 2 --------------------------
+    
+    PS>Step-ModuleVersionCalculated -path 'C:\sc\Get-MediaInfo'  -verbose -NoBuildInfo ;
+    
+    Using option to exclude leveaging BuildHelper module (where it fails to properly process a given module, and 'hangs' with normal processing).
+    
+    
+    
+    
+    -------------------------- EXAMPLE 3 --------------------------
+    
+    PS>Step-ModuleVersionCalculated -path 'C:\sc\Get-MediaInfo'  -verbose -NoBuildInfo -applyChange ;
+    
+    Demo -applyChange option to apply Step-ModuleVersion immediately.
+    
+    
+    
+    
+    -------------------------- EXAMPLE 4 --------------------------
+    
+    PS>Step-ModuleVersionCalculated -path 'C:\sc\Get-MediaInfo'  -verbose -Method Percentage -applyChange ;
+    
+    Demo use of the optional 'Percentage' -Method (vs default 'Fingerprint' basis).
+    
+    
+    
+    
+    -------------------------- EXAMPLE 5 --------------------------
+    
+    PS>$newRevBump = Step-ModuleVersionCalculated -path 'C:\sc\Get-MediaInfo' ;
+    
+    PS> Step-ModuleVersion -path 'C:\sc\Get-MediaInfo\MediaInfo.psd1' -By $newRevBump ;
+    Analyze the specified module, calculate a revision BumpVersionType, and return the calculated value tp the pipeline
+    Then run Step-ModuleVersion -By `$bumpVersionType to increment the ModuleVersion (independantly, rather than within this function using -ApplyChange)
+    
+    
+    
+    
+    
+RELATED LINKS
+    https://github.com/tostka/verb-dev
+    https://powershellexplained.com/2017-10-14-Powershell-module-semantic-version/
+    
+    Requires -Version 3
+    Requires -Modules BuildHelpers
+    Requires -RunasAdministrator
+
+
+
