@@ -1,0 +1,64 @@
+﻿
+NAME
+    import-ISEBreakPointsALL
+    
+SYNOPSIS
+    import-ISEBreakPointsALL - Loop open tabs in ISE, and foreach: Import all 'Line' ise breakpoints from assoc'd XML file
+    
+    
+SYNTAX
+    import-ISEBreakPointsALL [<CommonParameters>]
+    
+    
+DESCRIPTION
+    import-ISEBreakPointsALL - Loop open tabs in ISE, and foreach: Import all 'Line' ise breakpoints from assoc'd XML file
+    Quick bulk import, when ISE ineveitbly stops properly echo'ing variable values to terminal (and need to close and re-open all open files, with BPs intact)
+    
+
+PARAMETERS
+    <CommonParameters>
+        This cmdlet supports the common parameters: Verbose, Debug,
+        ErrorAction, ErrorVariable, WarningAction, WarningVariable,
+        OutBuffer, PipelineVariable, and OutVariable. For more information, see 
+        about_CommonParameters (https:/go.microsoft.com/fwlink/?LinkID=113216). 
+    
+INPUTS
+    
+OUTPUTS
+    
+NOTES
+    
+    
+        Version     : 1.0.0
+        Author      : Todd Kadrie
+        Website     : http://www.toddomation.com
+        Twitter     : @tostka / http://twitter.com/tostka
+        CreatedDate : 2022-05-11
+        FileName    : import-ISEBreakPointsALL
+        License     : MIT License
+        Copyright   : (c) 2022 Todd Kadrie
+        Github      : https://github.com/tostka/verb-dev
+        Tags        : Powershell,ISE,development,debugging
+        REVISIONS
+        * 8:28 AM 3/26/2024 chg iIseBpAll -> ipIseBpAll
+        * 1:21 PM 2/28/2024 add ipbpAll alias
+        * 12:23 PM 5/23/2022 added try/catch: failed out hard on Untitled.ps1's
+        * 9:19 AM 5/20/2022 add: iIseBpAll alias (using these a lot lately; w freq crashouts of ise, and need to recover all files open & BPs to quickly get back to function)
+        * 1:58 PM 5/16/2022 rem'd whatif (not supported in child func)
+        * 12:16 PM 5/11/2022 init
+    
+    -------------------------- EXAMPLE 1 --------------------------
+    
+    PS C:\>import-ISEBreakPointsALL -verbose -whatif
+    
+    Export all 'line'-type breakpoints for all current open ISE tabs, to matching xml files, with verbose & whatif
+    
+    
+    
+    
+    
+RELATED LINKS
+    https://github.com/tostka/verb-dev
+
+
+

@@ -1,0 +1,98 @@
+﻿
+NAME
+    Uninstall-ModuleForce
+    
+SYNOPSIS
+    Uninstall-ModuleForce.ps1 - Uninstalls a module (via Uninstall-Module -force), and then searches through all PSModulePath directories, and deletes any unregistered copies as well.
+    
+    
+SYNTAX
+    Uninstall-ModuleForce [-ModuleName] <String[]> [-whatIf] [<CommonParameters>]
+    
+    
+DESCRIPTION
+    Uninstall-ModuleForce.ps1 - Uninstalls a module (via Uninstall-Module -force), and then searches through all PSModulePath directories, and deletes any unregistered copies as well.
+    Note: *installed* mods have PSGetModuleInfo.xml files
+    
+
+PARAMETERS
+    -ModuleName <String[]>
+        Module Name (used to name the ModuleName.psm1 file)[-ModuleName verb-XXX]
+        
+        Required?                    true
+        Position?                    1
+        Default value                
+        Accept pipeline input?       false
+        Accept wildcard characters?  false
+        
+    -whatIf [<SwitchParameter>]
+        Parameter to run a Test no-change pass [-Whatif switch]
+        
+        Required?                    false
+        Position?                    named
+        Default value                False
+        Accept pipeline input?       false
+        Accept wildcard characters?  false
+        
+    <CommonParameters>
+        This cmdlet supports the common parameters: Verbose, Debug,
+        ErrorAction, ErrorVariable, WarningAction, WarningVariable,
+        OutBuffer, PipelineVariable, and OutVariable. For more information, see 
+        about_CommonParameters (https:/go.microsoft.com/fwlink/?LinkID=113216). 
+    
+INPUTS
+    
+OUTPUTS
+    
+NOTES
+    
+    
+        Version     : 0.0.
+        Author      : Todd Kadrie
+        Website     : http://www.toddomation.com
+        Twitter     : @tostka / http://twitter.com/tostka
+        CreatedDate : 2022-05-10
+        FileName    : Uninstall-ModuleForce.ps1
+        License     : MIT License
+        Copyright   : (c) 2022 Todd Kadrie
+        Github      : https://github.com/tostka/verb-dev
+        Tags        : Powershell,Module,Management,Lifecycle
+        REVISIONS
+        # 4:06 PM 8/21/2024 #135:empty PSModulePath entry causes this to crash out, post filter only populated!
+        * 12:33 PM 1/17/2024 added RunAA pretest, and folder perms seize code
+        * 10:10 AM 5/17/2022 updated post test, also don't want it to abort/break, on any single failure.
+        * 11:11 AM 5/10/2022 init, split out process-NewModule #773: $smsg= "Removing existing profile $($ModuleName) content..."  block, to have a single maintainable shared func
+    
+    -------------------------- EXAMPLE 1 --------------------------
+    
+    PS>$pltUMF=[ordered]@{ ModuleName = $ModuleName ; Verbose = $($VerbosePreference -eq 'Continue') ; whatif=$($whatif); } ;
+    
+    PS> $smsg= "Uninstall-ModuleForce w`n$(($pltUMF|out-string).trim())" ;
+    PS> if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info }  #Error|Warn|Debug
+    PS> else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+    PS> $bRet = Uninstall-ModuleForce @pltUMF ;
+    PS> # check return for semi-colon-delimited specific error string
+    PS> if($sRet){
+    PS>     if([array]$sRet.split(';').trim() -contains 'uninstall-module:ERROR'){
+    PS>         # or, work with raw ;-delim'd string: if($sret.indexof('uninstall-module:ERROR')){
+    PS>         $smsg = "Uninstall-ModuleForce:uninstall-module:ERRO!"  ;
+    PS>         write-warning $smsg ;
+    PS>         throw $smsg ;
+    PS>         # spec optional Break|Continue etc recovery cmd
+    PS>     } ;
+    PS> } else {
+    PS>     $smsg = "(no `$sRet returned on call)" ;
+    PS>     if($verbose){if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } #Error|Warn|Debug
+    PS>     else{ write-verbose "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; } ;
+    PS> } ; 
+    Demo that displays running with a splat, and parsing the return'd PassStatus for Error entries in the array
+    
+    
+    
+    
+    
+RELATED LINKS
+    https://github.com/tostka/verb-dev
+
+
+

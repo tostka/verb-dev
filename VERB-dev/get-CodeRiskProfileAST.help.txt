@@ -1,0 +1,85 @@
+﻿
+NAME
+    get-CodeRiskProfileAST
+    
+SYNOPSIS
+    get-CodeRiskProfileAST.ps1 - Analyze a script/function/module (ps1|psm1) and prepare a report showing what commands it would run, necessary parameters, and anything that might pose 
+    a danger. Outputs/displays an ABOUT_[filebasename].help.txt file.
+    
+    
+SYNTAX
+    get-CodeRiskProfileAST [[-Path] <String>] [-FilePath <String>] [<CommonParameters>]
+    
+    
+DESCRIPTION
+    get-CodeRiskProfileAST.ps1 - Analyze a script/function/module (ps1|psm1) and prepare a report showing what commands it would run, necessary parameters, and anything that might pose 
+    a danger. Outputs/displays an ABOUT_[filebasename].help.txt file.  
+    Based on Jeff Hicks' get-ASTProfile() script.
+    
+
+PARAMETERS
+    -Path <String>
+        Enter the path of a PowerShell script
+        
+        Required?                    false
+        Position?                    1
+        Default value                $(Read-Host "Enter the filename and path to a PowerShell script")
+        Accept pipeline input?       false
+        Accept wildcard characters?  false
+        
+    -FilePath <String>
+        Report output directory
+        
+        Required?                    false
+        Position?                    named
+        Default value                "$env:userprofile\Documents\WindowsPowerShell"
+        Accept pipeline input?       false
+        Accept wildcard characters?  false
+        
+    <CommonParameters>
+        This cmdlet supports the common parameters: Verbose, Debug,
+        ErrorAction, ErrorVariable, WarningAction, WarningVariable,
+        OutBuffer, PipelineVariable, and OutVariable. For more information, see 
+        about_CommonParameters (https:/go.microsoft.com/fwlink/?LinkID=113216). 
+    
+INPUTS
+    
+OUTPUTS
+    
+NOTES
+    
+    
+        Version     : 3.4.1
+        Author      : Jeff Hicks
+        Website     : https://www.powershellgallery.com/packages/ISEScriptingGeek/3.4.1
+        Twitter     : 
+        CreatedDate : 2022-04-26
+        FileName    : get-CodeRiskProfileAST.ps1
+        License     : 
+        Copyright   : 
+        Github      : 
+        Tags        : Powershell,Parser,Risk
+        REVISIONS
+        * 12:58 PM 4/28/2022 ren'd get-ASTCodeRiskProfile.ps1 -> get-CodeRiskProfileAST.ps1 (matches other verb-dev functions in niche)
+        * 3:59 PM 4/26/2022 ren'd get-ASTProfile() (JH's original func name) & get-ASTScriptProfile.ps1 -> get-ASTCodeRiskProfile ; fixed output wrap issues (added `n to a few of the 
+        here string leads, to ensure proper line wraps occured). ;  spliced over jdhitsolutions' latest rev of get-ASTCodeRiskProfile() (reverts -Reportpath param back to orig 
+        -FilePath); move it into verb-dev
+        * Jun 24, 2019 jdhitsolutions from v3.4.1 of ISEScriptingGeek module
+        * 8:26 AM 2/27/2020 added CBH, renamed FilePath to ReportDir, expanded param defs a little. 
+        * 2019, posted vers 3.4.1
+    
+    -------------------------- EXAMPLE 1 --------------------------
+    
+    PS>get-CodeRiskProfileAST -Path 'C:\sc\verb-AAD\verb-AAD\verb-AAD.psm1' -FilePath 'C:\sc\verb-AAD\'
+    
+    
+    
+    
+    
+    
+    
+RELATED LINKS
+    
+
+
+

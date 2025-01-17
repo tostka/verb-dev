@@ -1,0 +1,7 @@
+﻿
+Name                              Category  Module                    Synopsis                                                                                                           
+----                              --------  ------                    --------                                                                                                           
+Split-CommandLine                 Function  verb-dev                  Split-CommandLine - Parse command-line arguments using Win32 API CommandLineToArgvW function.                      
+Split-CommandLine.ps1             Extern...                           Split-CommandLine.ps1 [-CommandLine] <string> [<CommonParameters>]...                                              
+
+

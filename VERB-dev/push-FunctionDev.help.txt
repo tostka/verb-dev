@@ -1,0 +1,104 @@
+﻿
+NAME
+    push-FunctionDev
+    
+SYNOPSIS
+    push-FunctionDev.ps1 - Stage a given c:\sc\[repo]\Public\function.ps1 file to prod editing dir as function_func.ps1
+    
+    
+SYNTAX
+    push-FunctionDev [[-Path] <FileInfo[]>] [-Destination <DirectoryInfo>] [-force] [-whatIf] [<CommonParameters>]
+    
+    
+DESCRIPTION
+    push-FunctionDev.ps1 - Stage a given c:\sc\[repo]\Public\function.ps1 file to prod editing dir as function_func.ps1
+    
+    Concept is to use this to quickly 'push' a module source .ps1 into the dev dir, suffixed as _func.ps1, so that it can be ipmo -fo -verb'd and debugged/edited for updates. 
+    On completion the matching function pop-FunctionDev.ps1 would be used to pull the updated file back into place, overwriting the original source.
+    
+
+PARAMETERS
+    -Path <FileInfo[]>
+        Source module funciton .ps1 file to be staged for editing (to uwps\Name_func.ps1)[-path 'C:\sc\verb-dev\Public\export-ISEBreakPoints.ps1']
+        
+        Required?                    false
+        Position?                    1
+        Default value                
+        Accept pipeline input?       true (ByValue)
+        Accept wildcard characters?  false
+        
+    -Destination <DirectoryInfo>
+        Directoy into which 'genericly-named output files should be written, or the full path to a specified output file[-Destination c:\pathto\MyModuleHelp.html]
+        
+        Required?                    false
+        Position?                    named
+        Default value                C:\sc\powershell\PSScripts\
+        Accept pipeline input?       false
+        Accept wildcard characters?  false
+        
+    -force [<SwitchParameter>]
+        
+        Required?                    false
+        Position?                    named
+        Default value                False
+        Accept pipeline input?       false
+        Accept wildcard characters?  false
+        
+    -whatIf [<SwitchParameter>]
+        
+        Required?                    false
+        Position?                    named
+        Default value                True
+        Accept pipeline input?       false
+        Accept wildcard characters?  false
+        
+    <CommonParameters>
+        This cmdlet supports the common parameters: Verbose, Debug,
+        ErrorAction, ErrorVariable, WarningAction, WarningVariable,
+        OutBuffer, PipelineVariable, and OutVariable. For more information, see 
+        about_CommonParameters (https:/go.microsoft.com/fwlink/?LinkID=113216). 
+    
+INPUTS
+    None. Does not accepted piped input.
+    
+    
+OUTPUTS
+    None. Does not return output to pipeline.
+    
+    
+NOTES
+    
+    
+        Version     : 1.2.1
+        Author      : Todd Kadrie
+        Website     : http://www.toddomation.com
+        Twitter     : @tostka / http://twitter.com/tostka
+        CreatedDate : 2023-10-02
+        FileName    : push-FunctionDev.ps1
+        License     : (None Asserted)
+        Copyright   : (None Asserted)
+        Github      : https://github.com/tostka/verb-dev
+        Tags        : Powershell, development, html, markdown, conversion
+        AddedCredit : Øyvind Kallstad @okallstad
+        AddedWebsite: https://communary.net/
+        AddedTwitter: @okallstad / https://twitter.com/okallstad
+        REVISIONS
+        * 3:09 PM 11/29/2023 added missing test on $sMod - gcm comes back with empty mod, when the item has been iflv'd in console, so prompt for a dest mod
+        * 8:27 AM 11/28/2023 updated CBH; tested, works; add: a few echo details, confirmed -ea stop on all cmds
+        * 12:30 PM 11/22/2023 init
+    
+    -------------------------- EXAMPLE 1 --------------------------
+    
+    PS>push-functiondev -Path 'C:\sc\verb-dev\Public\export-ISEBreakPoints.ps1' -verbose -whatif ;
+    
+    Typical run
+    
+    
+    
+    
+    
+RELATED LINKS
+    https://github.com/tostka/verb-dev
+
+
+

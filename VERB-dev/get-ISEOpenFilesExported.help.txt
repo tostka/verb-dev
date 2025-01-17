@@ -1,0 +1,108 @@
+﻿
+NAME
+    get-ISEOpenFilesExported
+    
+SYNOPSIS
+    get-ISEOpenFilesExported - List CU profile .\Documents\WindowsPowerShell\Scripts\*.psXML files, reflecting prior exports via export-ISEOpenFiles, as targets for import via 
+    import-ISEOpenFiles
+    
+    
+SYNTAX
+    get-ISEOpenFilesExported [[-Tag] <String>] [<CommonParameters>]
+    
+    
+DESCRIPTION
+    get-ISEOpenFilesExported - List CU profile .\Documents\WindowsPowerShell\Scripts\*.psXML files, reflecting prior exports via export-ISEOpenFiles, as targets for import via 
+    import-ISEOpenFiles
+    Returns list of string filepaths to pipeline, for further filtering, and passage to import-ISEOpenFiles
+    
+
+PARAMETERS
+    -Tag <String>
+        Optional Tag to apply to as filename suffix[-tag 'label']
+        
+        Required?                    false
+        Position?                    1
+        Default value                
+        Accept pipeline input?       false
+        Accept wildcard characters?  false
+        
+    <CommonParameters>
+        This cmdlet supports the common parameters: Verbose, Debug,
+        ErrorAction, ErrorVariable, WarningAction, WarningVariable,
+        OutBuffer, PipelineVariable, and OutVariable. For more information, see 
+        about_CommonParameters (https:/go.microsoft.com/fwlink/?LinkID=113216). 
+    
+INPUTS
+    
+OUTPUTS
+    
+NOTES
+    
+    
+        Version     : 1.0.0
+        Author      : Todd Kadrie
+        Website     : http://www.toddomation.com
+        Twitter     : @tostka / http://twitter.com/tostka
+        CreatedDate : 2022-05-11
+        FileName    : get-ISEOpenFilesExported.ps1
+        License     : MIT License
+        Copyright   : (c) 2022 Todd Kadrie
+        Github      : https://github.com/tostka/verb-dev
+        Tags        : Powershell,ISE,development,debugging
+        REVISIONS
+        * 9:24 AM 9/14/2023 CBH add:demo of pulling lastwritetime and using to make automatd decisions, or comparison reporting (as this returns a fullname, not a file object)
+        * 1:55 PM 3/29/2023 flipped alias (clashed) iIseOpen -> gIseOpen
+        * 8:51 AM 3/8/2023 init
+    
+    -------------------------- EXAMPLE 1 --------------------------
+    
+    PS>get-ISEOpenFilesExported -verbose
+    
+    Find any pre-existing exported ISESavedSession*.psXML files (those exported via export-ISEOpenFiles)
+    
+    
+    
+    
+    -------------------------- EXAMPLE 2 --------------------------
+    
+    PS>get-ISEOpenFilesExported -Tag MFA -verbose
+    
+    Find any pre-existing exported ISESavedSession*MFA*.psXML files (those exported with -Tag MFA)
+    
+    
+    
+    
+    -------------------------- EXAMPLE 3 --------------------------
+    
+    PS>get-ISEOpenFilesExported -Tag MFA | import-ISEOpenFiles ;
+    
+    Example pipelining the outputs into import-ISEOPenFiles() (via pipeline support for it's -FilePath param)
+    
+    
+    
+    
+    -------------------------- EXAMPLE 4 --------------------------
+    
+    PS>get-ISEOpenFilesExported | %{gci $_} | sort LastWriteTime | ft -a fullname,lastwritetime ;
+    
+    Example finding the 'latest' (newest LastWritTime) and echoing for review
+    
+    
+    
+    
+    -------------------------- EXAMPLE 5 --------------------------
+    
+    PS C:\>get-ISEOpenFilesExported | %{gci $_} | sort LastWriteTime | select -last 1 | select -expand fullname | import-ISEOpenFiles ;
+    
+    Example finding the 'latest' (newest LastWritTime), and then importing into ISE.
+    
+    
+    
+    
+    
+RELATED LINKS
+    https://github.com/tostka/verb-dev
+
+
+

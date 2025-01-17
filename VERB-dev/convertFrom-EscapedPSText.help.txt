@@ -1,0 +1,87 @@
+﻿
+NAME
+    convertFrom-EscapedPSText
+    
+SYNOPSIS
+    convertFrom-EscapedPSText - convert a previously backtick-escaped scriptblock of Powershell code text, to an un-escaped equivelent - specifically removing backtick-escape found on 
+    all special characters [$*\~;(%?.:@/].
+    
+    
+SYNTAX
+    convertFrom-EscapedPSText [[-ScriptBlock] <String[]>] [<CommonParameters>]
+    
+    
+DESCRIPTION
+    convertFrom-EscapedPSText - convert a previously backtick-escaped scriptblock of Powershell code text, to an un-escaped equivelent - specifically removing backtick-escape found on 
+    all special characters [$*\~;(%?.:@/]. 
+    Intent is to run this *after* to running a -replace pass on a given piece of pre-escaped Powershell code as text (parsing & editing scripts with powershell itself), to ensure the 
+    special characters in the block are no longer treated as literal text. Prior to doing search and replace, one would typically have escaped the special characters by running 
+    convertTo-EscapedPSText() on the block.
+    
+
+PARAMETERS
+    -ScriptBlock <String[]>
+        Semi-colon-delimited ScriptBlock of powershell to be wrapped at
+        
+        Required?                    false
+        Position?                    1
+        Default value                
+        Accept pipeline input?       false
+        Accept wildcard characters?  false
+        
+    <CommonParameters>
+        This cmdlet supports the common parameters: Verbose, Debug,
+        ErrorAction, ErrorVariable, WarningAction, WarningVariable,
+        OutBuffer, PipelineVariable, and OutVariable. For more information, see 
+        about_CommonParameters (https:/go.microsoft.com/fwlink/?LinkID=113216). 
+    
+INPUTS
+    
+OUTPUTS
+    
+NOTES
+    
+    
+        Version     : 1.0.0
+        Author      : Todd Kadrie
+        Website     :	http://www.toddomation.com
+        Twitter     :	@tostka / http://twitter.com/tostka
+        CreatedDate : 2021-11-08
+        FileName    : convertFrom-EscapedPSText.ps1
+        License     : MIT License
+        Copyright   : (c) 2021 Todd Kadrie
+        Github      : https://github.com/tostka/verb-text
+        Tags        : Powershell,Text
+        AddedCredit : REFERENCE
+        AddedWebsite:	URL
+        AddedTwitter:	URL
+        REVISIONS
+        * 12:44 PM 6/17/2022 update CBH; move verb-text -> verb-dev
+        * 2:10 PM 3/1/2022 updated the ScriptBlock param to string-array [string[]], preserves the multi-line nature of original text (otherwise, ps coerces arrays into single-element 
+        strings)
+        * 11:09 AM 11/8/2021 init
+    
+    -------------------------- EXAMPLE 1 --------------------------
+    
+    PS># pre-escape PS special chars
+    
+    PS>  $ScriptBlock = get-content c:\path-to\script.ps1 ; 
+    PS>  $ScriptBlock=convertTo-EscapedPSText -ScriptBlock $ScriptBlock ; 
+    PS>  $splitAt = ";" ; 
+    PS>  $replaceWith = ";$([Environment]::NewLine)" ; 
+    PS>  # ";`r`n"  ; 
+    PS>  $ScriptBlock = $ScriptBlock | Foreach-Object {$_ -replace $splitAt, $replaceWith } ; 
+    PS>  $ScriptBlock=convertFrom-EscapedPSText -ScriptBlock $ScriptBlock ; 
+    PS>  
+    Load a script file into a $ScriptBlock vari, escape special characters in the $Scriptblock, run a wrap on the text at semicolons (replace ';' with ';`n), then unescape the 
+    specialcharacters in the scriptblock, back to original functional state.
+    
+    
+    
+    
+    
+RELATED LINKS
+    https://github.com/tostka/verb-Text
+
+
+
