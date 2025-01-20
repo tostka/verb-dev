@@ -5,7 +5,7 @@
 .SYNOPSIS
 VERB-dev - Development PS Module-related generic functions
 .NOTES
-Version     : 1.5.68
+Version     : 1.5.64
 Author      : Todd Kadrie
 Website     :	https://www.toddomation.com
 Twitter     :	@tostka
@@ -12825,7 +12825,7 @@ r.com/tostka
     Github      : https://github.com/tostka/verb-dev
     Tags        : Powershell,Module,Build,Development
     REVISIONS
-    * *3:58 PM 1/20/2025 added another $killfiles block just before trailing log cleanup ;  address new .\Help\*.help.txt ref files (not part of build): mkdir verb-x\buildBlind, moved Help to below it, add:$gciExcludes = @(...,'*.help.txt','buildBlind'); & to $excludeMatch; 
+    * 3:02 PM 1/20/2025 address new .\Help\*.help.txt ref files (not part of build): mkdir verb-x\buildBlind, moved Help to below it, add:$gciExcludes = @(...,'*.help.txt','buildBlind'); & to $excludeMatch; 
          ren $exclude -> $gciExcludes, and add $gciExcludes = @(...,'*.help.txt') ; 
     * 3:30 PM 9/17/2024 added ps7 test & warning;  retooled trailing process (new WinTerm install eating into ps7 by default -> confusion)  added gmo -name `$tmod | ? version -ne `$tVer | rmo -Force -Verbose  to update procedure output (ensure old in-mem obso copies are out of memory)
     * 2:59 PM 8/29/2024 recoded post install report output, found on LYN-9C5CTV3 an 
@@ -13272,11 +13272,11 @@ r.com/tostka
     # add exclude of pester .md module creation info to both
     #$exclude = @('main.js','rebuild-module.ps1','New-Module-Create.md') ; 
     # add exclude on the .\Help\ .help.txt exported ref CBH copy files
-    $gciExcludes = @('main.js','rebuild-module.ps1','New-Module-Create.md','buildBlind','*.help.txt','*-ps1-BP.xml') ; 
+    $gciExcludes = @('main.js','rebuild-module.ps1','New-Module-Create.md','buildBlind','*.help.txt') ; 
     # gci post-filtered excludes from build/pkg
     #$excludeMatch = @('.git','.vscode','New-Module-Create.md') ;
     # * 3:07 PM 1/20/2025 added buildblind and the x.help.txts as well
-    $excludeMatch = @('.git','.vscode','New-Module-Create.md','buildBlind','*.help.txt','*-ps1-BP.xml') ;
+    $excludeMatch = @('.git','.vscode','New-Module-Create.md','buildBlind','*.help.txt') ;
     [regex] $excludeMatchRegEx = '(?i)' + (($excludeMatch |ForEach-Object {[regex]::escape($_)}) -join "|") + '' ;
     $rgxPsd1FileListDirs = "\\(Docs|Licenses|Resource)\\" ;  # dirs of files to be included in the manifest FileList key
     $rgxPsd1FileListExcl = "\\(\.vscode|ScriptAnalyzer-Results-|logs\\)|-LOG-BATCH-EXEC-" ; # file filter to exclude from mani FilList key
@@ -14173,17 +14173,6 @@ r.com/tostka
     #Levels:Error|Warn|Info|H1|H2|H3|H4|H5|Debug|Verbose|Prompt|Success
     #reset-ModulePublishingDirectory -ModuleName $ModuleName -whatif:$($whatif) -verbose:$($VerbosePreference -eq "Continue") ; 
     populate-ModulePublishingDirectory -ModuleName $ModuleName -whatif:$($whatif) -verbose:$($VerbosePreference -eq "Continue") ; 
-
-    # this is probably where we should purge out any garbage brought in - nope this never gets triggered, try splcing into exit, we just want these purged as deadwood, they aren't making it into the build anyway
-    $smsg = "Run: Remove any non-pub garbage cp'd into c:\sc\$($ModuleName)\$($ModuleName) -ModuleName $($ModuleName)" ; 
-    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } 
-    else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
-    #Levels:Error|Warn|Info|H1|H2|H3|H4|H5|Debug|Verbose|Prompt|Success
-    #reset-ModulePublishingDirectory -ModuleName $ModuleName -whatif:$($whatif) -verbose:$($VerbosePreference -eq "Continue") ; 
-    # leveage $gciExcludes
-    if($killfiles = gci -path "c:\sc\$($ModuleName)\$($ModuleName)" -include $gciExcludes){
-        $killfiles | remove-item -force -verbose -whatif:$($whatif) ; 
-    } ; 
 
     $smsg = "Validate updated $($ModuleName)\$($ModuleName) dir contents against Manifest:`nRun: test-modulemanifest -Path $($ModPsdPath)" ;
     if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } 
@@ -15685,16 +15674,6 @@ $($logfile)
         copy-item -path $logfile -dest $ModDirPath -whatif:$($whatif) ;
     } ;
 
-    # this is probably where we should purge out any garbage brought in - splicing into exit, we just want these purged as deadwood, they aren't making it into the build anyway
-    $smsg = "Run: Remove any non-pub garbage cp'd into c:\sc\$($ModuleName)\$($ModuleName) -ModuleName $($ModuleName)" ;
-    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info }
-    else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
-    #Levels:Error|Warn|Info|H1|H2|H3|H4|H5|Debug|Verbose|Prompt|Success
-    # leveage $gciExcludes
-    if($killfiles = gci -path "c:\sc\$($ModuleName)\$($ModuleName)" -include $gciExcludes){
-        $killfiles | remove-item -force -verbose -whatif:$($whatif) ;
-    } ; 
-
     # this is where we should maintain accumulated old logs, post log close
     # $logfile =  'C:\sc\verb-Auth\update-NewModule-verb-auth-LOG-BATCH-EXEC-20210917-1504PM-log.txt'
 
@@ -15733,8 +15712,8 @@ Export-ModuleMember -Function backup-ModuleBuild,check-PsLocalRepoRegistration,c
 # SIG # Begin signature block
 # MIIELgYJKoZIhvcNAQcCoIIEHzCCBBsCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQU+x2ae0arm01O7rBwIYqXOoEh
-# /D6gggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQU+a7yr2klRmzpks3qVVffoLCv
+# 362gggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
 # MCwxKjAoBgNVBAMTIVBvd2VyU2hlbGwgTG9jYWwgQ2VydGlmaWNhdGUgUm9vdDAe
 # Fw0xNDEyMjkxNzA3MzNaFw0zOTEyMzEyMzU5NTlaMBUxEzARBgNVBAMTClRvZGRT
 # ZWxmSUkwgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBALqRVt7uNweTkZZ+16QG
@@ -15749,9 +15728,9 @@ Export-ModuleMember -Function backup-ModuleBuild,check-PsLocalRepoRegistration,c
 # AWAwggFcAgEBMEAwLDEqMCgGA1UEAxMhUG93ZXJTaGVsbCBMb2NhbCBDZXJ0aWZp
 # Y2F0ZSBSb290AhBaydK0VS5IhU1Hy6E1KUTpMAkGBSsOAwIaBQCgeDAYBgorBgEE
 # AYI3AgEMMQowCKACgAChAoAAMBkGCSqGSIb3DQEJAzEMBgorBgEEAYI3AgEEMBwG
-# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBS/o4Y/
-# Qr271y+ohHAwWD4nH4UgZzANBgkqhkiG9w0BAQEFAASBgBUfxZfjixR0trFM1b1V
-# +xDhafA68pIfYEEhlcKAoqlWak4IIMEgUoplRCS7veQsI0a7fcyUF43qPee+Clkp
-# XgKg+Xf+UC9RrB7OxJDOp4J5w+cEce+Vs/j3rbq3F66rTAsYmgZVu+y7WOldM5fM
-# TW2lxFn9cXOCKyyxXb8r15yC
+# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBSMqC/y
+# xgFYefz7R1m6R3ZztzRDmjANBgkqhkiG9w0BAQEFAASBgFd9/QHQj2m+zLB6v9rl
+# coYgWC9f3h3JYZvplILiPmghhTBWm79KHbbW3bomuIf32arjoKDQLsMknkyoqp/B
+# 37y5yycrlkrWrJRFi54RtUJUEMQ3wO0MKDid+NRjtBlPdxWLXXiYD4VWzdsQFmy7
+# 0CFLLWfiQKz9valNG/W27xq/
 # SIG # End signature block

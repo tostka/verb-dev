@@ -1,64 +1,7 @@
 ﻿<Objs Version="1.1.0.1" xmlns="http://schemas.microsoft.com/powershell/2004/04">
-  <S>backup-ModuleBuild.help.txt</S>
   <S>bootstrap.min.css</S>
   <S>bootstrap.min.js</S>
-  <S>build-VSCConfig.help.txt</S>
   <S>CHANGELOG.md</S>
-  <S>check-PsLocalRepoRegistration.help.txt</S>
-  <S>confirm-ModuleBuildSync.help.txt</S>
-  <S>confirm-ModulePsd1Version.help.txt</S>
-  <S>confirm-ModulePsm1Version.help.txt</S>
-  <S>confirm-ModuleTestPs1Guid.help.txt</S>
-  <S>convert-cmdline2json.help.txt</S>
-  <S>convert-CommandLine2VSCDebugJson.help.txt</S>
-  <S>convertFrom-EscapedPSText.help.txt</S>
-  <S>Convert-HelpToHtmlFile.help.txt</S>
-  <S>convert-ISEOpenSession.help.txt</S>
-  <S>converto-VSCConfig.help.txt</S>
-  <S>ConvertTo-Breakpoint.help.txt</S>
-  <S>convertTo-EscapedPSText.help.txt</S>
-  <S>ConvertTo-ModuleDynamicTDO.help.txt</S>
-  <S>ConvertTo-ModuleMergedTDO.help.txt</S>
-  <S>convertTo-UnwrappedPS.help.txt</S>
-  <S>convertTo-WrappedPS.help.txt</S>
-  <S>copy-ISELocalSourceToTab.help.txt</S>
-  <S>copy-ISETabFileToLocal.help.txt</S>
-  <S>export-ISEBreakPoints.help.txt</S>
-  <S>export-ISEBreakPointsALL.help.txt</S>
-  <S>export-ISEOpenFiles.help.txt</S>
-  <S>find-NounAliasesTDO.help.txt</S>
-  <S>get-AliasAssignsAST.help.txt</S>
-  <S>get-CodeProfileAST.help.txt</S>
-  <S>get-CodeRiskProfileAST.help.txt</S>
-  <S>Get-CommentBlocks.help.txt</S>
-  <S>get-FunctionBlock.help.txt</S>
-  <S>get-FunctionBlocks.help.txt</S>
-  <S>get-HelpParsed.help.txt</S>
-  <S>get-ISEBreakPoints.help.txt</S>
-  <S>get-ISEOpenFilesExported.help.txt</S>
-  <S>get-ModuleRevisedCommands.help.txt</S>
-  <S>get-NounAlias.help.txt</S>
-  <S>get-NounAliasTDO.help.txt</S>
-  <S>get-ProjectNameTDO.help.txt</S>
-  <S>Get-PSBreakpointSorted.help.txt</S>
-  <S>Get-PSModuleFile.help.txt</S>
-  <S>get-ScriptProfileAST.help.txt</S>
-  <S>get-StrictMode.help.txt</S>
-  <S>Get-TMVerbSynonym.help.txt</S>
-  <S>get-VariableAssignsAST.help.txt</S>
-  <S>get-VerbAlias.help.txt</S>
-  <S>get-VerbAliasTDO.help.txt</S>
-  <S>Get-VerbSyn.help.txt</S>
-  <S>Get-VerbSynonym.help.txt</S>
-  <S>Get-VerbSynonymTDO.help.txt</S>
-  <S>get-VersionInfo.help.txt</S>
-  <S>import-ISEBreakPoints.help.txt</S>
-  <S>import-ISEBreakPointsALL.help.txt</S>
-  <S>import-ISEConsoleColors.help.txt</S>
-  <S>import-ISEOpenFiles.help.txt</S>
-  <S>Initialize-ModuleFingerprint.help.txt</S>
-  <S>Initialize-PSModuleDirectories.help.txt</S>
-  <S>Invoke-CreateModuleHelpFile.help.txt</S>
   <S>jasny-bootstrap.min.css</S>
   <S>jasny-bootstrap.min.js</S>
   <S>jquery-1.11.1.min.js</S>
@@ -67,32 +10,8 @@
   <S>LICENSE_INVOKE-CREATEMODULEHELPFILE</S>
   <S>LICENSE_JASNY-BOOTSTRAP</S>
   <S>LICENSE_JQUERY</S>
-  <S>Merge-Module.help.txt</S>
-  <S>move-ISEBreakPoints.help.txt</S>
   <S>navmenu.css</S>
-  <S>new-CBH.help.txt</S>
-  <S>New-GitHubGist.help.txt</S>
-  <S>parse-Help.help.txt</S>
-  <S>pop-FunctionDev.help.txt</S>
-  <S>process-NewModule.help.txt</S>
-  <S>push-FunctionDev.help.txt</S>
   <S>Quick-Start-Installation-and-Example.md</S>
   <S>README.md</S>
-  <S>restore-ISEConsoleColors.help.txt</S>
-  <S>restore-ModuleBuild.help.txt</S>
-  <S>save-ISEConsoleColors.help.txt</S>
   <S>screenshot.png</S>
-  <S>shift-ISEBreakPoints.help.txt</S>
-  <S>show-ISEOpenTab.help.txt</S>
-  <S>show-Verbs.help.txt</S>
-  <S>Split-CommandLine.help.txt</S>
-  <S>Step-ModuleVersionCalculated.help.txt</S>
-  <S>Test-ModuleTMPFiles.help.txt</S>
-  <S>test-verb.help.txt</S>
-  <S>test-VerbStandard.help.txt</S>
-  <S>Uninstall-ModuleForce.help.txt</S>
-  <S>Unmerge-Module.help.txt</S>
-  <S>unwrap-PS.help.txt</S>
-  <S>update-NewModule.help.txt</S>
-  <S>wrap-PS.help.txt</S>
 </Objs>

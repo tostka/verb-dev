@@ -5,7 +5,7 @@
 .SYNOPSIS
 VERB-dev - Development PS Module-related generic functions
 .NOTES
-Version     : 1.5.68
+Version     : 1.5.67
 Author      : Todd Kadrie
 Website     :	https://www.toddomation.com
 Twitter     :	@tostka
@@ -12825,7 +12825,7 @@ r.com/tostka
     Github      : https://github.com/tostka/verb-dev
     Tags        : Powershell,Module,Build,Development
     REVISIONS
-    * *3:58 PM 1/20/2025 added another $killfiles block just before trailing log cleanup ;  address new .\Help\*.help.txt ref files (not part of build): mkdir verb-x\buildBlind, moved Help to below it, add:$gciExcludes = @(...,'*.help.txt','buildBlind'); & to $excludeMatch; 
+    * 3:02 PM 1/20/2025 address new .\Help\*.help.txt ref files (not part of build): mkdir verb-x\buildBlind, moved Help to below it, add:$gciExcludes = @(...,'*.help.txt','buildBlind'); & to $excludeMatch; 
          ren $exclude -> $gciExcludes, and add $gciExcludes = @(...,'*.help.txt') ; 
     * 3:30 PM 9/17/2024 added ps7 test & warning;  retooled trailing process (new WinTerm install eating into ps7 by default -> confusion)  added gmo -name `$tmod | ? version -ne `$tVer | rmo -Force -Verbose  to update procedure output (ensure old in-mem obso copies are out of memory)
     * 2:59 PM 8/29/2024 recoded post install report output, found on LYN-9C5CTV3 an 
@@ -14174,7 +14174,7 @@ r.com/tostka
     #reset-ModulePublishingDirectory -ModuleName $ModuleName -whatif:$($whatif) -verbose:$($VerbosePreference -eq "Continue") ; 
     populate-ModulePublishingDirectory -ModuleName $ModuleName -whatif:$($whatif) -verbose:$($VerbosePreference -eq "Continue") ; 
 
-    # this is probably where we should purge out any garbage brought in - nope this never gets triggered, try splcing into exit, we just want these purged as deadwood, they aren't making it into the build anyway
+    # this is probably where we should purge out any garbage brought in
     $smsg = "Run: Remove any non-pub garbage cp'd into c:\sc\$($ModuleName)\$($ModuleName) -ModuleName $($ModuleName)" ; 
     if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } 
     else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
@@ -15685,16 +15685,6 @@ $($logfile)
         copy-item -path $logfile -dest $ModDirPath -whatif:$($whatif) ;
     } ;
 
-    # this is probably where we should purge out any garbage brought in - splicing into exit, we just want these purged as deadwood, they aren't making it into the build anyway
-    $smsg = "Run: Remove any non-pub garbage cp'd into c:\sc\$($ModuleName)\$($ModuleName) -ModuleName $($ModuleName)" ;
-    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info }
-    else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
-    #Levels:Error|Warn|Info|H1|H2|H3|H4|H5|Debug|Verbose|Prompt|Success
-    # leveage $gciExcludes
-    if($killfiles = gci -path "c:\sc\$($ModuleName)\$($ModuleName)" -include $gciExcludes){
-        $killfiles | remove-item -force -verbose -whatif:$($whatif) ;
-    } ; 
-
     # this is where we should maintain accumulated old logs, post log close
     # $logfile =  'C:\sc\verb-Auth\update-NewModule-verb-auth-LOG-BATCH-EXEC-20210917-1504PM-log.txt'
 
@@ -15733,8 +15723,8 @@ Export-ModuleMember -Function backup-ModuleBuild,check-PsLocalRepoRegistration,c
 # SIG # Begin signature block
 # MIIELgYJKoZIhvcNAQcCoIIEHzCCBBsCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQU+x2ae0arm01O7rBwIYqXOoEh
-# /D6gggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUsPxW8Iq9koeV+JNCLkqMIfYy
+# UsygggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
 # MCwxKjAoBgNVBAMTIVBvd2VyU2hlbGwgTG9jYWwgQ2VydGlmaWNhdGUgUm9vdDAe
 # Fw0xNDEyMjkxNzA3MzNaFw0zOTEyMzEyMzU5NTlaMBUxEzARBgNVBAMTClRvZGRT
 # ZWxmSUkwgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBALqRVt7uNweTkZZ+16QG
@@ -15749,9 +15739,9 @@ Export-ModuleMember -Function backup-ModuleBuild,check-PsLocalRepoRegistration,c
 # AWAwggFcAgEBMEAwLDEqMCgGA1UEAxMhUG93ZXJTaGVsbCBMb2NhbCBDZXJ0aWZp
 # Y2F0ZSBSb290AhBaydK0VS5IhU1Hy6E1KUTpMAkGBSsOAwIaBQCgeDAYBgorBgEE
 # AYI3AgEMMQowCKACgAChAoAAMBkGCSqGSIb3DQEJAzEMBgorBgEEAYI3AgEEMBwG
-# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBS/o4Y/
-# Qr271y+ohHAwWD4nH4UgZzANBgkqhkiG9w0BAQEFAASBgBUfxZfjixR0trFM1b1V
-# +xDhafA68pIfYEEhlcKAoqlWak4IIMEgUoplRCS7veQsI0a7fcyUF43qPee+Clkp
-# XgKg+Xf+UC9RrB7OxJDOp4J5w+cEce+Vs/j3rbq3F66rTAsYmgZVu+y7WOldM5fM
-# TW2lxFn9cXOCKyyxXb8r15yC
+# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBSItW0p
+# 0QGaq9EULJXGrxIAx3AK5zANBgkqhkiG9w0BAQEFAASBgLpixUht+Wcul3E4ULUL
+# iCfGYmdkLjzgShTqujhS90YZhYDmomRsv5+Fa4Bk4kW6fRqOMk+TbUNeECFr/qxw
+# /MlcTehyS0SVqE2Qj+ZCsRxjjFqr0NsE0mQo9CLdP6GU+IutEfd97f2HDXksBmC/
+# VorJQLrzBhX7KE1U1JY1AQu8
 # SIG # End signature block

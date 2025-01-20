@@ -5,7 +5,7 @@
 .SYNOPSIS
 VERB-dev - Development PS Module-related generic functions
 .NOTES
-Version     : 1.5.68
+Version     : 1.5.63
 Author      : Todd Kadrie
 Website     :	https://www.toddomation.com
 Twitter     :	@tostka
@@ -12825,8 +12825,7 @@ r.com/tostka
     Github      : https://github.com/tostka/verb-dev
     Tags        : Powershell,Module,Build,Development
     REVISIONS
-    * *3:58 PM 1/20/2025 added another $killfiles block just before trailing log cleanup ;  address new .\Help\*.help.txt ref files (not part of build): mkdir verb-x\buildBlind, moved Help to below it, add:$gciExcludes = @(...,'*.help.txt','buildBlind'); & to $excludeMatch; 
-         ren $exclude -> $gciExcludes, and add $gciExcludes = @(...,'*.help.txt') ; 
+    * 1:49 PM 1/20/2025 add: $rgxHelpExportedExcl & $Psd1filelist , postfilter exclude exported help ref files
     * 3:30 PM 9/17/2024 added ps7 test & warning;  retooled trailing process (new WinTerm install eating into ps7 by default -> confusion)  added gmo -name `$tmod | ? version -ne `$tVer | rmo -Force -Verbose  to update procedure output (ensure old in-mem obso copies are out of memory)
     * 2:59 PM 8/29/2024 recoded post install report output, found on LYN-9C5CTV3 an 
         obsolete copy of verb-io 11.x that didn't show from uninstall-module, but did 
@@ -13270,13 +13269,9 @@ r.com/tostka
     # files that are explicitly excluded from build/pkg/filelist by name
     # gci -exclude spec:
     # add exclude of pester .md module creation info to both
-    #$exclude = @('main.js','rebuild-module.ps1','New-Module-Create.md') ; 
-    # add exclude on the .\Help\ .help.txt exported ref CBH copy files
-    $gciExcludes = @('main.js','rebuild-module.ps1','New-Module-Create.md','buildBlind','*.help.txt','*-ps1-BP.xml') ; 
+    $exclude = @('main.js','rebuild-module.ps1','New-Module-Create.md') ; 
     # gci post-filtered excludes from build/pkg
-    #$excludeMatch = @('.git','.vscode','New-Module-Create.md') ;
-    # * 3:07 PM 1/20/2025 added buildblind and the x.help.txts as well
-    $excludeMatch = @('.git','.vscode','New-Module-Create.md','buildBlind','*.help.txt','*-ps1-BP.xml') ;
+    $excludeMatch = @('.git','.vscode','New-Module-Create.md') ;
     [regex] $excludeMatchRegEx = '(?i)' + (($excludeMatch |ForEach-Object {[regex]::escape($_)}) -join "|") + '' ;
     $rgxPsd1FileListDirs = "\\(Docs|Licenses|Resource)\\" ;  # dirs of files to be included in the manifest FileList key
     $rgxPsd1FileListExcl = "\\(\.vscode|ScriptAnalyzer-Results-|logs\\)|-LOG-BATCH-EXEC-" ; # file filter to exclude from mani FilList key
@@ -13286,8 +13281,8 @@ r.com/tostka
     $rgxSrcFilesPostExcl = "\\(Package|Tests|logs)\\|(\.ps[dm]1_(\d+-\d+[AP]M|TMP)|-LOG-BATCH-EXEC-\d+-\d+[AP]M-log\.txt|\\(fingerprint|Psd1filelist))$" ; 
     # rgx to exclude exported temp breakpoint files from inclusion in module build
     $rgxPsd1BPExcl = "\\(Public|Internal|Private)\\.*-ps1-BP\.xml$" ; 
-    # no, it's still building with this, so move it up to the $excludeMatch array; prior: rgx to exclude exporte .\Help\*.help.txt files (created for offline ref, not as a module compoonent)
-    #$rgxHelpExportedExcl = "\\Help\\.*\.help\.txt$" ;
+    # rgx to exclude exporte .\Help\*.help.txt files (created for offline ref, not as a module compoonent)
+    $rgxHelpExportedExcl = "\\Help\\.*\.help\.txt$" ;
     $MergeBuildExcl = "\\(Public|Internal|External|Private)\\.*.ps1$" ; 
     # rgx to exclude target verb-mod\verb-mod from efforts to flatten (it's the dest, shouldn't be a source)
     $rgxTargExcl = [regex]::escape("\$($ModuleName)\$($ModuleName)") ; 
@@ -14174,17 +14169,6 @@ r.com/tostka
     #reset-ModulePublishingDirectory -ModuleName $ModuleName -whatif:$($whatif) -verbose:$($VerbosePreference -eq "Continue") ; 
     populate-ModulePublishingDirectory -ModuleName $ModuleName -whatif:$($whatif) -verbose:$($VerbosePreference -eq "Continue") ; 
 
-    # this is probably where we should purge out any garbage brought in - nope this never gets triggered, try splcing into exit, we just want these purged as deadwood, they aren't making it into the build anyway
-    $smsg = "Run: Remove any non-pub garbage cp'd into c:\sc\$($ModuleName)\$($ModuleName) -ModuleName $($ModuleName)" ; 
-    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } 
-    else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
-    #Levels:Error|Warn|Info|H1|H2|H3|H4|H5|Debug|Verbose|Prompt|Success
-    #reset-ModulePublishingDirectory -ModuleName $ModuleName -whatif:$($whatif) -verbose:$($VerbosePreference -eq "Continue") ; 
-    # leveage $gciExcludes
-    if($killfiles = gci -path "c:\sc\$($ModuleName)\$($ModuleName)" -include $gciExcludes){
-        $killfiles | remove-item -force -verbose -whatif:$($whatif) ; 
-    } ; 
-
     $smsg = "Validate updated $($ModuleName)\$($ModuleName) dir contents against Manifest:`nRun: test-modulemanifest -Path $($ModPsdPath)" ;
     if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } 
     else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
@@ -14540,13 +14524,13 @@ $(if($Merge){'MERGE parm specified as well:`n-Merge Public|Internal|Classes incl
     #>
     # 1) assemble the list of non-code/class module resourcs:
     # $moddirpath: C:\sc\verb-dev
-    $pltGci=[ordered]@{Path=$moddirpath ;Recurse=$true ;File = $true ; Exclude=$gciExcludes; ErrorAction="Stop" ; } ;
+    $pltGci=[ordered]@{Path=$moddirpath ;Recurse=$true ;File = $true ; Exclude=$exclude; ErrorAction="Stop" ; } ;
     # add: postfilter breakpoint filters
-    $Psd1filelist = Get-ChildItem @pltGci | ?{($_.extension -match $rgxPsd1FileList -and $_.fullname -notmatch $rgxPsd1FileListExcl) -OR $_.fullname -match $rgxPsd1FileListDirs} | 
-        ?{$_.fullname -notmatch $rgxPsd1BPExcl} ;
-    # add: postfilter exclude exported help ref files
     #$Psd1filelist = Get-ChildItem @pltGci | ?{($_.extension -match $rgxPsd1FileList -and $_.fullname -notmatch $rgxPsd1FileListExcl) -OR $_.fullname -match $rgxPsd1FileListDirs} | 
-    #    ?{ $_.fullname -notmatch $rgxPsd1BPExcl -OR $_.fullname -notmatch $rgxHelpExportedExcl } ;
+    #    ?{$_.fullname -notmatch $rgxPsd1BPExcl} ;
+    # add: postfilter exclude exported help ref files
+    $Psd1filelist = Get-ChildItem @pltGci | ?{($_.extension -match $rgxPsd1FileList -and $_.fullname -notmatch $rgxPsd1FileListExcl) -OR $_.fullname -match $rgxPsd1FileListDirs} | 
+        ?{ $_.fullname -notmatch $rgxPsd1BPExcl -OR $_.fullname -notmatch $rgxHelpExportedExcl } ;
     # add fullname variant for flatten copying resources
     $Psd1filelistFull =  $Psd1filelist | select -expand fullname ; 
     # and name only for the manifest FileList key
@@ -14719,8 +14703,8 @@ $(if($Merge){'MERGE parm specified as well:`n-Merge Public|Internal|Classes incl
     $to = "$([Environment]::GetFolderPath("MyDocuments"))\WindowsPowerShell\Modules\$($ModuleName)\$($ModuleName)" ;
 
     # below is original copy-all gci
-    #$pltGci=[ordered]@{Path=$from ;Recurse=$true ;Exclude=$gciExcludes; ErrorAction="Stop" ; } ;
-    $pltGci=[ordered]@{Path=$from ;Recurse=$false ;Exclude=$gciExcludes; ErrorAction="Stop" ; } ;
+    #$pltGci=[ordered]@{Path=$from ;Recurse=$true ;Exclude=$exclude; ErrorAction="Stop" ; } ;
+    $pltGci=[ordered]@{Path=$from ;Recurse=$false ;Exclude=$exclude; ErrorAction="Stop" ; } ;
     # explicitly only go after the common module component, by type, via -include -
     #issue is -include causes it to collect only leaf files, doesn't include dir
     #creation, and if no pre-exist on the dir, causes a hard error on copy attempt.
@@ -14731,7 +14715,7 @@ $(if($Merge){'MERGE parm specified as well:`n-Merge Public|Internal|Classes incl
     Do {
         Try {
             # below is original copy-all gci
-            #Get-ChildItem @pltGci | Where-Object { $excludeMatch -eq $null -or $_.FullName.Replace($from, '') -notmatch $excludeMatchRegEx} | Copy-Item -Destination {  if ($_.PSIsContainer) { Join-Path $to $_.Parent.FullName.Substring($from.length) }   else { Join-Path $to $_.FullName.Substring($from.length) }    } -Force -Exclude $gciExcludes -whatif:$($whatif) ;
+            #Get-ChildItem @pltGci | Where-Object { $excludeMatch -eq $null -or $_.FullName.Replace($from, '') -notmatch $excludeMatchRegEx} | Copy-Item -Destination {  if ($_.PSIsContainer) { Join-Path $to $_.Parent.FullName.Substring($from.length) }   else { Join-Path $to $_.FullName.Substring($from.length) }    } -Force -Exclude $exclude -whatif:$($whatif) ;
             # two stage it anyway
             $srcFiles = Get-ChildItem @pltGci | Where-Object { $excludeMatch -eq $null -OR $_.FullName.Replace($from, '') -notmatch $excludeMatchRegEx} ;
             $smsg = "`$srcFiles:post-filter out:`n$($rgxSrcFilesPostExcl)" ; 
@@ -14777,13 +14761,13 @@ $(if($Merge){'MERGE parm specified as well:`n-Merge Public|Internal|Classes incl
                     }   else {
                         Join-Path $to $_.FullName.Substring($from.length)
                     }
-                } -Force -Exclude $gciExcludes -whatif:$($whatif) ;
+                } -Force -Exclude $exclude -whatif:$($whatif) ;
             <# leaf copies fail hard, when gci -include, due to returns being solely leaf files, no dirs, so the dirs don't get pre-created, and cause 'not found' copy fails
             # 2-stage and pull out non-target ext's
             $srcFiles = Get-ChildItem @pltGci | Where-Object { $excludeMatch -eq $null -or $_.FullName.Replace($from, '') -notmatch $excludeMatchRegEx}
             # need the dirs before the files, to ensure they're pre-created (avoids errors)
             $srcFiles = $srcFiles | sort PSIsContainer,Parent -desc
-            $srcFiles | Copy-Item -Destination {  if ($_.PSIsContainer) { Join-Path $to $_.Parent.FullName.Substring($from.length) }   else { Join-Path $to $_.FullName.Substring($from.length) }    } -Force -Exclude $gciExcludes -whatif:$($whatif) ;
+            $srcFiles | Copy-Item -Destination {  if ($_.PSIsContainer) { Join-Path $to $_.Parent.FullName.Substring($from.length) }   else { Join-Path $to $_.FullName.Substring($from.length) }    } -Force -Exclude $exclude -whatif:$($whatif) ;
             #>
             $Exit = $Retries ;
         } CATCH {
@@ -15211,7 +15195,7 @@ And then re-run update-NewModule.
             #$tagdemo = "'$((gci C:\sc\verb-io\public\*.ps1 | select -expand name ).replace('.ps1','') -join "','")'"
             # on vio that's only 2846chars, so clearly the tag add process is adding a lot of wrapper tags (html-style?). So we need to target a much lower threshold. 
             #$from = "$(join-path -path $moddirpath.fullname -childpath $ModuleName)\" ;
-            #$pltGci=[ordered]@{Path=$from ;Recurse=$false ;Exclude=$gciExcludes; ErrorAction="Stop" ; } ;
+            #$pltGci=[ordered]@{Path=$from ;Recurse=$false ;Exclude=$exclude; ErrorAction="Stop" ; } ;
             #$srcFiles = Get-ChildItem @pltGci | Where-Object { $excludeMatch -eq $null -OR $_.FullName.Replace($from, '') -notmatch $excludeMatchRegEx} ;
             #$srcFiles = $srcFiles | ?{$_.fullname -notmatch $rgxSrcFilesPostExcl -AND -not($_.PsIsContainer)} ; 
 
@@ -15685,16 +15669,6 @@ $($logfile)
         copy-item -path $logfile -dest $ModDirPath -whatif:$($whatif) ;
     } ;
 
-    # this is probably where we should purge out any garbage brought in - splicing into exit, we just want these purged as deadwood, they aren't making it into the build anyway
-    $smsg = "Run: Remove any non-pub garbage cp'd into c:\sc\$($ModuleName)\$($ModuleName) -ModuleName $($ModuleName)" ;
-    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info }
-    else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
-    #Levels:Error|Warn|Info|H1|H2|H3|H4|H5|Debug|Verbose|Prompt|Success
-    # leveage $gciExcludes
-    if($killfiles = gci -path "c:\sc\$($ModuleName)\$($ModuleName)" -include $gciExcludes){
-        $killfiles | remove-item -force -verbose -whatif:$($whatif) ;
-    } ; 
-
     # this is where we should maintain accumulated old logs, post log close
     # $logfile =  'C:\sc\verb-Auth\update-NewModule-verb-auth-LOG-BATCH-EXEC-20210917-1504PM-log.txt'
 
@@ -15733,8 +15707,8 @@ Export-ModuleMember -Function backup-ModuleBuild,check-PsLocalRepoRegistration,c
 # SIG # Begin signature block
 # MIIELgYJKoZIhvcNAQcCoIIEHzCCBBsCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQU+x2ae0arm01O7rBwIYqXOoEh
-# /D6gggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUAp9agSw5OPfiH9nNrT2w5AWN
+# FKugggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
 # MCwxKjAoBgNVBAMTIVBvd2VyU2hlbGwgTG9jYWwgQ2VydGlmaWNhdGUgUm9vdDAe
 # Fw0xNDEyMjkxNzA3MzNaFw0zOTEyMzEyMzU5NTlaMBUxEzARBgNVBAMTClRvZGRT
 # ZWxmSUkwgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBALqRVt7uNweTkZZ+16QG
@@ -15749,9 +15723,9 @@ Export-ModuleMember -Function backup-ModuleBuild,check-PsLocalRepoRegistration,c
 # AWAwggFcAgEBMEAwLDEqMCgGA1UEAxMhUG93ZXJTaGVsbCBMb2NhbCBDZXJ0aWZp
 # Y2F0ZSBSb290AhBaydK0VS5IhU1Hy6E1KUTpMAkGBSsOAwIaBQCgeDAYBgorBgEE
 # AYI3AgEMMQowCKACgAChAoAAMBkGCSqGSIb3DQEJAzEMBgorBgEEAYI3AgEEMBwG
-# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBS/o4Y/
-# Qr271y+ohHAwWD4nH4UgZzANBgkqhkiG9w0BAQEFAASBgBUfxZfjixR0trFM1b1V
-# +xDhafA68pIfYEEhlcKAoqlWak4IIMEgUoplRCS7veQsI0a7fcyUF43qPee+Clkp
-# XgKg+Xf+UC9RrB7OxJDOp4J5w+cEce+Vs/j3rbq3F66rTAsYmgZVu+y7WOldM5fM
-# TW2lxFn9cXOCKyyxXb8r15yC
+# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBTG38mg
+# IqsFv6SMkjMdFA3JPFyCWzANBgkqhkiG9w0BAQEFAASBgKbMjqbHe6Ys3Za0DdTR
+# bu6W5tDumkYFymSWzln7uNJ5STQAZfZubaLzbjOyg4ySLKEwugrC/yAA92TQsstc
+# 9FJYNRVM0edyeEa0Pxw4nc3LGM92N5eqdcU0bOBzq6CAn9lBXctAZbukrV5cIWKK
+# +S47UoqjIe912su/2AeYANgR
 # SIG # End signature block
