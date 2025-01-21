@@ -1,7 +1,0 @@
-﻿
-Name                              Category  Module                    Synopsis                                                                                                           
-----                              --------  ------                    --------                                                                                                           
-convert-ISEOpenSession            Function  verb-dev                  convert-ISEOpenSession - Converts remote devbox ISE debugging session (CU\documents\windowspowershell\scripts\IS...
-convert-ISEOpenSession.ps1        Extern...                           convert-ISEOpenSession.ps1 ...                                                                                     
-
-

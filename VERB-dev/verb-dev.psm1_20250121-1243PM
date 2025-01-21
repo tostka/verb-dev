@@ -5,7 +5,7 @@
 .SYNOPSIS
 VERB-dev - Development PS Module-related generic functions
 .NOTES
-Version     : 1.5.72
+Version     : 1.5.69
 Author      : Todd Kadrie
 Website     :	https://www.toddomation.com
 Twitter     :	@tostka
@@ -12825,7 +12825,6 @@ r.com/tostka
     Github      : https://github.com/tostka/verb-dev
     Tags        : Powershell,Module,Build,Development
     REVISIONS
-    * 4:17 PM 1/21/2025 I *think* I've tracked down the .help.txt mis-includes in build to #748: updated $rgxPsd1FileListExcl to properly cover buildBlind, in addition to other dirs and file substrings
     * *3:58 PM 1/20/2025 added another $killfiles block just before trailing log cleanup ;  address new .\Help\*.help.txt ref files (not part of build): mkdir verb-x\buildBlind, moved Help to below it, add:$gciExcludes = @(...,'*.help.txt','buildBlind'); & to $excludeMatch; 
          ren $exclude -> $gciExcludes, and add $gciExcludes = @(...,'*.help.txt') ; 
     * 3:30 PM 9/17/2024 added ps7 test & warning;  retooled trailing process (new WinTerm install eating into ps7 by default -> confusion)  added gmo -name `$tmod | ? version -ne `$tVer | rmo -Force -Verbose  to update procedure output (ensure old in-mem obso copies are out of memory)
@@ -13223,8 +13222,6 @@ r.com/tostka
     
     #endregion ENVIRO_DISCOVER ; #*------^ END ENVIRO_DISCOVER ^------
 
-    #region COMMON_CONSTANTS ; #*------v COMMON_CONSTANTS v------
-
     if(-not $DoRetries){$DoRetries = 4 } ;    # # times to repeat retry attempts
     if(-not $RetrySleep){$RetrySleep = 10 } ; # wait time between retries
     if(-not $RetrySleep){$DawdleWait = 30 } ; # wait time (secs) between dawdle checks
@@ -13249,9 +13246,9 @@ r.com/tostka
     $script:PassStatus = $null ;
     [array]$SmtpAttachment = $null ;
 
-    #endregion COMMON_CONSTANTS ; #*------^ END COMMON_CONSTANTS ^-
+    # local Constants:
 
-    #region LOCAL_CONSTANTS ; #*------v LOCAL_CONSTANTS v------
+    #endregion CONSTANTS-AND-ENVIRO #*======^ END CONSTANTS-AND-ENVIRO ^======
 
     $DomainWork = $tormeta.legacydomain ;
     #$ProgInterval= 500 ; # write-progress wait interval in ms
@@ -13275,17 +13272,14 @@ r.com/tostka
     # add exclude of pester .md module creation info to both
     #$exclude = @('main.js','rebuild-module.ps1','New-Module-Create.md') ; 
     # add exclude on the .\Help\ .help.txt exported ref CBH copy files
-    $gciExcludes = @('main.js','rebuild-module.ps1','New-Module-Create.md') ; 
+    $gciExcludes = @('main.js','rebuild-module.ps1','New-Module-Create.md','buildBlind','*.help.txt','*-ps1-BP.xml') ; 
     # gci post-filtered excludes from build/pkg
     #$excludeMatch = @('.git','.vscode','New-Module-Create.md') ;
     # * 3:07 PM 1/20/2025 added buildblind and the x.help.txts as well
-    $excludeMatch = @('.git','.vscode','New-Module-Create.md') ;
+    $excludeMatch = @('.git','.vscode','New-Module-Create.md','buildBlind','*.help.txt','*-ps1-BP.xml') ;
     [regex] $excludeMatchRegEx = '(?i)' + (($excludeMatch |ForEach-Object {[regex]::escape($_)}) -join "|") + '' ;
     $rgxPsd1FileListDirs = "\\(Docs|Licenses|Resource)\\" ;  # dirs of files to be included in the manifest FileList key
-    #$rgxPsd1FileListExcl = "\\(\.vscode|ScriptAnalyzer-Results-|logs\\)|-LOG-BATCH-EXEC-" ; # file filter to exclude from mani FilList key
-    # \\xxx|yyy\\ block is dir excludes; the (-LOG-BATCH-EXEC-|...) block is filename match excludes. 
-    # 4:25 PM 1/21/2025 updated to cover psd1 FileList excludes of \buildBlind\
-    $rgxPsd1FileListExcl = "\\(\.vscode|logs|buildBlind\\)|(-LOG-BATCH-EXEC-|ScriptAnalyzer-Results-)" ; # file filter to exclude from mani FilList key
+    $rgxPsd1FileListExcl = "\\(\.vscode|ScriptAnalyzer-Results-|logs\\)|-LOG-BATCH-EXEC-" ; # file filter to exclude from mani FilList key
     $rgxLicFileFilter = '\\(Resource|Licenses)\\' ; # exempt extensionless license files from removal in temp profile copy
     $rgxRootFilesBuild = "(CHANGELOG|README)\.md$" ;
     # # post filter excludes regex, dir names in fullname path that should never be included in build, logs, and temp versions of .ps[md]1 files.
@@ -13301,18 +13295,6 @@ r.com/tostka
     $rgxInclOutLicFileName = '^LICENSE' ; # id's local extensionless vdev\vdev lic files that *should* remain
     $iSkipAutomaticTagsThreshold = 2000 ; # number of chars of comma-quote-delim'd public function names, as a string array, to establish a threshold to use SkipAutomaticTags with publish-module (NugGet bug workaround)
     # issue is: powershellget automatic tags all exported function and hangs when u go over 4000 characters can be avoided by SkipAutomaticTags on publish-module
-    $rgxModModPurges = "(main\.js|rebuild-module\.ps1$|New-Module-Create\.md$|buildBlind|\.help\.txt$|-ps1-BP\.xml$)" ; 
-
-    #endregion LOCAL_CONSTANTS ; #*------^ END LOCAL_CONSTANTS ^------        
-    
-    #region ENCODED_CONTANTS ; #*------v ENCODED_CONTANTS v------
-    #endregion ENCODED_CONTANTS ; #*------^ END ENCODED_CONTANTS ^------
-    
-    
-
-    #endregion CONSTANTS-AND-ENVIRO #*======^ END CONSTANTS-AND-ENVIRO ^======
-
-    
     #*======v FUNCTIONS v======
 
     # suppress VerbosePreference:Continue, if set, during mod loads (VERY NOISEY)
@@ -14197,7 +14179,9 @@ r.com/tostka
     if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } 
     else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
     #Levels:Error|Warn|Info|H1|H2|H3|H4|H5|Debug|Verbose|Prompt|Success
-    if($killfiles = gci -path "c:\sc\$($ModuleName)\$($ModuleName)" | ?{$_.fullname -match $rgxModModPurges}){
+    #reset-ModulePublishingDirectory -ModuleName $ModuleName -whatif:$($whatif) -verbose:$($VerbosePreference -eq "Continue") ; 
+    # leveage $gciExcludes
+    if($killfiles = gci -path "c:\sc\$($ModuleName)\$($ModuleName)" -include $gciExcludes){
         $killfiles | remove-item -force -verbose -whatif:$($whatif) ; 
     } ; 
 
@@ -15706,9 +15690,9 @@ $($logfile)
     if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info }
     else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
     #Levels:Error|Warn|Info|H1|H2|H3|H4|H5|Debug|Verbose|Prompt|Success
-    #$rgxModModPurges = "(main\.js|rebuild-module\.ps1$|New-Module-Create\.md$|buildBlind|\.help\.txt$|-ps1-BP\.xml$)" ; 
-    if($killfiles = gci -path "c:\sc\$($ModuleName)\$($ModuleName)" | ?{$_.fullname -match $rgxModModPurges}){
-        $killfiles | remove-item -force -verbose -whatif:$($whatif) ; 
+    # leveage $gciExcludes
+    if($killfiles = gci -path "c:\sc\$($ModuleName)\$($ModuleName)" -include $gciExcludes){
+        $killfiles | remove-item -force -verbose -whatif:$($whatif) ;
     } ; 
 
     # this is where we should maintain accumulated old logs, post log close
@@ -15745,3 +15729,29 @@ Export-ModuleMember -Function backup-ModuleBuild,check-PsLocalRepoRegistration,c
 
 
 
+
+# SIG # Begin signature block
+# MIIELgYJKoZIhvcNAQcCoIIEHzCCBBsCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
+# gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUQI+OMGKtXyFZj8u9dVnu9FAi
+# alOgggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
+# MCwxKjAoBgNVBAMTIVBvd2VyU2hlbGwgTG9jYWwgQ2VydGlmaWNhdGUgUm9vdDAe
+# Fw0xNDEyMjkxNzA3MzNaFw0zOTEyMzEyMzU5NTlaMBUxEzARBgNVBAMTClRvZGRT
+# ZWxmSUkwgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBALqRVt7uNweTkZZ+16QG
+# a+NnFYNRPPa8Bnm071ohGe27jNWKPVUbDfd0OY2sqCBQCEFVb5pqcIECRRnlhN5H
+# +EEJmm2x9AU0uS7IHxHeUo8fkW4vm49adkat5gAoOZOwbuNntBOAJy9LCyNs4F1I
+# KKphP3TyDwe8XqsEVwB2m9FPAgMBAAGjdjB0MBMGA1UdJQQMMAoGCCsGAQUFBwMD
+# MF0GA1UdAQRWMFSAEL95r+Rh65kgqZl+tgchMuKhLjAsMSowKAYDVQQDEyFQb3dl
+# clNoZWxsIExvY2FsIENlcnRpZmljYXRlIFJvb3SCEGwiXbeZNci7Rxiz/r43gVsw
+# CQYFKw4DAh0FAAOBgQB6ECSnXHUs7/bCr6Z556K6IDJNWsccjcV89fHA/zKMX0w0
+# 6NefCtxas/QHUA9mS87HRHLzKjFqweA3BnQ5lr5mPDlho8U90Nvtpj58G9I5SPUg
+# CspNr5jEHOL5EdJFBIv3zI2jQ8TPbFGC0Cz72+4oYzSxWpftNX41MmEsZkMaADGC
+# AWAwggFcAgEBMEAwLDEqMCgGA1UEAxMhUG93ZXJTaGVsbCBMb2NhbCBDZXJ0aWZp
+# Y2F0ZSBSb290AhBaydK0VS5IhU1Hy6E1KUTpMAkGBSsOAwIaBQCgeDAYBgorBgEE
+# AYI3AgEMMQowCKACgAChAoAAMBkGCSqGSIb3DQEJAzEMBgorBgEEAYI3AgEEMBwG
+# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBQh8d+b
+# H1KP5sLicqYhMTyZOlTmCDANBgkqhkiG9w0BAQEFAASBgAPP0OzTbqIhrAEwL0TG
+# QZJyfG45opQ/dfVqwYKvqFinIqOc/lhBXaawFgdMViEQi3Nh59wkHDTjokeA8SW8
+# rEdD9vD97kiwWEmbhdv80zcF7OD6MXDgSdYvQhKXcU5bc4UvZ8qEd64/qIG5jo48
+# P2Bj2DaG2X9r/hNUthjMJy2d
+# SIG # End signature block
