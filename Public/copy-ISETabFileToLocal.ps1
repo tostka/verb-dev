@@ -15,6 +15,8 @@ function copy-ISETabFileToLocal {
     Github      : https://github.com/tostka/verb-dev
     Tags        : Powershell,ISE,development,debugging,backup
     REVISIONS
+    * 9:20 AM 2/10/2025 tweaked to permit non-tsclient-spanning use: supports copying from a separate generic debugging copy to local repo; 
+        fixed inaccurate CBH expl (was rote copy from copy-iselocalsourcetotab()); fixed swapped error msgs at bottom of PROC{}
     * 3:55 PM 10/25/2024 added cbh demo using -path ; pulled -path container validator (should always be a file) ;  fixed unupdated -nofunc else echo
     * 2:15 PM 5/29/2024 add: c:\sc dev repo dest test, prompt for optional -nofunc use (avoid mistakes copying into repo with _func.ps1 source name intact)
     * 1:22 PM 5/22/2024init
@@ -37,7 +39,7 @@ function copy-ISETabFileToLocal {
     PS> copy-ISETabFileToLocal -verbose -localdest C:\sc\verb-dev\public\ -noFunc -whatif
     Copy the current tab file to explicit specified -LocalDesetination, replacing any _func substring from filename, with whatif, with verbose output
     .EXAMPLE
-    PS> copy-ISETabFileToLocal -verbose -localdest C:\sc\verb-dev\public\ -noFunc -whatif
+    PS> copy-ISETabFileToLocal -Path d:\scripts\get-LastEvent_func.ps1 -LocalDestination C:\sc\verb-logging\public\ -noFunc -whatif
     Copy specified -path source file to explicit specified -LocalDesetination, replacing any _func substring from filename, with whatif, with verbose output (used for debugging, when current tab file switch to be another file)
     .LINK
     https://github.com/tostka/verb-dev
@@ -66,14 +68,27 @@ function copy-ISETabFileToLocal {
     ) ;
     BEGIN {
         ${CmdletName} = $PSCmdlet.MyInvocation.MyCommand.Name ;
-        $verbose = $($VerbosePreference -eq "Continue")
+        $verbose = $($VerbosePreference -eq "Continue") ; 
+        $nonRDPDefaultPath = 'c:\usr\work\ps\scripts\' ; 
         $sBnr="#*======v $($CmdletName): v======" ;
         write-verbose  "$((get-date).ToString('HH:mm:ss')):$($sBnr)" ;
+        if($env:SESSIONNAME  -match 'RDP-Tcp#\d+'){
+            $defaultPath = 'd:\scripts\' ; 
+        } elseif(-not $Path -AND (test-path $nonRDPDefaultPath )){
+            $defaultPath = $nonRDPDefaultPath ; 
+            write-host -foregroundcolor yellow "(no -Path specified, defaulting to $($defaultPath))" ; 
+        } elseif($Path){
+
+
+        } else {
+            write-warning "Neither -Path, nor pre-existing $($nonRDPDefaultPath):Please rerun specifying a -Path destination for new copy" ; 
+            break ; 
+        } ;
         $moveBP = $false ; 
     }
     PROCESS {
         if ($psise){
-            if($env:SESSIONNAME  -match 'RDP-Tcp#\d+'){
+            #if($env:SESSIONNAME  -match 'RDP-Tcp#\d+'){
                 TRY{
                     if($path){
                         [system.io.fileinfo[]]$source = @($path) ; 
@@ -92,12 +107,17 @@ function copy-ISETabFileToLocal {
                                 write-host -foregroundcolor yellow $smsg  ;
                             } ; 
                         } ; 
-                        if($LocalDestination.substring(0,1) -ne 'c'){
-                            $Destination = $LocalDestination.replace(':','$') ; 
-                            $Destination = (join-path -path "\\$($mybox[0])\" -childpath $Destination) ; 
-                        }else{
-                            $Destination = $LocalDestination.replace(':','') ; 
-                            $Destination = (join-path -path "\\tsclient\" -childpath $Destination) ; 
+                        if($env:SESSIONNAME  -match 'RDP-Tcp#\d+'){
+                            if($LocalDestination.substring(0,1) -ne 'c'){
+                                $Destination = $LocalDestination.replace(':','$') ; 
+                                $Destination = (join-path -path "\\$($mybox[0])\" -childpath $Destination) ; 
+                            }else{
+                                $Destination = $LocalDestination.replace(':','') ; 
+                                $Destination = (join-path -path "\\tsclient\" -childpath $Destination) ; 
+                            } ; 
+                        } else {
+                            write-host "(local non-RDP session: coppying without tsclient translation)" 
+                            $Destination = $LocalDestination ; 
                         } ; 
                         write-verbose "resolved `$Destination:$($Destination)" ; 
                         if(-not (test-path -path $Destination)){
@@ -150,8 +170,8 @@ function copy-ISETabFileToLocal {
                     $smsg = "`n$(($ErrTrapd | fl * -Force|out-string).trim())" ;
                     write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" ;
                 } ;             
-            } else {  write-warning "This script only functions within PS ISE, with a script file open for editing" };
-        } else {  write-warning "This script only functions within an RDP remote session (non-local)" };
+            #} else { write-warning "This script only functions within an RDP remote session (non-local)" };
+        } else {  write-warning "This script only functions within PS ISE, with a script file open for editing"  };
     } # PROC-E
     END{
         write-verbose  "$((get-date).ToString('HH:mm:ss')):$($sBnr.replace('=v','=^').replace('v=','^='))" ;
