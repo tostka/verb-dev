@@ -16,6 +16,7 @@ r.com/tostka
     Github      : https://github.com/tostka/verb-dev
     Tags        : Powershell,Module,Build,Development
     REVISIONS
+    * 10:17 AM 4/11/2025 fixed missing semis ; trailing lines to properly unwrap the install block herestrings (wt doesn't paste cleanly multiline blocks)
     * 4:17 PM 1/21/2025 I *think* I've tracked down the .help.txt mis-includes in build to #748: updated $rgxPsd1FileListExcl to properly cover buildBlind, in addition to other dirs and file substrings
     * *3:58 PM 1/20/2025 added another $killfiles block just before trailing log cleanup ;  address new .\Help\*.help.txt ref files (not part of build): mkdir verb-x\buildBlind, moved Help to below it, add:$gciExcludes = @(...,'*.help.txt','buildBlind'); & to $excludeMatch; 
          ren $exclude -> $gciExcludes, and add $gciExcludes = @(...,'*.help.txt') ; 
@@ -2787,7 +2788,7 @@ if(`$env:WT_SESSION){
 TRY {
     switch(`$tScop){
         'CurrentUser'{`$ModPath = "`$(split-path `$profile)\Modules\`$(`$tmod)" }
-        'AllUsers' {`$ModPath = "`$(`$env:ProgramFiles)\WindowsPowerShell\Modules)\`$(`$tmod)"} ; 
+        'AllUsers' {`$ModPath = "`$(`$env:ProgramFiles)\WindowsPowerShell\Modules)\`$(`$tmod)"} 
     } ;
     if(`$Repository = (Get-PSRepository -Name `$localPSRepo -ea 'STOP').name){
         rmo -Name `$tmod -ea 0 ;
@@ -2797,7 +2798,7 @@ TRY {
             `$thisvers  | ft -a Name,Version,Repository ; 
             `$thisVers | install-Module -scope `$tScop -Force -AllowClobber -ea 'STOP' -whatif:`$(`$whatif) ;
         }else {
-            throw "Unable to:find-module -name `$(`$tmod) -Repository `$(`$Repository) -RequiredVersion `$(`$tVer)"
+            throw "Unable to:find-module -name `$(`$tmod) -Repository `$(`$Repository) -RequiredVersion `$(`$tVer)" ; 
             break ; 
         } ; 
         rmo -Name `$tmod -force -ea 0 ;
@@ -2823,7 +2824,7 @@ if(`$env:WT_SESSION){
 TRY {
     switch(`$tScop){
         'CurrentUser'{`$ModPath = "`$(split-path `$profile)\Modules\`$(`$tmod)" }
-        'AllUsers' {`$ModPath = "`$(`$env:ProgramFiles)\WindowsPowerShell\Modules)\`$(`$tmod)"} ; 
+        'AllUsers' {`$ModPath = "`$(`$env:ProgramFiles)\WindowsPowerShell\Modules)\`$(`$tmod)"} 
     } ;
     if(`$Repository = (Get-PSRepository -Name `$localPSRepo -ea 'STOP').name){
         rmo -Name `$tmod -ea 0 ;
@@ -2833,7 +2834,7 @@ TRY {
             `$thisvers  | ft -a Name,Version,Repository ; 
             `$thisVers | install-Module -scope `$tScop -Force -AllowClobber -ea 'STOP' -whatif:`$(`$whatif) ;
         }else {
-            throw "Unable to:find-module -name `$(`$tmod) -Repository `$(`$Repository) -RequiredVersion `$(`$tVer)"
+            throw "Unable to:find-module -name `$(`$tmod) -Repository `$(`$Repository) -RequiredVersion `$(`$tVer)" ; 
             break ; 
         } ; 
         rmo -Name `$tmod -force -ea 0 ;
