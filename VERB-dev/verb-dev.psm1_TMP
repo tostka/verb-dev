@@ -5,7 +5,7 @@
 .SYNOPSIS
 VERB-dev - Development PS Module-related generic functions
 .NOTES
-Version     : 1.5.73
+Version     : 1.5.76
 Author      : Todd Kadrie
 Website     :	https://www.toddomation.com
 Twitter     :	@tostka
@@ -12860,6 +12860,7 @@ r.com/tostka
     Github      : https://github.com/tostka/verb-dev
     Tags        : Powershell,Module,Build,Development
     REVISIONS
+    * 11:55 AM 4/11/2025 shifted pscore install test from wt hardcode to test $isCoreCLR; fixed missing semis ; trailing lines to properly unwrap the install block herestrings (wt doesn't paste cleanly multiline blocks)
     * 4:17 PM 1/21/2025 I *think* I've tracked down the .help.txt mis-includes in build to #748: updated $rgxPsd1FileListExcl to properly cover buildBlind, in addition to other dirs and file substrings
     * *3:58 PM 1/20/2025 added another $killfiles block just before trailing log cleanup ;  address new .\Help\*.help.txt ref files (not part of build): mkdir verb-x\buildBlind, moved Help to below it, add:$gciExcludes = @(...,'*.help.txt','buildBlind'); & to $excludeMatch; 
          ren $exclude -> $gciExcludes, and add $gciExcludes = @(...,'*.help.txt') ; 
@@ -15623,15 +15624,15 @@ Processing completed: $($ModuleName) :: $($ModDirPath)
 
 #-=-=-Stacked list for the above: CURRENTUSER=-=-=-=-=-=
 `$whatif=`$false ;  `$tScop = 'CurrentUser' ; `$tMod = '$($ModuleName)' ; `$tVer = '$($psd1Vers)' ;
-if(`$env:WT_SESSION){
-    write-warning "WARNING YOU'RE INSTALLING INTO POWERSHELL7!`nTHE MODULE WILL GO INTO \DOCS\POWERSHELL\MODULES`n(vs \DOCS\WINDOWSPOWERSHELL\MODULES)!" ; 
+if(`$IsCoreCLR){
+    write-warning "WARNING YOU'RE INSTALLING INTO POWERSHELLCORE (7+)!`nTHE MODULE WILL GO INTO \DOCS\POWERSHELL\MODULES`n(vs \DOCS\WINDOWSPOWERSHELL\MODULES)!" ; 
     `$bRet=Read-Host "Enter YYY to continue. Anything else will exit"  ; 
     if (`$bRet.ToUpper() -eq "YYY") {} else {WRITE-WARNING "HALTING!" ; BREAK} ; 
 } ; 
 TRY {
     switch(`$tScop){
         'CurrentUser'{`$ModPath = "`$(split-path `$profile)\Modules\`$(`$tmod)" }
-        'AllUsers' {`$ModPath = "`$(`$env:ProgramFiles)\WindowsPowerShell\Modules)\`$(`$tmod)"} ; 
+        'AllUsers' {`$ModPath = "`$(`$env:ProgramFiles)\WindowsPowerShell\Modules)\`$(`$tmod)"} 
     } ;
     if(`$Repository = (Get-PSRepository -Name `$localPSRepo -ea 'STOP').name){
         rmo -Name `$tmod -ea 0 ;
@@ -15641,7 +15642,7 @@ TRY {
             `$thisvers  | ft -a Name,Version,Repository ; 
             `$thisVers | install-Module -scope `$tScop -Force -AllowClobber -ea 'STOP' -whatif:`$(`$whatif) ;
         }else {
-            throw "Unable to:find-module -name `$(`$tmod) -Repository `$(`$Repository) -RequiredVersion `$(`$tVer)"
+            throw "Unable to:find-module -name `$(`$tmod) -Repository `$(`$Repository) -RequiredVersion `$(`$tVer)" ; 
             break ; 
         } ; 
         rmo -Name `$tmod -force -ea 0 ;
@@ -15659,15 +15660,15 @@ TRY {
 #-=-=-=-=-=-=-=-=
 #-=-=-Stacked list for the above: ALLUSERS=-=-=-=-=-=
 `$whatif=`$false ; `$tScop = 'AllUsers' ; `$tMod = '$($ModuleName)' ; `$tVer = '$($psd1Vers)' ;  
-if(`$env:WT_SESSION){
-    write-warning "WARNING YOU'RE INSTALLING INTO POWERSHELL7!`nTHE MODULE WILL GO INTO \DOCS\POWERSHELL\MODULES`n(vs \DOCS\WINDOWSPOWERSHELL\MODULES)!" ; 
+if(`$IsCoreCLR){
+    write-warning "WARNING YOU'RE INSTALLING INTO POWERSHELLCORE (7+)!`nTHE MODULE WILL GO INTO \DOCS\POWERSHELL\MODULES`n(vs \DOCS\WINDOWSPOWERSHELL\MODULES)!" ; 
     `$bRet=Read-Host "Enter YYY to continue. Anything else will exit"  ; 
     if (`$bRet.ToUpper() -eq "YYY") {} else {WRITE-WARNING "HALTING!" ; BREAK} ; 
 } ; 
 TRY {
     switch(`$tScop){
         'CurrentUser'{`$ModPath = "`$(split-path `$profile)\Modules\`$(`$tmod)" }
-        'AllUsers' {`$ModPath = "`$(`$env:ProgramFiles)\WindowsPowerShell\Modules)\`$(`$tmod)"} ; 
+        'AllUsers' {`$ModPath = "`$(`$env:ProgramFiles)\WindowsPowerShell\Modules)\`$(`$tmod)"} 
     } ;
     if(`$Repository = (Get-PSRepository -Name `$localPSRepo -ea 'STOP').name){
         rmo -Name `$tmod -ea 0 ;
@@ -15677,7 +15678,7 @@ TRY {
             `$thisvers  | ft -a Name,Version,Repository ; 
             `$thisVers | install-Module -scope `$tScop -Force -AllowClobber -ea 'STOP' -whatif:`$(`$whatif) ;
         }else {
-            throw "Unable to:find-module -name `$(`$tmod) -Repository `$(`$Repository) -RequiredVersion `$(`$tVer)"
+            throw "Unable to:find-module -name `$(`$tmod) -Repository `$(`$Repository) -RequiredVersion `$(`$tVer)" ; 
             break ; 
         } ; 
         rmo -Name `$tmod -force -ea 0 ;

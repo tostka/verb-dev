@@ -16,7 +16,7 @@ r.com/tostka
     Github      : https://github.com/tostka/verb-dev
     Tags        : Powershell,Module,Build,Development
     REVISIONS
-    * 10:17 AM 4/11/2025 fixed missing semis ; trailing lines to properly unwrap the install block herestrings (wt doesn't paste cleanly multiline blocks)
+    * 11:55 AM 4/11/2025 shifted pscore install test from wt hardcode to test $isCoreCLR; fixed missing semis ; trailing lines to properly unwrap the install block herestrings (wt doesn't paste cleanly multiline blocks)
     * 4:17 PM 1/21/2025 I *think* I've tracked down the .help.txt mis-includes in build to #748: updated $rgxPsd1FileListExcl to properly cover buildBlind, in addition to other dirs and file substrings
     * *3:58 PM 1/20/2025 added another $killfiles block just before trailing log cleanup ;  address new .\Help\*.help.txt ref files (not part of build): mkdir verb-x\buildBlind, moved Help to below it, add:$gciExcludes = @(...,'*.help.txt','buildBlind'); & to $excludeMatch; 
          ren $exclude -> $gciExcludes, and add $gciExcludes = @(...,'*.help.txt') ; 
@@ -2780,8 +2780,8 @@ Processing completed: $($ModuleName) :: $($ModDirPath)
 
 #-=-=-Stacked list for the above: CURRENTUSER=-=-=-=-=-=
 `$whatif=`$false ;  `$tScop = 'CurrentUser' ; `$tMod = '$($ModuleName)' ; `$tVer = '$($psd1Vers)' ;
-if(`$env:WT_SESSION){
-    write-warning "WARNING YOU'RE INSTALLING INTO POWERSHELL7!`nTHE MODULE WILL GO INTO \DOCS\POWERSHELL\MODULES`n(vs \DOCS\WINDOWSPOWERSHELL\MODULES)!" ; 
+if(`$IsCoreCLR){
+    write-warning "WARNING YOU'RE INSTALLING INTO POWERSHELLCORE (7+)!`nTHE MODULE WILL GO INTO \DOCS\POWERSHELL\MODULES`n(vs \DOCS\WINDOWSPOWERSHELL\MODULES)!" ; 
     `$bRet=Read-Host "Enter YYY to continue. Anything else will exit"  ; 
     if (`$bRet.ToUpper() -eq "YYY") {} else {WRITE-WARNING "HALTING!" ; BREAK} ; 
 } ; 
@@ -2816,8 +2816,8 @@ TRY {
 #-=-=-=-=-=-=-=-=
 #-=-=-Stacked list for the above: ALLUSERS=-=-=-=-=-=
 `$whatif=`$false ; `$tScop = 'AllUsers' ; `$tMod = '$($ModuleName)' ; `$tVer = '$($psd1Vers)' ;  
-if(`$env:WT_SESSION){
-    write-warning "WARNING YOU'RE INSTALLING INTO POWERSHELL7!`nTHE MODULE WILL GO INTO \DOCS\POWERSHELL\MODULES`n(vs \DOCS\WINDOWSPOWERSHELL\MODULES)!" ; 
+if(`$IsCoreCLR){
+    write-warning "WARNING YOU'RE INSTALLING INTO POWERSHELLCORE (7+)!`nTHE MODULE WILL GO INTO \DOCS\POWERSHELL\MODULES`n(vs \DOCS\WINDOWSPOWERSHELL\MODULES)!" ; 
     `$bRet=Read-Host "Enter YYY to continue. Anything else will exit"  ; 
     if (`$bRet.ToUpper() -eq "YYY") {} else {WRITE-WARNING "HALTING!" ; BREAK} ; 
 } ; 

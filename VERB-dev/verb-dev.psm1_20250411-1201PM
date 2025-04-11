@@ -5,7 +5,7 @@
 .SYNOPSIS
 VERB-dev - Development PS Module-related generic functions
 .NOTES
-Version     : 1.5.76
+Version     : 1.5.75
 Author      : Todd Kadrie
 Website     :	https://www.toddomation.com
 Twitter     :	@tostka
@@ -15624,7 +15624,7 @@ Processing completed: $($ModuleName) :: $($ModDirPath)
 
 #-=-=-Stacked list for the above: CURRENTUSER=-=-=-=-=-=
 `$whatif=`$false ;  `$tScop = 'CurrentUser' ; `$tMod = '$($ModuleName)' ; `$tVer = '$($psd1Vers)' ;
-if(`$IsCoreCLR){
+if($IsCoreCLR){
     write-warning "WARNING YOU'RE INSTALLING INTO POWERSHELLCORE (7+)!`nTHE MODULE WILL GO INTO \DOCS\POWERSHELL\MODULES`n(vs \DOCS\WINDOWSPOWERSHELL\MODULES)!" ; 
     `$bRet=Read-Host "Enter YYY to continue. Anything else will exit"  ; 
     if (`$bRet.ToUpper() -eq "YYY") {} else {WRITE-WARNING "HALTING!" ; BREAK} ; 
@@ -15660,7 +15660,7 @@ TRY {
 #-=-=-=-=-=-=-=-=
 #-=-=-Stacked list for the above: ALLUSERS=-=-=-=-=-=
 `$whatif=`$false ; `$tScop = 'AllUsers' ; `$tMod = '$($ModuleName)' ; `$tVer = '$($psd1Vers)' ;  
-if(`$IsCoreCLR){
+if($IsCoreCLR){
     write-warning "WARNING YOU'RE INSTALLING INTO POWERSHELLCORE (7+)!`nTHE MODULE WILL GO INTO \DOCS\POWERSHELL\MODULES`n(vs \DOCS\WINDOWSPOWERSHELL\MODULES)!" ; 
     `$bRet=Read-Host "Enter YYY to continue. Anything else will exit"  ; 
     if (`$bRet.ToUpper() -eq "YYY") {} else {WRITE-WARNING "HALTING!" ; BREAK} ; 
@@ -15785,8 +15785,8 @@ Export-ModuleMember -Function backup-ModuleBuild,check-PsLocalRepoRegistration,c
 # SIG # Begin signature block
 # MIIELgYJKoZIhvcNAQcCoIIEHzCCBBsCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUSOJmuiHcnzWHvCp+HNmce9QV
-# oHigggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUraeqQvnVybENXaQmGUqqApy+
+# xbugggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
 # MCwxKjAoBgNVBAMTIVBvd2VyU2hlbGwgTG9jYWwgQ2VydGlmaWNhdGUgUm9vdDAe
 # Fw0xNDEyMjkxNzA3MzNaFw0zOTEyMzEyMzU5NTlaMBUxEzARBgNVBAMTClRvZGRT
 # ZWxmSUkwgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBALqRVt7uNweTkZZ+16QG
@@ -15801,9 +15801,9 @@ Export-ModuleMember -Function backup-ModuleBuild,check-PsLocalRepoRegistration,c
 # AWAwggFcAgEBMEAwLDEqMCgGA1UEAxMhUG93ZXJTaGVsbCBMb2NhbCBDZXJ0aWZp
 # Y2F0ZSBSb290AhBaydK0VS5IhU1Hy6E1KUTpMAkGBSsOAwIaBQCgeDAYBgorBgEE
 # AYI3AgEMMQowCKACgAChAoAAMBkGCSqGSIb3DQEJAzEMBgorBgEEAYI3AgEEMBwG
-# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBRFqVZw
-# zXgqBS9Vvs+vTcYSMdX0TTANBgkqhkiG9w0BAQEFAASBgEmi3L/lrpTsUeICqTT8
-# oV99JenDqxqEhEIpX/iKFINVQpI05PhKyRoqARSLnwfSSMP0afc5g6C94uZXWuQK
-# HeNx8XSHCFH4JpLQ8lzwvk1mf8rf62kU9NjwLJnq64JEkXpGsiiO3k3b9PuYXq5Q
-# XzntYRW88Uc9zCKHPlhDYwR6
+# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBRX5k6w
+# 9z61/vANmdbR9si+Ye6eyTANBgkqhkiG9w0BAQEFAASBgDeUF991oTM5DplJers9
+# BV7xlgsFsu363GDUH0ZyC+o7LBByJG4oCp64T9sHbDKBZ4kcr444V6ItuOKs9Ykn
+# WIEgOVSH7NX3K2Yc5m36TdPz+Zq2vOdTfcCQWXPyk1w7p8k7nVJAI6ohry3MeZMh
+# Q3lQfKs8C1ulchLtIzyoL2FD
 # SIG # End signature block
