@@ -20,6 +20,7 @@
         AddedWebsite:
         AddedTwitter:
         REVISIONS
+        * 4:11 PM 5/15/2025 add psv2-ordered compat
         * 10:43 AM 5/14/2025 added SSP-suppressing -whatif:/-confirm:$false to nv's
         * 12:10 PM 5/6/2025 added -ScriptBlock, and logic to process either file or scriptblock; added examples demoing resolve Microsoft.Graph module cmdlet permissions from a file, 
             and connect-MGGraph with the resolved dynamic permissions scope. 
@@ -174,7 +175,8 @@
                 }elseif($scriptblock){
                     $AST = [System.Management.Automation.Language.Parser]::ParseInput($scriptblock, [ref]$astTokens, [ref]$astErr) ; 
                 } ;     
-                $objReturn = [ordered]@{ } ;
+                if($host.version.major -ge 3){$objReturn=[ordered]@{Dummy = $null ;} }
+                else {$objReturn = @{Dummy = $null ;} } ;
                 if ($Functions -OR $All) {
                     write-verbose "$((get-date).ToString('HH:mm:ss')):(parsing Functions from AST...)" ; 
                     $ASTFunctions = $AST.FindAll( { $args[0] -is [System.Management.Automation.Language.FunctionDefinitionAst] }, $true) ;
