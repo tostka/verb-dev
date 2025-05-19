@@ -14,13 +14,13 @@
         CreatedDate : 3:56 PM 12/8/2019
         FileName    : get-CodeProfileAST.ps1
         License     : MIT License
-        Copyright   : (c) 2019 Todd Kadrie
-        Github      : https://github.com/tostka
+        Copyright   : (c) 2025 Todd Kadrie
+        Github      : https://github.com/tostka/verb-dev
         AddedCredit :
         AddedWebsite:
         AddedTwitter:
         REVISIONS
-        * 4:11 PM 5/15/2025 add psv2-ordered compat
+        * 10:57 AM 5/19/2025 add: CBH for more extensive code profiling demo (for targeting action-verb cmds in code, from specific modules); fixed some missing CBH info.
         * 10:43 AM 5/14/2025 added SSP-suppressing -whatif:/-confirm:$false to nv's
         * 12:10 PM 5/6/2025 added -ScriptBlock, and logic to process either file or scriptblock; added examples demoing resolve Microsoft.Graph module cmdlet permissions from a file, 
             and connect-MGGraph with the resolved dynamic permissions scope. 
@@ -111,7 +111,51 @@
         PS> $bret.variables.extent.text
         PS> $bret.aliases.extent.text
         Return ALL variant objects - Functions, Parameters, Variables, aliases, GenericCommands - from the specified script, and output the function names, variable names, and alias assignement commands
+        .EXAMPLE
+        PS> $GCmds = (get-CodeProfileAST -File .\new-MGDomainRegTDO.ps1 -GenericCommands).GenericCommands ;
+        PS> $rgxverbNounNames = "\b\w+\-\w+\b" ;
+        PS> # match extents with verb-noun substrings
+        PS> $CmdletNames = @() ;
+        PS> ($GCmds|?{$_.extent -match $rgxverbNounNames}) | %{
+        PS>   $isolatedlines = $_ ;
+        PS>   # isolate the actual verb-noun substrings
+        PS>   $CmdletNames += $isolatedlines.extent.text | %{if($_ -match $rgxverbNounNames){ $matches[0]}}
+        PS> } ; 
+        PS> # unique the list
+        PS> #$CmdletNames = $CmdletNames | select -unique | sort ; # isn't unbiqueing for some reason (passes dupes), use group
+        PS> $CmdletNames = $CmdletNames | group | select -expand  name | sort ;
+        PS> # resolve each to a source (and properly case the name), or default source to 'unresolved' if fails gcm (note function [Alias()] names in use will come back with $null source: they gcm, but there's no source to return)
+        PS> $ResolvedCmds = $CmdletNames | %{    
+        PS>     $thiscmd = $_ ;
+        PS>     $hsCmdSummary = [ordered]@{'name'=$null;'source'=$null;'verb'=$null;'noun'=$null; CommandType=$null} ;
+        PS>     if($rvGcm = gcm $thiscmd  -ea 0){
+        PS>         $hsCmdSummary.name = $rvGcm.name ; $hsCmdSummary.source = $rvGcm.source ;;
+        PS>         $hsCmdSummary.verb = $rvGcm.verb ; $hsCmdSummary.noun = $rvGcm.noun ; $hsCmdSummary.CommandType=$rvGcm.CommandType ;
+        PS>     }else {
+        PS>         # fake it from what we know
+        PS>         $hsCmdSummary.name = $thiscmd  ; $hsCmdSummary.source = 'UNRESOLVED' ;
+        PS>         $hsCmdSummary.verb,$hsCmdSummary.noun = $thiscmd.split('-');
+        PS>         $hsCmdSummary.CommandType="UNRESOLVED" ;
+        PS>     };
+        PS>     [pscustomobject]$hsCmdSummary ;
+        PS> } | sort source,name ;
+        PS> $ResolvedCmds| ft -a ;
+
+            name                         source                                       verb        noun                  CommandType
+            ----                         ------                                       ----        ----                  -----------
+            Out-Clipboard                                                                                                     Alias
+            Resolve-DnsName              DnsClient                                    Resolve     DnsName                    Cmdlet
+            New-MgDomain                 Microsoft.Graph.Identity.DirectoryManagement New         MgDomain                 Function
+            ForEach-Object               Microsoft.PowerShell.Core                    ForEach     Object                     Cmdlet
+            Write-Degug                  UNRESOLVED                                   Write       Degug                  UNRESOLVED
+            ...
+
+        PS> $ResolvedCmds | ? verb -ne 'get' | ft -a  ; 
+        AST parse out all verb-noun format generic commands from a source (regex demarced on word boundaries) ; unique the returned strings, then resolve each against a source/module, w verb,noun,source & commandtype. 
+        Goal is to profile code for updates around source modules, and types of verb (action/change verbs, for adding shouldproceses support, etc). 
+        Trailing command outputs the non-'Get' verb items.
         .LINK
+        https://github.com/tostka/verb-dev
         #>
         [CmdletBinding()]
         [Alias('get-ScriptProfileAST')]
@@ -175,8 +219,7 @@
                 }elseif($scriptblock){
                     $AST = [System.Management.Automation.Language.Parser]::ParseInput($scriptblock, [ref]$astTokens, [ref]$astErr) ; 
                 } ;     
-                if($host.version.major -ge 3){$objReturn=[ordered]@{Dummy = $null ;} }
-                else {$objReturn = @{Dummy = $null ;} } ;
+                $objReturn = [ordered]@{ } ;
                 if ($Functions -OR $All) {
                     write-verbose "$((get-date).ToString('HH:mm:ss')):(parsing Functions from AST...)" ; 
                     $ASTFunctions = $AST.FindAll( { $args[0] -is [System.Management.Automation.Language.FunctionDefinitionAst] }, $true) ;
