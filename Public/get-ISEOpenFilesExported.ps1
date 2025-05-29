@@ -16,6 +16,7 @@ function get-ISEOpenFilesExported {
     Github      : https://github.com/tostka/verb-dev
     Tags        : Powershell,ISE,development,debugging
     REVISIONS
+    * 1:55 PM 5/29/2025 add expl dumping report of name & the constituent files in most recent exports
     * 9:24 AM 9/14/2023 CBH add:demo of pulling lastwritetime and using to make automatd decisions, or comparison reporting (as this returns a fullname, not a file object)
     * 1:55 PM 3/29/2023 flipped alias (clashed) iIseOpen -> gIseOpen
     * 8:51 AM 3/8/2023 init
@@ -37,8 +38,11 @@ function get-ISEOpenFilesExported {
     PS> get-ISEOpenFilesExported | %{gci $_} | sort LastWriteTime | ft -a fullname,lastwritetime ; 
     Example finding the 'latest' (newest LastWritTime) and echoing for review
     .EXAMPLE
-    get-ISEOpenFilesExported | %{gci $_} | sort LastWriteTime | select -last 1 | select -expand fullname | import-ISEOpenFiles ; 
+    PS> get-ISEOpenFilesExported | %{gci $_} | sort LastWriteTime | select -last 1 | select -expand fullname | import-ISEOpenFiles ; 
     Example finding the 'latest' (newest LastWritTime), and then importing into ISE.
+    .EXAMPLE    
+    PS> get-ISEOpenFilesExported | %{gci $_} | sort LastWriteTime | ? LastWriteTime -gt (get-date '5/11/2025')  | %{[xml]$xml = gc $_.fullname ; write-host -foregroundcolor green "`n====$($_.name)`n$(($xml.Objs.S|out-string).trim())`n===" ; }
+    Dump summary of names & files contained, in most recent after spec'd time, sorted on LastWriteTime
     .LINK
     https://github.com/tostka/verb-dev
     #>
