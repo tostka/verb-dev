@@ -5,7 +5,7 @@
 .SYNOPSIS
 VERB-dev - Development PS Module-related generic functions
 .NOTES
-Version     : 1.5.79
+Version     : 1.5.80
 Author      : Todd Kadrie
 Website     :	https://www.toddomation.com
 Twitter     :	@tostka
@@ -5936,6 +5936,7 @@ function get-CodeProfileAST {
         AddedTwitter:
         REVISIONS
         * 10:57 AM 5/19/2025 add: CBH for more extensive code profiling demo (for targeting action-verb cmds in code, from specific modules); fixed some missing CBH info.
+        * 4:11 PM 5/15/2025 add psv2-ordered compat
         * 10:43 AM 5/14/2025 added SSP-suppressing -whatif:/-confirm:$false to nv's
         * 12:10 PM 5/6/2025 added -ScriptBlock, and logic to process either file or scriptblock; added examples demoing resolve Microsoft.Graph module cmdlet permissions from a file, 
             and connect-MGGraph with the resolved dynamic permissions scope. 
@@ -6134,7 +6135,8 @@ function get-CodeProfileAST {
                 }elseif($scriptblock){
                     $AST = [System.Management.Automation.Language.Parser]::ParseInput($scriptblock, [ref]$astTokens, [ref]$astErr) ; 
                 } ;     
-                $objReturn = [ordered]@{ } ;
+                if($host.version.major -ge 3){$objReturn=[ordered]@{Dummy = $null ;} }
+                else {$objReturn = @{Dummy = $null ;} } ;
                 if ($Functions -OR $All) {
                     write-verbose "$((get-date).ToString('HH:mm:ss')):(parsing Functions from AST...)" ; 
                     $ASTFunctions = $AST.FindAll( { $args[0] -is [System.Management.Automation.Language.FunctionDefinitionAst] }, $true) ;
@@ -7255,6 +7257,7 @@ function get-ISEOpenFilesExported {
     Github      : https://github.com/tostka/verb-dev
     Tags        : Powershell,ISE,development,debugging
     REVISIONS
+    * 1:55 PM 5/29/2025 add expl dumping report of name & the constituent files in most recent exports
     * 9:24 AM 9/14/2023 CBH add:demo of pulling lastwritetime and using to make automatd decisions, or comparison reporting (as this returns a fullname, not a file object)
     * 1:55 PM 3/29/2023 flipped alias (clashed) iIseOpen -> gIseOpen
     * 8:51 AM 3/8/2023 init
@@ -7276,8 +7279,11 @@ function get-ISEOpenFilesExported {
     PS> get-ISEOpenFilesExported | %{gci $_} | sort LastWriteTime | ft -a fullname,lastwritetime ; 
     Example finding the 'latest' (newest LastWritTime) and echoing for review
     .EXAMPLE
-    get-ISEOpenFilesExported | %{gci $_} | sort LastWriteTime | select -last 1 | select -expand fullname | import-ISEOpenFiles ; 
+    PS> get-ISEOpenFilesExported | %{gci $_} | sort LastWriteTime | select -last 1 | select -expand fullname | import-ISEOpenFiles ; 
     Example finding the 'latest' (newest LastWritTime), and then importing into ISE.
+    .EXAMPLE    
+    PS> get-ISEOpenFilesExported | %{gci $_} | sort LastWriteTime | ? LastWriteTime -gt (get-date '5/11/2025')  | %{[xml]$xml = gc $_.fullname ; write-host -foregroundcolor green "`n====$($_.name)`n$(($xml.Objs.S|out-string).trim())`n===" ; }
+    Dump summary of names & files contained, in most recent after spec'd time, sorted on LastWriteTime
     .LINK
     https://github.com/tostka/verb-dev
     #>
@@ -15896,8 +15902,8 @@ Export-ModuleMember -Function backup-ModuleBuild,check-PsLocalRepoRegistration,c
 # SIG # Begin signature block
 # MIIELgYJKoZIhvcNAQcCoIIEHzCCBBsCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUzAin06JzDFSQbvsAN1fTBYaF
-# a7agggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQU8LGtblF3lov6fHWuivI8LGqe
+# pHigggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
 # MCwxKjAoBgNVBAMTIVBvd2VyU2hlbGwgTG9jYWwgQ2VydGlmaWNhdGUgUm9vdDAe
 # Fw0xNDEyMjkxNzA3MzNaFw0zOTEyMzEyMzU5NTlaMBUxEzARBgNVBAMTClRvZGRT
 # ZWxmSUkwgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBALqRVt7uNweTkZZ+16QG
@@ -15912,9 +15918,9 @@ Export-ModuleMember -Function backup-ModuleBuild,check-PsLocalRepoRegistration,c
 # AWAwggFcAgEBMEAwLDEqMCgGA1UEAxMhUG93ZXJTaGVsbCBMb2NhbCBDZXJ0aWZp
 # Y2F0ZSBSb290AhBaydK0VS5IhU1Hy6E1KUTpMAkGBSsOAwIaBQCgeDAYBgorBgEE
 # AYI3AgEMMQowCKACgAChAoAAMBkGCSqGSIb3DQEJAzEMBgorBgEEAYI3AgEEMBwG
-# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBTNbHwz
-# Pf1P6iuFgoxhsEs+Ai265TANBgkqhkiG9w0BAQEFAASBgAbyjGaqtf3nciVgqLH7
-# UF0ILimvRf4Qw8zqO0++kJW4z7O7rEV3P0sVKJUip+k+6xwMqKDFZTMgytmWw2XD
-# cy4JCS0dRRHWYHe9NG1wVPy4TCvN81Wxf/hhnSv0FJ5J46wRIsSUr+O8ro9ugPEQ
-# 4wjIAwo/HkxaLHUm2WbtvQEK
+# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBTihsZr
+# epfaqvxduf51UB8avsXqfDANBgkqhkiG9w0BAQEFAASBgKqiFU6s7aCAm+LxOyr8
+# 5DYjKf45Zu9kmkt/KpfLuFzL2Rn6ytO+H+cxvkK080E9MTYmIYqjRXkfmpvdI/zF
+# t5jRUb0gtj4QMg03lR8wb3A7SqKYJhPeYuzc0MnBSh2xjgRxykHZtigheBDPODAM
+# UTWAwH0fJySI2B3er10dEeUg
 # SIG # End signature block
