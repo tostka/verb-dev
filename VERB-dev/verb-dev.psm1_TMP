@@ -5,7 +5,7 @@
 .SYNOPSIS
 VERB-dev - Development PS Module-related generic functions
 .NOTES
-Version     : 1.5.80
+Version     : 1.5.81
 Author      : Todd Kadrie
 Website     :	https://www.toddomation.com
 Twitter     :	@tostka
@@ -5392,6 +5392,168 @@ function export-ISEOpenFiles {
 #*------^ export-ISEOpenFiles.ps1 ^------
 
 
+#*------v export-OpenNotepads.ps1 v------
+function export-OpenNotepads {
+    <#
+    .SYNOPSIS
+    export-OpenNotepads - Export a list of all currently open Notepad* variant (notepad2/3 curr) windows, to CU \WindowsPowershell\Scripts\data\NotePdSavedSession-....psXML file (uses -Tag if specified, otherwise timestamps the file)
+    .NOTES
+    Version     : 1.0.0
+    Author      : Todd Kadrie
+    Website     : http://www.toddomation.com
+    Twitter     : @tostka / http://twitter.com/tostka
+    CreatedDate : 2025-07-02
+    FileName    : export-OpenNotepads.ps1
+    License     : MIT License
+    Copyright   : (c) 2025 Todd Kadrie
+    Github      : https://github.com/tostka/verb-dev
+    Tags        : Powershell,ISE,development,debugging
+    REVISIONS
+    * 1:53 PM 7/2/2025 converted to func;  init
+    .DESCRIPTION
+    export-OpenNotepads - Export a list of all currently open Notepad* variant (notepad2/3 curr) windows, to CU \WindowsPowershell\Scripts\data\NotePdSavedSession-....
+
+    Goal is to quickest productive work state after a reboot (get all the open files back open for continued review and work)
+
+    Exports are in psXML files (xml) to the 'CurrentUserProfile\WindowsPowershell\Scripts\data\' directory:
+
+    - If a -Tag is specified, the exported summary is named  'NotePdSavedSession-$($Tag).psXML'
+
+    - If NO -Tag is specified, the exported summary is named with a timestamp in form: NotePdSavedSession-yyyyMMdd-HHmmtt.psXML
+
+    .PARAMETER Tag
+    Optional Tag to apply to as filename suffix (otherwise appends a timestamp)[-tag 'label']
+    .PARAMETER rgxExclTitles
+    Regex filter reflecting window MainWindowTitle strings to be excluded from exports (defaults to a stock filter)[-rgxExclTitles '^((\*\s)*)(Untitled|input\.txt|tmp\.ps1|tmpL\.ps1)\s-\s']
+    .PARAMETER rgxNPAppNames
+    Regex filter reflecting window MainWindowTitle Notepad* variant suffix strings to be targeted for exports (defaults to a stock filter)[rgxNPAppNames '\s-\s(Notepad\s2e\sx64|Notepad3)']
+    .PARAMETER Whatif
+    Parameter to run a Test no-change pass [-Whatif switch]
+    .EXAMPLE
+    PS> export-OpenNotepads -verbose -whatif
+    Export all 'line'-type breakpoints on all current open ISE tabs, to a matching xml file, with verbose output, and whatif
+    .EXAMPLE
+    PS> export-OpenNotepads -Tag 'mfa' -verbose -whatif
+    Export with Tag 'mfa' applied to filename (e.g. "ISESavedSession-MFA.psXML")
+    .LINK
+    https://github.com/tostka/verb-dev
+    #>
+    [CmdletBinding()]
+    [Alias('epNpOpen')]
+    PARAM(
+        [Parameter(Position=0,HelpMessage="Optional Tag to apply to as filename suffix (otherwise appends a timestamp)[-tag 'label']")]
+            [string]$Tag,
+        [Parameter(HelpMessage="Regex filter reflecting window MainWindowTitle strings to be excluded from exports (defaults to a stock filter)[-rgxExclTitles '^((\*\s)*)(Untitled|input\.txt|tmp\.ps1|tmpL\.ps1)\s-\s']")]
+            [regex]$rgxExclTitles =  '^((\*\s)*)(Untitled|input\.txt|tmp\.ps1|tmpL\.ps1)\s-\s',
+        [Parameter(HelpMessage="Regex filter reflecting window MainWindowTitle Notepad* variant suffix strings to be targeted for exports (defaults to a stock filter)[rgxNPAppNames '\s-\s(Notepad\s2e\sx64|Notepad3)']")]
+            [regex]$rgxNPAppNames = "\s-\s(Notepad\s2e\sx64|Notepad3)",
+        [Parameter(HelpMessage="Whatif Flag  [-whatIf]")]
+            [switch] $whatIf
+    ) ;
+    BEGIN {
+        ${CmdletName} = $PSCmdlet.MyInvocation.MyCommand.Name ;
+        $verbose = $($VerbosePreference -eq "Continue")
+        $sBnr="#*======v $($CmdletName): v======" ;
+        write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($sBnr)" ;
+        $prPS = 'Name', 'Id', 'Path', 'Description', 'MainWindowHandle', 'MainWindowTitle', 'ProcessName', 'StartTime', 'ExitCode', 'HasExited', 'ExitTime' ;
+        #$rgxExclTitles =  '^((\*\s)*)(Untitled|input\.txt|tmp\.ps1|tmpL\.ps1)\s-\s';
+        #$rgxNPAppNames = "\s-\s(Notepad\s2e\sx64|Notepad3)"
+
+        [string[]]$chkpaths = @() ;
+        $chkpaths += @('c:\usr\work\incid\','c:\usr\work\ps\scripts\','c:\usr\work\exch\scripts\','C:\usr\work\o365\scripts\')
+        $chkpaths += @($(resolve-path c:\sc\verb-*\public))
+
+        $CUScripts = "$([Environment]::GetFolderPath('MyDocuments'))\WindowsPowershell\Scripts" ;
+        # CREATE new WindowsPowershell\Scripts\data folder if nonexist, use it to park data .xml & jsons etc for script processing/output (should prob shift the ise export/import code to use it)
+        $npExpDir = join-path -path $CUScripts -ChildPath 'data' ;
+        if(-not(test-path $npExpDir)){
+            mkdir $npExpDir -verbose ;
+        }
+
+        if($Tag){
+            $txmlf = join-path -path $npExpDir -ChildPath "NotePdSavedSession-$($Tag).psXML" ;
+        } else {
+            $txmlf = join-path -path $npExpDir -ChildPath "NotePdSavedSession-$(get-date -format 'yyyyMMdd-HHmmtt').psXML" ;
+        } ;
+    } # BEG-E
+    PROCESS {
+
+        $npProc = get-process notepad* | ? { $_.MainWindowTitle -notmatch $rgxExclTitles } | select $prPS ;
+
+
+        $npExports = @() ;
+        $prcd = 0 ;
+        $ttl = $npProc |  measure | select -expand count ;
+        foreach ($npp in $npProc) {
+            $prcd++ ;
+            write-verbose "Processing:($($prcd)/$($ttl)):$($npp.MainWindowHandle)"
+            $fname = $null ;
+            $fsummary = [ordered]@{
+                Name             = $null ;
+                Id               = $null ;
+                Path             = $null ;
+                Description      = $null ;
+                MainWindowHandle = $null ;
+                MainWindowTitle  = $null ;
+                ProcessName      = $null ;
+                StartTime        = $null ;
+                ExitCode         = $null ;
+                HasExited        = $null ;
+                ExitTime         = $null ;
+                FilePath         = $null ;
+                Resolved         = $false ;
+                NPAppPath        = $null ;
+            }
+            if ($fname =[regex]::match($npp.MainWindowTitle,"^((\*\s)*)[\w\-. ]+(?=(\s-\sNotepad\s2e\sx64|\s-\sNotepad3))").groups[0].value){
+                $chkpaths |%{
+                    $testpath = (join-path $_ $fname);
+                    if($hit = gci -path $testpath -ea 0){
+                        write-verbose "HIT:$($testpath)"
+                        $fsummary.Name = $npp.Name ;
+                        $fsummary.Id               = $npp.Id ;
+                        $fsummary.Path             = $npp.Path ;
+                        $fsummary.Description      = $npp.Description ;
+                        $fsummary.MainWindowHandle = $npp.MainWindowHandle ;
+                        $fsummary.MainWindowTitle  = $npp.MainWindowTitle ;
+                        $fsummary.ProcessName      = $npp.ProcessName ;
+                        $fsummary.StartTime        = $npp.StartTime ;
+                        $fsummary.ExitCode         = $npp.ExitCode ;
+                        $fsummary.HasExited        = $npp.HasExited ;
+                        $fsummary.ExitTime         = $npp.ExitTime ;
+                        $fsummary.FilePath         = $hit.fullname ;
+                        $fsummary.Resolved         = $true ;
+                        $fsummary.NPAppPath        = $npp.Path ;
+                        #break
+                        $npExports += [PSCustomObject]$fsummary
+                    } else {
+                        write-verbose "no hit:$($testpath)"
+                    }
+                } ;
+                #$hit ;
+            } else {
+                $smsg = "Unable to resolve a usable filename from:" ;
+                $smsg += "`n$(($npp | ft -a |out-string).trim())" ;
+                write-warning $smsg ;
+            }
+        } ; # loop-E
+    } #  # PROC-E
+    END{
+        if ($npExports ){
+            $smsg = "Exporting $(($npExports|measure).count) Open Notepad* session summaries to:`n"
+            $smsg += "`n$($txmlf)" ;
+            write-host -foregroundcolor green $smsg ;
+            $npExports | sort StartTime | Export-Clixml -Path $txmlf -whatif:$($whatif);
+
+        }else{
+            write-warning "No matched notepad* file-related matches completed. `nSkipping exports"
+        };
+        write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($sBnr.replace('=v','=^').replace('v=','^='))" ;
+    }
+}
+
+#*------^ export-OpenNotepads.ps1 ^------
+
+
 #*------v find-NounAliasesTDO.ps1 v------
 Function find-NounAliasesTDO {
     <#
@@ -7770,6 +7932,114 @@ wr | WebRequest
 #*------^ get-NounAliasTDO.ps1 ^------
 
 
+#*------v get-OpenNotepadsExported.ps1 v------
+function get-OpenNotepadsExported {
+    <#
+    .SYNOPSIS
+    get-OpenNotepadsExported - List CU profile .\Documents\WindowsPowerShell\Scripts\data\NotePdSavedSession*.psXML files, reflecting prior exports via export-OpenNotepads, as targets for import via import-OpenNotepads
+    .NOTES
+    Version     : 1.0.0
+    Author      : Todd Kadrie
+    Website     : http://www.toddomation.com
+    Twitter     : @tostka / http://twitter.com/tostka
+    CreatedDate : 2022-05-11
+    FileName    : get-OpenNotepadsExported.ps1
+    License     : MIT License
+    Copyright   : (c) 2022 Todd Kadrie
+    Github      : https://github.com/tostka/verb-dev
+    Tags        : Powershell,ISE,development,debugging
+    REVISIONS
+    * 1:46 PM 7/2/2025 init, works
+    .DESCRIPTION
+    get-OpenNotepadsExported - List CU profile .\Documents\WindowsPowerShell\Scripts\data\NotePdSavedSession*.psXML files, reflecting prior exports via export-OpenNotepads, as targets for import via import-OpenNotepads
+
+    Returns list of string filepaths to pipeline, for further filtering, and passage to import-OpenNotepads
+    .PARAMETER Tag
+    Optional Tag to apply to as filename suffix[-tag 'label']
+    .EXAMPLE
+    PS> get-OpenNotepadsExported -verbose
+    Find any pre-existing exported ISESavedSession*.psXML files (those exported via export-OpenNotepads)
+    .EXAMPLE
+    PS> get-OpenNotepadsExported -Tag MFA -verbose  
+    Find any pre-existing exported ISESavedSession*MFA*.psXML files (those exported with -Tag MFA)
+    .EXAMPLE
+    PS> get-OpenNotepadsExported -Tag MFA | import-OpenNotepads ; 
+    Example pipelining the outputs into import-OpenNotepads() (via pipeline support for it's -FilePath param)
+    .EXAMPLE
+    PS> get-OpenNotepadsExported | %{gci $_} | sort LastWriteTime | ft -a fullname,lastwritetime ; 
+    Example finding the 'latest' (newest LastWritTime) and echoing for review
+    .EXAMPLE
+    get-OpenNotepadsExported | %{gci $_} | sort LastWriteTime | select -last 1 | select -expand fullname | import-OpenNotepads ; 
+    Example finding the 'latest' (newest LastWritTime), and then importing into ISE.
+    .LINK
+    https://github.com/tostka/verb-dev
+    #>
+    [CmdletBinding()]
+    [Alias('gIseOpen')]
+    PARAM(
+        [Parameter(Position=0,HelpMessage="Optional Tag to check for, within prior-export filename[-Tag MFA]")]
+        [string]$Tag
+    ) ;
+    BEGIN {
+        ${CmdletName} = $PSCmdlet.MyInvocation.MyCommand.Name ;
+        $verbose = $($VerbosePreference -eq "Continue")
+        $sBnr="#*======v $($CmdletName): v======" ;
+        $smsg = $sBnr ;
+        if($verbose){if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level VERBOSE } 
+        else{ write-verbose "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; } ; 
+    }
+    PROCESS {
+        
+        #$AllUsrsScripts = "$($env:ProgramFiles)\WindowsPowerShell\Scripts" ;
+        $CUScripts = "$([Environment]::GetFolderPath('MyDocuments'))\WindowsPowershell\Scripts" ;
+        # CREATE new WindowsPowershell\Scripts\data folder if nonexist, use it to park data .xml & jsons etc for script processing/output (should prob shift the ise export/import code to use it)
+        $npExpDir = join-path -path $CUScripts -ChildPath 'data' ;
+        if(-not(test-path $npExpDir)){
+            mkdir $npExpDir -verbose ;
+        }
+
+        if($Tag){
+            $txmlf = join-path -path $npExpDir -ChildPath "NotePdSavedSession-$($Tag)*.psXML" ;
+        } else {
+            $txmlf = join-path -path $npExpDir -ChildPath "NotePdSavedSession-*.psXML" ;
+        } ;
+        #$allISEScripts = $psise.powershelltabs.files.fullpath ;
+        $error.clear() ;
+        TRY {
+                
+            if($hits = get-childitem -path $txmlf -ErrorAction SilentlyContinue){
+                $smsg = "(returning matched file fullnames to pipeline for ..."
+                $smsg += "`ngci $($txmlf):" ; 
+                $smsg += "`n)" ; 
+                if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } 
+                else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                #Levels:Error|Warn|Info|H1|H2|H3|H4|H5|Debug|Verbose|Prompt|Success
+                $hits | select -expand fullname ; 
+            } else { 
+                    $smsg = "No matches found for search..."
+                $smsg += "`ngci $($txmlf):" ; 
+                $smsg += "`n)" ; 
+                if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level WARN -Indent} 
+                else{ write-WARNING "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; 
+            } ; 
+        } CATCH {
+            $ErrTrapd=$Error[0] ;
+            $smsg = "$('*'*5)`nFailed processing $($ErrTrapd.Exception.ItemName). `nError Message: $($ErrTrapd.Exception.Message)`nError Details: `n$(($ErrTrapd|out-string).trim())`n$('-'*5)" ;
+            write-warning $smsg ;
+            Continue ; #Opts: STOP(debug)|EXIT(close)|CONTINUE(move on in loop cycle)|BREAK(exit loop iteration)|THROW $_/'CustomMsg'(end script with Err output)
+        } ;
+        
+    } # PROC-E
+    END{
+        $smsg = "$($sBnr.replace('=v','=^').replace('v=','^='))" ;
+        if($verbose){if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level VERBOSE } 
+        else{ write-verbose "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; } ; 
+    }
+}
+
+#*------^ get-OpenNotepadsExported.ps1 ^------
+
+
 #*------v get-ProjectNameTDO.ps1 v------
 function get-ProjectNameTDO {
     <#
@@ -9376,6 +9646,136 @@ function import-ISEOpenFiles {
 }
 
 #*------^ import-ISEOpenFiles.ps1 ^------
+
+
+#*------v import-OpenNotepads.ps1 v------
+function import-OpenNotepads {
+    <#
+    .SYNOPSIS
+     import-OpenNotepads - Import & open a previously-exported list of  Notepad* variant (notepad2/3 curr) sessions
+    .NOTES
+    Version     : 1.0.0.
+    Author      : Todd Kadrie
+    Website     : http://www.toddomation.com
+    Twitter     : @tostka / http://twitter.com/tostka
+    CreatedDate : 2025-07-02
+    FileName    : import-OpenNotepads.ps1
+    License     : MIT License
+    Copyright   : (c) 2020 Todd Kadrie
+    Github      : https://github.com/tostka
+    Tags        : Powershell,ISE,development,debugging
+    REVISIONS
+    * 2:21 PM 7/2/2025 works init
+    .DESCRIPTION
+    import-OpenNotepads - Import & open a previously-exported list of  Notepad* variant (notepad2/3 curr) sessions
+    .PARAMETER File
+    Path to an exported .psxml file reflecting previously opened Notepad* variant windows & documents, to be reopened.
+    .PARAMETER Tag
+    Variant to specify targeting a Tag (filename suffix - portion after the std 'NotePdSavedSession-' of filename, wo .psxml extension, which by default is a timestamp, if no export -Tag was specified)[-tag 'label']
+    .EXAMPLE
+    PS> import-opennotepads -File 'C:\Users\kadrits\OneDrive - The Toro Company\Documents\WindowsPowershell\Scripts\data\NotePdSavedSession-20250702-1120AM.psXML' -verbose
+    Demo using a full path specification to the target import file
+    .EXAMPLE
+    PS> import-opennotepads -Tag '20250702-1120AM'   -verbose
+    Demo targeting an exported file based on the trailing Tag suffix
+    .LINK
+    Github      : https://github.com/tostka
+    #>
+    [CmdletBinding()]
+    [Alias('ipNpOpen')]
+
+    #[ValidateScript({Test-Path $_})]
+    PARAM(
+        [Parameter(Mandatory = $False, Position = 0, ValueFromPipeline = $True, HelpMessage = 'File paths[-path c:\pathto\file.ext]')]
+            [Alias('PsPath')]
+            #[ValidateScript({Test-Path $_ -PathType 'Container'})]
+            #[System.IO.DirectoryInfo[]]$File,
+            [ValidateScript({ Test-Path $_ })]
+            [system.io.fileinfo[]]$File,
+            #[string[]]$File
+        [Parameter(Position=0,HelpMessage="Variant to specify targeting a Tag (filename suffix - portion after the std 'NotePdSavedSession-' of filename, wo .psxml extension, which by default is a timestamp, if no export -Tag was specified)[-tag 'label']")]
+            [string]$Tag,
+        [Parameter(HelpMessage="Whatif Flag  [-whatIf]")]
+            [switch] $whatIf
+    ) ;
+    BEGIN {
+        ${CmdletName} = $PSCmdlet.MyInvocation.MyCommand.Name ;
+        $verbose = $($VerbosePreference -eq "Continue") ;
+        $prPS = 'Name', 'Id', 'Path', 'Description', 'MainWindowHandle', 'MainWindowTitle', 'ProcessName', 'StartTime', 'ExitCode', 'HasExited', 'ExitTime' ;
+        $CUScripts = "$([Environment]::GetFolderPath('MyDocuments'))\WindowsPowershell\Scripts" ;
+        # CREATE new WindowsPowershell\Scripts\data folder if nonexist, use it to park data .xml & jsons etc for script processing/output (should prob shift the ise export/import code to use it)
+        $npExpDir = join-path -path $CUScripts -ChildPath 'data' ;
+        if (-not(test-path $npExpDir)) {
+            mkdir $npExpDir -verbose ;
+        }
+
+        if ($Tag) {
+            $txmlf = join-path -path $npExpDir -ChildPath "NotePdSavedSession-$($Tag).psXML" ;
+        } elseif($File) {
+            if ($File -match '\\|\/'){
+                write-verbose "File appears to be fully pathed (has /\ chars)"
+                $txmlf = $File ;
+            } ;
+            }else{
+                write-verbose "unpathed -File, building target default path"
+                $txmlf = join-path -path $npExpDir -ChildPath $File ;
+            }
+
+    } ;
+    PROCESS {
+        # for debugging, -Script permits targeting another script *not* being currently debugged
+
+
+            if($txmlf){
+                write-host "*Importing exported file:$($txmlf) and setting specified files for open file`n$($tScript)" ;
+                
+                # set apps & files in found .xml file
+                $ipFiles = Import-Clixml -path $txmlf ;
+
+                # patch over empty existing file (file w no specs, happens)
+                if($ipFiles){
+
+
+                    if($whatif){
+                        foreach($ipFile in $ipFiles){
+                            write-host "-whatif:set-PSBreakpoint -script $($setPs1) -line $($ipFile.line)"
+                        } ;
+                    } else {
+                        foreach($ipFile in $ipFiles){
+                            #$null = set-PSBreakpoint -script $setPs1 -line $ipFile.line ;
+                            # $process = start-process ping.exe -windowstyle Hidden -ArgumentList "-n 1 -w 127.0.0.1" -PassThru –Wait ;
+                            # $process.ExitCode
+                            $pltSaPS = [ordered]@{
+                                FilePath = $null ;
+                                ArgumentList = $null ;
+                                PassThru = $true
+                            } ;
+                            if($ipFile.Path){$pltSaPS.FilePath = $ipFile.Path }else{throw "missing FilePath!"} 
+                            if($ipFile.FilePath){$pltSaPS.ArgumentList = $ipFile.FilePath }else{throw "missing notepad app Path!"}
+                            $smsg = "start-process w`n$(($pltSaPS|out-string).trim())" ; 
+                            write-verbose $smsg ; 
+                            TRY{
+                                $process = start-process @pltSaPS ;
+                            } CATCH {
+                                $ErrTrapd=$Error[0] ;
+                                $smsg = "`n$(($ErrTrapd | fl * -Force|out-string).trim())" ;
+                                write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" ;
+                            } ;
+                            write-verbose  "$($pltSaPS.Path ) $($pltSaPS.FilePath): $(($process.ExitCode|out-string).trim())" ;
+                        } ;
+                    } ;
+                    $smsg = "$(($ipFile|measure).count) Files restored per $($txmlf)`n$(($ipFiles|sort line|ft -a Path,FilePath|out-string).trim())" ;
+                    if($whatif){$smsg = "-whatif:$($smsg)" }
+                    write-host $smsg ;
+                } else {
+                    write-warning "EMPTY/Spec .xml file for reopening" ;
+                }
+             } else { write-warning "Missing .xml exported file for open file $($tScript)" } ;
+
+    } # PROC-E
+}
+
+#*------^ import-OpenNotepads.ps1 ^------
 
 
 #*------v Initialize-ModuleFingerprint.ps1 v------
@@ -15894,7 +16294,7 @@ $($logfile)
 
 #*======^ END FUNCTIONS ^======
 
-Export-ModuleMember -Function backup-ModuleBuild,check-PsLocalRepoRegistration,confirm-ModuleBuildSync,confirm-ModulePsd1Version,confirm-ModulePsm1Version,confirm-ModuleTestPs1Guid,convert-CommandLine2VSCDebugJson,convertFrom-EscapedPSText,Convert-HelpToHtmlFile,convert-ISEOpenSession,converto-VSCConfig,ConvertTo-Breakpoint,_extractBreakpoint,convertTo-EscapedPSText,ConvertTo-ModuleDynamicTDO,ConvertTo-ModuleMergedTDO,convertTo-UnwrappedPS,convertTo-WrappedPS,copy-ISELocalSourceToTab,copy-ISETabFileToLocal,export-CommentBasedHelpToFileTDO,export-ISEBreakPoints,export-ISEBreakPointsALL,export-ISEOpenFiles,find-NounAliasesTDO,get-AliasAssignsAST,get-CodeProfileAST,get-CodeRiskProfileAST,Get-CommentBlocks,get-FunctionBlock,get-FunctionBlocks,get-HelpParsed,get-ISEBreakPoints,get-ISEOpenFilesExported,get-ModuleRevisedCommands,get-NounAliasTDO,get-ProjectNameTDO,Get-PSBreakpointSorted,Get-PSModuleFile,get-StrictMode,Version,ToString,get-VariableAssignsAST,get-VerbAliasTDO,Get-VerbSynonymTDO,get-VersionInfo,import-ISEBreakPoints,import-ISEBreakPointsALL,import-ISEConsoleColors,import-ISEOpenFiles,Initialize-ModuleFingerprint,Get-PSModuleFile,Initialize-PSModuleDirectories,move-ISEBreakPoints,new-CBH,New-GitHubGist,pop-FunctionDev,push-FunctionDev,restore-ISEConsoleColors,restore-ModuleBuild,save-ISEConsoleColors,show-ISEOpenTab,show-ISEOpenTabPaths,show-Verbs,Split-CommandLine,Step-ModuleVersionCalculated,Get-PSModuleFile,Test-ModuleTMPFiles,test-VerbStandard,Uninstall-ModuleForce,update-NewModule,get-FolderEmpty,reset-ModulePublishingDirectory,populate-ModulePublishingDirectory -Alias *
+Export-ModuleMember -Function backup-ModuleBuild,check-PsLocalRepoRegistration,confirm-ModuleBuildSync,confirm-ModulePsd1Version,confirm-ModulePsm1Version,confirm-ModuleTestPs1Guid,convert-CommandLine2VSCDebugJson,convertFrom-EscapedPSText,Convert-HelpToHtmlFile,convert-ISEOpenSession,converto-VSCConfig,ConvertTo-Breakpoint,_extractBreakpoint,convertTo-EscapedPSText,ConvertTo-ModuleDynamicTDO,ConvertTo-ModuleMergedTDO,convertTo-UnwrappedPS,convertTo-WrappedPS,copy-ISELocalSourceToTab,copy-ISETabFileToLocal,export-CommentBasedHelpToFileTDO,export-ISEBreakPoints,export-ISEBreakPointsALL,export-ISEOpenFiles,export-OpenNotepads,find-NounAliasesTDO,get-AliasAssignsAST,get-CodeProfileAST,get-CodeRiskProfileAST,Get-CommentBlocks,get-FunctionBlock,get-FunctionBlocks,get-HelpParsed,get-ISEBreakPoints,get-ISEOpenFilesExported,get-ModuleRevisedCommands,get-NounAliasTDO,get-OpenNotepadsExported,get-ProjectNameTDO,Get-PSBreakpointSorted,Get-PSModuleFile,get-StrictMode,Version,ToString,get-VariableAssignsAST,get-VerbAliasTDO,Get-VerbSynonymTDO,get-VersionInfo,import-ISEBreakPoints,import-ISEBreakPointsALL,import-ISEConsoleColors,import-ISEOpenFiles,import-OpenNotepads,Initialize-ModuleFingerprint,Get-PSModuleFile,Initialize-PSModuleDirectories,move-ISEBreakPoints,new-CBH,New-GitHubGist,pop-FunctionDev,push-FunctionDev,restore-ISEConsoleColors,restore-ModuleBuild,save-ISEConsoleColors,show-ISEOpenTab,show-ISEOpenTabPaths,show-Verbs,Split-CommandLine,Step-ModuleVersionCalculated,Get-PSModuleFile,Test-ModuleTMPFiles,test-VerbStandard,Uninstall-ModuleForce,update-NewModule,get-FolderEmpty,reset-ModulePublishingDirectory,populate-ModulePublishingDirectory -Alias *
 
 
 
