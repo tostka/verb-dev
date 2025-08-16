@@ -54,6 +54,8 @@ function import-ISEBreakPoints {
     BEGIN {
         ${CmdletName} = $PSCmdlet.MyInvocation.MyCommand.Name ;        
         $verbose = $($VerbosePreference -eq "Continue") ;
+        $CUScripts = "$([Environment]::GetFolderPath('MyDocuments'))\WindowsPowershell\Scripts" ;
+        if(-not (test-path $cuscripts)){mkdir $CUScripts -verbose } ; 
     } ;
     PROCESS {
         # for debugging, -Script permits targeting another script *not* being currently debugged

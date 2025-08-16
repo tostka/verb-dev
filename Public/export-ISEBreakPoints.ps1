@@ -17,6 +17,7 @@ function export-ISEBreakPoints {
     Github      : https://github.com/tostka
     Tags        : Powershell,ISE,development,debugging
     REVISIONS
+    * 9:06 PM 8/12/2025 added code to create CUScripts if missing
     * 8:27 AM 3/26/2024 chg eIseBp -> epIseBp
     * 2:35 PM 5/24/2023 add: prompt for force deletion of existing .xml if no psbreakpoints defined in loaded ISE copy for script.
     * 10:20 AM 5/11/2022 added whatif support; updated CBH ; expanded echos; cleanedup
@@ -55,6 +56,7 @@ function export-ISEBreakPoints {
     BEGIN {
         ${CmdletName} = $PSCmdlet.MyInvocation.MyCommand.Name ;
         $verbose = $($VerbosePreference -eq "Continue")} ;
+        
     PROCESS {
         if ($psise){
             if($Script){
@@ -71,7 +73,8 @@ function export-ISEBreakPoints {
                 $tScript = $psise.CurrentFile.FullPath ;
                 # default to same loc, variant name of script in currenttab of ise
                 $xFname=$tScript.replace(".ps1","-ps1.xml").replace(".psm1","-psm1.xml").replace(".","-BP.") ;
-                $AllUsrsScripts = "$($env:ProgramFiles)\WindowsPowerShell\Scripts" ; 
+                $AllUsrsScripts = "$($env:ProgramFiles)\WindowsPowerShell\Scripts" ;                 
+                if(-not (test-path $AllUsrsScripts )){mkdir $AllUsrsScripts  -verbose } ; 
                 if( ( (split-path $xFname) -eq $AllUsrsScripts) -OR (-not(test-path (split-path $xFname))) ){
                     # if in the AllUsers profile, or the ISE script dir is invalid
                     if($tdir = get-item "$([Environment]::GetFolderPath('MyDocuments'))\WindowsPowershell\Scripts"){

@@ -15,6 +15,7 @@ function export-ISEOpenFiles {
     Github      : https://github.com/tostka/verb-dev
     Tags        : Powershell,ISE,development,debugging
     REVISIONS
+    * 9:06 PM 8/12/2025 added code to create CUScripts if missing
     * 8:31 AM 3/26/2024 chg eIseOpen -> epIseOpen
     * 3:28 PM 6/23/2022 add -Tag param to permit running interger-suffixed variants (ie. mult ise sessions open & stored from same desktop). 
     * 9:19 AM 5/20/2022 add: eIseOpen alias (using these a lot lately; w freq crashouts of ise, and need to recover all files open & BPs to quickly get back to function)
@@ -53,6 +54,7 @@ function export-ISEOpenFiles {
         if ($psise){
             #$AllUsrsScripts = "$($env:ProgramFiles)\WindowsPowerShell\Scripts" ;
             $CUScripts = "$([Environment]::GetFolderPath('MyDocuments'))\WindowsPowershell\Scripts" ;
+            if(-not (test-path $cuscripts)){mkdir $CUScripts -verbose } ; 
             if($Tag){
                 $txmlf = join-path -path $CUScripts -ChildPath "ISESavedSession-$($Tag).psXML" ;
             } else { 

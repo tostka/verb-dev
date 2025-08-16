@@ -15,6 +15,7 @@ function import-ISEOpenFiles {
     Github      : https://github.com/tostka/verb-dev
     Tags        : Powershell,ISE,development,debugging
     REVISIONS
+    * 9:06 PM 8/12/2025 added code to create CUScripts if missing
     * 8:30 AM 3/26/2024 chg iIseOpen -> ipIseOpen
     * 3:31 PM 1/17/2024 typo fix: lacking $ on () (dumping $ISES obj into pipeline/console)
     * 1:20 PM 3/27/2023 bugfix: coerce $txmlf into [system.io.fileinfo], to make it match $fileinfo's type.
@@ -58,6 +59,7 @@ function import-ISEOpenFiles {
             if(-not $FilePath){
                 #$AllUsrsScripts = "$($env:ProgramFiles)\WindowsPowerShell\Scripts" ;
                 $CUScripts = "$([Environment]::GetFolderPath('MyDocuments'))\WindowsPowershell\Scripts" ;
+                if(-not (test-path $cuscripts)){mkdir $CUScripts -verbose } ; 
                 if($Tag){
                     [array]$txmlf = @( [system.io.fileinfo](join-path -path $CUScripts -ChildPath "ISESavedSession-$($Tag).psXML") ) ;
                 } else { 
