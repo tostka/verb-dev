@@ -9,6 +9,7 @@ function get-FunctionBlocks {
     Website:	http://tinstoys.blogspot.com
     Twitter:	http://twitter.com/tostka
     REVISIONS   :
+    * 9:38 AM 10/7/2025 CBH added leading tag for 1st demo
     * 2:53 PM 5/18/2022 $parsefile -> $path, strong typed
     # 5:55 PM 3/15/2020 fix corrupt ABC typo
     # 10:21 AM 9/27/2019 just pull the functions in a file and pipeline them, nothing more.
@@ -19,6 +20,7 @@ function get-FunctionBlocks {
     Accepts piped input.
     .OUTPUTS
     None. Returns matched Function block to pipeline.
+    .EXAMPLE
     get-FunctionBlocks -Parse C:\usr\work\exch\scripts\Set-Empl-Offboard-20160601-1217PM.ps1 ;
     Pull/display the Add-EMSRemote function from the specified .ps1, using named params
     .EXAMPLE
