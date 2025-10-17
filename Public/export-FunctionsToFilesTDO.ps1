@@ -20,12 +20,15 @@ function export-FunctionsToFilesTDO {
     AddedWebsite: URL
     AddedTwitter: URL
     REVISIONS   :
-    * 10:48 AM 10/7/2025 port from get-FunctionBlocks(), works, add to vdev
+    * 12:26 PM 10/7/2025 add autocreate missing dest dir; cbh demo diffing exports against the repo tree for commit updates back;  port from get-FunctionBlocks(), works, add to vdev
     * 2:53 PM 5/18/2022 $parsefile -> $path, strong typed
     # 5:55 PM 3/15/2020 fix corrupt ABC typo
     # 10:21 AM 9/27/2019 just pull the functions in a file and pipeline them, nothing more.
     .DESCRIPTION
     export-FunctionsToFilesTDO - Parse out all functions from the specified -Path (via AST Parser), and output each to _func.ps1 files in specified destination dir
+
+    Automatically skips 'internal functions', those by convention tagged with an underscore as the first letter of the function name, unless 
+    -IncludeInternalFunctions is specified (which would cause the internal function to export both within it's parent function, and as a separate freestanding function file).
     .PARAMETER  Path
     Script/Module file(s) to be parsed [path-to\script.ps1]
     .PARAMETER  Destination
@@ -47,6 +50,29 @@ function export-FunctionsToFilesTDO {
     .EXAMPLE
     PS> $results = export-FunctionsToFilesTDO -Path C:\sc\powershell\PSScripts\build\xopBuildLibrary.psm1 -Destination "C:\sc\powershell\PSScripts\build\epFuncs" -verbose  ;
     Parse and export all items in the specified file, to the destination directory
+    .EXAMPLE
+    PS> $results = export-FunctionsToFilesTDO -Path C:\sc\powershell\PSScripts\build\xopBuildLibrary.psm1 -Destination "C:\sc\powershell\PSScripts\build\epFuncs2" -verbose -NoFunc ;
+    Demo exports with -Nofunc to suppress _func.ps1 suffix on exported filemames.
+    .EXAMPLE
+    PS> gci C:\sc\powershell\PSScripts\build\modslist20251007-1147AM.txt | sls '^\w+' | %{
+    PS>     $hit = $_ ;
+    PS>     $tfunc = $hit.line.trim() ;
+    PS>     write-host $tfunc ;
+    PS>     if($found = gci "c:\sc\$($tfunc).ps1" -recur){
+    PS>         $epspec = (join-path (split-path $hit.Path) "epFuncs\$($tfunc)_func.ps1")
+    PS>         if($epfile = gci $epspec){
+    PS>             @($found.fullname,$epfile.fullname) | gci | ft -a fullname,length,LastWriteTime ;
+    PS>             (windiff $found.fullname $epfile.fullname) ;
+    PS>             Read-Host "Press any key to continue . . ." | Out-Null ;
+    PS>         }else{write-host -foregroundcolor gray "(no match epspec:$($epspec))" } ; ;
+    PS>     }else{write-host -foregroundcolor gray "(no match $($tfunc))" } ;
+    PS> } ; 
+    Demo reviewing diffs between exported .ps1 files, and repo-tree c:\sc\* content, for commiting back as updates to the repo: 
+    Works from a text file with the updated function names (which are sls rgx matched as unindented lines in the file),
+    each of which are searched as filenames within the repositories root; 
+    on any match, the matching file is windif'd against the exported file for the function, and the loop is paused. 
+    This permits reviewing updates against the repo, and where material, the updated .ps1 can be copied back to the repo tree, for commit.
+    The appropriate copy-item -path & -dest values are part of the echo (as fullname properties).
     .LINK
     https://github.com/tostka/verb-dev
     #>
@@ -72,6 +98,7 @@ function export-FunctionsToFilesTDO {
             [switch] $whatIf
     )  ;
     BEGIN{
+        if(-not (test-path $Destination)){mkdir $Destination -verbose} ; 
         $sw = [Diagnostics.Stopwatch]::StartNew();
         $prcd = 0 ; 
     } # BEG-E
