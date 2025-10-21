@@ -5,7 +5,7 @@
 .SYNOPSIS
 VERB-dev - Development PS Module-related generic functions
 .NOTES
-Version     : 1.5.81
+Version     : 1.5.82
 Author      : Todd Kadrie
 Website     :	https://www.toddomation.com
 Twitter     :	@tostka
@@ -5122,6 +5122,217 @@ function export-CommentBasedHelpToFileTDO{
 #*------^ export-CommentBasedHelpToFileTDO.ps1 ^------
 
 
+#*------v export-FunctionsToFilesTDO.ps1 v------
+function export-FunctionsToFilesTDO {
+    <#
+    .SYNOPSIS
+    export-FunctionsToFilesTDO - Parse out all functions from the specified -Path (via AST Parser), and output each to _func.ps1 files in specified destination dir
+    .NOTES
+    Version     : 0.0.1
+    Author      : Todd Kadrie
+    Website     : http://www.toddomation.com
+    Twitter     : @tostka / http://twitter.com/tostka
+    CreatedDate : 2025-10-07
+    FileName    : export-FunctionsToFilesTDO.ps1
+    License     : MIT License
+    Copyright   : (c) 2025 Todd Kadrie
+    Github      : https://github.com/tostka/verb-dev
+    Tags        : Powershell,development,function,export
+    AddedCredit : REFERENCE
+    AddedWebsite: URL
+    AddedTwitter: URL
+    REVISIONS   :
+    * 12:26 PM 10/7/2025 add autocreate missing dest dir; cbh demo diffing exports against the repo tree for commit updates back;  port from get-FunctionBlocks(), works, add to vdev
+    * 2:53 PM 5/18/2022 $parsefile -> $path, strong typed
+    # 5:55 PM 3/15/2020 fix corrupt ABC typo
+    # 10:21 AM 9/27/2019 just pull the functions in a file and pipeline them, nothing more.
+    .DESCRIPTION
+    export-FunctionsToFilesTDO - Parse out all functions from the specified -Path (via AST Parser), and output each to _func.ps1 files in specified destination dir
+
+    Automatically skips 'internal functions', those by convention tagged with an underscore as the first letter of the function name, unless 
+    -IncludeInternalFunctions is specified (which would cause the internal function to export both within it's parent function, and as a separate freestanding function file).
+    .PARAMETER  Path
+    Script/Module file(s) to be parsed [path-to\script.ps1]
+    .PARAMETER  Destination
+    Directory into which new [functionname]_func.ps1 files should be written[-Destination path-to\]
+    .PARAMETER  NoFunc
+    Switch to output exported functions without standard _func.ps1 suffix.[-NoFunc]
+    .PARAMETER Include
+    String Array of function names to be included in export - the only functions found, that will be exported - from specified Path file.[-Include @('func1','func2')]
+    .PARAMETER Exclude
+    String Array of function names to be excluded from export, in specified Path file (defaults to '2b4','2b4c','fb4').[-Exclude @('2b4','2b4c','fb4')]
+    .PARAMETER IncludeInternalFunctions
+    Switch to override default behavior - skip internal functions (as indicated by underscore prefix in function naame) - and instead export internal functions BOTH as part of their parent function, and as a separate function file[-IncludeInternalFunctions)]
+    .PARAMETER whatIf
+    Whatif Flag  [-whatIf]
+    .INPUTS
+    system.io.fileinfo[] Accepts piped input for Path variable Array
+    .OUTPUTS
+    System.String outputs count summary to pipeline
+    .EXAMPLE
+    PS> $results = export-FunctionsToFilesTDO -Path C:\sc\powershell\PSScripts\build\xopBuildLibrary.psm1 -Destination "C:\sc\powershell\PSScripts\build\epFuncs" -verbose  ;
+    Parse and export all items in the specified file, to the destination directory
+    .EXAMPLE
+    PS> $results = export-FunctionsToFilesTDO -Path C:\sc\powershell\PSScripts\build\xopBuildLibrary.psm1 -Destination "C:\sc\powershell\PSScripts\build\epFuncs2" -verbose -NoFunc ;
+    Demo exports with -Nofunc to suppress _func.ps1 suffix on exported filemames.
+    .EXAMPLE
+    PS> gci C:\sc\powershell\PSScripts\build\modslist20251007-1147AM.txt | sls '^\w+' | %{
+    PS>     $hit = $_ ;
+    PS>     $tfunc = $hit.line.trim() ;
+    PS>     write-host $tfunc ;
+    PS>     if($found = gci "c:\sc\$($tfunc).ps1" -recur){
+    PS>         $epspec = (join-path (split-path $hit.Path) "epFuncs\$($tfunc)_func.ps1")
+    PS>         if($epfile = gci $epspec){
+    PS>             @($found.fullname,$epfile.fullname) | gci | ft -a fullname,length,LastWriteTime ;
+    PS>             (windiff $found.fullname $epfile.fullname) ;
+    PS>             Read-Host "Press any key to continue . . ." | Out-Null ;
+    PS>         }else{write-host -foregroundcolor gray "(no match epspec:$($epspec))" } ; ;
+    PS>     }else{write-host -foregroundcolor gray "(no match $($tfunc))" } ;
+    PS> } ; 
+    Demo reviewing diffs between exported .ps1 files, and repo-tree c:\sc\* content, for commiting back as updates to the repo: 
+    Works from a text file with the updated function names (which are sls rgx matched as unindented lines in the file),
+    each of which are searched as filenames within the repositories root; 
+    on any match, the matching file is windif'd against the exported file for the function, and the loop is paused. 
+    This permits reviewing updates against the repo, and where material, the updated .ps1 can be copied back to the repo tree, for commit.
+    The appropriate copy-item -path & -dest values are part of the echo (as fullname properties).
+    .LINK
+    https://github.com/tostka/verb-dev
+    #>
+    [CmdletBinding()]
+    [Alias('export-FunctionsToFiles')]
+    PARAM(
+        [Parameter(Position = 0, Mandatory = $True, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true, HelpMessage = "Script/Module file(s) to be parsed [path-to\script.ps1]")]
+            [ValidateNotNullOrEmpty()]
+            [Alias('ParseFile')]
+            [system.io.fileinfo[]]$Path,
+        [Parameter(Position = 1, Mandatory = $True, HelpMessage = "Directory into which new [functionname]_func.ps1 files should be written[-Destination path-to\]")]
+            [ValidateNotNullOrEmpty()]
+            [System.IO.DirectoryInfo]$Destination,
+        [Parameter(HelpMessage = "Switch to output exported functions without standard _func.ps1 suffix.[-NoFunc]")]
+            [switch]$NoFunc,
+        [Parameter(HelpMessage = "String Array of function names to be included in export - the only functions found, that will be exported - from specified Path file.[-Include @('func1','func2')]")]
+            [string[]]$Include,
+        [Parameter(HelpMessage = "String Array of function names to be excluded from export, in specified Path file (defaults to '2b4','2b4c','fb4').[-Exclude @('2b4','2b4c','fb4')]")]
+            [string[]]$Exclude = @('2b4','2b4c','fb4'),
+        [Parameter(HelpMessage = "Switch to override default behavior - skip internal functions (as indicated by underscore prefix in function naame) - and instead export internal functions BOTH as part of their parent function, and as a separate function file[-IncludeInternalFunctions)]")]
+            [string[]]$IncludeInternalFunctions,
+        [Parameter(HelpMessage="Whatif Flag  [-whatIf]")]
+            [switch] $whatIf
+    )  ;
+    BEGIN{
+        if(-not (test-path $Destination)){mkdir $Destination -verbose} ; 
+        $sw = [Diagnostics.Stopwatch]::StartNew();
+        $prcd = 0 ; 
+    } # BEG-E
+    PROCESS{
+        foreach($item in $Path){
+            $smsg = "(running AST parse on $($item.fullname)...)" ; 
+            if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } 
+            else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+            #Levels:Error|Warn|Info|H1|H2|H3|H4|H5|Debug|Verbose|Prompt|Success
+            $AST = [System.Management.Automation.Language.Parser]::ParseFile($item.fullname, [ref]$null, [ref]$Null ) ;
+            $smsg = "(parsing Functions from AST...)" ; 
+            if($VerbosePreference -eq "Continue"){if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level VERBOSE } 
+            else{ write-verbose "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; } ; 
+            $funcsInFile = $AST.FindAll( { $args[0] -is [System.Management.Automation.Language.FunctionDefinitionAst] }, $true) ;
+            # this variant pulls commands v functions
+            #$AST.FindAll({$args[0] -is [System.Management.Automation.Language.CommandAst]}, $true)
+            <# available properties/methods of parsed return
+                $funcs[5] | gm
+                   TypeName: System.Management.Automation.Language.FunctionDefinitionAst
+                Name           MemberType Definition
+                ----           ---------- ----------
+                Copy           Method     System.Management.Automation.Language.Ast Copy()
+                Equals         Method     bool Equals(System.Object obj)
+                Find           Method     System.Management.Automation.Language.Ast Find(System.Func[System.Management.Automation.Language.Ast,bool] ...
+                FindAll        Method     System.Collections.Generic.IEnumerable[System.Management.Automation.Language.Ast] FindAll(System.Func[Syste...
+                GetHashCode    Method     int GetHashCode()
+                GetHelpContent Method     System.Management.Automation.Language.CommentHelpInfo GetHelpContent(System.Collections.Generic.Dictionary[...
+                GetType        Method     type GetType()
+                SafeGetValue   Method     System.Object SafeGetValue()
+                ToString       Method     string ToString()
+                Visit          Method     System.Object Visit(System.Management.Automation.Language.ICustomAstVisitor astVisitor), void Visit(System....
+                Body           Property   System.Management.Automation.Language.ScriptBlockAst Body {get;}
+                Extent         Property   System.Management.Automation.Language.IScriptExtent Extent {get;}
+                IsFilter       Property   bool IsFilter {get;}
+                IsWorkflow     Property   bool IsWorkflow {get;}
+                Name           Property   string Name {get;}
+                Parameters     Property   System.Collections.ObjectModel.ReadOnlyCollection[System.Management.Automation.Language.ParameterAst] Param...
+                Parent         Property   System.Management.Automation.Language.Ast Parent {get;}
+            #>
+            $ttl = $funcsInFile |  measure | select -expand count ;             
+            foreach ($func in $funcsInFile) {
+                $prcd++ ; 
+                #$func | write-output ;
+                $smsg = $sBnrS="`n#*------v PROCESSING ($($prcd)/$($ttl)): $($func.name) : v------" ; 
+                if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level H2 } else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                if(-NOT $IncludeInternalFunctions -AND ($func.name -match '^_')){
+                    $smsg = "Function name - $($func.name) - prefixed by _ (underscore) -> traditionally marks an INTERNAL function" ; 
+                    $smsg += "`n-IncludeInternalFunctions *not* in use -> Skipping internal function export" ;
+                    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } 
+                    else{ write-host -foregroundcolor gray "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                    #Levels:Error|Warn|Info|H1|H2|H3|H4|H5|Debug|Verbose|Prompt|Success
+                    Continue ; 
+                } ; 
+                if($Exclude -contains $func.name){
+                    $smsg = "(skipping -Exclude:$($func.name))" ; 
+                    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } 
+                    else{ write-host -foregroundcolor gray "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                    #Levels:Error|Warn|Info|H1|H2|H3|H4|H5|Debug|Verbose|Prompt|Success
+                    Continue ; 
+                } ; 
+                if(-NOT $Include -OR ($Include -AND ($Include -contains $func.name))){
+                    if($Include){
+                        $smsg = "(-Include:$($func.name))" ; 
+                        if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } 
+                        else{ write-host -foregroundcolor gray "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                        #Levels:Error|Warn|Info|H1|H2|H3|H4|H5|Debug|Verbose|Prompt|Success
+                    } ; 
+                
+                    if($NoFunc){
+                        $ofilename = join-path -path $Destination -ChildPath "$($func.name).ps1" ; 
+                    }else{
+                        $ofilename = join-path -path $Destination -ChildPath "$($func.name)_func.ps1" ; 
+                    }; 
+                    $pltSCFE=[ordered]@{PassThru=$true ;Verbose=$($verbose) ;whatif= $($whatif) ; } 
+                    #$bRet = Set-ContentFixEncoding -Value $updatedContent -Path $PsmNameTmp @pltSCFE ; 
+                    # we're getting 4 writes in set-cfe, for each block added to updatedcontent, lets try |out-string before passing, to see if they fold into one write
+                    $outContent = @() ; 
+                    $outContent += @("# $($func.name).ps1")
+                    $outContent += @("`n")
+                    $outContent += @("#region $($func.name.toUpper() -replace '-', '_') ; #*------v $($func.name) v------")
+                    $outContent += @($func.extent.text) ; 
+                    $outContent += @("#endregion $($func.name.toUpper() -replace '-', '_') ; #*------^ END $($func.name) ^------")        
+                    #$bRet = Set-ContentFixEncoding -Value ($func.extent.text| out-string) -Path $PsmNameTmp @pltSCFE ; 
+                    $bRet = Set-ContentFixEncoding -Value ($outContent| out-string) -Path $ofilename @pltSCFE ; 
+                    if(-not $bRet -AND -not $whatif){throw "Set-ContentFixEncoding $($ofilename)!" } else {
+                        $PassStatus += ";UPDATED:Set-ContentFixEncoding ";
+                    }  ;
+                } else { 
+                   $smsg = "(skipping -non-Include:$($func.name))" ; 
+                    if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } 
+                    else{ write-host -foregroundcolor gray "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+                    #Levels:Error|Warn|Info|H1|H2|H3|H4|H5|Debug|Verbose|Prompt|Success
+                    Continue ;  
+                } ; 
+                $smsg = "$($sBnrS.replace('-v','-^').replace('v-','^-'))" ;
+            } ;
+        } ;  # loop-E $item
+    } ;  # PROC-E
+    END{
+        $sw.Stop() ;
+        write-verbose ("Elapsed Time: {0:dd}d {0:hh}h {0:mm}m {0:ss}s {0:fff}ms" -f $sw.Elapsed) ; 
+        $smsg = "$($prcd) functions exported to $($destination)" 
+        if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level Info } 
+        else{ write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ;
+        #Levels:Error|Warn|Info|H1|H2|H3|H4|H5|Debug|Verbose|Prompt|Success
+        $smsg | write-output ; 
+    } ; 
+}
+
+#*------^ export-FunctionsToFilesTDO.ps1 ^------
+
+
 #*------v export-ISEBreakPoints.ps1 v------
 function export-ISEBreakPoints {
     <#
@@ -5139,6 +5350,7 @@ function export-ISEBreakPoints {
     Github      : https://github.com/tostka
     Tags        : Powershell,ISE,development,debugging
     REVISIONS
+    * 9:06 PM 8/12/2025 added code to create CUScripts if missing
     * 8:27 AM 3/26/2024 chg eIseBp -> epIseBp
     * 2:35 PM 5/24/2023 add: prompt for force deletion of existing .xml if no psbreakpoints defined in loaded ISE copy for script.
     * 10:20 AM 5/11/2022 added whatif support; updated CBH ; expanded echos; cleanedup
@@ -5177,6 +5389,7 @@ function export-ISEBreakPoints {
     BEGIN {
         ${CmdletName} = $PSCmdlet.MyInvocation.MyCommand.Name ;
         $verbose = $($VerbosePreference -eq "Continue")} ;
+        
     PROCESS {
         if ($psise){
             if($Script){
@@ -5193,7 +5406,8 @@ function export-ISEBreakPoints {
                 $tScript = $psise.CurrentFile.FullPath ;
                 # default to same loc, variant name of script in currenttab of ise
                 $xFname=$tScript.replace(".ps1","-ps1.xml").replace(".psm1","-psm1.xml").replace(".","-BP.") ;
-                $AllUsrsScripts = "$($env:ProgramFiles)\WindowsPowerShell\Scripts" ; 
+                $AllUsrsScripts = "$($env:ProgramFiles)\WindowsPowerShell\Scripts" ;                 
+                if(-not (test-path $AllUsrsScripts )){mkdir $AllUsrsScripts  -verbose } ; 
                 if( ( (split-path $xFname) -eq $AllUsrsScripts) -OR (-not(test-path (split-path $xFname))) ){
                     # if in the AllUsers profile, or the ISE script dir is invalid
                     if($tdir = get-item "$([Environment]::GetFolderPath('MyDocuments'))\WindowsPowershell\Scripts"){
@@ -5332,6 +5546,7 @@ function export-ISEOpenFiles {
     Github      : https://github.com/tostka/verb-dev
     Tags        : Powershell,ISE,development,debugging
     REVISIONS
+    * 9:06 PM 8/12/2025 added code to create CUScripts if missing
     * 8:31 AM 3/26/2024 chg eIseOpen -> epIseOpen
     * 3:28 PM 6/23/2022 add -Tag param to permit running interger-suffixed variants (ie. mult ise sessions open & stored from same desktop). 
     * 9:19 AM 5/20/2022 add: eIseOpen alias (using these a lot lately; w freq crashouts of ise, and need to recover all files open & BPs to quickly get back to function)
@@ -5370,6 +5585,7 @@ function export-ISEOpenFiles {
         if ($psise){
             #$AllUsrsScripts = "$($env:ProgramFiles)\WindowsPowerShell\Scripts" ;
             $CUScripts = "$([Environment]::GetFolderPath('MyDocuments'))\WindowsPowershell\Scripts" ;
+            if(-not (test-path $cuscripts)){mkdir $CUScripts -verbose } ; 
             if($Tag){
                 $txmlf = join-path -path $CUScripts -ChildPath "ISESavedSession-$($Tag).psXML" ;
             } else { 
@@ -6831,6 +7047,7 @@ function get-FunctionBlocks {
     Website:	http://tinstoys.blogspot.com
     Twitter:	http://twitter.com/tostka
     REVISIONS   :
+    * 9:38 AM 10/7/2025 CBH added leading tag for 1st demo
     * 2:53 PM 5/18/2022 $parsefile -> $path, strong typed
     # 5:55 PM 3/15/2020 fix corrupt ABC typo
     # 10:21 AM 9/27/2019 just pull the functions in a file and pipeline them, nothing more.
@@ -6841,6 +7058,7 @@ function get-FunctionBlocks {
     Accepts piped input.
     .OUTPUTS
     None. Returns matched Function block to pipeline.
+    .EXAMPLE
     get-FunctionBlocks -Parse C:\usr\work\exch\scripts\Set-Empl-Offboard-20160601-1217PM.ps1 ;
     Pull/display the Add-EMSRemote function from the specified .ps1, using named params
     .EXAMPLE
@@ -9295,6 +9513,8 @@ function import-ISEBreakPoints {
     BEGIN {
         ${CmdletName} = $PSCmdlet.MyInvocation.MyCommand.Name ;        
         $verbose = $($VerbosePreference -eq "Continue") ;
+        $CUScripts = "$([Environment]::GetFolderPath('MyDocuments'))\WindowsPowershell\Scripts" ;
+        if(-not (test-path $cuscripts)){mkdir $CUScripts -verbose } ; 
     } ;
     PROCESS {
         # for debugging, -Script permits targeting another script *not* being currently debugged
@@ -9535,6 +9755,7 @@ function import-ISEOpenFiles {
     Github      : https://github.com/tostka/verb-dev
     Tags        : Powershell,ISE,development,debugging
     REVISIONS
+    * 9:06 PM 8/12/2025 added code to create CUScripts if missing
     * 8:30 AM 3/26/2024 chg iIseOpen -> ipIseOpen
     * 3:31 PM 1/17/2024 typo fix: lacking $ on () (dumping $ISES obj into pipeline/console)
     * 1:20 PM 3/27/2023 bugfix: coerce $txmlf into [system.io.fileinfo], to make it match $fileinfo's type.
@@ -9578,6 +9799,7 @@ function import-ISEOpenFiles {
             if(-not $FilePath){
                 #$AllUsrsScripts = "$($env:ProgramFiles)\WindowsPowerShell\Scripts" ;
                 $CUScripts = "$([Environment]::GetFolderPath('MyDocuments'))\WindowsPowershell\Scripts" ;
+                if(-not (test-path $cuscripts)){mkdir $CUScripts -verbose } ; 
                 if($Tag){
                     [array]$txmlf = @( [system.io.fileinfo](join-path -path $CUScripts -ChildPath "ISESavedSession-$($Tag).psXML") ) ;
                 } else { 
@@ -16294,7 +16516,7 @@ $($logfile)
 
 #*======^ END FUNCTIONS ^======
 
-Export-ModuleMember -Function backup-ModuleBuild,check-PsLocalRepoRegistration,confirm-ModuleBuildSync,confirm-ModulePsd1Version,confirm-ModulePsm1Version,confirm-ModuleTestPs1Guid,convert-CommandLine2VSCDebugJson,convertFrom-EscapedPSText,Convert-HelpToHtmlFile,convert-ISEOpenSession,converto-VSCConfig,ConvertTo-Breakpoint,_extractBreakpoint,convertTo-EscapedPSText,ConvertTo-ModuleDynamicTDO,ConvertTo-ModuleMergedTDO,convertTo-UnwrappedPS,convertTo-WrappedPS,copy-ISELocalSourceToTab,copy-ISETabFileToLocal,export-CommentBasedHelpToFileTDO,export-ISEBreakPoints,export-ISEBreakPointsALL,export-ISEOpenFiles,export-OpenNotepads,find-NounAliasesTDO,get-AliasAssignsAST,get-CodeProfileAST,get-CodeRiskProfileAST,Get-CommentBlocks,get-FunctionBlock,get-FunctionBlocks,get-HelpParsed,get-ISEBreakPoints,get-ISEOpenFilesExported,get-ModuleRevisedCommands,get-NounAliasTDO,get-OpenNotepadsExported,get-ProjectNameTDO,Get-PSBreakpointSorted,Get-PSModuleFile,get-StrictMode,Version,ToString,get-VariableAssignsAST,get-VerbAliasTDO,Get-VerbSynonymTDO,get-VersionInfo,import-ISEBreakPoints,import-ISEBreakPointsALL,import-ISEConsoleColors,import-ISEOpenFiles,import-OpenNotepads,Initialize-ModuleFingerprint,Get-PSModuleFile,Initialize-PSModuleDirectories,move-ISEBreakPoints,new-CBH,New-GitHubGist,pop-FunctionDev,push-FunctionDev,restore-ISEConsoleColors,restore-ModuleBuild,save-ISEConsoleColors,show-ISEOpenTab,show-ISEOpenTabPaths,show-Verbs,Split-CommandLine,Step-ModuleVersionCalculated,Get-PSModuleFile,Test-ModuleTMPFiles,test-VerbStandard,Uninstall-ModuleForce,update-NewModule,get-FolderEmpty,reset-ModulePublishingDirectory,populate-ModulePublishingDirectory -Alias *
+Export-ModuleMember -Function backup-ModuleBuild,check-PsLocalRepoRegistration,confirm-ModuleBuildSync,confirm-ModulePsd1Version,confirm-ModulePsm1Version,confirm-ModuleTestPs1Guid,convert-CommandLine2VSCDebugJson,convertFrom-EscapedPSText,Convert-HelpToHtmlFile,convert-ISEOpenSession,converto-VSCConfig,ConvertTo-Breakpoint,_extractBreakpoint,convertTo-EscapedPSText,ConvertTo-ModuleDynamicTDO,ConvertTo-ModuleMergedTDO,convertTo-UnwrappedPS,convertTo-WrappedPS,copy-ISELocalSourceToTab,copy-ISETabFileToLocal,export-CommentBasedHelpToFileTDO,export-FunctionsToFilesTDO,export-ISEBreakPoints,export-ISEBreakPointsALL,export-ISEOpenFiles,export-OpenNotepads,find-NounAliasesTDO,get-AliasAssignsAST,get-CodeProfileAST,get-CodeRiskProfileAST,Get-CommentBlocks,get-FunctionBlock,get-FunctionBlocks,get-HelpParsed,get-ISEBreakPoints,get-ISEOpenFilesExported,get-ModuleRevisedCommands,get-NounAliasTDO,get-OpenNotepadsExported,get-ProjectNameTDO,Get-PSBreakpointSorted,Get-PSModuleFile,get-StrictMode,Version,ToString,get-VariableAssignsAST,get-VerbAliasTDO,Get-VerbSynonymTDO,get-VersionInfo,import-ISEBreakPoints,import-ISEBreakPointsALL,import-ISEConsoleColors,import-ISEOpenFiles,import-OpenNotepads,Initialize-ModuleFingerprint,Get-PSModuleFile,Initialize-PSModuleDirectories,move-ISEBreakPoints,new-CBH,New-GitHubGist,pop-FunctionDev,push-FunctionDev,restore-ISEConsoleColors,restore-ModuleBuild,save-ISEConsoleColors,show-ISEOpenTab,show-ISEOpenTabPaths,show-Verbs,Split-CommandLine,Step-ModuleVersionCalculated,Get-PSModuleFile,Test-ModuleTMPFiles,test-VerbStandard,Uninstall-ModuleForce,update-NewModule,get-FolderEmpty,reset-ModulePublishingDirectory,populate-ModulePublishingDirectory -Alias *
 
 
 
