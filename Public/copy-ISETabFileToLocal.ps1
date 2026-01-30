@@ -15,6 +15,7 @@ function copy-ISETabFileToLocal {
     Github      : https://github.com/tostka/verb-dev
     Tags        : Powershell,ISE,development,debugging,backup
     REVISIONS
+    * 2:17 PM 1/29/2026 add: test for nofunc into \public; added validates to try to prevent specifying leaf-path in the -LocalDestination, and a -Leaf in the -Path (burned trying to backup to a leaf, which bounced wo comment, leaving the file uncopied)
     * 9:20 AM 2/10/2025 tweaked to permit non-tsclient-spanning use: supports copying from a separate generic debugging copy to local repo; 
         fixed inaccurate CBH expl (was rote copy from copy-iselocalsourcetotab()); fixed swapped error msgs at bottom of PROC{}
     * 3:55 PM 10/25/2024 added cbh demo using -path ; pulled -path container validator (should always be a file) ;  fixed unupdated -nofunc else echo
@@ -48,17 +49,24 @@ function copy-ISETabFileToLocal {
     [Alias('cpIseFileLocal')]
     PARAM(
         [Parameter(Mandatory = $false,Position=0,HelpMessage="Path to source file (defaults to `$psise.CurrentFile.FullPath)[-Path 'D:\scripts\copy-ISETabFileToLocal_func.ps1']")]
-            [ValidateScript({Test-Path $_ })]
+            [ValidateScript({Test-Path $_ -PathType Leaf})]
             [system.io.fileinfo]$Path=$psise.CurrentFile.FullPath,
         [Parameter(Mandatory = $true,Position = 1,HelpMessage = 'Localized destination directory path[-path c:\pathto\]')]
             [ValidateScript({
-                if([uri]$_ |?{ $_.IsUNC}){
-                    throw "UNC Path specified: Please specify a 'localized' path!" ; 
-                }elseif([uri]$_ |?{$_.AbsolutePath -AND $_.LocalPath -AND $_.IsFile -AND -not $_.IsUNC}){
-                    $true ;
+                #if(Test-Path $_ -PathType 'Container'){ # never works with non-existant local path, always $false
+                # test has an extension -> leaf; test ends in \ -> container
+                if(($_ -notmatch '\.\w+$') -OR ($_ -match '\\$')){
+                    if([uri]$_ |?{ $_.IsUNC}){
+                        throw "UNC Path specified: Please specify a 'localized' path!" ; 
+                    }elseif([uri]$_ |?{$_.AbsolutePath -AND $_.LocalPath -AND $_.IsFile -AND -not $_.IsUNC}){
+                        $true ;
+                    }else{
+                        throw "Invalid path!" ; 
+                    }
                 }else{
-                    throw "Invalid path!" ; 
+                    throw "-LocalDestination: Appears to be Leaf path specified: Specify a Folder (or no ext-like periods in filename, or end with \$)!!" ; 
                 }
+                
             })]
             [string]$LocalDestination,
         [Parameter(HelpMessage="Switch to remove any '_func' substring from the original file name, while copying (used for copying to final module .\Public directory for publishing[-noFunc])")]
@@ -101,6 +109,14 @@ function copy-ISETabFileToLocal {
                             if ($bRet.ToUpper() -eq "YYY") {
                                 $smsg = "(specifying -NoFunc)" ; 
                                 write-host -foregroundcolor green $smsg  ;
+                                if($LocalDestination -notmatch '^C:\\sc\\.*\\public\\'){
+                                    $smsg = "-nofunc, but -LocalDestination $($LocalDestination) does *NOT* match \Public\$" ; 
+                                    $smsg += "`nAre you *SURE* you want to copy a function to the root of a module?" ;
+                                    write-warning $smsg ; 
+                                    $bRet=Read-Host "Enter YYY to continue. Anything else will exit"  ; 
+                                    if ($bRet.ToUpper() -eq "YYY") {
+                                    } else { BREAK } ; 
+                                }
                                 $noFunc = $true ; 
                             } else {
                                 $smsg = "(*skip* use of -NoFunc)" ; 
