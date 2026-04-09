@@ -1,0 +1,709 @@
+﻿2026-04-09 12:27:36 INFO:  : #*======v update-NewModule.ps1:VERB-dev v======
+2026-04-09 12:27:38 INFO:  : Run: reset-ModulePublishingDirectory -ModuleName VERB-dev
+2026-04-09 12:27:38 ##  : 
+#*------v PROCESSING : VERB-dev v------
+2026-04-09 12:27:38 INFO:  : Pre-purge (CHANGELOG|README)\.md$ Root dir matches from :
+2026-04-09 12:27:39 INFO:  : VERB-dev resolved $ModPubPath:C:\sc\VERB-dev\VERB-dev\
+$ModResPath:C:\sc\VERB-dev\Resource\
+2026-04-09 12:27:39 INFO:  : VERB-dev resolved $ModPubPath:C:\sc\VERB-dev\VERB-dev\
+$ModResPath:C:\sc\VERB-dev\Licenses\
+2026-04-09 12:27:40 INFO:  : VERB-dev resolved $ModPubPath:C:\sc\VERB-dev\VERB-dev\
+$ModResPath:C:\sc\VERB-dev\Docs\
+2026-04-09 12:27:41 INFO:  : ==C:\sc\VERB-dev\CHANGELOG.md:
+2026-04-09 12:27:41 INFO:  : ==C:\sc\VERB-dev\README.md:
+2026-04-09 12:27:41 INFO:  : ==C:\sc\VERB-dev\Resource\bootstrap.min.css:
+2026-04-09 12:27:42 INFO:  : ==C:\sc\VERB-dev\Resource\bootstrap.min.js:
+2026-04-09 12:27:42 INFO:  : ==C:\sc\VERB-dev\Resource\jasny-bootstrap.min.css:
+2026-04-09 12:27:43 INFO:  : ==C:\sc\VERB-dev\Resource\jasny-bootstrap.min.js:
+2026-04-09 12:27:43 INFO:  : ==C:\sc\VERB-dev\Resource\jquery-1.11.1.min.js:
+2026-04-09 12:27:44 INFO:  : ==C:\sc\VERB-dev\Resource\navmenu.css:
+2026-04-09 12:27:44 INFO:  : ==C:\sc\VERB-dev\Resource\screenshot.png:
+2026-04-09 12:27:45 INFO:  : ==C:\sc\VERB-dev\Licenses\LICENSE.txt:
+2026-04-09 12:27:45 INFO:  : ==C:\sc\VERB-dev\Licenses\LICENSE_BOOTSTRAP:
+2026-04-09 12:27:46 INFO:  : ==C:\sc\VERB-dev\Licenses\LICENSE_INVOKE-CREATEMODULEHELPFILE:
+2026-04-09 12:27:46 INFO:  : ==C:\sc\VERB-dev\Licenses\LICENSE_JASNY-BOOTSTRAP:
+2026-04-09 12:27:47 INFO:  : ==C:\sc\VERB-dev\Licenses\LICENSE_JQUERY:
+2026-04-09 12:27:47 INFO:  : ==C:\sc\VERB-dev\Docs\Quick-Start-Installation-and-Example.md:
+2026-04-09 12:27:47 ##  : 
+#*------^ PROCESSING : VERB-dev ^------
+2026-04-09 12:27:48 INFO:  : Run: populate-ModulePublishingDirectory -ModuleName VERB-dev
+2026-04-09 12:27:48 ##  : 
+#*------v PROCESSING : VERB-dev v------
+2026-04-09 12:27:49 INFO:  : Locating (CHANGELOG|README)\.md$ Root dir matches from :
+2026-04-09 12:27:49 INFO:  : VERB-dev resolved $ModPubPath:C:\sc\VERB-dev\VERB-dev\
+$ModResPath:C:\sc\VERB-dev\Resource\
+2026-04-09 12:27:50 INFO:  : VERB-dev resolved $ModPubPath:C:\sc\VERB-dev\VERB-dev\
+$ModResPath:C:\sc\VERB-dev\Licenses\
+2026-04-09 12:27:50 INFO:  : VERB-dev resolved $ModPubPath:C:\sc\VERB-dev\VERB-dev\
+$ModResPath:C:\sc\VERB-dev\Docs\
+2026-04-09 12:27:50 INFO:  : copy-item w
+Name                           Value                                                                                                                                                                                                                                          
+----                           -----                                                                                                                                                                                                                                          
+path                           {C:\sc\VERB-dev\CHANGELOG.md, C:\sc\VERB-dev\README.md, C:\sc\VERB-dev\Resource\bootstrap.min.css, C:\sc\VERB-dev\Resource\bootstrap.min.js...}                                                                                                
+destination                    C:\sc\VERB-dev\VERB-dev\                                                                                                                                                                                                                       
+force                          True                                                                                                                                                                                                                                           
+erroraction                    STOP                                                                                                                                                                                                                                           
+verbose                        False                                                                                                                                                                                                                                          
+whatif                         False
+--$pltCI.path:
+C:\sc\VERB-dev\CHANGELOG.md
+C:\sc\VERB-dev\README.md
+C:\sc\VERB-dev\Resource\bootstrap.min.css
+C:\sc\VERB-dev\Resource\bootstrap.min.js
+C:\sc\VERB-dev\Resource\jasny-bootstrap.min.css
+C:\sc\VERB-dev\Resource\jasny-bootstrap.min.js
+C:\sc\VERB-dev\Resource\jquery-1.11.1.min.js
+C:\sc\VERB-dev\Resource\navmenu.css
+C:\sc\VERB-dev\Resource\screenshot.png
+C:\sc\VERB-dev\Licenses\LICENSE.txt
+C:\sc\VERB-dev\Licenses\LICENSE_BOOTSTRAP
+C:\sc\VERB-dev\Licenses\LICENSE_INVOKE-CREATEMODULEHELPFILE
+C:\sc\VERB-dev\Licenses\LICENSE_JASNY-BOOTSTRAP
+C:\sc\VERB-dev\Licenses\LICENSE_JQUERY
+C:\sc\VERB-dev\Docs\Quick-Start-Installation-and-Example.md
+2026-04-09 12:27:51 ##  : 
+#*------^ PROCESSING : VERB-dev ^------
+2026-04-09 12:27:51 INFO:  : Run: Remove any non-pub garbage cp'd into c:\sc\VERB-dev\VERB-dev -ModuleName VERB-dev
+2026-04-09 12:27:52 INFO:  : Validate updated VERB-dev\VERB-dev dir contents against Manifest:
+Run: test-modulemanifest -Path C:\sc\VERB-dev\VERB-dev\VERB-dev.psd1
+2026-04-09 12:27:52 INFO:  : NON-Republish pass detected:
+MERGE parm specified as well:`n-Merge Public|Internal|Classes include subdirs module content into updated .psm1
+-Sign updated files.
+-Uninstall/Remove existing profile module
+-Copy new module to profile
+-Confirm: Get-Module -ListAvailable
+-Check/Update existing Psd1 Version
+-Publish-Module
+-Remove existing installed profile module
+-Test Install-Module
+-Test Import-Module
+2026-04-09 12:27:53 INFO:  : -Merge specified...
+2026-04-09 12:27:53 INFO:  : ConvertTo-ModuleMergedTDO w
+Name                           Value                                                                                                                                                                                                                                          
+----                           -----                                                                                                                                                                                                                                          
+ModuleName                     VERB-dev                                                                                                                                                                                                                                       
+ModuleSourcePath               {c:\sc\VERB-dev\Public, c:\sc\VERB-dev\Internal}                                                                                                                                                                                               
+ModuleDestinationPath          c:\sc\VERB-dev\VERB-dev                                                                                                                                                                                                                        
+RequiredVersion                1.5.88                                                                                                                                                                                                                                         
+LogSpec                        {logging, logfile, transcript}                                                                                                                                                                                                                 
+NoAliasExport                                                                                                                                                                                                                                                                 
+ErrorAction                    Stop                                                                                                                                                                                                                                           
+showdebug                      False                                                                                                                                                                                                                                          
+whatif                         False
+2026-04-09 12:27:54 INFO:  : ConvertTo-ModuleMergedTDO w
+Name                           Value                                                                                                                                                                                                                                          
+----                           -----                                                                                                                                                                                                                                          
+ModuleName                     VERB-dev                                                                                                                                                                                                                                       
+ModuleSourcePath               {c:\sc\VERB-dev\Public, c:\sc\VERB-dev\Internal}                                                                                                                                                                                               
+ModuleDestinationPath          c:\sc\VERB-dev\VERB-dev                                                                                                                                                                                                                        
+RequiredVersion                1.5.88                                                                                                                                                                                                                                         
+LogSpec                        {logging, logfile, transcript}                                                                                                                                                                                                                 
+NoAliasExport                                                                                                                                                                                                                                                                 
+ErrorAction                    Stop                                                                                                                                                                                                                                           
+showdebug                      False                                                                                                                                                                                                                                          
+whatif                         False
+2026-04-09 12:27:55 INFO:  : (NON-dyn psm1 detected - purging existing non-CBH content...)
+2026-04-09 12:27:56 INFO:  : Initialize-PSModuleDirectories w
+Name                           Value                                                                                                                                                                                                                                          
+----                           -----                                                                                                                                                                                                                                          
+ModuleSourcePath               {c:\sc\VERB-dev\Public, c:\sc\VERB-dev\Internal}                                                                                                                                                                                               
+ModuleDestinationPath          c:\sc\VERB-dev\VERB-dev                                                                                                                                                                                                                        
+ErrorAction                    Stop                                                                                                                                                                                                                                           
+whatif                         False
+2026-04-09 12:27:56 INFO:  : 
+#*------v (1/2):C:\sc\VERB-dev\Public v------
+2026-04-09 12:27:57 INFO:  : Processing 77 $ComponentScripts files through Remove-AuthenticodeSignature...
+2026-04-09 12:27:57 INFO:  : Processing (1/77):C:\sc\VERB-dev\Public\backup-ModuleBuild.ps1...
+2026-04-09 12:27:58 INFO:  : Processing (2/77):C:\sc\VERB-dev\Public\check-PsLocalRepoRegistration.ps1...
+2026-04-09 12:27:58 INFO:  : Processing (3/77):C:\sc\VERB-dev\Public\close-ISEOpenfiles.ps1...
+2026-04-09 12:27:59 INFO:  : Processing (4/77):C:\sc\VERB-dev\Public\close-ISEOtherOpenFiles.ps1...
+2026-04-09 12:27:59 INFO:  : Processing (5/77):C:\sc\VERB-dev\Public\confirm-ModuleBuildSync.ps1...
+2026-04-09 12:28:00 INFO:  : Processing (6/77):C:\sc\VERB-dev\Public\confirm-ModulePsd1Version.ps1...
+2026-04-09 12:28:00 INFO:  : Processing (7/77):C:\sc\VERB-dev\Public\confirm-ModulePsm1Version.ps1...
+2026-04-09 12:28:01 INFO:  : Processing (8/77):C:\sc\VERB-dev\Public\confirm-ModuleTestPs1Guid.ps1...
+2026-04-09 12:28:01 INFO:  : Processing (9/77):C:\sc\VERB-dev\Public\convert-CommandLine2VSCDebugJson.ps1...
+2026-04-09 12:28:02 INFO:  : Processing (10/77):C:\sc\VERB-dev\Public\convertFrom-EscapedPSText.ps1...
+2026-04-09 12:28:02 INFO:  : Processing (11/77):C:\sc\VERB-dev\Public\Convert-HelpToHtmlFile.ps1...
+2026-04-09 12:28:03 INFO:  : Processing (12/77):C:\sc\VERB-dev\Public\Convert-ISEOpenFileToText.ps1...
+2026-04-09 12:28:03 INFO:  : Processing (13/77):C:\sc\VERB-dev\Public\convert-ISEOpenSession.ps1...
+2026-04-09 12:28:04 INFO:  : Processing (14/77):C:\sc\VERB-dev\Public\converto-VSCConfig.ps1...
+2026-04-09 12:28:04 INFO:  : Processing (15/77):C:\sc\VERB-dev\Public\ConvertTo-Breakpoint.ps1...
+2026-04-09 12:28:04 INFO:  : Processing (16/77):C:\sc\VERB-dev\Public\convertTo-EscapedPSText.ps1...
+2026-04-09 12:28:05 INFO:  : Processing (17/77):C:\sc\VERB-dev\Public\ConvertTo-ModuleDynamicTDO.ps1...
+2026-04-09 12:28:05 INFO:  : Processing (18/77):C:\sc\VERB-dev\Public\ConvertTo-ModuleMergedTDO.ps1...
+2026-04-09 12:28:06 INFO:  : Processing (19/77):C:\sc\VERB-dev\Public\convertTo-UnwrappedPS.ps1...
+2026-04-09 12:28:06 INFO:  : Processing (20/77):C:\sc\VERB-dev\Public\convertTo-WrappedPS.ps1...
+2026-04-09 12:28:07 INFO:  : Processing (21/77):C:\sc\VERB-dev\Public\copy-ISELocalSourceToTab.ps1...
+2026-04-09 12:28:08 INFO:  : Processing (22/77):C:\sc\VERB-dev\Public\copy-ISETabFileToLocal.ps1...
+2026-04-09 12:28:08 INFO:  : Processing (23/77):C:\sc\VERB-dev\Public\export-CommentBasedHelpToFileTDO.ps1...
+2026-04-09 12:28:09 INFO:  : Processing (24/77):C:\sc\VERB-dev\Public\export-FunctionsToFilesTDO.ps1...
+2026-04-09 12:28:09 INFO:  : Processing (25/77):C:\sc\VERB-dev\Public\export-ISEBreakPoints.ps1...
+2026-04-09 12:28:10 INFO:  : Processing (26/77):C:\sc\VERB-dev\Public\export-ISEBreakPointsALL.ps1...
+2026-04-09 12:28:10 INFO:  : Processing (27/77):C:\sc\VERB-dev\Public\export-ISEOpenFiles.ps1...
+2026-04-09 12:28:11 INFO:  : Processing (28/77):C:\sc\VERB-dev\Public\export-OpenNotepads.ps1...
+2026-04-09 12:28:11 INFO:  : Processing (29/77):C:\sc\VERB-dev\Public\find-NounAliasesTDO.ps1...
+2026-04-09 12:28:12 INFO:  : Processing (30/77):C:\sc\VERB-dev\Public\get-AliasAssignsAST.ps1...
+2026-04-09 12:28:12 INFO:  : Processing (31/77):C:\sc\VERB-dev\Public\get-CodeProfileAST.ps1...
+2026-04-09 12:28:13 INFO:  : Processing (32/77):C:\sc\VERB-dev\Public\get-CodeRiskProfileAST.ps1...
+2026-04-09 12:28:13 INFO:  : Processing (33/77):C:\sc\VERB-dev\Public\Get-CommentBlocks.ps1...
+2026-04-09 12:28:14 INFO:  : Processing (34/77):C:\sc\VERB-dev\Public\get-FunctionBlock.ps1...
+2026-04-09 12:28:14 INFO:  : Processing (35/77):C:\sc\VERB-dev\Public\get-FunctionBlocks.ps1...
+2026-04-09 12:28:14 INFO:  : Processing (36/77):C:\sc\VERB-dev\Public\get-HelpParsed.ps1...
+2026-04-09 12:28:15 INFO:  : Processing (37/77):C:\sc\VERB-dev\Public\get-ISEBreakPoints.ps1...
+2026-04-09 12:28:15 INFO:  : Processing (38/77):C:\sc\VERB-dev\Public\get-ISEOpenFilesExported.ps1...
+2026-04-09 12:28:16 INFO:  : Processing (39/77):C:\sc\VERB-dev\Public\get-ModuleRevisedCommands.ps1...
+2026-04-09 12:28:16 INFO:  : Processing (40/77):C:\sc\VERB-dev\Public\get-NounAliasTDO.ps1...
+2026-04-09 12:28:17 INFO:  : Processing (41/77):C:\sc\VERB-dev\Public\get-OpenNotepadsExported.ps1...
+2026-04-09 12:28:17 INFO:  : Processing (42/77):C:\sc\VERB-dev\Public\get-ProjectNameTDO.ps1...
+2026-04-09 12:28:18 INFO:  : Processing (43/77):C:\sc\VERB-dev\Public\Get-PSBreakpointSorted.ps1...
+2026-04-09 12:28:18 INFO:  : Processing (44/77):C:\sc\VERB-dev\Public\Get-PSModuleFile.ps1...
+2026-04-09 12:28:19 INFO:  : Processing (45/77):C:\sc\VERB-dev\Public\Get-ScriptCommentsTDO.ps1...
+2026-04-09 12:28:19 INFO:  : Processing (46/77):C:\sc\VERB-dev\Public\get-StrictMode.ps1...
+2026-04-09 12:28:20 INFO:  : Processing (47/77):C:\sc\VERB-dev\Public\get-VariableAssignsAST.ps1...
+2026-04-09 12:28:20 INFO:  : Processing (48/77):C:\sc\VERB-dev\Public\get-VerbAliasTDO.ps1...
+2026-04-09 12:28:20 INFO:  : Processing (49/77):C:\sc\VERB-dev\Public\Get-VerbSynonymTDO.ps1...
+2026-04-09 12:28:21 INFO:  : Processing (50/77):C:\sc\VERB-dev\Public\get-VersionInfo.ps1...
+2026-04-09 12:28:21 INFO:  : Processing (51/77):C:\sc\VERB-dev\Public\import-ISEBreakPoints.ps1...
+2026-04-09 12:28:22 INFO:  : Processing (52/77):C:\sc\VERB-dev\Public\import-ISEBreakPointsALL.ps1...
+2026-04-09 12:28:22 INFO:  : Processing (53/77):C:\sc\VERB-dev\Public\import-ISEConsoleColors.ps1...
+2026-04-09 12:28:23 INFO:  : Processing (54/77):C:\sc\VERB-dev\Public\import-ISEOpenFiles.ps1...
+2026-04-09 12:28:23 INFO:  : Processing (55/77):C:\sc\VERB-dev\Public\import-OpenNotepads.ps1...
+2026-04-09 12:28:24 INFO:  : Processing (56/77):C:\sc\VERB-dev\Public\Initialize-ModuleFingerprint.ps1...
+2026-04-09 12:28:24 INFO:  : Processing (57/77):C:\sc\VERB-dev\Public\Initialize-PSModuleDirectories.ps1...
+2026-04-09 12:28:25 INFO:  : Processing (58/77):C:\sc\VERB-dev\Public\move-ISEBreakPoints.ps1...
+2026-04-09 12:28:25 INFO:  : Processing (59/77):C:\sc\VERB-dev\Public\new-CBH.ps1...
+2026-04-09 12:28:26 INFO:  : Processing (60/77):C:\sc\VERB-dev\Public\New-GitHubGist.ps1...
+2026-04-09 12:28:26 INFO:  : Processing (61/77):C:\sc\VERB-dev\Public\Out-ISETab.ps1...
+2026-04-09 12:28:27 INFO:  : Processing (62/77):C:\sc\VERB-dev\Public\pop-FunctionDev.ps1...
+2026-04-09 12:28:27 INFO:  : Processing (63/77):C:\sc\VERB-dev\Public\push-FunctionDev.ps1...
+2026-04-09 12:28:27 INFO:  : Processing (64/77):C:\sc\VERB-dev\Public\Reset-ISEFile.ps1...
+2026-04-09 12:28:28 INFO:  : Processing (65/77):C:\sc\VERB-dev\Public\restore-ISEConsoleColors.ps1...
+2026-04-09 12:28:28 INFO:  : Processing (66/77):C:\sc\VERB-dev\Public\restore-ModuleBuild.ps1...
+2026-04-09 12:28:29 INFO:  : Processing (67/77):C:\sc\VERB-dev\Public\save-ISEConsoleColors.ps1...
+2026-04-09 12:28:29 INFO:  : Processing (68/77):C:\sc\VERB-dev\Public\Set-ISEScriptLocation.ps1...
+2026-04-09 12:28:30 INFO:  : Processing (69/77):C:\sc\VERB-dev\Public\show-ISEOpenTab.ps1...
+2026-04-09 12:28:30 INFO:  : Processing (70/77):C:\sc\VERB-dev\Public\show-ISEOpenTabPaths.ps1...
+2026-04-09 12:28:31 INFO:  : Processing (71/77):C:\sc\VERB-dev\Public\show-Verbs.ps1...
+2026-04-09 12:28:31 INFO:  : Processing (72/77):C:\sc\VERB-dev\Public\split-CommandLine.ps1...
+2026-04-09 12:28:32 INFO:  : Processing (73/77):C:\sc\VERB-dev\Public\Step-ModuleVersionCalculated.ps1...
+2026-04-09 12:28:32 INFO:  : Processing (74/77):C:\sc\VERB-dev\Public\Test-ModuleTMPFiles.ps1...
+2026-04-09 12:28:33 INFO:  : Processing (75/77):C:\sc\VERB-dev\Public\test-VerbStandard.ps1...
+2026-04-09 12:28:33 INFO:  : Processing (76/77):C:\sc\VERB-dev\Public\Uninstall-ModuleForce.ps1...
+2026-04-09 12:28:34 INFO:  : Processing (77/77):C:\sc\VERB-dev\Public\update-NewModule.ps1...
+2026-04-09 12:28:35 INFO:  : 
+#*------v (2/2):C:\sc\VERB-dev\Internal v------
+2026-04-09 12:28:35 INFO:  : Processing 0 $ComponentScripts files through Remove-AuthenticodeSignature...
+2026-04-09 12:28:36 INFO:  : (Updating Psm1 Export-ModuleMember -Function to reflect Public modules)
+2026-04-09 12:28:36 INFO:  : Adding:FooterBlock...
+2026-04-09 12:28:36 INFO:  : confirm-ModuleBuildSync w
+Name                           Value                                                                                                                                                                                                                                          
+----                           -----                                                                                                                                                                                                                                          
+ModPsdPath                     c:\sc\VERB-dev\VERB-dev\VERB-dev.psd1_TMP                                                                                                                                                                                                      
+RequiredVersion                1.5.88                                                                                                                                                                                                                                         
+NoTest                         True                                                                                                                                                                                                                                           
+whatif                         False                                                                                                                                                                                                                                          
+verbose                        False
+2026-04-09 12:28:37 INFO:  : (test-path confirms $ModPsm1 & $ModTestPs1)
+2026-04-09 12:28:37 INFO:  : Import-PowerShellDataFile w
+Name                           Value                                                                                                                                                                                                                                          
+----                           -----                                                                                                                                                                                                                                          
+Path                           c:\sc\VERB-dev\VERB-dev\VERB-dev.psd1_TMP                                                                                                                                                                                                      
+ErrorAction                    Stop                                                                                                                                                                                                                                           
+verbose                        False
+2026-04-09 12:28:38 INFO:  : (resolved Module attributes:
+$ModuleName:	VERB-dev
+$ModRoot:	c:\sc\VERB-dev
+$ModPsd1:	c:\sc\VERB-dev\VERB-dev\VERB-dev.psd1_TMP
+$ModPsm1:	c:\sc\VERB-dev\VERB-dev\VERB-dev.psm1_TMP
+$ModTestPs1:	c:\sc\VERB-dev\Tests\VERB-dev.tests.ps1
+$psd1Vers:	1.5.88
+$psd1guid:	af7c9182-3b10-416d-bace-aab0aab77828)
+2026-04-09 12:28:38 INFO:  : confirm-ModulePsd1Version w
+Name                           Value                                                                                                                                                                                                                                          
+----                           -----                                                                                                                                                                                                                                          
+Path                           c:\sc\VERB-dev\VERB-dev\VERB-dev.psd1_TMP                                                                                                                                                                                                      
+RequiredVersion                1.5.88                                                                                                                                                                                                                                         
+whatif                         False                                                                                                                                                                                                                                          
+verbose                        False
+2026-04-09 12:28:39 INFO:  : (Version already updated to match)
+2026-04-09 12:28:39 INFO:  : $objReport
+Name                           Value                                                                                                                                                                                                                                          
+----                           -----                                                                                                                                                                                                                                          
+Version                        1.5.88                                                                                                                                                                                                                                         
+Valid                          False
+2026-04-09 12:28:40 INFO:  : (SET:$objReport.Valid = $true ;)
+2026-04-09 12:28:40 INFO:  : (PIPELINE:New-Object PSObject -Property $objReport | write-output)
+$objReport
+Name                           Value                                                                                                                                                                                                                                          
+----                           -----                                                                                                                                                                                                                                          
+Version                        1.5.88                                                                                                                                                                                                                                         
+Valid                          True
+2026-04-09 12:28:40 INFO:  : #*======^ confirm-ModulePsd1Version: c:\sc\VERB-dev\VERB-dev\VERB-dev.psd1_TMP ^======
+2026-04-09 12:28:41 INFO:  : (confirm-ModulePsd1Version:Success)
+2026-04-09 12:28:41 INFO:  : confirm-ModulePsm1Version w
+Name                           Value                                                                                                                                                                                                                                          
+----                           -----                                                                                                                                                                                                                                          
+Path                           c:\sc\VERB-dev\VERB-dev\VERB-dev.psm1_TMP                                                                                                                                                                                                      
+RequiredVersion                1.5.88                                                                                                                                                                                                                                         
+whatif                         False                                                                                                                                                                                                                                          
+verbose                        False
+2026-04-09 12:28:42 WARNING:  : In:c:\sc\VERB-dev\VERB-dev\VERB-dev.psm1_TMP
+Version present:(1.5.87)
+*does not* properly match:1.5.88
+FORCING MATCHING UPDATE!
+2026-04-09 12:28:43 INFO:  : $objReport
+Name                           Value                                                                                                                                                                                                                                          
+----                           -----                                                                                                                                                                                                                                          
+Version                        1.5.88                                                                                                                                                                                                                                         
+Valid                          False
+2026-04-09 12:28:44 INFO:  : (SET:$objReport.Valid = $true ;)
+2026-04-09 12:28:44 INFO:  : (PIPELINE:New-Object PSObject -Property $objReport | write-output)
+$objReport
+Name                           Value                                                                                                                                                                                                                                          
+----                           -----                                                                                                                                                                                                                                          
+Version                        1.5.88                                                                                                                                                                                                                                         
+Valid                          True
+2026-04-09 12:28:45 INFO:  : #*======^ confirm-ModulePsm1Version: c:\sc\VERB-dev\VERB-dev\VERB-dev.psm1_TMP ^======
+2026-04-09 12:28:45 INFO:  : (confirm-ModulePsm1Version:Success)
+2026-04-09 12:28:46 INFO:  : (-NoTest: skipping confirm-ModuleTestPs1Guid)
+2026-04-09 12:28:46 INFO:  : $objReport
+Name                           Value                                                                                                                                                                                                                                          
+----                           -----                                                                                                                                                                                                                                          
+Manifest                       c:\sc\VERB-dev\VERB-dev\VERB-dev.psd1_TMP                                                                                                                                                                                                      
+Module                         c:\sc\VERB-dev\VERB-dev\VERB-dev.psm1_TMP                                                                                                                                                                                                      
+Pester                         (SKIPPED)                                                                                                                                                                                                                                      
+Guid                           (SKIPPED)                                                                                                                                                                                                                                      
+Version                        1.5.88                                                                                                                                                                                                                                         
+Valid                          False
+2026-04-09 12:28:46 INFO:  : (SET:$objReport.Valid = $true ;)
+2026-04-09 12:28:47 INFO:  : (PIPELINE:New-Object PSObject -Property $objReport | write-output)
+$objReport
+Name                           Value                                                                                                                                                                                                                                          
+----                           -----                                                                                                                                                                                                                                          
+Manifest                       c:\sc\VERB-dev\VERB-dev\VERB-dev.psd1_TMP                                                                                                                                                                                                      
+Module                         c:\sc\VERB-dev\VERB-dev\VERB-dev.psm1_TMP                                                                                                                                                                                                      
+Pester                         (SKIPPED)                                                                                                                                                                                                                                      
+Guid                           (SKIPPED)                                                                                                                                                                                                                                      
+Version                        1.5.88                                                                                                                                                                                                                                         
+Valid                          True
+2026-04-09 12:28:47 INFO:  : #*======^ confirm-ModuleBuildSync:  ^======
+2026-04-09 12:28:48 INFO:  : (confirm-ModuleBuildSync:Success)
+2026-04-09 12:28:48 INFO:  : Test-ModuleTMPFiles w
+Name                           Value                                                                                                                                                                                                                                          
+----                           -----                                                                                                                                                                                                                                          
+ModuleNamePSM1Path             c:\sc\VERB-dev\VERB-dev\VERB-dev.psm1_TMP                                                                                                                                                                                                      
+verbose                        False
+2026-04-09 12:28:49 INFO:  : #*======v Test-ModuleTMPFiles: c:\sc\VERB-dev\VERB-dev\VERB-dev.psm1_TMP v======
+2026-04-09 12:28:49 INFO:  : 
+Psm1:c:\sc\VERB-dev\VERB-dev\VERB-dev.psm1_TMP
+Psd1:c:\sc\VERB-dev\VERB-dev\VERB-dev.psd1_TMP
+2026-04-09 12:28:50 INFO:  : Test-ModuleManifest:PASSED
+2026-04-09 12:28:50 INFO:  : Creating Testable c:\sc\VERB-dev\VERB-dev\037b9289-ed39-43d9-8463-a9d0f6f5e488.psm1
+ to validate c:\sc\VERB-dev\VERB-dev\VERB-dev.psm1_TMP will Import-Module
+2026-04-09 12:28:51 INFO:  : Ipmo: PASSED
+2026-04-09 12:28:51 INFO:  : (remove-module -name c:\sc\VERB-dev\VERB-dev\037b9289-ed39-43d9-8463-a9d0f6f5e488.psm1 -force)
+2026-04-09 12:28:52 INFO:  : (remove-item -path c:\sc\VERB-dev\VERB-dev\037b9289-ed39-43d9-8463-a9d0f6f5e488.psm1 -ErrorAction SilentlyContinue ; 
+2026-04-09 12:28:52 INFO:  : (remove-item -path c:\sc\VERB-dev\VERB-dev\037b9289-ed39-43d9-8463-a9d0f6f5e488.psd1 -ErrorAction SilentlyContinue ; 
+2026-04-09 12:28:53 INFO:  : $objReport
+Name                           Value                                                                                                                                                                                                                                          
+----                           -----                                                                                                                                                                                                                                          
+Manifest                       037b9289-ed39-43d9-8463-a9d0f6f5e488                                                                                                                                                                                                           
+Module                         037b9289-ed39-43d9-8463-a9d0f6f5e488                                                                                                                                                                                                           
+Valid                          False
+2026-04-09 12:28:53 INFO:  : (SET:$objReport.Valid = $true ;)
+2026-04-09 12:28:53 INFO:  : (PIPELINE:New-Object PSObject -Property $objReport | write-output)
+$objReport
+Name                           Value                                                                                                                                                                                                                                          
+----                           -----                                                                                                                                                                                                                                          
+Manifest                       037b9289-ed39-43d9-8463-a9d0f6f5e488                                                                                                                                                                                                           
+Module                         037b9289-ed39-43d9-8463-a9d0f6f5e488                                                                                                                                                                                                           
+Valid                          True
+2026-04-09 12:28:54 INFO:  : #*======^ Test-ModuleTMPFiles: c:\sc\VERB-dev\VERB-dev\VERB-dev.psm1_TMP ^======
+2026-04-09 12:28:54 INFO:  : #*======^ ConvertTo-ModuleMergedTDO: ^======
+2026-04-09 12:28:55 INFO:  : (Test-ModuleManifest:PASSED)
+2026-04-09 12:28:55 INFO:  : Checking sync of Psd1 module guid to the Pester Test Script: c:\sc\VERB-dev\Tests\VERB-dev.tests.ps1
+2026-04-09 12:28:56 INFO:  : confirm-ModuleBuildSync w
+Name                           Value                                                                                                                                                                                                                                          
+----                           -----                                                                                                                                                                                                                                          
+ModPsdPath                     C:\sc\VERB-dev\VERB-dev\VERB-dev.psd1                                                                                                                                                                                                          
+RequiredVersion                1.5.88                                                                                                                                                                                                                                         
+whatif                         False                                                                                                                                                                                                                                          
+verbose                        False
+2026-04-09 12:28:56 INFO:  : (test-path confirms $ModPsm1 & $ModTestPs1)
+2026-04-09 12:28:57 INFO:  : Import-PowerShellDataFile w
+Name                           Value                                                                                                                                                                                                                                          
+----                           -----                                                                                                                                                                                                                                          
+Path                           C:\sc\VERB-dev\VERB-dev\VERB-dev.psd1                                                                                                                                                                                                          
+ErrorAction                    Stop                                                                                                                                                                                                                                           
+verbose                        False
+2026-04-09 12:28:57 INFO:  : (resolved Module attributes:
+$ModuleName:	VERB-dev
+$ModRoot:	c:\sc\VERB-dev
+$ModPsd1:	C:\sc\VERB-dev\VERB-dev\VERB-dev.psd1
+$ModPsm1:	C:\sc\VERB-dev\VERB-dev\VERB-dev.psm1
+$ModTestPs1:	c:\sc\VERB-dev\Tests\VERB-dev.tests.ps1
+$psd1Vers:	1.5.88
+$psd1guid:	af7c9182-3b10-416d-bace-aab0aab77828)
+2026-04-09 12:28:57 INFO:  : confirm-ModulePsd1Version w
+Name                           Value                                                                                                                                                                                                                                          
+----                           -----                                                                                                                                                                                                                                          
+Path                           C:\sc\VERB-dev\VERB-dev\VERB-dev.psd1                                                                                                                                                                                                          
+RequiredVersion                1.5.88                                                                                                                                                                                                                                         
+whatif                         False                                                                                                                                                                                                                                          
+verbose                        False
+2026-04-09 12:28:58 INFO:  : (Version already updated to match)
+2026-04-09 12:28:58 INFO:  : $objReport
+Name                           Value                                                                                                                                                                                                                                          
+----                           -----                                                                                                                                                                                                                                          
+Version                        1.5.88                                                                                                                                                                                                                                         
+Valid                          False
+2026-04-09 12:28:59 INFO:  : (SET:$objReport.Valid = $true ;)
+2026-04-09 12:28:59 INFO:  : (PIPELINE:New-Object PSObject -Property $objReport | write-output)
+$objReport
+Name                           Value                                                                                                                                                                                                                                          
+----                           -----                                                                                                                                                                                                                                          
+Version                        1.5.88                                                                                                                                                                                                                                         
+Valid                          True
+2026-04-09 12:29:00 INFO:  : #*======^ confirm-ModulePsd1Version: C:\sc\VERB-dev\VERB-dev\VERB-dev.psd1 ^======
+2026-04-09 12:29:00 INFO:  : (confirm-ModulePsd1Version:Success)
+2026-04-09 12:29:00 INFO:  : confirm-ModulePsm1Version w
+Name                           Value                                                                                                                                                                                                                                          
+----                           -----                                                                                                                                                                                                                                          
+Path                           C:\sc\VERB-dev\VERB-dev\VERB-dev.psm1                                                                                                                                                                                                          
+RequiredVersion                1.5.88                                                                                                                                                                                                                                         
+whatif                         False                                                                                                                                                                                                                                          
+verbose                        False
+2026-04-09 12:29:01 INFO:  : (Version already updated to match)
+2026-04-09 12:29:01 INFO:  : $objReport
+Name                           Value                                                                                                                                                                                                                                          
+----                           -----                                                                                                                                                                                                                                          
+Version                        1.5.88                                                                                                                                                                                                                                         
+Valid                          False
+2026-04-09 12:29:02 INFO:  : (SET:$objReport.Valid = $true ;)
+2026-04-09 12:29:02 INFO:  : (PIPELINE:New-Object PSObject -Property $objReport | write-output)
+$objReport
+Name                           Value                                                                                                                                                                                                                                          
+----                           -----                                                                                                                                                                                                                                          
+Version                        1.5.88                                                                                                                                                                                                                                         
+Valid                          True
+2026-04-09 12:29:03 INFO:  : #*======^ confirm-ModulePsm1Version: C:\sc\VERB-dev\VERB-dev\VERB-dev.psm1 ^======
+2026-04-09 12:29:03 INFO:  : (confirm-ModulePsm1Version:Success)
+2026-04-09 12:29:04 INFO:  : Checking sync of Psd1 module guid to the Pester Test Script: c:\sc\VERB-dev\Tests\VERB-dev.tests.ps1
+2026-04-09 12:29:04 INFO:  : confirm-ModuleTestPs1Guid w
+Name                           Value                                                                                                                                                                                                                                          
+----                           -----                                                                                                                                                                                                                                          
+Path                           c:\sc\VERB-dev\Tests\VERB-dev.tests.ps1                                                                                                                                                                                                        
+RequiredGuid                   af7c9182-3b10-416d-bace-aab0aab77828                                                                                                                                                                                                           
+whatif                         False                                                                                                                                                                                                                                          
+verbose                        False
+2026-04-09 12:29:04 INFO:  : (Guid  already updated to match)
+2026-04-09 12:29:05 INFO:  : $objReport
+Name                           Value                                                                                                                                                                                                                                          
+----                           -----                                                                                                                                                                                                                                          
+Guid                           af7c9182-3b10-416d-bace-aab0aab77828                                                                                                                                                                                                           
+Valid                          False
+2026-04-09 12:29:05 INFO:  : (SET:$objReport.Valid = $true ;)
+2026-04-09 12:29:06 INFO:  : (PIPELINE:New-Object PSObject -Property $objReport | write-output)
+$objReport
+Name                           Value                                                                                                                                                                                                                                          
+----                           -----                                                                                                                                                                                                                                          
+Guid                           af7c9182-3b10-416d-bace-aab0aab77828                                                                                                                                                                                                           
+Valid                          True
+2026-04-09 12:29:06 INFO:  : (confirm-ModuleTestPs1Guid:Success)
+2026-04-09 12:29:07 INFO:  : $objReport
+Name                           Value                                                                                                                                                                                                                                          
+----                           -----                                                                                                                                                                                                                                          
+Manifest                       C:\sc\VERB-dev\VERB-dev\VERB-dev.psd1                                                                                                                                                                                                          
+Module                         C:\sc\VERB-dev\VERB-dev\VERB-dev.psm1                                                                                                                                                                                                          
+Pester                         c:\sc\VERB-dev\Tests\VERB-dev.tests.ps1                                                                                                                                                                                                        
+Guid                           af7c9182-3b10-416d-bace-aab0aab77828                                                                                                                                                                                                           
+Version                        1.5.88                                                                                                                                                                                                                                         
+Valid                          False
+2026-04-09 12:29:07 INFO:  : (SET:$objReport.Valid = $true ;)
+2026-04-09 12:29:08 INFO:  : (PIPELINE:New-Object PSObject -Property $objReport | write-output)
+$objReport
+Name                           Value                                                                                                                                                                                                                                          
+----                           -----                                                                                                                                                                                                                                          
+Manifest                       C:\sc\VERB-dev\VERB-dev\VERB-dev.psd1                                                                                                                                                                                                          
+Module                         C:\sc\VERB-dev\VERB-dev\VERB-dev.psm1                                                                                                                                                                                                          
+Pester                         c:\sc\VERB-dev\Tests\VERB-dev.tests.ps1                                                                                                                                                                                                        
+Guid                           af7c9182-3b10-416d-bace-aab0aab77828                                                                                                                                                                                                           
+Version                        1.5.88                                                                                                                                                                                                                                         
+Valid                          True
+2026-04-09 12:29:08 INFO:  : #*======^ confirm-ModuleBuildSync:  ^======
+2026-04-09 12:29:09 INFO:  : (confirm-ModuleBuildSync:Success)
+2026-04-09 12:29:09 INFO:  : Signing appropriate files...
+2026-04-09 12:29:10 INFO:  : set-AuthenticodeSignatureTDO w
+Name                           Value                                                                                                                                                                                                                                          
+----                           -----                                                                                                                                                                                                                                          
+file                           {C:\sc\VERB-dev\rebuild-module.ps1, C:\sc\VERB-dev\requirements.psd1, C:\sc\VERB-dev\Tests\PPoShScriptingStyle.psd1, C:\sc\VERB-dev\Tests\ToddomationScriptingStyle-medium.psd1...}                                                            
+ErrorAction                    Stop                                                                                                                                                                                                                                           
+whatif                         False
+2026-04-09 12:29:10 INFO:  : Removing existing profile VERB-dev content...
+2026-04-09 12:29:11 INFO:  : Uninstall-ModuleForce w
+Name                           Value                                                                                                                                                                                                                                          
+----                           -----                                                                                                                                                                                                                                          
+ModuleName                     VERB-dev                                                                                                                                                                                                                                       
+Verbose                        False                                                                                                                                                                                                                                          
+whatif                         False
+2026-04-09 12:29:15 INFO:  : 
+#*------v Uninstall PSGet Mod:verb-dev:v1.5.87 v------
+2026-04-09 12:29:39 INFO:  : 
+#*------^ Uninstall PSGet Mod:verb-dev:v1.5.87 ^------
+2026-04-09 12:29:40 INFO:  : (Processing $env:PSModulePath paths, for surviving locked copies of VERB-dev to *manually* purge...)
+2026-04-09 12:29:40 INFO:  : Checking: VERB-dev below: C:\Users\kadritss\Documents\WindowsPowerShell\Modules...
+2026-04-09 12:29:40 INFO:  : Checking: VERB-dev below: C:\ProgramData\Boxstarter...
+2026-04-09 12:29:41 INFO:  : Checking: VERB-dev below: C:\Program Files\WindowsPowerShell\Modules...
+2026-04-09 12:29:41 INFO:  : Checking: VERB-dev below: C:\WINDOWS\system32\WindowsPowerShell\v1.0\Modules...
+2026-04-09 12:29:42 INFO:  : Checking: VERB-dev below: C:\Program Files (x86)\AutoIt3\AutoItX...
+2026-04-09 12:29:42 INFO:  : Copying module to profile (net of .git & .vscode dirs, and backed up content)...
+2026-04-09 12:29:43 INFO:  : $srcFiles:post-filter out:
+\\(Package|Tests|logs)\\|(\.ps[dm]1_(\d+-\d+[AP]M|TMP)|-LOG-BATCH-EXEC-\d+-\d+[AP]M-log\.txt|\\(fingerprint|Psd1filelist))$
+2026-04-09 12:29:43 INFO:  : Discovered mod-copy files ($srcFiles.fullname):w
+C:\sc\VERB-dev\VERB-dev\bootstrap.min.css
+C:\sc\VERB-dev\VERB-dev\bootstrap.min.js
+C:\sc\VERB-dev\VERB-dev\CHANGELOG.md
+C:\sc\VERB-dev\VERB-dev\jasny-bootstrap.min.css
+C:\sc\VERB-dev\VERB-dev\jasny-bootstrap.min.js
+C:\sc\VERB-dev\VERB-dev\jquery-1.11.1.min.js
+C:\sc\VERB-dev\VERB-dev\LICENSE.txt
+C:\sc\VERB-dev\VERB-dev\LICENSE_BOOTSTRAP
+C:\sc\VERB-dev\VERB-dev\LICENSE_INVOKE-CREATEMODULEHELPFILE
+C:\sc\VERB-dev\VERB-dev\LICENSE_JASNY-BOOTSTRAP
+C:\sc\VERB-dev\VERB-dev\LICENSE_JQUERY
+C:\sc\VERB-dev\VERB-dev\navmenu.css
+C:\sc\VERB-dev\VERB-dev\Quick-Start-Installation-and-Example.md
+C:\sc\VERB-dev\VERB-dev\README.md
+C:\sc\VERB-dev\VERB-dev\screenshot.png
+C:\sc\VERB-dev\VERB-dev\verb-dev.psd1
+C:\sc\VERB-dev\VERB-dev\verb-dev.psm1
+2026-04-09 12:29:43 INFO:  : Non-Pre-existing:$to:C:\Users\kadritss\Documents\WindowsPowerShell\Modules\VERB-dev\VERB-dev
+Pre-creating before copy...
+2026-04-09 12:29:44 INFO:  : Mode   LastWriteTime        Length Name    
+----   -------------        ------ ----    
+d----- 4/9/2026 12:29:44 PM        VERB-dev
+2026-04-09 12:29:44 INFO:  : -Merge:exclude $MergeBuildExcl \\(Public|Internal|External|Private)\\.*.ps1$ files from temp build copy
+2026-04-09 12:29:45 INFO:  : Recursively remove empty subdirs below C:\Users\kadritss\Documents\WindowsPowerShell\Modules\VERB-dev\VERB-dev...
+2026-04-09 12:29:45 INFO:  : Move/Flatten Resource etc files into root of temp Build dir...
+2026-04-09 12:29:46 INFO:  : Unable to locate a problematic temp mod dir C:\Users\kadritss\Documents\WindowsPowerShell\Modules\VERB-dev\VERB-dev COPY of Quick-Start-Installation-and-Example.md
+2026-04-09 12:29:46 INFO:  : Unable to locate a problematic temp mod dir C:\Users\kadritss\Documents\WindowsPowerShell\Modules\VERB-dev\VERB-dev COPY of LICENSE.txt
+2026-04-09 12:29:46 INFO:  : Unable to locate a problematic temp mod dir C:\Users\kadritss\Documents\WindowsPowerShell\Modules\VERB-dev\VERB-dev COPY of LICENSE_BOOTSTRAP
+2026-04-09 12:29:47 INFO:  : Unable to locate a problematic temp mod dir C:\Users\kadritss\Documents\WindowsPowerShell\Modules\VERB-dev\VERB-dev COPY of LICENSE_INVOKE-CREATEMODULEHELPFILE
+2026-04-09 12:29:47 INFO:  : Unable to locate a problematic temp mod dir C:\Users\kadritss\Documents\WindowsPowerShell\Modules\VERB-dev\VERB-dev COPY of LICENSE_JASNY-BOOTSTRAP
+2026-04-09 12:29:48 INFO:  : Unable to locate a problematic temp mod dir C:\Users\kadritss\Documents\WindowsPowerShell\Modules\VERB-dev\VERB-dev COPY of LICENSE_JQUERY
+2026-04-09 12:29:48 INFO:  : Unable to locate a problematic temp mod dir C:\Users\kadritss\Documents\WindowsPowerShell\Modules\VERB-dev\VERB-dev COPY of bootstrap.min.css
+2026-04-09 12:29:49 INFO:  : Unable to locate a problematic temp mod dir C:\Users\kadritss\Documents\WindowsPowerShell\Modules\VERB-dev\VERB-dev COPY of bootstrap.min.js
+2026-04-09 12:29:49 INFO:  : Unable to locate a problematic temp mod dir C:\Users\kadritss\Documents\WindowsPowerShell\Modules\VERB-dev\VERB-dev COPY of jasny-bootstrap.min.css
+2026-04-09 12:29:50 INFO:  : Unable to locate a problematic temp mod dir C:\Users\kadritss\Documents\WindowsPowerShell\Modules\VERB-dev\VERB-dev COPY of jasny-bootstrap.min.js
+2026-04-09 12:29:50 INFO:  : Unable to locate a problematic temp mod dir C:\Users\kadritss\Documents\WindowsPowerShell\Modules\VERB-dev\VERB-dev COPY of jquery-1.11.1.min.js
+2026-04-09 12:29:50 INFO:  : Unable to locate a problematic temp mod dir C:\Users\kadritss\Documents\WindowsPowerShell\Modules\VERB-dev\VERB-dev COPY of navmenu.css
+2026-04-09 12:29:51 INFO:  : Unable to locate a problematic temp mod dir C:\Users\kadritss\Documents\WindowsPowerShell\Modules\VERB-dev\VERB-dev COPY of screenshot.png
+2026-04-09 12:29:51 INFO:  : Unable to locate a problematic temp mod dir C:\Users\kadritss\Documents\WindowsPowerShell\Modules\VERB-dev\VERB-dev COPY of CHANGELOG.md
+2026-04-09 12:29:52 INFO:  : Unable to locate a problematic temp mod dir C:\Users\kadritss\Documents\WindowsPowerShell\Modules\VERB-dev\VERB-dev COPY of README.md
+2026-04-09 12:29:52 INFO:  : copy/Flatten Resource etc files into source root c:\sc\VERB-dev\VERB-dev dir...
+2026-04-09 12:29:53 INFO:  : Resolved $ModPsdPath:
+C:\sc\VERB-dev\VERB-dev\VERB-dev.psd1
+2026-04-09 12:29:53 INFO:  : 
+==Verifying CU:Mods\VERB-dev\VERB-dev\Quick-Start-Installation-and-Example.md:
+2026-04-09 12:29:54 INFO:  : 
+==Verifying CU:Mods\VERB-dev\VERB-dev\LICENSE.txt:
+2026-04-09 12:29:54 INFO:  : 
+==Verifying CU:Mods\VERB-dev\VERB-dev\LICENSE_BOOTSTRAP:
+2026-04-09 12:29:55 INFO:  : 
+==Verifying CU:Mods\VERB-dev\VERB-dev\LICENSE_INVOKE-CREATEMODULEHELPFILE:
+2026-04-09 12:29:55 INFO:  : 
+==Verifying CU:Mods\VERB-dev\VERB-dev\LICENSE_JASNY-BOOTSTRAP:
+2026-04-09 12:29:56 INFO:  : 
+==Verifying CU:Mods\VERB-dev\VERB-dev\LICENSE_JQUERY:
+2026-04-09 12:29:56 INFO:  : 
+==Verifying CU:Mods\VERB-dev\VERB-dev\bootstrap.min.css:
+2026-04-09 12:29:56 INFO:  : 
+==Verifying CU:Mods\VERB-dev\VERB-dev\bootstrap.min.js:
+2026-04-09 12:29:57 INFO:  : 
+==Verifying CU:Mods\VERB-dev\VERB-dev\jasny-bootstrap.min.css:
+2026-04-09 12:29:57 INFO:  : 
+==Verifying CU:Mods\VERB-dev\VERB-dev\jasny-bootstrap.min.js:
+2026-04-09 12:29:58 INFO:  : 
+==Verifying CU:Mods\VERB-dev\VERB-dev\jquery-1.11.1.min.js:
+2026-04-09 12:29:58 INFO:  : 
+==Verifying CU:Mods\VERB-dev\VERB-dev\navmenu.css:
+2026-04-09 12:29:59 INFO:  : 
+==Verifying CU:Mods\VERB-dev\VERB-dev\screenshot.png:
+2026-04-09 12:29:59 INFO:  : 
+==Verifying CU:Mods\VERB-dev\VERB-dev\CHANGELOG.md:
+2026-04-09 12:29:59 INFO:  : 
+==Verifying CU:Mods\VERB-dev\VERB-dev\README.md:
+2026-04-09 12:30:00 INFO:  : Running pre-Publish-Module .psd1 test:
+Test-ModuleManifest -path C:\sc\VERB-dev\VERB-dev\VERB-dev.psd1
+2026-04-09 12:30:01 INFO:  : (Test-ModuleManifest:PASSED)
+2026-04-09 12:30:01 INFO:  : (Profiling Repo: get-PSRepository -name lyncRepo...)
+2026-04-09 12:30:02 INFO:  : 
+Publish-Module w
+Name                           Value                                                                                                                                                                                                                                          
+----                           -----                                                                                                                                                                                                                                          
+Name                           VERB-dev                                                                                                                                                                                                                                       
+Repository                     lyncRepo                                                                                                                                                                                                                                       
+RequiredVersion                1.5.88                                                                                                                                                                                                                                         
+Verbose                        True                                                                                                                                                                                                                                           
+ErrorAction                    Stop                                                                                                                                                                                                                                           
+errorVariable                  pbmo_Err                                                                                                                                                                                                                                       
+whatif                         False
+2026-04-09 12:30:24 WARNING:  :  FOUND $pbmo_Err: import-module HAD ERRORS! (no action, could be non-impacting)
+2026-04-09 12:30:25 WARNING:  :  Publish-Module PBMO UNDEFINED ERROR! System.Management.Automation.StopUpstreamCommandsException: System error.     at Microsoft.PowerShell.Commands.SelectObjectCommand.ProcessRecord()     at System.Management.Automation.CommandProcessor.ProcessRecord() (But PublishModule doesn't bother to return a functional Error object with an Exception, so we can't trust/parse or act on it. Just echo)
+2026-04-09 12:30:26 INFO:  : Waiting for:find-module -name VERB-dev -Repository lyncRepo ...
+2026-04-09 12:30:30 INFO:  : find-module returned Array, taking highest Version...
+2026-04-09 12:30:30 INFO:  : Install-Module w
+Name                           Value                                                                                                                                                                                                                                          
+----                           -----                                                                                                                                                                                                                                          
+Name                           VERB-dev                                                                                                                                                                                                                                       
+Repository                     lyncRepo                                                                                                                                                                                                                                       
+RequiredVersion                1.5.88                                                                                                                                                                                                                                         
+scope                          CurrentUser                                                                                                                                                                                                                                    
+force                          True                                                                                                                                                                                                                                           
+AllowClobber                   True                                                                                                                                                                                                                                           
+errorVariable                  ismo_Err                                                                                                                                                                                                                                       
+ErrorAction                    Stop                                                                                                                                                                                                                                           
+whatif                         False
+2026-04-09 12:30:36 INFO:  : Testing Module:Import-Module w
+Name                           Value                                                                                                                                                                                                                                          
+----                           -----                                                                                                                                                                                                                                          
+Name                           VERB-dev                                                                                                                                                                                                                                       
+ErrorAction                    Stop                                                                                                                                                                                                                                           
+errorVariable                  ipmo_Err                                                                                                                                                                                                                                       
+force                          True                                                                                                                                                                                                                                           
+verbose                        True
+2026-04-09 12:30:37 INFO:  : Retrieving matching Repo .nupkg file:
+gci \\lynmsv10\lync_fs\scripts\sc\VERB-dev.1.5.88.nupkgl..
+2026-04-09 12:30:37 INFO:  : Proper updated .nupkg file found:VERB-dev.1.5.88.nupkg, copying to local Pkg directory.
+2026-04-09 12:30:38 INFO:  : remove-UnneededFileVariants w
+Name                           Value                                                                                                                                                                                                                                          
+----                           -----                                                                                                                                                                                                                                          
+Path                           c:\sc\VERB-dev\Package                                                                                                                                                                                                                         
+Include                        VERB-dev*.nupkg                                                                                                                                                                                                                                
+Pattern                                                                                                                                                                                                                                                                       
+FilterOn                       CreationTime                                                                                                                                                                                                                                   
+Keep                           2                                                                                                                                                                                                                                              
+KeepToday                      True                                                                                                                                                                                                                                           
+verbose                        True                                                                                                                                                                                                                                           
+whatif                         False
+2026-04-09 12:30:39 INFO:  : remove-UnneededFileVariants w
+Name                           Value                                                                                                                                                                                                                                          
+----                           -----                                                                                                                                                                                                                                          
+Path                           c:\sc\VERB-dev\Tests                                                                                                                                                                                                                           
+Include                        ScriptAnalyzer-Results-*.xml                                                                                                                                                                                                                   
+Pattern                                                                                                                                                                                                                                                                       
+FilterOn                       CreationTime                                                                                                                                                                                                                                   
+Keep                           4                                                                                                                                                                                                                                              
+KeepToday                      True                                                                                                                                                                                                                                           
+verbose                        True                                                                                                                                                                                                                                           
+whatif                         False
+2026-04-09 12:30:40 INFO:  : 
+---------------------------------------------------------------------------------
+Processing completed: VERB-dev :: c:\sc\VERB-dev
+- Script is currently installed (from PsRep: with scope:CurrentUser, under TORO\kadritss profile
+
+- To update other scopes/accounts on same machine, or install on other machines:
+    1. Uninstall current module copies:
+
+        Uninstall-Module -Name VERB-dev) -AllVersion -whatif ;
+
+    2. Install the current version (or higher) from the Repo:lyncRepo:
+
+        install-Module -name VERB-dev -Repository lyncRepo -RequiredVersion 1.5.88 -scope currentuser -whatif ;
+
+    3. Reimport the module with -force, to ensure the current installed verison is loaded:
+
+        import-Module -name VERB-dev -force -verbose ;
+
+#-=-=-Stacked list for the above: CURRENTUSER=-=-=-=-=-=
+$whatif=$false ;  $tScop = 'CurrentUser' ; $tMod = 'VERB-dev' ; $tVer = '1.5.88' ;
+if($IsCoreCLR){
+    write-warning "WARNING YOU'RE INSTALLING INTO POWERSHELLCORE (7+)!
+THE MODULE WILL GO INTO \DOCS\POWERSHELL\MODULES
+(vs \DOCS\WINDOWSPOWERSHELL\MODULES)!" ; 
+    $bRet=Read-Host "Enter YYY to continue. Anything else will exit"  ; 
+    if ($bRet.ToUpper() -eq "YYY") {} else {WRITE-WARNING "HALTING!" ; BREAK} ; 
+} ; 
+TRY {
+    switch($tScop){
+        'CurrentUser'{$ModPath = "$(split-path $profile)\Modules\$($tmod)" }
+        'AllUsers' {$ModPath = "$($env:ProgramFiles)\WindowsPowerShell\Modules)\$($tmod)"} 
+    } ;
+    if($Repository = (Get-PSRepository -Name $localPSRepo -ea 'STOP').name){
+        rmo -Name $tmod -ea 0 ;
+        Uninstall-Module -Name $tmod -AllVersion -force -ea 0 -whatif:$($whatif);
+        gi -path $ModPath -ea 0 |ri -Recurse -force -verbose  -whatif:$($whatif) ;
+        if($thisVers = find-module -name $tmod -Repository $Repository -RequiredVersion $tVer){
+            $thisvers  | ft -a Name,Version,Repository ; 
+            $thisVers | install-Module -scope $tScop -Force -AllowClobber -ea 'STOP' -whatif:$($whatif) ;
+        }else {
+            throw "Unable to:find-module -name $($tmod) -Repository $($Repository) -RequiredVersion $($tVer)" ; 
+            break ; 
+        } ; 
+        rmo -Name $tmod -force -ea 0 ;
+        ipmo -name $tmod -force -verbose -ea 'STOP'  ;
+        gmo -name $tmod | ? version -ne $tVer | rmo -Force -Verbose ; 
+        gmo -name $tmod -list ;
+    } else {
+        throw "Unable to resolve `lyncRepo to a configured local PSRepository" ;
+    } ;
+} CATCH {
+    $ErrTrapd=$Error[0] ;
+    $smsg = "
+$(($ErrTrapd | fl * -Force|out-string).trim())" ;
+    write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" ;
+} ;
+#-=-=-=-=-=-=-=-=
+#-=-=-Stacked list for the above: ALLUSERS=-=-=-=-=-=
+$whatif=$false ; $tScop = 'AllUsers' ; $tMod = 'VERB-dev' ; $tVer = '1.5.88' ;  
+if($IsCoreCLR){
+    write-warning "WARNING YOU'RE INSTALLING INTO POWERSHELLCORE (7+)!
+THE MODULE WILL GO INTO \DOCS\POWERSHELL\MODULES
+(vs \DOCS\WINDOWSPOWERSHELL\MODULES)!" ; 
+    $bRet=Read-Host "Enter YYY to continue. Anything else will exit"  ; 
+    if ($bRet.ToUpper() -eq "YYY") {} else {WRITE-WARNING "HALTING!" ; BREAK} ; 
+} ; 
+TRY {
+    switch($tScop){
+        'CurrentUser'{$ModPath = "$(split-path $profile)\Modules\$($tmod)" }
+        'AllUsers' {$ModPath = "$($env:ProgramFiles)\WindowsPowerShell\Modules)\$($tmod)"} 
+    } ;
+    if($Repository = (Get-PSRepository -Name $localPSRepo -ea 'STOP').name){
+        rmo -Name $tmod -ea 0 ;
+        Uninstall-Module -Name $tmod -AllVersion -force -ea 0 -whatif:$($whatif);
+        gi -path $ModPath -ea 0 |ri -Recurse -force -verbose  -whatif:$($whatif) ;
+        if($thisVers = find-module -name $tmod -Repository $Repository -RequiredVersion $tVer){
+            $thisvers  | ft -a Name,Version,Repository ; 
+            $thisVers | install-Module -scope $tScop -Force -AllowClobber -ea 'STOP' -whatif:$($whatif) ;
+        }else {
+            throw "Unable to:find-module -name $($tmod) -Repository $($Repository) -RequiredVersion $($tVer)" ; 
+            break ; 
+        } ; 
+        rmo -Name $tmod -force -ea 0 ;
+        ipmo -name $tmod -force -verbose -ea 'STOP'  ;
+        gmo -name $tmod | ? version -ne $tVer | rmo -Force -Verbose ; 
+        gmo -name $tmod -list ;
+    } else {
+        throw "Unable to resolve `lyncRepo to a configured local PSRepository" ;
+    } ;
+} CATCH {
+    $ErrTrapd=$Error[0] ;
+    $smsg = "
+$(($ErrTrapd | fl * -Force|out-string).trim())" ;
+    write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" ;
+} ;
+#-=-=-=-=-=-=-=-=
+
+- You may also want to run the configured Pester Tests of the new script:
+
+        . c:\sc\VERB-dev\Tests\VERB-dev.tests.ps1
+
+Full Processing Details can be found in:
+
+c:\usr\work\ps\scripts\logs\processbulk-NewModule-VERB-dev-LOG-BATCH-EXEC-20260409-1227PM-log.txt
+
+---------------------------------------------------------------------------------
+
+2026-04-09 12:30:40 INFO:  : 
+(Most recent processing log can be found at:c:\sc\VERB-dev\processbulk-NewModule-VERB-dev-LOG-BATCH-EXEC-20260409-1227PM-log.txt)
+(perm copy stored at:c:\usr\work\ps\scripts\logs\processbulk-NewModule-VERB-dev-LOG-BATCH-EXEC-20260409-1227PM-log.txt

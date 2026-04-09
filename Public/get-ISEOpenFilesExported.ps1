@@ -16,6 +16,7 @@ function get-ISEOpenFilesExported {
     Github      : https://github.com/tostka/verb-dev
     Tags        : Powershell,ISE,development,debugging
     REVISIONS
+    * 12:25 PM 4/9/2026 rem'd $psise test - it's not required, no calls to the psies obj occurs
     * 1:55 PM 5/29/2025 add expl dumping report of name & the constituent files in most recent exports
     * 9:24 AM 9/14/2023 CBH add:demo of pulling lastwritetime and using to make automatd decisions, or comparison reporting (as this returns a fullname, not a file object)
     * 1:55 PM 3/29/2023 flipped alias (clashed) iIseOpen -> gIseOpen
@@ -61,7 +62,7 @@ function get-ISEOpenFilesExported {
         else{ write-verbose "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; } ; 
     }
     PROCESS {
-        if ($psise){
+        #if ($psise){
             #$AllUsrsScripts = "$($env:ProgramFiles)\WindowsPowerShell\Scripts" ;
             $CUScripts = "$([Environment]::GetFolderPath('MyDocuments'))\WindowsPowershell\Scripts" ;
             if($Tag){
@@ -94,7 +95,7 @@ function get-ISEOpenFilesExported {
                 write-warning $smsg ;
                 Continue ; #Opts: STOP(debug)|EXIT(close)|CONTINUE(move on in loop cycle)|BREAK(exit loop iteration)|THROW $_/'CustomMsg'(end script with Err output)
             } ;
-        } else {  write-warning "This script only functions within PS ISE, with a script file open for editing" };
+        #} else {  write-warning "This script only functions within PS ISE, with a script file open for editing" };
     } # PROC-E
     END{
         $smsg = "$($sBnr.replace('=v','=^').replace('v=','^='))" ;

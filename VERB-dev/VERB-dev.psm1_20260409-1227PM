@@ -1,11 +1,11 @@
-﻿# verb-dev.psm1
+﻿# VERB-dev.psm1
 
 
 <#
 .SYNOPSIS
 VERB-dev - Development PS Module-related generic functions
 .NOTES
-Version     : 1.5.82
+Version     : 1.5.87
 Author      : Todd Kadrie
 Website     :	https://www.toddomation.com
 Twitter     :	@tostka
@@ -274,6 +274,136 @@ function check-PsLocalRepoRegistration {
 }
 
 #*------^ check-PsLocalRepoRegistration.ps1 ^------
+
+
+#*------v close-ISEOpenfiles.ps1 v------
+Function close-ISEOpenfiles {
+    <#
+    .SYNOPSIS
+    close-ISEOpenfiles - Close all _saved_ open tabs in ISE
+    .NOTES
+    Version     : 0.0.
+    Author      : Todd Kadrie
+    Website     : http://www.toddomation.com
+    Twitter     : @tostka / http://twitter.com/tostka
+    CreatedDate : 2026-
+    FileName    : close-ISEOpenfiles.ps1
+    License     : MIT License
+    Copyright   : (c) 2026 Todd Kadrie
+    Github      : https://github.com/tostka/verb-XXX
+    Tags        : Powershell
+    AddedCredit : jdhitsolutions
+    AddedWebsite: https://github.com/jdhitsolutions/ISEScriptingGeek/
+    AddedTwitter: URL
+    REVISIONS
+    * 10:13 AM 4/9/2026 init, added psie check
+    * Jul 3, 2023 jdh posted vers
+    .DESCRIPTION
+    close-ISEOpenfiles - Close all _saved_ open tabs in ISE
+    .INPUTS
+    None. Does not accepted piped input.(.NET types, can add description)
+    .OUTPUTS
+    None. Returns no objects or output (.NET types)
+    System.Boolean
+    .EXAMPLE
+    PS> close-ISEOpenfiles
+    EXSAMPLEOUTPUT
+    Run with whatif & verbose
+    .LINK
+    https://github.com/tostka/verb-dev
+    .LINK
+    https://github.com/jdhitsolutions/ISEScriptingGeek/
+    #>
+    [CmdletBinding()]
+    Param()
+    if ($psISE) {
+        $smsg = "Closing all Tabs in this ISE!" ;
+        write-warning $smsg ; 
+        $bRet=Read-Host "Enter YYY to continue. Anything else will exit"  ;
+        if ($bRet.ToUpper() -eq "YYY") {
+            $smsg = "(Moving on)" ;
+            write-host -foregroundcolor green $smsg  ;
+        } else {
+            $smsg = "(*skip* use of -NoFunc)" ;
+            write-host -foregroundcolor yellow $smsg  ;
+            return; # return (exits script or function); break (exits loop/switch) ; exit 1 (terms context,can close ps)
+        } ; 
+        $saved = $psISE.CurrentPowerShellTab.Files.Where( { $_.isSaved })
+        foreach ($file in $saved) {
+            Write-Verbose "closing $($file.FullPath)"
+            [void]$psISE.CurrentPowerShellTab.files.Remove($file)
+        }
+    } else {
+        Write-Warning 'This function requires the Windows PowerShell ISE.'
+    }
+}
+
+#*------^ close-ISEOpenfiles.ps1 ^------
+
+
+#*------v close-ISEOtherOpenFiles.ps1 v------
+Function close-ISEOtherOpenFiles.ps1 {
+     <#
+    .SYNOPSIS
+    close-ISEOtherOpenFiles - Close all _saved_ open tabs in ISE, other than Current Tab\File
+    .NOTES
+    Version     : 0.0.
+    Author      : Todd Kadrie
+    Website     : http://www.toddomation.com
+    Twitter     : @tostka / http://twitter.com/tostka
+    CreatedDate : 2026-
+    FileName    : close-ISEOtherOpenFiles.ps1
+    License     : MIT License
+    Copyright   : (c) 2026 Todd Kadrie
+    Github      : https://github.com/tostka/verb-XXX
+    Tags        : Powershell
+    AddedCredit : jdhitsolutions
+    AddedWebsite: https://github.com/jdhitsolutions/ISEScriptingGeek/
+    AddedTwitter: URL
+    REVISIONS
+    * 10:13 AM 4/9/2026 init, added psie check
+    * Jul 3, 2023 jdh posted vers
+    .DESCRIPTION
+    close-ISEOtherOpenFiles - Close all _saved_ open tabs in ISE, other than Current Tab\File
+    .INPUTS
+    None. Does not accepted piped input.(.NET types, can add description)
+    .OUTPUTS
+    None. Returns no objects or output (.NET types)
+    System.Boolean
+    .EXAMPLE
+    PS> close-ISEOtherOpenFiles
+    EXSAMPLEOUTPUT
+    Run with whatif & verbose
+    .LINK
+    https://github.com/tostka/verb-dev
+    .LINK
+    https://github.com/jdhitsolutions/ISEScriptingGeek/
+    #>
+    [CmdletBinding()]
+    Param()
+    if ($psISE) {
+        $smsg = "Closing all OTHER Tabs in this ISE!" ;
+        write-warning $smsg ; 
+        $bRet=Read-Host "Enter YYY to continue. Anything else will exit"  ;
+        if ($bRet.ToUpper() -eq "YYY") {
+            $smsg = "(Moving on)" ;
+            write-host -foregroundcolor green $smsg  ;
+        } else {
+            $smsg = "(*skip* use of -NoFunc)" ;
+            write-host -foregroundcolor yellow $smsg  ;
+            return; # return (exits script or function); break (exits loop/switch) ; exit 1 (terms context,can close ps)
+        } ; 
+        $saved = $psISE.CurrentPowerShellTab.Files.Where( { $_.isSaved -AND $_.FullPath -ne $psISE.CurrentFile.FullPath })
+        foreach ($file in $saved) {
+            Write-Verbose "closing $($file.FullPath)"
+            [void]$psISE.CurrentPowerShellTab.files.Remove($file)
+        }
+     } else {
+        Write-Warning 'This function requires the Windows PowerShell ISE.'
+    }
+}
+
+#*------^ close-ISEOtherOpenFiles.ps1 ^------
 
 
 #*------v confirm-ModuleBuildSync.ps1 v------
@@ -2231,6 +2361,67 @@ function Convert-HelpToHtmlFile {
 }
 
 #*------^ Convert-HelpToHtmlFile.ps1 ^------
+
+
+#*------v Convert-ISEOpenFileToText.ps1 v------
+Function Convert-ISEOpenFileToText {
+    <#
+    .SYNOPSIS
+    Convert-ISEOpenFileToText.ps1 - Save current tab file to .txt extension
+    .NOTES
+    Version     : 0.0.
+    Author      : Todd Kadrie
+    Website     : http://www.toddomation.com
+    Twitter     : @tostka / http://twitter.com/tostka
+    CreatedDate : 2026-
+    FileName    : Convert-ISEOpenFileToText.ps1
+    License     : MIT License
+    Copyright   : (c) 2026 Todd Kadrie
+    Github      : https://github.com/tostka/verb-XXX
+    Tags        : Powershell
+    AddedCredit : jdhitsolutions
+    AddedWebsite: https://github.com/jdhitsolutions/ISEScriptingGeek/
+    AddedTwitter: URL
+    REVISIONS
+    * 10:13 AM 4/9/2026 init
+    * Jul 3, 2023 jdh posted vers
+    .DESCRIPTION
+    Convert-ISEOpenFileToText.ps1 - Save current tab file to .txt extension
+    .INPUTS
+    None. Does not accepted piped input.(.NET types, can add description)
+    .OUTPUTS
+    None. Returns no objects or output (.NET types)
+    System.Boolean
+    .EXAMPLE
+    PS> Convert-ISEOpenFileToText
+    EXSAMPLEOUTPUT
+    Run with whatif & verbose
+    .LINK
+    https://github.com/tostka/verb-dev
+    .LINK
+    https://github.com/jdhitsolutions/ISEScriptingGeek/    #>
+    [CmdletBinding()]
+    Param (
+        [Switch]$Reload
+    )
+    #verify we are in the ISE
+    if ($psISE) {        
+        #get the current file name and path and change the extension
+        $PSVersion = $psISE.CurrentFile.FullPath
+        $textVersion = $PSVersion -replace '.ps1', '-ps1.txt'
+        #save the file.
+        $psISE.CurrentFile.SaveAs($textVersion)
+        #if -Reload then reload the PowerShell file into the ISE
+        if ($Reload) {
+            $psISE.CurrentPowerShellTab.Files.Add($PSVersion)
+        }
+    } #if $psISE
+    else {
+        Write-Warning 'This function requires the Windows PowerShell ISE.'
+    }
+}
+
+#*------^ Convert-ISEOpenFileToText.ps1 ^------
 
 
 #*------v convert-ISEOpenSession.ps1 v------
@@ -4830,6 +5021,7 @@ function copy-ISETabFileToLocal {
     Github      : https://github.com/tostka/verb-dev
     Tags        : Powershell,ISE,development,debugging,backup
     REVISIONS
+    * 2:17 PM 1/29/2026 add: test for nofunc into \public; added validates to try to prevent specifying leaf-path in the -LocalDestination, and a -Leaf in the -Path (burned trying to backup to a leaf, which bounced wo comment, leaving the file uncopied)
     * 9:20 AM 2/10/2025 tweaked to permit non-tsclient-spanning use: supports copying from a separate generic debugging copy to local repo; 
         fixed inaccurate CBH expl (was rote copy from copy-iselocalsourcetotab()); fixed swapped error msgs at bottom of PROC{}
     * 3:55 PM 10/25/2024 added cbh demo using -path ; pulled -path container validator (should always be a file) ;  fixed unupdated -nofunc else echo
@@ -4863,17 +5055,24 @@ function copy-ISETabFileToLocal {
     [Alias('cpIseFileLocal')]
     PARAM(
         [Parameter(Mandatory = $false,Position=0,HelpMessage="Path to source file (defaults to `$psise.CurrentFile.FullPath)[-Path 'D:\scripts\copy-ISETabFileToLocal_func.ps1']")]
-            [ValidateScript({Test-Path $_ })]
+            [ValidateScript({Test-Path $_ -PathType Leaf})]
             [system.io.fileinfo]$Path=$psise.CurrentFile.FullPath,
         [Parameter(Mandatory = $true,Position = 1,HelpMessage = 'Localized destination directory path[-path c:\pathto\]')]
             [ValidateScript({
-                if([uri]$_ |?{ $_.IsUNC}){
-                    throw "UNC Path specified: Please specify a 'localized' path!" ; 
-                }elseif([uri]$_ |?{$_.AbsolutePath -AND $_.LocalPath -AND $_.IsFile -AND -not $_.IsUNC}){
-                    $true ;
+                #if(Test-Path $_ -PathType 'Container'){ # never works with non-existant local path, always $false
+                # test has an extension -> leaf; test ends in \ -> container
+                if(($_ -notmatch '\.\w+$') -OR ($_ -match '\\$')){
+                    if([uri]$_ |?{ $_.IsUNC}){
+                        throw "UNC Path specified: Please specify a 'localized' path!" ; 
+                    }elseif([uri]$_ |?{$_.AbsolutePath -AND $_.LocalPath -AND $_.IsFile -AND -not $_.IsUNC}){
+                        $true ;
+                    }else{
+                        throw "Invalid path!" ; 
+                    }
                 }else{
-                    throw "Invalid path!" ; 
+                    throw "-LocalDestination: Appears to be Leaf path specified: Specify a Folder (or no ext-like periods in filename, or end with \$)!!" ; 
                 }
+                
             })]
             [string]$LocalDestination,
         [Parameter(HelpMessage="Switch to remove any '_func' substring from the original file name, while copying (used for copying to final module .\Public directory for publishing[-noFunc])")]
@@ -4916,6 +5115,14 @@ function copy-ISETabFileToLocal {
                             if ($bRet.ToUpper() -eq "YYY") {
                                 $smsg = "(specifying -NoFunc)" ; 
                                 write-host -foregroundcolor green $smsg  ;
+                                if($LocalDestination -notmatch '^C:\\sc\\.*\\public\\'){
+                                    $smsg = "-nofunc, but -LocalDestination $($LocalDestination) does *NOT* match \Public\$" ; 
+                                    $smsg += "`nAre you *SURE* you want to copy a function to the root of a module?" ;
+                                    write-warning $smsg ; 
+                                    $bRet=Read-Host "Enter YYY to continue. Anything else will exit"  ; 
+                                    if ($bRet.ToUpper() -eq "YYY") {
+                                    } else { BREAK } ; 
+                                }
                                 $noFunc = $true ; 
                             } else {
                                 $smsg = "(*skip* use of -NoFunc)" ; 
@@ -8566,6 +8773,117 @@ function Get-PSModuleFile {
 #*------^ Get-PSModuleFile.ps1 ^------
 
 
+#*------v Get-ScriptCommentsTDO.ps1 v------
+Function Get-ScriptCommentsTDO {
+    <#
+    .SYNOPSIS
+    Get-ScriptCommentsTDO - Parse Comments from specified .ps1 file
+    .NOTES
+    Version     : 0.0.
+    Author      : Todd Kadrie
+    Website     : http://www.toddomation.com
+    Twitter     : @tostka / http://twitter.com/tostka
+    CreatedDate : 2026-
+    FileName    : Get-ScriptCommentsTDO
+    License     : MIT License
+    Copyright   : (c) 2026 Todd Kadrie
+    Github      : https://github.com/tostka/verb-XXX
+    Tags        : Powershell
+    AddedCredit : jdhitsolutions
+    AddedWebsite: https://github.com/jdhitsolutions/ISEScriptingGeek/
+    AddedTwitter: URL
+    REVISIONS
+    * 10:13 AM 4/9/2026 init
+    * Jul 3, 2023 jdh posted vers
+    .DESCRIPTION
+    Get-ScriptCommentsTDO - Parse Comments from specified .ps1 file
+    .PARAMETER  PARAMNAME
+    .PARAMETER  PARAMNAME2
+    .PARAMETER Ticket
+    Ticket number[-ticket 123456]
+    .PARAMETER Path
+    Path [-path c:\path-to\]
+    .PARAMETER File
+    File [-file c:\path-to\file.ext]
+    .PARAMETER TargetMailboxes
+    HelpMessage="Mailbox email addresses(array)[-Targetmailboxes]
+    .PARAMETER ResultSize
+    Integer maximum number of results to request (for shortened debugging passes)
+    .PARAMETER Credential
+    Use specific Credentials (defaults to Tenant-defined SvcAccount)[-Credentials [credential object]]
+    .PARAMETER AdminAccount
+    Use specific Admin account (defaults to Tenant-defined o365_SIDUpn)[-Credentials [credential object]]
+    .PARAMETER UserRole
+    Credential User Role spec (SID|CSID|UID|B2BI|CSVC|ESVC|LSVC|ESvcCBA|CSvcCBA|SIDCBA)[-UserRole @('SIDCBA','SID','CSVC')]
+    .PARAMETER useEXOv2
+    Use EXOv2 (ExchangeOnlineManagement) over basic auth legacy connection [-useEXOv2]
+    .PARAMETER Silent
+    Switch to specify suppression of all but warn/error echos.(unimplemented, here for cross-compat)
+    .PARAMETER MGPermissionsScope
+    Optional Array of MG Permission Names(avoids manual discovery against configured cmdlets)[-MGPermissionsScope @('Domain.Read.All','Domain.ReadWrite.All','Directory.Read.All') ]
+    .PARAMETER useExOPVers
+    String array to indicate target OnPrem Exchange Server version to target with connections, if an array, will be assumed to reflect a span of versions to include, connections will aways be to a random server of the latest version specified (Ex2000|Ex2003|Ex2007|Ex2010|Ex2000|Ex2003|Ex2007|Ex2010|Ex2016|Ex2019), used with verb-Ex2010\get-ADExchangeServerTDO() dyn location via ActiveDirectory.[-useExOPVers @('Ex2010','Ex2016')]")]
+    .PARAMETER Force
+    Force (Confirm-override switch, overrides ShouldProcess testing, executes somewhat like legacy -whatif:`$false)[-force]
+    .PARAMETER PassThru
+    Returns an object to pipeline. By default, this cmdlet does not generate any pipeline output.[-PassThru]
+    .PARAMETER whatIf
+    Whatif Flag  [-whatIf]
+    .INPUTS
+    None. Does not accepted piped input.(.NET types, can add description)
+    .OUTPUTS
+    None. Returns no objects or output (.NET types)
+    System.Boolean
+    .EXAMPLE
+    PS> .\Get-ScriptCommentsTDO -whatif -verbose
+    EXSAMPLEOUTPUT
+    Run with whatif & verbose
+    .LINK
+    https://github.com/tostka/verb-XXX
+    .LINK
+    https://github.com/tostka/powershellbb/
+    #>
+    [CmdletBinding()]
+    [Alias('Get-ScriptComments')]
+    Param(
+        [Parameter(Position = 0, Mandatory, HelpMessage = 'Enter the path of a PS1 file',
+            ValueFromPipeline, ValueFromPipelineByPropertyName)]
+            [Alias('PSPath', 'Name')]
+            [ValidateScript( { Test-Path $_ })]
+            [ValidatePattern('\.ps(1|m1)$')]
+            [String]$Path
+    )
+    Begin {
+        #Begin scriptblock
+        Write-Verbose -Message "Starting $($MyInvocation.MyCommand)"
+        #initialization commands
+        #explicitly define some AST variables
+        #New-Variable $AstTokens -Force # throws:New-Variable : Cannot bind argument to parameter 'Name' because it is null.
+        New-Variable AstTokens -Force
+        New-Variable astErr -Force
+    } #close begin
+    Process {        
+        #Process scriptblock
+        #convert each path to a nice filesystem path
+        $Path = Convert-Path -Path $Path
+        $sBnrS="`n#*------v AST-PARSED COMMENTS : $($Path) v------" ; 
+        write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($sBnrS)" ;
+        Write-Verbose -Message "Parsing $Path"
+        #Parse the file
+        $AST = [System.Management.Automation.Language.Parser]::ParseFile($Path, [ref]$AstTokens, [ref]$astErr)
+        #filter tokens for comments and display text
+        $AstTokens.where( { $_.kind -eq 'comment' }) |
+        Select-Object -ExpandProperty Text
+        write-host -foregroundcolor green "$((get-date).ToString('HH:mm:ss')):$($sBnrS.replace('-v','-^').replace('v-','^-'))" ;
+    } #close process
+    End {
+        Write-Verbose -Message "Ending $($MyInvocation.MyCommand)"
+    } #close end
+}
+
+#*------^ Get-ScriptCommentsTDO.ps1 ^------
+
+
 #*------v get-StrictMode.ps1 v------
 Function get-StrictMode {
     <#
@@ -9884,9 +10202,12 @@ function import-OpenNotepads {
     FileName    : import-OpenNotepads.ps1
     License     : MIT License
     Copyright   : (c) 2020 Todd Kadrie
-    Github      : https://github.com/tostka
+    Github      : https://github.com/tostka/verb-dev
     Tags        : Powershell,ISE,development,debugging
     REVISIONS
+    * 1:00 PM 11/20/2025 added support for edit flags (*\s), optional, as part of dupe suppress
+        added dupe-suppression, both retroactively - searches launched process.mainwindowtitle for array status, closes all but oldest id - and proactively - 
+        runs a collection of processname-filtered existing processes, and appends the newly opened to the list, then builds and checks for each filename in the MainWindowTitle list, skipping open dupes.
     * 2:21 PM 7/2/2025 works init
     .DESCRIPTION
     import-OpenNotepads - Import & open a previously-exported list of  Notepad* variant (notepad2/3 curr) sessions
@@ -9917,8 +10238,9 @@ function import-OpenNotepads {
             #[string[]]$File
         [Parameter(Position=0,HelpMessage="Variant to specify targeting a Tag (filename suffix - portion after the std 'NotePdSavedSession-' of filename, wo .psxml extension, which by default is a timestamp, if no export -Tag was specified)[-tag 'label']")]
             [string]$Tag,
-        [Parameter(HelpMessage="Whatif Flag  [-whatIf]")]
-            [switch] $whatIf
+        [Parameter(Position=0,HelpMessage="ProcessName (as returned by get-process) for the default associated app for .txt files (defaults to notepad2, used to pre-collect existing open files for dupe suppression)[-DefaultProcessName 'notepad3']")]
+            [string]$DefaultProcessName = 'notepad2'
+        
     ) ;
     BEGIN {
         ${CmdletName} = $PSCmdlet.MyInvocation.MyCommand.Name ;
@@ -9938,11 +10260,13 @@ function import-OpenNotepads {
                 write-verbose "File appears to be fully pathed (has /\ chars)"
                 $txmlf = $File ;
             } ;
-            }else{
-                write-verbose "unpathed -File, building target default path"
-                $txmlf = join-path -path $npExpDir -ChildPath $File ;
-            }
-
+        }else{
+            write-verbose "unpathed -File, building target default path"
+            $txmlf = join-path -path $npExpDir -ChildPath $File ;
+        }
+        $openedProcesses = @() ; 
+        $openedProcesses += (get-process -ProcessName $DefaultProcessName) ; 
+        $appTag = $null ; 
     } ;
     PROCESS {
         # for debugging, -Script permits targeting another script *not* being currently debugged
@@ -9953,39 +10277,80 @@ function import-OpenNotepads {
                 
                 # set apps & files in found .xml file
                 $ipFiles = Import-Clixml -path $txmlf ;
-
+                
                 # patch over empty existing file (file w no specs, happens)
                 if($ipFiles){
 
-
-                    if($whatif){
-                        foreach($ipFile in $ipFiles){
-                            write-host "-whatif:set-PSBreakpoint -script $($setPs1) -line $($ipFile.line)"
+                    foreach($ipFile in $ipFiles){                        
+                        # $process = start-process ping.exe -windowstyle Hidden -ArgumentList "-n 1 -w 127.0.0.1" -PassThru –Wait ;
+                        # $process.ExitCode
+                        $pltSaPS = [ordered]@{
+                            FilePath = $null ;
+                            ArgumentList = $null ;
+                            PassThru = $true
                         } ;
-                    } else {
-                        foreach($ipFile in $ipFiles){
-                            #$null = set-PSBreakpoint -script $setPs1 -line $ipFile.line ;
-                            # $process = start-process ping.exe -windowstyle Hidden -ArgumentList "-n 1 -w 127.0.0.1" -PassThru –Wait ;
-                            # $process.ExitCode
-                            $pltSaPS = [ordered]@{
-                                FilePath = $null ;
-                                ArgumentList = $null ;
-                                PassThru = $true
-                            } ;
-                            if($ipFile.Path){$pltSaPS.FilePath = $ipFile.Path }else{throw "missing FilePath!"} 
-                            if($ipFile.FilePath){$pltSaPS.ArgumentList = $ipFile.FilePath }else{throw "missing notepad app Path!"}
-                            $smsg = "start-process w`n$(($pltSaPS|out-string).trim())" ; 
-                            write-verbose $smsg ; 
-                            TRY{
-                                $process = start-process @pltSaPS ;
-                            } CATCH {
-                                $ErrTrapd=$Error[0] ;
-                                $smsg = "`n$(($ErrTrapd | fl * -Force|out-string).trim())" ;
-                                write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" ;
-                            } ;
-                            write-verbose  "$($pltSaPS.Path ) $($pltSaPS.FilePath): $(($process.ExitCode|out-string).trim())" ;
+                        if($ipFile.Path){$pltSaPS.FilePath = $ipFile.Path }else{throw "missing FilePath!"} 
+                        if($ipFile.FilePath){$pltSaPS.ArgumentList = $ipFile.FilePath }else{throw "missing notepad app Path!"}
+                        if($thisfile = get-childitem -path $ipFile.FilePath -ea STOP){
+                            if ($thisfile.name -eq 'Ex16-Build-ExInstall-20250707-0138PM.txt'){
+                                write-verbose "gotcha!" ; 
+                            } ; 
+                            $filename = split-path -leaf -path $ipFile.FilePath ; 
+                            #$rgxtitleString = [regex]::Escape($filename) ; 
+                            $titlestring = "$($filename)$($appTag)" ; 
+                            #$titlestringEdit = "* $($filename)$($appTag)" ; 
+                            # cover both base filename, and optional leading *\s when editing
+                            $rgxtitlestring = "^((\*\s)*)$([regex]::Escape($titlestring))" ; 
+                            #if($openedProcesses.mainwindowtitle -contains $titlestring){
+                            # issue: edits have '\s*\s' prefix, can't do -contains against a regex, need to loop them out and compare
+                            $openedProcesses.mainwindowtitle |foreach-object{
+                                    $thistitle = $_ ; 
+                                    if($thistitle -match $rgxtitlestring){
+                                        $smsg = "(Window already open: dupe suppress: $($titlestring))" ; 
+                                        if($VerbosePreference -eq "Continue"){if ($logging) { Write-Log -LogContent $smsg -Path $logfile -useHost -Level VERBOSE } 
+                                        else{ write-verbose "$((get-date).ToString('HH:mm:ss')):$($smsg)" } ; } ; 
+                                        Continue ; 
+                                    } 
+                                }                                
+                        } ELSE { 
+                            $smsg = "MISSING SPECIFIED FILE: $($ipFile.FilePath) (skipping)" ; 
+                            write-WARNING "$((get-date).ToString('HH:mm:ss')):$($smsg)" ; 
+                            continue 
+                        } 
+                        # existing open copies have file name in MainWindowTitle: Ex16-Build-ExInstall-20250707-0138PM.txt
+                        $smsg = "start-process w`n$(($pltSaPS|out-string).trim())" ; 
+                        write-verbose $smsg ; 
+                        TRY{
+                            $process = start-process @pltSaPS ;
+                            # popu apptag if unpop'd
+                            if($appTag -eq $null){
+                                # resolve the locally associated app's tag, based on the trailing non-filename string in the spawned mainwindowtitle.
+                                $appTag = $process.mainwindowtitle -replace (split-path -leaf $ipFile.FilePath -ea STOP),'' ; 
+                            } ; 
+                            # remedially close dupes (1st pass will miss them, apptag is unpopulated until below)
+                            $matchingprocesses = get-process -ProcessName $process.processname |?{$_.MainWindowTitle -eq $Process.MainWindowTitle} | sort id ; 
+                            $edits = $matchingprocesses |?{$_.MainWindowTitle -match '$\*\s'}  | sort id ; 
+                            $nonEdits = $matchingprocesses | ?{$edits.id -notcontains $_.id} ; 
+                            if($matchingprocesses -is [array]){
+                                if($edits){
+                                    $nonEdits | stop-process -Force -Verbose:($VerbosePreference -eq 'Continue') ;
+                                } else {
+                                    # close all but oldest copy, sorted on highest ID ; edits will have non-matching title, as they get '*' markers
+                                    write-host "Dupe MainWindowTitle found: Closing all but oldest copy: $($matchingprocesses[-1].id)" ; 
+                                    $matchingprocesses | select-object -Skip 1  | stop-process -Force -Verbose:($VerbosePreference -eq 'Continue') ; 
+                                } ; 
+                            } else{
+                                $openedProcesses += @($process) ;                                 
+                            } ; 
+                            
+                        } CATCH {
+                            $ErrTrapd=$Error[0] ;
+                            $smsg = "`n$(($ErrTrapd | fl * -Force|out-string).trim())" ;
+                            write-warning "$((get-date).ToString('HH:mm:ss')):$($smsg)" ;
                         } ;
+                        write-verbose  "$($pltSaPS.Path ) $($pltSaPS.FilePath): $(($process.ExitCode|out-string).trim())" ;
                     } ;
+                    
                     $smsg = "$(($ipFile|measure).count) Files restored per $($txmlf)`n$(($ipFiles|sort line|ft -a Path,FilePath|out-string).trim())" ;
                     if($whatif){$smsg = "-whatif:$($smsg)" }
                     write-host $smsg ;
@@ -10850,6 +11215,85 @@ Function New-GitHubGist {
 #*------^ New-GitHubGist.ps1 ^------
 
 
+#*------v Out-ISETab.ps1 v------
+Function Out-ISETab {
+    <#
+    .SYNOPSIS
+    Out-ISETab.ps1 - Runs specified input (pipeline) into a Tab in ISE (new tab, default, -currenttab if specified)
+    .NOTES
+    Version     : 0.0.
+    Author      : Todd Kadrie
+    Website     : http://www.toddomation.com
+    Twitter     : @tostka / http://twitter.com/tostka
+    CreatedDate : 2026-
+    FileName    : Out-ISETab.ps1
+    License     : MIT License
+    Copyright   : (c) 2026 Todd Kadrie
+    Github      : https://github.com/tostka/verb-XXX
+    Tags        : Powershell
+    AddedCredit : jdhitsolutions
+    AddedWebsite: https://github.com/jdhitsolutions/ISEScriptingGeek/
+    AddedTwitter: URL
+    REVISIONS
+    * 10:13 AM 4/9/2026 init
+    * Jul 3, 2023 jdh posted vers
+    .DESCRIPTION
+    Out-ISETab.ps1 - Runs specified input (pipeline) into a Tab in ISE (new tab, default, -currenttab if specified)
+    .INPUTS
+    object[]
+    Accepts pipeline input
+    .OUTPUTS
+    None. Returns no objects or output (.NET types)
+    .EXAMPLE
+    PS> gc d:\scripts\out-iseTab_func.ps1 | Out-ISETab
+    Demo pipeline content from a script file, creates a new tab in current ISE and populates the tab with the inbound content        
+    .EXAMPLE
+    PS> gc d:\scripts\out-iseTab_func.ps1 | Out-ISETab -currentfile
+    Demo above but recycles the current open tab/file as the destination
+    .LINK
+    https://github.com/tostka/verb-dev
+    .LINK
+    https://github.com/jdhitsolutions/ISEScriptingGeek/
+    #>
+    [CmdletBinding()]
+    [alias('tab')]
+    Param (
+        [Parameter(Position = 0, Mandatory, ValueFromPipeline)]
+            [object[]]$InputObject,
+            [Switch]$UseCurrentFile
+    )
+    Begin {
+        if ($psISE) {
+            Write-Verbose -Message "Starting $($MyInvocation.MyCommand)"
+            if ($UseCurrentFile) {
+                Write-Verbose 'Using current file'
+                $tab = $psISE.CurrentFile
+            }
+            else {
+                #create a new file
+                Write-Verbose 'Creating a new tab'
+                $tab = $psISE.CurrentPowerShellTab.Files.Add()
+            }
+        } else {
+            Write-Warning 'This function requires the Windows PowerShell ISE.'
+            return ; 
+        }
+        $data = @()
+    }
+    Process {
+        #add each piped object
+        $data += $InputObject
+    } #process
+    End {
+        #send the data to the ISE tab
+        $tab.Editor.InsertText(($data | Out-String))
+        Write-Verbose -Message "Ending $($MyInvocation.MyCommand)"
+    }
+}
+
+#*------^ Out-ISETab.ps1 ^------
+
+
 #*------v pop-FunctionDev.ps1 v------
 function pop-FunctionDev {
     <#
@@ -11500,6 +11944,101 @@ git push -u origin tostka/BRANCHNAME
 #*------^ push-FunctionDev.ps1 ^------
 
 
+#*------v Reset-ISEFile.ps1 v------
+Function Reset-ISEFile {
+    <#
+    .SYNOPSIS
+    Reset-ISEFile - Close & Reopen current tab file
+    .NOTES
+    Version     : 0.0.
+    Author      : Todd Kadrie
+    Website     : http://www.toddomation.com
+    Twitter     : @tostka / http://twitter.com/tostka
+    CreatedDate : 2026-
+    FileName    : Reset-ISEFile.ps1
+    License     : MIT License
+    Copyright   : (c) 2026 Todd Kadrie
+    Github      : https://github.com/tostka/verb-XXX
+    Tags        : Powershell
+    AddedCredit : jdhitsolutions
+    AddedWebsite: https://github.com/jdhitsolutions/ISEScriptingGeek/
+    AddedTwitter: URL
+    REVISIONS
+    * 10:13 AM 4/9/2026 init, added check for breakpoints, and pre-exported status prompt.
+    * Jul 3, 2023 jdh posted vers
+    .DESCRIPTION
+    Reset-ISEFile.ps1 - Close & Reopen current tab file
+    .INPUTS
+    None. Does not accepted piped input.(.NET types, can add description)
+    .OUTPUTS
+    None. Returns no objects or output (.NET types)
+    System.Boolean
+    .EXAMPLE
+    PS> Reset-ISEFile
+    EXSAMPLEOUTPUT
+    Run with whatif & verbose
+    .LINK
+    https://github.com/tostka/verb-dev
+    .LINK
+    https://github.com/jdhitsolutions/ISEScriptingGeek/
+    #>
+    [cmdletbinding()]
+    Param()
+    if ($psISE) {
+    #save the current file path
+    #$path = $psISE.CurrentFile.FullPath
+    $tScript = $psise.CurrentFile.FullPath ;
+    $xBPs= get-psbreakpoint |?{ ($_.Script -eq $tScript) -AND ($_.line)} ;
+    if($xBPs){        
+        # default to same loc, variant name of script in currenttab of ise
+        $xFname=$tScript.replace(".ps1","-ps1.xml").replace(".psm1","-psm1.xml").replace(".","-BP.") ;
+        $AllUsrsScripts = "$($env:ProgramFiles)\WindowsPowerShell\Scripts" ;                 
+        if(-not (test-path $AllUsrsScripts )){mkdir $AllUsrsScripts  -verbose } ; 
+        if( ( (split-path $xFname) -eq $AllUsrsScripts) -OR (-not(test-path (split-path $xFname))) ){
+            # if in the AllUsers profile, or the ISE script dir is invalid
+            if($tdir = get-item "$([Environment]::GetFolderPath('MyDocuments'))\WindowsPowershell\Scripts"){
+                write-verbose "(`$tDir:CUser has a profile Scripts dir: using it for xml output:`n$($tdir))" ;
+            } elseif($tdir = get-item $PathDefault){
+                write-verbose "(`$tDir:Using `$PathDefault:$($PathDefault))" ; 
+            } else {
+                throw "Unable to resolve a suitable destination for the current script`n$($tScript)" ; 
+                break ; 
+            } ; 
+            $smsg = "broken path, defaulting to: $($tdir.fullname)" ; 
+            $xFname = $xFname.replace( (split-path $xFname), $tdir.fullname) ;
+        } ;
+        $smsg = "PSBreakpoints are defined, reloading will reset to PRIOR last saved breakpoints!" ;
+        if(test-path $xFname){
+            $smsg += "`n... and existing Breakpoint file exists at:`n$((gci $xFname | ft -a |out-string).trim())" ; 
+        } else{
+            $smsg += "`n... but they are *UNEXPORTED* - *NO* existing Breakpoint file exists" ; 
+        }; 
+        write-warning $smsg ;
+        $bRet=Read-Host "Enter YYY to continue. Anything else will exit"  ;
+        if ($bRet.ToUpper() -eq "YYY") {
+            $smsg = "(Moving on)" ;
+            write-host -foregroundcolor green $smsg  ;
+        } else {
+            $smsg = "(*skip* use of -NoFunc)" ;
+            write-host -foregroundcolor yellow $smsg  ;
+            return; # return (exits script or function); break (exits loop/switch) ; exit 1 (terms context,can close ps)
+        } ; 
+    }
+    #get current index
+    $i = $psISE.CurrentPowerShellTab.files.IndexOf($psISE.CurrentFile)
+    #remove the file
+    [void]$psISE.CurrentPowerShellTab.Files.Remove($psISE.CurrentFile)
+    [void]$psISE.CurrentPowerShellTab.Files.Add($tScript)
+    #file always added to the end
+    [void]$psISE.CurrentPowerShellTab.files.Move(($psISE.CurrentPowerShellTab.files.count - 1), $i)
+    } else {
+        Write-Warning 'This function requires the Windows PowerShell ISE.'
+    }
+}
+
+#*------^ Reset-ISEFile.ps1 ^------
+
+
 #*------v restore-ISEConsoleColors.ps1 v------
 Function restore-ISEConsoleColors {
     <#
@@ -11797,6 +12336,59 @@ Function save-ISEConsoleColors {
 }
 
 #*------^ save-ISEConsoleColors.ps1 ^------
+
+
+#*------v Set-ISEScriptLocation.ps1 v------
+Function Set-ISEScriptLocation {
+    <#
+    .SYNOPSIS
+    Set-ISEScriptLocation - cd to parent directory of current File Tab
+    .NOTES
+    Version     : 0.0.
+    Author      : Todd Kadrie
+    Website     : http://www.toddomation.com
+    Twitter     : @tostka / http://twitter.com/tostka
+    CreatedDate : 2026-
+    FileName    : Set-ISEScriptLocation.ps1
+    License     : MIT License
+    Copyright   : (c) 2026 Todd Kadrie
+    Github      : https://github.com/tostka/verb-XXX
+    Tags        : Powershell
+    AddedCredit : jdhitsolutions
+    AddedWebsite: https://github.com/jdhitsolutions/ISEScriptingGeek/
+    AddedTwitter: URL
+    REVISIONS
+    * 10:13 AM 4/9/2026 init, added psie check
+    * Jul 3, 2023 jdh posted vers
+    .DESCRIPTION
+    Set-ISEScriptLocation - cd to parent directory of current File Tab
+    .INPUTS
+    None. Does not accepted piped input.(.NET types, can add description)
+    .OUTPUTS
+    None. Returns no objects or output (.NET types)
+    System.Boolean
+    .EXAMPLE
+    PS> Set-ISEScriptLocation
+    EXSAMPLEOUTPUT
+    Run with whatif & verbose
+    .LINK
+    https://github.com/tostka/verb-dev
+    .LINK
+    https://github.com/jdhitsolutions/ISEScriptingGeek/
+    #>
+    [cmdletbinding()]
+    [alias("sd")]
+    Param()
+    if ($psISE) {
+        $path = Split-Path -Path $psISE.CurrentFile.FullPath
+        set-location -path $path
+        clear-host
+    } else {
+        Write-Warning 'This function requires the Windows PowerShell ISE.'
+    }
+}
+
+#*------^ Set-ISEScriptLocation.ps1 ^------
 
 
 #*------v show-ISEOpenTab.ps1 v------
@@ -16516,7 +17108,7 @@ $($logfile)
 
 #*======^ END FUNCTIONS ^======
 
-Export-ModuleMember -Function backup-ModuleBuild,check-PsLocalRepoRegistration,confirm-ModuleBuildSync,confirm-ModulePsd1Version,confirm-ModulePsm1Version,confirm-ModuleTestPs1Guid,convert-CommandLine2VSCDebugJson,convertFrom-EscapedPSText,Convert-HelpToHtmlFile,convert-ISEOpenSession,converto-VSCConfig,ConvertTo-Breakpoint,_extractBreakpoint,convertTo-EscapedPSText,ConvertTo-ModuleDynamicTDO,ConvertTo-ModuleMergedTDO,convertTo-UnwrappedPS,convertTo-WrappedPS,copy-ISELocalSourceToTab,copy-ISETabFileToLocal,export-CommentBasedHelpToFileTDO,export-FunctionsToFilesTDO,export-ISEBreakPoints,export-ISEBreakPointsALL,export-ISEOpenFiles,export-OpenNotepads,find-NounAliasesTDO,get-AliasAssignsAST,get-CodeProfileAST,get-CodeRiskProfileAST,Get-CommentBlocks,get-FunctionBlock,get-FunctionBlocks,get-HelpParsed,get-ISEBreakPoints,get-ISEOpenFilesExported,get-ModuleRevisedCommands,get-NounAliasTDO,get-OpenNotepadsExported,get-ProjectNameTDO,Get-PSBreakpointSorted,Get-PSModuleFile,get-StrictMode,Version,ToString,get-VariableAssignsAST,get-VerbAliasTDO,Get-VerbSynonymTDO,get-VersionInfo,import-ISEBreakPoints,import-ISEBreakPointsALL,import-ISEConsoleColors,import-ISEOpenFiles,import-OpenNotepads,Initialize-ModuleFingerprint,Get-PSModuleFile,Initialize-PSModuleDirectories,move-ISEBreakPoints,new-CBH,New-GitHubGist,pop-FunctionDev,push-FunctionDev,restore-ISEConsoleColors,restore-ModuleBuild,save-ISEConsoleColors,show-ISEOpenTab,show-ISEOpenTabPaths,show-Verbs,Split-CommandLine,Step-ModuleVersionCalculated,Get-PSModuleFile,Test-ModuleTMPFiles,test-VerbStandard,Uninstall-ModuleForce,update-NewModule,get-FolderEmpty,reset-ModulePublishingDirectory,populate-ModulePublishingDirectory -Alias *
+Export-ModuleMember -Function backup-ModuleBuild,check-PsLocalRepoRegistration,close-ISEOpenfiles,close-ISEOtherOpenFiles.ps1,confirm-ModuleBuildSync,confirm-ModulePsd1Version,confirm-ModulePsm1Version,confirm-ModuleTestPs1Guid,convert-CommandLine2VSCDebugJson,convertFrom-EscapedPSText,Convert-HelpToHtmlFile,Convert-ISEOpenFileToText,convert-ISEOpenSession,converto-VSCConfig,ConvertTo-Breakpoint,_extractBreakpoint,convertTo-EscapedPSText,ConvertTo-ModuleDynamicTDO,ConvertTo-ModuleMergedTDO,convertTo-UnwrappedPS,convertTo-WrappedPS,copy-ISELocalSourceToTab,copy-ISETabFileToLocal,export-CommentBasedHelpToFileTDO,export-FunctionsToFilesTDO,export-ISEBreakPoints,export-ISEBreakPointsALL,export-ISEOpenFiles,export-OpenNotepads,find-NounAliasesTDO,get-AliasAssignsAST,get-CodeProfileAST,get-CodeRiskProfileAST,Get-CommentBlocks,get-FunctionBlock,get-FunctionBlocks,get-HelpParsed,get-ISEBreakPoints,get-ISEOpenFilesExported,get-ModuleRevisedCommands,get-NounAliasTDO,get-OpenNotepadsExported,get-ProjectNameTDO,Get-PSBreakpointSorted,Get-PSModuleFile,Get-ScriptCommentsTDO,get-StrictMode,Version,ToString,get-VariableAssignsAST,get-VerbAliasTDO,Get-VerbSynonymTDO,get-VersionInfo,import-ISEBreakPoints,import-ISEBreakPointsALL,import-ISEConsoleColors,import-ISEOpenFiles,import-OpenNotepads,Initialize-ModuleFingerprint,Get-PSModuleFile,Initialize-PSModuleDirectories,move-ISEBreakPoints,new-CBH,New-GitHubGist,Out-ISETab,pop-FunctionDev,push-FunctionDev,Reset-ISEFile,restore-ISEConsoleColors,restore-ModuleBuild,save-ISEConsoleColors,Set-ISEScriptLocation,show-ISEOpenTab,show-ISEOpenTabPaths,show-Verbs,Split-CommandLine,Step-ModuleVersionCalculated,Get-PSModuleFile,Test-ModuleTMPFiles,test-VerbStandard,Uninstall-ModuleForce,update-NewModule,get-FolderEmpty,reset-ModulePublishingDirectory,populate-ModulePublishingDirectory -Alias *
 
 
 
@@ -16524,8 +17116,8 @@ Export-ModuleMember -Function backup-ModuleBuild,check-PsLocalRepoRegistration,c
 # SIG # Begin signature block
 # MIIELgYJKoZIhvcNAQcCoIIEHzCCBBsCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUHfxqqx0e1zx1wsgvXbcaoPCA
-# xwmgggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQU9LbBzsnuFulgc+jhBQOLvIgt
+# l66gggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
 # MCwxKjAoBgNVBAMTIVBvd2VyU2hlbGwgTG9jYWwgQ2VydGlmaWNhdGUgUm9vdDAe
 # Fw0xNDEyMjkxNzA3MzNaFw0zOTEyMzEyMzU5NTlaMBUxEzARBgNVBAMTClRvZGRT
 # ZWxmSUkwgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBALqRVt7uNweTkZZ+16QG
@@ -16540,9 +17132,9 @@ Export-ModuleMember -Function backup-ModuleBuild,check-PsLocalRepoRegistration,c
 # AWAwggFcAgEBMEAwLDEqMCgGA1UEAxMhUG93ZXJTaGVsbCBMb2NhbCBDZXJ0aWZp
 # Y2F0ZSBSb290AhBaydK0VS5IhU1Hy6E1KUTpMAkGBSsOAwIaBQCgeDAYBgorBgEE
 # AYI3AgEMMQowCKACgAChAoAAMBkGCSqGSIb3DQEJAzEMBgorBgEEAYI3AgEEMBwG
-# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBToPkdO
-# mp7uRFkmEN/6rt1LQFfxADANBgkqhkiG9w0BAQEFAASBgA8m9rPj3CNPc0aQneIA
-# h4Wlx6blqjJJYoIywG3H8NAwH0R1OTi3xbijG70r0UPjnt5/JPqsx/aWfX3CnfOj
-# BcYB+4I++j4R92IICYtwxdKfobZxpWYqeT4Q0E9/4KWeaRywUI6thLivC44cN6T5
-# asUxppGibynyTt+57F52NoOr
+# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBSAr6CC
+# CHG3Zo7Wd+tYWHzB4IYzpDANBgkqhkiG9w0BAQEFAASBgAwwbb46VRtptOL0dcP7
+# kuuKyGfJJXD0x3vHVsBUCLyXPmals04HihfS1jUsjl4Vrt376oYAcID2oXthoEjt
+# EIrXhTjIGymLI82oFodNTkM222S18PGs8VL2HOA2RCK42jFvXqc5E4CcYNOnNWIS
+# j0PJmkPbioRSdoVh4K7m/C8Q
 # SIG # End signature block
