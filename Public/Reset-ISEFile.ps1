@@ -19,6 +19,7 @@ Function Reset-ISEFile {
     AddedWebsite: https://github.com/jdhitsolutions/ISEScriptingGeek/
     AddedTwitter: URL
     REVISIONS
+    * 10:29 AM 4/10/2026 added confirming tooltip 
     * 12:15 PM 4/9/2026 added -force; init, added check for breakpoints, and pre-exported status prompt.
     * Jul 3, 2023 jdh posted vers
     .DESCRIPTION
@@ -45,54 +46,67 @@ Function Reset-ISEFile {
             [switch]$Force
     )
     if ($psISE) {
-    #save the current file path
-    #$path = $psISE.CurrentFile.FullPath
-    $tScript = $psise.CurrentFile.FullPath ;
-    $xBPs= get-psbreakpoint |?{ ($_.Script -eq $tScript) -AND ($_.line)} ;
-    if($xBPs){        
-        # default to same loc, variant name of script in currenttab of ise
-        $xFname=$tScript.replace(".ps1","-ps1.xml").replace(".psm1","-psm1.xml").replace(".","-BP.") ;
-        $AllUsrsScripts = "$($env:ProgramFiles)\WindowsPowerShell\Scripts" ;                 
-        if(-not (test-path $AllUsrsScripts )){mkdir $AllUsrsScripts  -verbose } ; 
-        if( ( (split-path $xFname) -eq $AllUsrsScripts) -OR (-not(test-path (split-path $xFname))) ){
-            # if in the AllUsers profile, or the ISE script dir is invalid
-            if($tdir = get-item "$([Environment]::GetFolderPath('MyDocuments'))\WindowsPowershell\Scripts"){
-                write-verbose "(`$tDir:CUser has a profile Scripts dir: using it for xml output:`n$($tdir))" ;
-            } elseif($tdir = get-item $PathDefault){
-                write-verbose "(`$tDir:Using `$PathDefault:$($PathDefault))" ; 
-            } else {
-                throw "Unable to resolve a suitable destination for the current script`n$($tScript)" ; 
-                break ; 
-            } ; 
-            $smsg = "broken path, defaulting to: $($tdir.fullname)" ; 
-            $xFname = $xFname.replace( (split-path $xFname), $tdir.fullname) ;
-        } ;
-        $smsg = "PSBreakpoints are defined, reloading will reset to PRIOR last saved breakpoints!" ;
-        if(test-path $xFname){
-            $smsg += "`n... and existing Breakpoint file exists at:`n$((gci $xFname | ft -a |out-string).trim())" ; 
-        } else{
-            $smsg += "`n... but they are *UNEXPORTED* - *NO* existing Breakpoint file exists" ; 
-        }; 
-        write-warning $smsg ;
-        if(-not $Force){
-            $bRet=Read-Host "Enter YYY to continue. Anything else will exit"  ;
-            if ($bRet.ToUpper() -eq "YYY") {
-                $smsg = "(Moving on)" ;
-                write-host -foregroundcolor green $smsg  ;
-            } else {
-                $smsg = "(*skip* use of -NoFunc)" ;
-                write-host -foregroundcolor yellow $smsg  ;
-                return; # return (exits script or function); break (exits loop/switch) ; exit 1 (terms context,can close ps)
-            } ; 
+        #save the current file path
+        #$path = $psISE.CurrentFile.FullPath
+        $tScript = $psise.CurrentFile.FullPath ;
+        $xBPs= get-psbreakpoint |?{ ($_.Script -eq $tScript) -AND ($_.line)} ;
+        if($xBPs){        
+            # default to same loc, variant name of script in currenttab of ise
+            $xFname=$tScript.replace(".ps1","-ps1.xml").replace(".psm1","-psm1.xml").replace(".","-BP.") ;
+            $AllUsrsScripts = "$($env:ProgramFiles)\WindowsPowerShell\Scripts" ;                 
+            if(-not (test-path $AllUsrsScripts )){mkdir $AllUsrsScripts  -verbose } ; 
+            if( ( (split-path $xFname) -eq $AllUsrsScripts) -OR (-not(test-path (split-path $xFname))) ){
+                # if in the AllUsers profile, or the ISE script dir is invalid
+                if($tdir = get-item "$([Environment]::GetFolderPath('MyDocuments'))\WindowsPowershell\Scripts"){
+                    write-verbose "(`$tDir:CUser has a profile Scripts dir: using it for xml output:`n$($tdir))" ;
+                } elseif($tdir = get-item $PathDefault){
+                    write-verbose "(`$tDir:Using `$PathDefault:$($PathDefault))" ; 
+                } else {
+                    throw "Unable to resolve a suitable destination for the current script`n$($tScript)" ; 
+                    break ; 
+                } ; 
+                $smsg = "broken path, defaulting to: $($tdir.fullname)" ; 
+                $xFname = $xFname.replace( (split-path $xFname), $tdir.fullname) ;
+            } ;
+            $smsg = "PSBreakpoints are defined, reloading will reset to PRIOR last saved breakpoints!" ;
+            if(test-path $xFname){
+                $smsg += "`n... and existing Breakpoint file exists at:`n$((gci $xFname | ft -a |out-string).trim())" ; 
+            } else{
+                $smsg += "`n... but they are *UNEXPORTED* - *NO* existing Breakpoint file exists" ; 
+            }; 
+            write-warning $smsg ;
+            if(-not $Force){
+                $bRet=Read-Host "Enter YYY to continue. Anything else will exit"  ;
+                if ($bRet.ToUpper() -eq "YYY") {
+                    $smsg = "(Moving on)" ;
+                    write-host -foregroundcolor green $smsg  ;
+                } else {
+                    $smsg = "(*skip* use of -NoFunc)" ;
+                    write-host -foregroundcolor yellow $smsg  ;
+                    return; # return (exits script or function); break (exits loop/switch) ; exit 1 (terms context,can close ps)
+                } ; 
+            }
         }
-    }
-    #get current index
-    $i = $psISE.CurrentPowerShellTab.files.IndexOf($psISE.CurrentFile)
-    #remove the file
-    [void]$psISE.CurrentPowerShellTab.Files.Remove($psISE.CurrentFile)
-    [void]$psISE.CurrentPowerShellTab.Files.Add($tScript)
-    #file always added to the end
-    [void]$psISE.CurrentPowerShellTab.files.Move(($psISE.CurrentPowerShellTab.files.count - 1), $i)
+        #get current index
+        $i = $psISE.CurrentPowerShellTab.files.IndexOf($psISE.CurrentFile)
+        #remove the file
+        [void]$psISE.CurrentPowerShellTab.Files.Remove($psISE.CurrentFile)
+        [void]$psISE.CurrentPowerShellTab.Files.Add($tScript)
+        #file always added to the end
+        [void]$psISE.CurrentPowerShellTab.files.Move(($psISE.CurrentPowerShellTab.files.count - 1), $i)
+        # traytip the update status
+        $TipTimeSecs = 2   ; 
+        $tipTitle = "ISE update";
+        $tipText =  "ISE: current tab reloaded";
+        if(gcm show-traytip -ea 0){
+                show-traytip -Type info -Text $tipText -Title $tipTitle  -ShowTime $TipTimeSecs ;
+        }elseif(gcm show-MsgBox -ea 0){
+                show-traytip -Type info -Text $tipText -Title $tipTitle  -ShowTime $TipTimeSecs ;
+                Show-MsgBox -Prompt $tipText -Title $tipTitle -Icon Information -BoxType OkOnly
+        }else{
+            $shell = New-Object -ComObject WScript.Shell
+            $shell.Popup($tipText, 5,  $tipTitle , 64) ;
+        }
     } else {
         Write-Warning 'This function requires the Windows PowerShell ISE.'
     }
