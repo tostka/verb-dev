@@ -1,27 +1,28 @@
-﻿# get-ISEBreakPoints.ps1 
+﻿# get-ISEBreakPointsThisTab.ps1 
 
-#*------v get-ISEBreakPoints.ps1 v------
-function get-ISEBreakPoints {
+#*------v get-ISEBreakPointsThisTab.ps1 v------
+function get-ISEBreakPointsThisTab {
     <#
     .SYNOPSIS
-    get-ISEBreakPoints - Get-PSBreakPoints for solely the current focused ISE Open Tab
+    get-ISEBreakPointsThisTab - Get-PSBreakPoint for solely the current focused ISE Open Tab (fltered on -script param)
     .NOTES
     Version     : 1.0.0
     Author      : Todd Kadrie
     Website     : http://www.toddomation.com
     Twitter     : @tostka / http://twitter.com/tostka
     CreatedDate : 2024-07-11
-    FileName    : get-ISEBreakPoints
+    FileName    : get-ISEBreakPointsThisTab
     License     : MIT License
     Copyright   : (c) 2024 Todd Kadrie
     Github      : https://github.com/tostka/verb-dev
     Tags        : Powershell,ISE,development,debugging
     REVISIONS
+    * 7:41 AM 4/13/2026 ren get-ISEBreakPoints-> get-ISEBreakPointThisTab; add alias get-PSBreakPointThisTab
     * 2:27 PM 7/11/2024 init
     .DESCRIPTION
-    get-ISEBreakPoints - Get-PSBreakPoints for solely the current focused ISE Open Tab (fltered on -script param)
+    get-ISEBreakPointsThisTab - Get-PSBreakPoint for solely the current focused ISE Open Tab (fltered on -script param)
     .EXAMPLE
-    PS> get-isebreakpoints | ft -a ; 
+    PS> get-ISEBreakPointsThisTab | ft -a ; 
 
         ID Script                        Line Command Variable Action
         -- ------                        ---- ------- -------- ------
@@ -34,14 +35,17 @@ function get-ISEBreakPoints {
     Github      : https://github.com/tostka
     #>
     [CmdletBinding()]
-    [Alias('gIseBp')]
+    [Alias('gIseBp','gbptt','get-isebreakpoint','get-isebreakpoints','get-PSBreakPointThisTab')]
     PARAM() ;
+    BEGIN{
+        $prpSloPsb = 'ID','Script','Line','Enabled' ; 
+    }
     PROCESS {
         if ($psise){
             if($psise.CurrentFile.FullPath){
-                get-psbreakpoint -script $psise.CurrentFile.FullPath | write-output ; 
+                get-psbreakpoint -script $psise.CurrentFile.FullPath | select-object $prpSloPsb | write-output ; 
             } else { throw "ISE has no current file open. Open a file before using this script" } ; 
         } else {  write-warning "This script only functions within PS ISE, with a script file open for editing" };
     } # PROC-E
 }
-#*------^ get-ISEBreakPoints.ps1 ^------
+#*------^ get-ISEBreakPointsThisTab.ps1 ^------
