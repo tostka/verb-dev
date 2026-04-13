@@ -34,7 +34,7 @@ function enable-ISEBreakPointsThisTab {
     Github      : https://github.com/tostka
     #>
     [CmdletBinding()]
-    [Alias('gIseBp')]
+    [Alias('eIseBp','enable-PSBreakpointThisTab','eBptt')]
     PARAM() ;
     BEGIN{
         $prpSloPsb = 'ID','Script','Line','Enabled' ; 
