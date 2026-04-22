@@ -45,13 +45,13 @@ function export-ISEBreakPoints {
     [Alias('epIseBp','epBP')]
     PARAM(
         [Parameter(HelpMessage="Default Path for export (when `$Script directory is unavailable)[-PathDefault c:\path-to\]")]
-        [ValidateScript({Test-Path $_ -PathType 'Container'})]
-        [string]$PathDefault = 'c:\scripts',
+            [ValidateScript({Test-Path $_ -PathType 'Container'})]
+            [string]$PathDefault = 'c:\scripts',
         [Parameter(HelpMessage="(debugging):Path to target Script file (defaults to Current ISE Tab fullpath)[-Script c:\path-to\file.ext]")]
         #[ValidateScript({Test-Path $_})]
-        [string]$Script,
+            [string]$Script,
         [Parameter(HelpMessage="Whatif Flag  [-whatIf]")]
-        [switch] $whatIf
+            [switch] $whatIf
     ) ;
     BEGIN {
         ${CmdletName} = $PSCmdlet.MyInvocation.MyCommand.Name ;
