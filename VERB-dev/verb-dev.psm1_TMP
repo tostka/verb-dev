@@ -5,7 +5,7 @@
 .SYNOPSIS
 VERB-dev - Development PS Module-related generic functions
 .NOTES
-Version     : 1.5.88
+Version     : 1.5.89
 Author      : Todd Kadrie
 Website     :	https://www.toddomation.com
 Twitter     :	@tostka
@@ -1577,6 +1577,147 @@ function convert-CommandLine2VSCDebugJson {
 #*------^ convert-CommandLine2VSCDebugJson.ps1 ^------
 
 
+#*------v Convert-CommandToSplatTDO.ps1 v------
+Function Convert-CommandToSplatTDO {
+    <#
+    .SYNOPSIS
+    Convert-CommandToSplatTDO - Convert the named parameter part of a command into a splat (hash table oif parameters): In the ISE works from current selected text; pastes result over the selection (otherwise copies to CB and echoes to pipeline)
+    .NOTES
+    Version     : 1.0.0
+    Author      : Todd Kadrie
+    Website     : http://www.toddomation.com
+    Twitter     : @tostka / http://twitter.com/tostka
+    CreatedDate : 2024-07-11
+    FileName    : Convert-CommandToSplatTDO.ps1
+    License     : (non asserted)
+    Copyright   : (non asserted)
+    Github      : https://github.com/tostka/verb-dev
+    Tags        : Powershell,ISE,development,debugging
+    REVISIONS
+    * 8:46 AM 4/16/2026 init; works on cmdline as well as JH's intent as menu item in ISE; 
+        added testing for positional params (won't have -parametername), explicit error for correction. 
+        Also patched over internal functions and other cmdlets that won't gcm resolve (forces $cmd to $AstTokens[0].text)
+        -> resolves what it finds into a splat whether all the components are resolvable or not.
+    - Adapted from Jeff Hicks posted Convert-CommandToSplat: jdhitsolutions/ISEScriptingGeek
+
+    .DESCRIPTION
+    Convert-CommandToSplatTDO - Convert the named parameter part of a command into a splat (hash table oif parameters): In the ISE works from current selected text; pastes result over the selection (otherwise copies to CB and echoes to pipeline)
+    .EXAMPLE
+    PS> convert-commandtoSplatTDO -Text "gci -path d:\scripts\* -include @('*.ps1','*.psm1','*.xml') -recurse" ; 
+
+        $plt = @{
+            path = 'd:\scripts\*'
+            include = '@('''*.ps1'',''*.psm1'',''*.xml''')'
+        }
+        Get-ChildItem @plt
+
+
+    Convert command line text specification to splat [hashtable]
+    .LINK
+    https://github.com/jdhitsolutions/ISEScriptingGeek/tree/master/functions
+    .LINK
+    Github      : https://github.com/tostka/verb-dev
+    #>
+    [CmdletBinding()]
+    [Alias('Convert-CommandToSplat')]
+    Param(
+        #[ValidateNotNullOrEmpty()]
+        [String]$Text #= $psISE.CurrentFile.editor.SelectedText
+    )
+    if(-not $Text -AND $psISE -AND $psISE.CurrentFile.editor.SelectedText){$Text = $psISE.CurrentFile.editor.SelectedText}
+    if(-not $Text){
+        write-warning 'unable to locate either an ISE selection, or an explicit -Text "code commandline" input!'
+        return ; 
+    } ; 
+    Set-StrictMode -Version latest
+    #New-Variable $AstTokens -Force
+    New-Variable AstTokens -Force
+    New-Variable astErr -Force
+    Write-Verbose "Converting $text"
+    $AST = [System.Management.Automation.Language.Parser]::ParseInput($Text, [ref]$AstTokens, [ref]$astErr)
+    #resolve the command name
+    TRY{
+        $cmdType = Get-Command $AstTokens[0].text -erroraction STOP
+        if ($cmdType.CommandType -eq 'Alias') {
+            $cmd = $cmdType.ResolvedCommandName
+        }
+        else {
+            $cmd = $cmdType.Name
+        }
+    }CATCH{
+        # it will fail on internal or undefined functions/cmdlets, try to get it to rote parse the cmdline
+        $cmd = $AstTokens[0].text ; 
+    }
+    Write-Verbose "Command is $cmd"
+    Write-Verbose ($AstTokens | Out-String)
+    #last item is end of input token
+    $r = for ($i = 1; $i -lt $AstTokens.count - 2 ; $i++) {
+        #if ($AstTokens[$i].ParameterName) {
+        if (($AstTokens[$i] | gm).Name.contains('ParameterName') -AND $AstTokens[$i].ParameterName) {
+            $p = $AstTokens[$i].ParameterName
+            Write-Verbose "Parameter name = $p"
+            Write-Verbose ($AstTokens[$i] | Out-String)
+            $v = ''
+            #check next token
+            if ($AstTokens[$i + 1].Kind -match 'Parameter|NewLine|EndOfInput') {
+                #the parameter must be a switch
+                $v = "`$True"
+            }
+            else {
+                While ($AstTokens[$i + 1].Kind -notmatch 'Parameter|NewLine|EndOfInput') {
+                    #break out of loop if there is no text
+                    Write-Verbose "While: $($AstTokens[$i])"
+                    $i++
+                    #test if value is a string and if it is quoted, if not include quotes
+                    if ($AstTokens[$i].Text -match '\D' -AND $AstTokens[$i].Text -notmatch '"\w+.*"' -AND $AstTokens[$i].Text -notmatch "'\w+.*'") {
+                        #ignore commas and variables
+                        if ($AstTokens[$i].Kind -match 'Comma|Variable') {
+                            $value = $AstTokens[$i].Text
+                        }
+                        else {
+                            #Assume text and quote it
+                            Write-Verbose "Quoting $($AstTokens[$i].Text)"
+                            $value = "'$($AstTokens[$i].Text)'"
+                        }
+                    }
+                    else {
+                        Write-Verbose "Using text as is for $($AstTokens[$i].Text)"
+                        $value = $AstTokens[$i].Text
+                    }
+                    Write-Verbose "Adding $Value to `$v"
+                    $v += $value
+                }
+            } #while
+            "$p = $v`r"
+            Write-Verbose "hashentry -> $p = $v`r"
+        }else{
+            if($i -eq 1){
+                write-warning "First parameter - $( $asttokens[$i].value) has *NO* explicit Parameter name: postiional parameter? You need to use explicit parameter names for this function!" ; 
+                return ; 
+            } ; 
+        }
+    } #for
+    Write-Verbose 'Finished processing AST'
+    Write-Verbose ($r | Out-String)
+    #create text
+    $HashText = @"
+`$plt = @{
+ $r}
+$cmd @plt
+"@
+    if($HashText -AND $psISE -AND $psISE.CurrentFile.editor.SelectedText){
+        #insert the text which should replace the highlighted line
+        $psISE.CurrentFile.Editor.InsertText($HashText)
+    }else{
+        $hashText | out-clipboard ; 
+        write-host "Copied results to clipboard" ; 
+        $hashText | write-output ; 
+    } ; 
+}
+
+#*------^ Convert-CommandToSplatTDO.ps1 ^------
+
+
 #*------v convertFrom-EscapedPSText.ps1 v------
 Function convertFrom-EscapedPSText {
     <#
@@ -2397,10 +2538,13 @@ Function Convert-ISEOpenFileToText {
     AddedWebsite: https://github.com/jdhitsolutions/ISEScriptingGeek/
     AddedTwitter: URL
     REVISIONS
+    * 9:30 AM 4/10/2026 added traytip/msgbox notif of the update
     * 10:13 AM 4/9/2026 init
     * Jul 3, 2023 jdh posted vers
     .DESCRIPTION
     Convert-ISEOpenFileToText.ps1 - Save current tab file to .txt extension
+    .PARAMETER Reload
+    Switch to reload the original .ps1 file (vs leave .txt copy open)[-Reload]
     .INPUTS
     None. Does not accepted piped input.(.NET types, can add description)
     .OUTPUTS
@@ -2413,25 +2557,48 @@ Function Convert-ISEOpenFileToText {
     .LINK
     https://github.com/tostka/verb-dev
     .LINK
-    https://github.com/jdhitsolutions/ISEScriptingGeek/    #>
+    https://github.com/jdhitsolutions/ISEScriptingGeek/    
+    #>
     [CmdletBinding()]
     Param (
-        [Switch]$Reload
+        [Parameter(HelpMessage="Switch to reload the original .ps1 file (vs leave .txt copy open)[-Reload]")]
+            [Switch]$Reload
     )
-    #verify we are in the ISE
-    if ($psISE) {        
-        #get the current file name and path and change the extension
-        $PSVersion = $psISE.CurrentFile.FullPath
-        $textVersion = $PSVersion -replace '.ps1', '-ps1.txt'
-        #save the file.
-        $psISE.CurrentFile.SaveAs($textVersion)
-        #if -Reload then reload the PowerShell file into the ISE
-        if ($Reload) {
-            $psISE.CurrentPowerShellTab.Files.Add($PSVersion)
+    BEGIN{
+        $TipTimeSecs = 5        
+    }PROCESS{
+        if ($psISE) {                    
+            #get the current file name and path and change the extension
+            $PSVersion = $psISE.CurrentFile.FullPath
+            $textVersion = $PSVersion -replace '.ps1', '-ps1.txt'
+            #save the file.
+            $psISE.CurrentFile.SaveAs($textVersion)
+            # traytip the update status
+            $tipTitle = "ISE update";
+            $tipText =  "ISE: current tab saved as .txt";
+            if(gcm show-traytip -ea 0){
+                 show-traytip -Type info -Text $tipText -Title $tipTitle  -ShowTime $TipTimeSecs ; 
+            }elseif(gcm show-MsgBox -ea 0){
+                 show-traytip -Type info -Text $tipText -Title $tipTitle  -ShowTime $TipTimeSecs ; 
+                 Show-MsgBox -Prompt $tipText -Title $tipTitle -Icon Information -BoxType OkOnly
+            }else{
+                $shell = New-Object -ComObject WScript.Shell
+                $shell.Popup($tipText, 5,  $tipTitle , 64) ; 
+            }
+            #if -Reload then reload the PowerShell file into the ISE
+            if ($Reload) {
+                $psISE.CurrentPowerShellTab.Files.Add($PSVersion)
+            }
+        } else {
+            Write-Warning 'This function requires the Windows PowerShell ISE.'
         }
-    } #if $psISE
-    else {
-        Write-Warning 'This function requires the Windows PowerShell ISE.'
+    }
+    END{
+        if(gcm show-traytip -ea 0){
+            # Recommended: Clean up the icon after use to avoid it lingering in the tray
+            Wait-Event -Timeout 5 # Optional delay
+            TRY{$notification.Dispose()}CATCH{} # eat error, after tray closes
+        } ; 
     }
 }
 
@@ -5217,6 +5384,110 @@ function copy-ISETabFileToLocal {
 #*------^ copy-ISETabFileToLocal.ps1 ^------
 
 
+#*------v disable-ISEBreakPointsThisTab.ps1 v------
+function disable-ISEBreakPointsThisTab {
+    <#
+    .SYNOPSIS
+    disable-ISEBreakPointsThisTab - Disable-PSBreakPoints for solely the current focused ISE Open Tab
+    .NOTES
+    Version     : 1.0.0
+    Author      : Todd Kadrie
+    Website     : http://www.toddomation.com
+    Twitter     : @tostka / http://twitter.com/tostka
+    CreatedDate : 2024-07-11
+    FileName    : disable-ISEBreakPointsThisTab
+    License     : MIT License
+    Copyright   : (c) 2024 Todd Kadrie
+    Github      : https://github.com/tostka/verb-dev
+    Tags        : Powershell,ISE,development,debugging
+    REVISIONS
+    * 7:34 AM 4/13/2026 init
+    .DESCRIPTION
+    disable-ISEBreakPointsThisTab - Disable-PSBreakPoints for solely the current focused ISE Open Tab
+    .EXAMPLE
+    PS> disable-ISEBreakPointsThisTab | ft -a ; 
+
+        ID Script                        Line Command Variable Action
+        -- ------                        ---- ------- -------- ------
+        70 test-ExoDnsRecordTDO_func.ps1  237                        
+        71 test-ExoDnsRecordTDO_func.ps1  256                        
+        ...                       
+
+    Export all 'line'-type breakpoints on the current open ISE tab, to a matching xml file
+    .LINK
+    Github      : https://github.com/tostka
+    #>
+    [CmdletBinding()]
+    [Alias('dIseBp','disable-PSBreakpointThisTab','dBptt')]
+    PARAM() ;
+    BEGIN{
+        $prpSloPsb = 'ID','Script','Line','Enabled' ; 
+    }
+    PROCESS {
+        if ($psise){
+            if($psise.CurrentFile.FullPath){
+                get-psbreakpoint -script $psise.CurrentFile.FullPath | disable-psbreakpoints ; 
+                get-psbreakpoint -script $psise.CurrentFile.FullPath | select-object $prpSloPsb | write-output ; 
+            } else { throw "ISE has no current file open. Open a file before using this script" } ; 
+        } else {  write-warning "This script only functions within PS ISE, with a script file open for editing" };
+    } # PROC-E
+}
+
+#*------^ disable-ISEBreakPointsThisTab.ps1 ^------
+
+
+#*------v enable-ISEBreakPointsThisTab.ps1 v------
+function enable-ISEBreakPointsThisTab {
+    <#
+    .SYNOPSIS
+    enable-ISEBreakPointsThisTab - Enable-PSBreakPoints for solely the current focused ISE Open Tab
+    .NOTES
+    Version     : 1.0.0
+    Author      : Todd Kadrie
+    Website     : http://www.toddomation.com
+    Twitter     : @tostka / http://twitter.com/tostka
+    CreatedDate : 2024-07-11
+    FileName    : enable-ISEBreakPointsThisTab
+    License     : MIT License
+    Copyright   : (c) 2024 Todd Kadrie
+    Github      : https://github.com/tostka/verb-dev
+    Tags        : Powershell,ISE,development,debugging
+    REVISIONS
+    * 7:34 AM 4/13/2026 init
+    .DESCRIPTION
+    enable-ISEBreakPointsThisTab - Enable-PSBreakPoints for solely the current focused ISE Open Tab
+    .EXAMPLE
+    PS> enable-ISEBreakPointsThisTab | ft -a ; 
+
+        ID Script                        Line Command Variable Action
+        -- ------                        ---- ------- -------- ------
+        70 test-ExoDnsRecordTDO_func.ps1  237                        
+        71 test-ExoDnsRecordTDO_func.ps1  256                        
+        ...                       
+
+    Export all 'line'-type breakpoints on the current open ISE tab, to a matching xml file
+    .LINK
+    Github      : https://github.com/tostka
+    #>
+    [CmdletBinding()]
+    [Alias('eIseBp','enable-PSBreakpointThisTab','eBptt')]
+    PARAM() ;
+    BEGIN{
+        $prpSloPsb = 'ID','Script','Line','Enabled' ; 
+    }
+    PROCESS {
+        if ($psise){
+            if($psise.CurrentFile.FullPath){
+                get-psbreakpoint -script $psise.CurrentFile.FullPath | enable-psbreakpoints ; 
+                get-psbreakpoint -script $psise.CurrentFile.FullPath | select-object $prpSloPsb | write-output ;
+            } else { throw "ISE has no current file open. Open a file before using this script" } ; 
+        } else {  write-warning "This script only functions within PS ISE, with a script file open for editing" };
+    } # PROC-E
+}
+
+#*------^ enable-ISEBreakPointsThisTab.ps1 ^------
+
+
 #*------v export-CommentBasedHelpToFileTDO.ps1 v------
 function export-CommentBasedHelpToFileTDO{
     <#
@@ -5599,13 +5870,13 @@ function export-ISEBreakPoints {
     [Alias('epIseBp','epBP')]
     PARAM(
         [Parameter(HelpMessage="Default Path for export (when `$Script directory is unavailable)[-PathDefault c:\path-to\]")]
-        [ValidateScript({Test-Path $_ -PathType 'Container'})]
-        [string]$PathDefault = 'c:\scripts',
+            [ValidateScript({Test-Path $_ -PathType 'Container'})]
+            [string]$PathDefault = 'c:\scripts',
         [Parameter(HelpMessage="(debugging):Path to target Script file (defaults to Current ISE Tab fullpath)[-Script c:\path-to\file.ext]")]
         #[ValidateScript({Test-Path $_})]
-        [string]$Script,
+            [string]$Script,
         [Parameter(HelpMessage="Whatif Flag  [-whatIf]")]
-        [switch] $whatIf
+            [switch] $whatIf
     ) ;
     BEGIN {
         ${CmdletName} = $PSCmdlet.MyInvocation.MyCommand.Name ;
@@ -7793,28 +8064,29 @@ function get-HelpParsed {
 #*------^ get-HelpParsed.ps1 ^------
 
 
-#*------v get-ISEBreakPoints.ps1 v------
-function get-ISEBreakPoints {
+#*------v get-ISEBreakPointsThisTab.ps1 v------
+function get-ISEBreakPointsThisTab {
     <#
     .SYNOPSIS
-    get-ISEBreakPoints - Get-PSBreakPoints for solely the current focused ISE Open Tab
+    get-ISEBreakPointsThisTab - Get-PSBreakPoint for solely the current focused ISE Open Tab (fltered on -script param)
     .NOTES
     Version     : 1.0.0
     Author      : Todd Kadrie
     Website     : http://www.toddomation.com
     Twitter     : @tostka / http://twitter.com/tostka
     CreatedDate : 2024-07-11
-    FileName    : get-ISEBreakPoints
+    FileName    : get-ISEBreakPointsThisTab
     License     : MIT License
     Copyright   : (c) 2024 Todd Kadrie
     Github      : https://github.com/tostka/verb-dev
     Tags        : Powershell,ISE,development,debugging
     REVISIONS
+    * 7:41 AM 4/13/2026 ren get-ISEBreakPoints-> get-ISEBreakPointThisTab; add alias get-PSBreakPointThisTab
     * 2:27 PM 7/11/2024 init
     .DESCRIPTION
-    get-ISEBreakPoints - Get-PSBreakPoints for solely the current focused ISE Open Tab (fltered on -script param)
+    get-ISEBreakPointsThisTab - Get-PSBreakPoint for solely the current focused ISE Open Tab (fltered on -script param)
     .EXAMPLE
-    PS> get-isebreakpoints | ft -a ; 
+    PS> get-ISEBreakPointsThisTab | ft -a ; 
 
         ID Script                        Line Command Variable Action
         -- ------                        ---- ------- -------- ------
@@ -7827,18 +8099,21 @@ function get-ISEBreakPoints {
     Github      : https://github.com/tostka
     #>
     [CmdletBinding()]
-    [Alias('gIseBp')]
+    [Alias('gIseBp','gbptt','get-isebreakpoint','get-isebreakpoints','get-PSBreakPointThisTab')]
     PARAM() ;
+    BEGIN{
+        $prpSloPsb = 'ID','Script','Line','Enabled' ; 
+    }
     PROCESS {
         if ($psise){
             if($psise.CurrentFile.FullPath){
-                get-psbreakpoint -script $psise.CurrentFile.FullPath | write-output ; 
+                get-psbreakpoint -script $psise.CurrentFile.FullPath | select-object $prpSloPsb | write-output ; 
             } else { throw "ISE has no current file open. Open a file before using this script" } ; 
         } else {  write-warning "This script only functions within PS ISE, with a script file open for editing" };
     } # PROC-E
 }
 
-#*------^ get-ISEBreakPoints.ps1 ^------
+#*------^ get-ISEBreakPointsThisTab.ps1 ^------
 
 
 #*------v get-ISEOpenFilesExported.ps1 v------
@@ -11979,6 +12254,7 @@ Function Reset-ISEFile {
     AddedWebsite: https://github.com/jdhitsolutions/ISEScriptingGeek/
     AddedTwitter: URL
     REVISIONS
+    * 10:29 AM 4/10/2026 added confirming tooltip 
     * 12:15 PM 4/9/2026 added -force; init, added check for breakpoints, and pre-exported status prompt.
     * Jul 3, 2023 jdh posted vers
     .DESCRIPTION
@@ -12005,54 +12281,67 @@ Function Reset-ISEFile {
             [switch]$Force
     )
     if ($psISE) {
-    #save the current file path
-    #$path = $psISE.CurrentFile.FullPath
-    $tScript = $psise.CurrentFile.FullPath ;
-    $xBPs= get-psbreakpoint |?{ ($_.Script -eq $tScript) -AND ($_.line)} ;
-    if($xBPs){        
-        # default to same loc, variant name of script in currenttab of ise
-        $xFname=$tScript.replace(".ps1","-ps1.xml").replace(".psm1","-psm1.xml").replace(".","-BP.") ;
-        $AllUsrsScripts = "$($env:ProgramFiles)\WindowsPowerShell\Scripts" ;                 
-        if(-not (test-path $AllUsrsScripts )){mkdir $AllUsrsScripts  -verbose } ; 
-        if( ( (split-path $xFname) -eq $AllUsrsScripts) -OR (-not(test-path (split-path $xFname))) ){
-            # if in the AllUsers profile, or the ISE script dir is invalid
-            if($tdir = get-item "$([Environment]::GetFolderPath('MyDocuments'))\WindowsPowershell\Scripts"){
-                write-verbose "(`$tDir:CUser has a profile Scripts dir: using it for xml output:`n$($tdir))" ;
-            } elseif($tdir = get-item $PathDefault){
-                write-verbose "(`$tDir:Using `$PathDefault:$($PathDefault))" ; 
-            } else {
-                throw "Unable to resolve a suitable destination for the current script`n$($tScript)" ; 
-                break ; 
-            } ; 
-            $smsg = "broken path, defaulting to: $($tdir.fullname)" ; 
-            $xFname = $xFname.replace( (split-path $xFname), $tdir.fullname) ;
-        } ;
-        $smsg = "PSBreakpoints are defined, reloading will reset to PRIOR last saved breakpoints!" ;
-        if(test-path $xFname){
-            $smsg += "`n... and existing Breakpoint file exists at:`n$((gci $xFname | ft -a |out-string).trim())" ; 
-        } else{
-            $smsg += "`n... but they are *UNEXPORTED* - *NO* existing Breakpoint file exists" ; 
-        }; 
-        write-warning $smsg ;
-        if(-not $Force){
-            $bRet=Read-Host "Enter YYY to continue. Anything else will exit"  ;
-            if ($bRet.ToUpper() -eq "YYY") {
-                $smsg = "(Moving on)" ;
-                write-host -foregroundcolor green $smsg  ;
-            } else {
-                $smsg = "(*skip* use of -NoFunc)" ;
-                write-host -foregroundcolor yellow $smsg  ;
-                return; # return (exits script or function); break (exits loop/switch) ; exit 1 (terms context,can close ps)
-            } ; 
+        #save the current file path
+        #$path = $psISE.CurrentFile.FullPath
+        $tScript = $psise.CurrentFile.FullPath ;
+        $xBPs= get-psbreakpoint |?{ ($_.Script -eq $tScript) -AND ($_.line)} ;
+        if($xBPs){        
+            # default to same loc, variant name of script in currenttab of ise
+            $xFname=$tScript.replace(".ps1","-ps1.xml").replace(".psm1","-psm1.xml").replace(".","-BP.") ;
+            $AllUsrsScripts = "$($env:ProgramFiles)\WindowsPowerShell\Scripts" ;                 
+            if(-not (test-path $AllUsrsScripts )){mkdir $AllUsrsScripts  -verbose } ; 
+            if( ( (split-path $xFname) -eq $AllUsrsScripts) -OR (-not(test-path (split-path $xFname))) ){
+                # if in the AllUsers profile, or the ISE script dir is invalid
+                if($tdir = get-item "$([Environment]::GetFolderPath('MyDocuments'))\WindowsPowershell\Scripts"){
+                    write-verbose "(`$tDir:CUser has a profile Scripts dir: using it for xml output:`n$($tdir))" ;
+                } elseif($tdir = get-item $PathDefault){
+                    write-verbose "(`$tDir:Using `$PathDefault:$($PathDefault))" ; 
+                } else {
+                    throw "Unable to resolve a suitable destination for the current script`n$($tScript)" ; 
+                    break ; 
+                } ; 
+                $smsg = "broken path, defaulting to: $($tdir.fullname)" ; 
+                $xFname = $xFname.replace( (split-path $xFname), $tdir.fullname) ;
+            } ;
+            $smsg = "PSBreakpoints are defined, reloading will reset to PRIOR last saved breakpoints!" ;
+            if(test-path $xFname){
+                $smsg += "`n... and existing Breakpoint file exists at:`n$((gci $xFname | ft -a |out-string).trim())" ; 
+            } else{
+                $smsg += "`n... but they are *UNEXPORTED* - *NO* existing Breakpoint file exists" ; 
+            }; 
+            write-warning $smsg ;
+            if(-not $Force){
+                $bRet=Read-Host "Enter YYY to continue. Anything else will exit"  ;
+                if ($bRet.ToUpper() -eq "YYY") {
+                    $smsg = "(Moving on)" ;
+                    write-host -foregroundcolor green $smsg  ;
+                } else {
+                    $smsg = "(*skip* use of -NoFunc)" ;
+                    write-host -foregroundcolor yellow $smsg  ;
+                    return; # return (exits script or function); break (exits loop/switch) ; exit 1 (terms context,can close ps)
+                } ; 
+            }
         }
-    }
-    #get current index
-    $i = $psISE.CurrentPowerShellTab.files.IndexOf($psISE.CurrentFile)
-    #remove the file
-    [void]$psISE.CurrentPowerShellTab.Files.Remove($psISE.CurrentFile)
-    [void]$psISE.CurrentPowerShellTab.Files.Add($tScript)
-    #file always added to the end
-    [void]$psISE.CurrentPowerShellTab.files.Move(($psISE.CurrentPowerShellTab.files.count - 1), $i)
+        #get current index
+        $i = $psISE.CurrentPowerShellTab.files.IndexOf($psISE.CurrentFile)
+        #remove the file
+        [void]$psISE.CurrentPowerShellTab.Files.Remove($psISE.CurrentFile)
+        [void]$psISE.CurrentPowerShellTab.Files.Add($tScript)
+        #file always added to the end
+        [void]$psISE.CurrentPowerShellTab.files.Move(($psISE.CurrentPowerShellTab.files.count - 1), $i)
+        # traytip the update status
+        $TipTimeSecs = 2   ; 
+        $tipTitle = "ISE update";
+        $tipText =  "ISE: current tab reloaded";
+        if(gcm show-traytip -ea 0){
+                show-traytip -Type info -Text $tipText -Title $tipTitle  -ShowTime $TipTimeSecs ;
+        }elseif(gcm show-MsgBox -ea 0){
+                show-traytip -Type info -Text $tipText -Title $tipTitle  -ShowTime $TipTimeSecs ;
+                Show-MsgBox -Prompt $tipText -Title $tipTitle -Icon Information -BoxType OkOnly
+        }else{
+            $shell = New-Object -ComObject WScript.Shell
+            $shell.Popup($tipText, 5,  $tipTitle , 64) ;
+        }
     } else {
         Write-Warning 'This function requires the Windows PowerShell ISE.'
     }
@@ -12358,6 +12647,62 @@ Function save-ISEConsoleColors {
 }
 
 #*------^ save-ISEConsoleColors.ps1 ^------
+
+
+#*------v save-ISEOpenfiles.ps1 v------
+Function save-ISEOpenfiles {
+    <#
+    .SYNOPSIS
+    save-ISEOpenfiles - Save all open tabs in ISE
+    .NOTES
+    Version     : 0.0.
+    Author      : Todd Kadrie
+    Website     : http://www.toddomation.com
+    Twitter     : @tostka / http://twitter.com/tostka
+    CreatedDate : 2026-
+    FileName    : save-ISEOpenfiles.ps1
+    License     : MIT License
+    Copyright   : (c) 2026 Todd Kadrie
+    Github      : https://github.com/tostka/verb-XXX
+    Tags        : Powershell
+    AddedCredit : jdhitsolutions
+    AddedWebsite: https://github.com/jdhitsolutions/ISEScriptingGeek/
+    AddedTwitter: URL
+    REVISIONS
+    * 3:00 PM 4/14/2026 the presave portion of close-iseopenfiles
+    .DESCRIPTION
+    save-ISEOpenfiles - Save all open tabs in ISE
+    .INPUTS
+    None. Does not accepted piped input.(.NET types, can add description)
+    .OUTPUTS
+    None. Returns no objects or output (.NET types)
+    .EXAMPLE
+    PS> save-ISEOpenfiles
+    EXSAMPLEOUTPUT
+    Run with whatif & verbose
+    .LINK
+    https://github.com/tostka/verb-dev
+    .LINK
+    https://github.com/jdhitsolutions/ISEScriptingGeek/
+    #>
+    [CmdletBinding()]
+    Param(
+        #[Parameter(HelpMessage="Force (Confirm-override switch[-force]")]
+        #    [switch]$Force
+    )
+    if ($psISE) {    
+        $smsg = "Saving all previously saved Tabs in ISE" ;
+        write-host -foregroundcolor yellow $smsg ; 
+        #$unsaved = $psISE.CurrentPowerShellTab.Files.Where( { -not $_.isSaved })
+        #$saved = $psISE.CurrentPowerShellTab.Files.Where( { $_.isSaved })
+        $psISE.CurrentPowerShellTab.Files | Where-Object { -not $_.IsSaved -and -not $_.IsUntitled } | 
+            ForEach-Object { write-host "saving:$($_.fullpath)..." ; $_.Save() }        
+    } else {
+        Write-Warning 'This function requires the Windows PowerShell ISE.'
+    }
+}
+
+#*------^ save-ISEOpenfiles.ps1 ^------
 
 
 #*------v Set-ISEScriptLocation.ps1 v------
@@ -17130,7 +17475,7 @@ $($logfile)
 
 #*======^ END FUNCTIONS ^======
 
-Export-ModuleMember -Function backup-ModuleBuild,check-PsLocalRepoRegistration,close-ISEOpenfiles,close-ISEOtherOpenFiles.ps1,confirm-ModuleBuildSync,confirm-ModulePsd1Version,confirm-ModulePsm1Version,confirm-ModuleTestPs1Guid,convert-CommandLine2VSCDebugJson,convertFrom-EscapedPSText,Convert-HelpToHtmlFile,Convert-ISEOpenFileToText,convert-ISEOpenSession,converto-VSCConfig,ConvertTo-Breakpoint,_extractBreakpoint,convertTo-EscapedPSText,ConvertTo-ModuleDynamicTDO,ConvertTo-ModuleMergedTDO,convertTo-UnwrappedPS,convertTo-WrappedPS,copy-ISELocalSourceToTab,copy-ISETabFileToLocal,export-CommentBasedHelpToFileTDO,export-FunctionsToFilesTDO,export-ISEBreakPoints,export-ISEBreakPointsALL,export-ISEOpenFiles,export-OpenNotepads,find-NounAliasesTDO,get-AliasAssignsAST,get-CodeProfileAST,get-CodeRiskProfileAST,Get-CommentBlocks,get-FunctionBlock,get-FunctionBlocks,get-HelpParsed,get-ISEBreakPoints,get-ISEOpenFilesExported,get-ModuleRevisedCommands,get-NounAliasTDO,get-OpenNotepadsExported,get-ProjectNameTDO,Get-PSBreakpointSorted,Get-PSModuleFile,Get-ScriptCommentsTDO,get-StrictMode,Version,ToString,get-VariableAssignsAST,get-VerbAliasTDO,Get-VerbSynonymTDO,get-VersionInfo,import-ISEBreakPoints,import-ISEBreakPointsALL,import-ISEConsoleColors,import-ISEOpenFiles,import-OpenNotepads,Initialize-ModuleFingerprint,Get-PSModuleFile,Initialize-PSModuleDirectories,move-ISEBreakPoints,new-CBH,New-GitHubGist,Out-ISETab,pop-FunctionDev,push-FunctionDev,Reset-ISEFile,restore-ISEConsoleColors,restore-ModuleBuild,save-ISEConsoleColors,Set-ISEScriptLocation,show-ISEOpenTab,show-ISEOpenTabPaths,show-Verbs,Split-CommandLine,Step-ModuleVersionCalculated,Get-PSModuleFile,Test-ModuleTMPFiles,test-VerbStandard,Uninstall-ModuleForce,update-NewModule,get-FolderEmpty,reset-ModulePublishingDirectory,populate-ModulePublishingDirectory -Alias *
+Export-ModuleMember -Function backup-ModuleBuild,check-PsLocalRepoRegistration,close-ISEOpenfiles,close-ISEOtherOpenFiles.ps1,confirm-ModuleBuildSync,confirm-ModulePsd1Version,confirm-ModulePsm1Version,confirm-ModuleTestPs1Guid,convert-CommandLine2VSCDebugJson,Convert-CommandToSplatTDO,convertFrom-EscapedPSText,Convert-HelpToHtmlFile,Convert-ISEOpenFileToText,convert-ISEOpenSession,converto-VSCConfig,ConvertTo-Breakpoint,_extractBreakpoint,convertTo-EscapedPSText,ConvertTo-ModuleDynamicTDO,ConvertTo-ModuleMergedTDO,convertTo-UnwrappedPS,convertTo-WrappedPS,copy-ISELocalSourceToTab,copy-ISETabFileToLocal,disable-ISEBreakPointsThisTab,enable-ISEBreakPointsThisTab,export-CommentBasedHelpToFileTDO,export-FunctionsToFilesTDO,export-ISEBreakPoints,export-ISEBreakPointsALL,export-ISEOpenFiles,export-OpenNotepads,find-NounAliasesTDO,get-AliasAssignsAST,get-CodeProfileAST,get-CodeRiskProfileAST,Get-CommentBlocks,get-FunctionBlock,get-FunctionBlocks,get-HelpParsed,get-ISEBreakPointsThisTab,get-ISEOpenFilesExported,get-ModuleRevisedCommands,get-NounAliasTDO,get-OpenNotepadsExported,get-ProjectNameTDO,Get-PSBreakpointSorted,Get-PSModuleFile,Get-ScriptCommentsTDO,get-StrictMode,Version,ToString,get-VariableAssignsAST,get-VerbAliasTDO,Get-VerbSynonymTDO,get-VersionInfo,import-ISEBreakPoints,import-ISEBreakPointsALL,import-ISEConsoleColors,import-ISEOpenFiles,import-OpenNotepads,Initialize-ModuleFingerprint,Get-PSModuleFile,Initialize-PSModuleDirectories,move-ISEBreakPoints,new-CBH,New-GitHubGist,Out-ISETab,pop-FunctionDev,push-FunctionDev,Reset-ISEFile,restore-ISEConsoleColors,restore-ModuleBuild,save-ISEConsoleColors,save-ISEOpenfiles,Set-ISEScriptLocation,show-ISEOpenTab,show-ISEOpenTabPaths,show-Verbs,Split-CommandLine,Step-ModuleVersionCalculated,Get-PSModuleFile,Test-ModuleTMPFiles,test-VerbStandard,Uninstall-ModuleForce,update-NewModule,get-FolderEmpty,reset-ModulePublishingDirectory,populate-ModulePublishingDirectory -Alias *
 
 
 
