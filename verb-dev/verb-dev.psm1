@@ -1,11 +1,11 @@
-﻿# VERB-dev.psm1
+﻿# verb-dev.psm1
 
 
 <#
 .SYNOPSIS
 VERB-dev - Development PS Module-related generic functions
 .NOTES
-Version     : 1.5.89
+Version     : 1.5.90
 Author      : Todd Kadrie
 Website     :	https://www.toddomation.com
 Twitter     :	@tostka
@@ -296,6 +296,7 @@ Function close-ISEOpenfiles {
     AddedWebsite: https://github.com/jdhitsolutions/ISEScriptingGeek/
     AddedTwitter: URL
     REVISIONS
+    * 3:03 PM 4/29/2026 added -path, optional fullname spec for tabs to target (vs all tabs)
     * 12:15 PM 4/9/2026 added -force; init, added psie check
     * Jul 3, 2023 jdh posted vers
     .DESCRIPTION
@@ -311,38 +312,62 @@ Function close-ISEOpenfiles {
     PS> close-ISEOpenfiles
     EXSAMPLEOUTPUT
     Run with whatif & verbose
+    .EXAMPLE
+    PS> write-verbose 'dump listing of fullpath of all open tabs, from which to pick -Path array targets' ; 
+    PS> show-ISEOpenTabPaths | sort | ?{$_ -match '_func\.ps1'} | close-ISEOpenFiles ; 
+    Demo use of the -Path spec (via pipeline) to close a list/subset of open files
     .LINK
     https://github.com/tostka/verb-dev
     .LINK
     https://github.com/jdhitsolutions/ISEScriptingGeek/
     #>
     [CmdletBinding()]
-    Param(
+    PARAM(
         [Parameter(HelpMessage="Force (Confirm-override switch[-force]")]
-            [switch]$Force
+            [switch]$Force,
+        [Parameter(ValueFromPipeline=$true,HelpMessage="Optional Path to filter against the ISE .files Fullname string (for direct ISE console use)[-Path ' D:\scripts\show-ISEOpenTab_func.ps1']")]
+            [string[]]$Path,
+        [switch]$whatif
     )
-    if ($psISE) {
-        $smsg = "Closing all Tabs in this ISE!" ;
-        write-warning $smsg ; 
-        if(-not $Force){
-            $bRet=Read-Host "Enter YYY to continue. Anything else will exit"  ;
-            if ($bRet.ToUpper() -eq "YYY") {
-                $smsg = "(Moving on)" ;
-                write-host -foregroundcolor green $smsg  ;
-            } else {
-                $smsg = "(*skip* use of -NoFunc)" ;
-                write-host -foregroundcolor yellow $smsg  ;
-                return; # return (exits script or function); break (exits loop/switch) ; exit 1 (terms context,can close ps)
+    BEGIN{
+        if ($psISE) {
+            $smsg = "Closing all Tabs in this ISE!" ;
+            write-warning $smsg ; 
+            if(-not $Force){
+                $bRet=Read-Host "Enter YYY to continue. Anything else will exit"  ;
+                if ($bRet.ToUpper() -eq "YYY") {
+                    $smsg = "(Moving on)" ;
+                    write-host -foregroundcolor green $smsg  ;
+                } else {
+                    $smsg = "(*skip* use of -NoFunc)" ;
+                    write-host -foregroundcolor yellow $smsg  ;
+                    return; # return (exits script or function); break (exits loop/switch) ; exit 1 (terms context,can close ps)
+                } ; 
             } ; 
-        } ; 
-        $saved = $psISE.CurrentPowerShellTab.Files.Where( { $_.isSaved })
+            $saved = $psISE.CurrentPowerShellTab.Files.Where( { $_.isSaved })
+        } else {
+            Write-Warning 'This function requires the Windows PowerShell ISE.'
+            return  ; 
+        }
+        $aggpath = @() ; 
+    }
+    PROCESS{
+        $aggPath += $path ; 
+    }
+    END{
+        #$saved = $saved | ?{$Path -contains $_.Fullpath  } ; 
+        if($aggPath){
+            $saved = $saved | ?{$aggPath -contains $_.Fullpath  } ;
+        }  ; 
         foreach ($file in $saved) {
             Write-Verbose "closing $($file.FullPath)"
-            [void]$psISE.CurrentPowerShellTab.files.Remove($file)
-        }
-    } else {
-        Write-Warning 'This function requires the Windows PowerShell ISE.'
-    }
+            if(-not $whatif){
+                [void]$psISE.CurrentPowerShellTab.files.Remove($file)
+            }else{
+                write-host "-whatif:`$psISE.CurrentPowerShellTab.files.Remove($($file.fullpath))" ; 
+            } ; 
+        }   
+    } ;      
 }
 
 #*------^ close-ISEOpenfiles.ps1 ^------
@@ -6063,9 +6088,9 @@ function export-ISEOpenFiles {
     [Alias('epIseOpen')]
     PARAM(
         [Parameter(Position=0,HelpMessage="Optional Tag to apply to filename[-Tag MFA]")]
-        [string]$Tag,
+            [string]$Tag,
         [Parameter(HelpMessage="Whatif Flag  [-whatIf]")]
-        [switch] $whatIf
+            [switch] $whatIf
     ) ;
     BEGIN {
         ${CmdletName} = $PSCmdlet.MyInvocation.MyCommand.Name ;
@@ -17483,8 +17508,8 @@ Export-ModuleMember -Function backup-ModuleBuild,check-PsLocalRepoRegistration,c
 # SIG # Begin signature block
 # MIIELgYJKoZIhvcNAQcCoIIEHzCCBBsCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQU/gUQgp7Dt0fJld/jebs03c6V
-# SvWgggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUZtAERKevC4EIblDtHf+7UC0y
+# 8vqgggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
 # MCwxKjAoBgNVBAMTIVBvd2VyU2hlbGwgTG9jYWwgQ2VydGlmaWNhdGUgUm9vdDAe
 # Fw0xNDEyMjkxNzA3MzNaFw0zOTEyMzEyMzU5NTlaMBUxEzARBgNVBAMTClRvZGRT
 # ZWxmSUkwgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBALqRVt7uNweTkZZ+16QG
@@ -17499,9 +17524,9 @@ Export-ModuleMember -Function backup-ModuleBuild,check-PsLocalRepoRegistration,c
 # AWAwggFcAgEBMEAwLDEqMCgGA1UEAxMhUG93ZXJTaGVsbCBMb2NhbCBDZXJ0aWZp
 # Y2F0ZSBSb290AhBaydK0VS5IhU1Hy6E1KUTpMAkGBSsOAwIaBQCgeDAYBgorBgEE
 # AYI3AgEMMQowCKACgAChAoAAMBkGCSqGSIb3DQEJAzEMBgorBgEEAYI3AgEEMBwG
-# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBRTp8/8
-# D2uPIDR5+op/9DPpI9tRLjANBgkqhkiG9w0BAQEFAASBgFpwArlw5Ss+/t6B8yHZ
-# NbrFKEdWkQjoQSgJphIEqJLjJtvZkVWR8h9rNz9YhxvQgIlRNf1Nk29PioJrxJD1
-# x1hBbH0MaNQtohqP42c8+2HKNrUka8bM1XVytMWU3vVK0laBytsj9PJavF4kCvtd
-# j19Ex7dZhfTCiBBvQoV3d5ZH
+# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBSe4yAI
+# p4ixdGchK6dw8bM5RPGnmjANBgkqhkiG9w0BAQEFAASBgD8xqkMPdtE1CBjmZQ7M
+# tnlyd3fH2YAcpzXteiHvZc9CZqVRElVkdJ2aHh6VgH24/+dD+11mu+WSMK0nZnA/
+# d53I5JHkCSP7PKUZfBT8/JqGV3B2lGIhAgKWcE2riG/xGIFpmkWY1iOTkb76JuUy
+# LIgUJ9VqT/Ths9mW1J9X2kht
 # SIG # End signature block

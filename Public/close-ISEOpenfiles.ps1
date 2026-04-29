@@ -54,7 +54,13 @@ Function close-ISEOpenfiles {
     )
     BEGIN{
         if ($psISE) {
-            $smsg = "Closing all Tabs in this ISE!" ;
+            if($Path){
+                $smsg = "Closing matching Tabs in this ISE!" ;
+                $smsg += "`n`n$(($Path|out-string).trim())" ; 
+
+            }else{
+                $smsg = "Closing all Tabs in this ISE!" ;
+            } ; 
             write-warning $smsg ; 
             if(-not $Force){
                 $bRet=Read-Host "Enter YYY to continue. Anything else will exit"  ;
