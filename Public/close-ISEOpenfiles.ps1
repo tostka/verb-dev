@@ -39,6 +39,10 @@ Function close-ISEOpenfiles {
     PS> write-verbose 'dump listing of fullpath of all open tabs, from which to pick -Path array targets' ; 
     PS> show-ISEOpenTabPaths | sort | ?{$_ -match '_func\.ps1'} | close-ISEOpenFiles ; 
     Demo use of the -Path spec (via pipeline) to close a list/subset of open files
+    .EXAMPLE
+    PS> if ((gcm close-ISEOpenfiles -ea 0) -AND -not($psISE.CurrentPowerShellTab.AddOnsMenu.Submenus | Where-Object { $_.DisplayName -eq "Close All" })){
+    PS>    $psISE.CurrentPowerShellTab.AddOnsMenu.Submenus.Add("Close All",{close-ISEOpenfiles},"")
+    PS> } ; 
     .LINK
     https://github.com/tostka/verb-dev
     .LINK

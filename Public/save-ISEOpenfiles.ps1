@@ -1,5 +1,6 @@
 ﻿# save-ISEOpenfiles.ps1
 
+#region SAVE_ISEOPENFILES ; #*------v save-ISEOpenfiles v------
 Function save-ISEOpenfiles {
     <#
     .SYNOPSIS
@@ -19,6 +20,7 @@ Function save-ISEOpenfiles {
     AddedWebsite: https://github.com/jdhitsolutions/ISEScriptingGeek/
     AddedTwitter: URL
     REVISIONS
+    * 1:12 PM 5/4/2026 added demo mnu add
     * 3:00 PM 4/14/2026 the presave portion of close-iseopenfiles
     .DESCRIPTION
     save-ISEOpenfiles - Save all open tabs in ISE
@@ -30,6 +32,11 @@ Function save-ISEOpenfiles {
     PS> save-ISEOpenfiles
     EXSAMPLEOUTPUT
     Run with whatif & verbose
+    .EXAMPLE
+    # updated, precheck existing before blindly adding
+    PS> if ((gcm save-ISEOpenfiles --ea 0) -AND -not($psISE.CurrentPowerShellTab.AddOnsMenu.Submenus | Where-Object { $_.DisplayName -eq "Save All" })){
+    PS>    $psISE.CurrentPowerShellTab.AddOnsMenu.Submenus.Add("Save All",{save-ISEOpenfiles},"Ctrl+Shift+S")
+    PS> } ; 
     .LINK
     https://github.com/tostka/verb-dev
     .LINK
@@ -50,4 +57,5 @@ Function save-ISEOpenfiles {
     } else {
         Write-Warning 'This function requires the Windows PowerShell ISE.'
     }
-} #end function
+} 
+#endregion SAVE_ISEOPENFILES ; #*------^ END save-ISEOpenfiles ^------

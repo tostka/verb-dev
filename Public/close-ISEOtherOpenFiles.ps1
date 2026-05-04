@@ -1,7 +1,7 @@
 ﻿# close-ISEOtherOpenFiles.ps1
 
 #close all other saved files except for the active file
-Function close-ISEOtherOpenFiles.ps1 {
+Function close-ISEOtherOpenFiles {
      <#
     .SYNOPSIS
     close-ISEOtherOpenFiles - Close all _saved_ open tabs in ISE, other than Current Tab\File
@@ -20,6 +20,7 @@ Function close-ISEOtherOpenFiles.ps1 {
     AddedWebsite: https://github.com/jdhitsolutions/ISEScriptingGeek/
     AddedTwitter: URL
     REVISIONS
+    * 2:12 PM 5/4/2026 fixed function name typo
     * 12:15 PM 4/9/2026 added -force;init, added psie check
     * Jul 3, 2023 jdh posted vers
     .DESCRIPTION
