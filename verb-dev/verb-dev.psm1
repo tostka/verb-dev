@@ -5,7 +5,7 @@
 .SYNOPSIS
 VERB-dev - Development PS Module-related generic functions
 .NOTES
-Version     : 1.5.90
+Version     : 1.5.91
 Author      : Todd Kadrie
 Website     :	https://www.toddomation.com
 Twitter     :	@tostka
@@ -316,6 +316,10 @@ Function close-ISEOpenfiles {
     PS> write-verbose 'dump listing of fullpath of all open tabs, from which to pick -Path array targets' ; 
     PS> show-ISEOpenTabPaths | sort | ?{$_ -match '_func\.ps1'} | close-ISEOpenFiles ; 
     Demo use of the -Path spec (via pipeline) to close a list/subset of open files
+    .EXAMPLE
+    PS> if ((gcm close-ISEOpenfiles -ea 0) -AND -not($psISE.CurrentPowerShellTab.AddOnsMenu.Submenus | Where-Object { $_.DisplayName -eq "Close All" })){
+    PS>    $psISE.CurrentPowerShellTab.AddOnsMenu.Submenus.Add("Close All",{close-ISEOpenfiles},"")
+    PS> } ; 
     .LINK
     https://github.com/tostka/verb-dev
     .LINK
@@ -331,7 +335,13 @@ Function close-ISEOpenfiles {
     )
     BEGIN{
         if ($psISE) {
-            $smsg = "Closing all Tabs in this ISE!" ;
+            if($Path){
+                $smsg = "Closing matching Tabs in this ISE!" ;
+                $smsg += "`n`n$(($Path|out-string).trim())" ; 
+
+            }else{
+                $smsg = "Closing all Tabs in this ISE!" ;
+            } ; 
             write-warning $smsg ; 
             if(-not $Force){
                 $bRet=Read-Host "Enter YYY to continue. Anything else will exit"  ;
@@ -374,7 +384,7 @@ Function close-ISEOpenfiles {
 
 
 #*------v close-ISEOtherOpenFiles.ps1 v------
-Function close-ISEOtherOpenFiles.ps1 {
+Function close-ISEOtherOpenFiles {
      <#
     .SYNOPSIS
     close-ISEOtherOpenFiles - Close all _saved_ open tabs in ISE, other than Current Tab\File
@@ -393,6 +403,7 @@ Function close-ISEOtherOpenFiles.ps1 {
     AddedWebsite: https://github.com/jdhitsolutions/ISEScriptingGeek/
     AddedTwitter: URL
     REVISIONS
+    * 2:12 PM 5/4/2026 fixed function name typo
     * 12:15 PM 4/9/2026 added -force;init, added psie check
     * Jul 3, 2023 jdh posted vers
     .DESCRIPTION
@@ -12694,6 +12705,7 @@ Function save-ISEOpenfiles {
     AddedWebsite: https://github.com/jdhitsolutions/ISEScriptingGeek/
     AddedTwitter: URL
     REVISIONS
+    * 1:12 PM 5/4/2026 added demo mnu add
     * 3:00 PM 4/14/2026 the presave portion of close-iseopenfiles
     .DESCRIPTION
     save-ISEOpenfiles - Save all open tabs in ISE
@@ -12705,6 +12717,11 @@ Function save-ISEOpenfiles {
     PS> save-ISEOpenfiles
     EXSAMPLEOUTPUT
     Run with whatif & verbose
+    .EXAMPLE
+    # updated, precheck existing before blindly adding
+    PS> if ((gcm save-ISEOpenfiles --ea 0) -AND -not($psISE.CurrentPowerShellTab.AddOnsMenu.Submenus | Where-Object { $_.DisplayName -eq "Save All" })){
+    PS>    $psISE.CurrentPowerShellTab.AddOnsMenu.Submenus.Add("Save All",{save-ISEOpenfiles},"Ctrl+Shift+S")
+    PS> } ; 
     .LINK
     https://github.com/tostka/verb-dev
     .LINK
@@ -17500,7 +17517,7 @@ $($logfile)
 
 #*======^ END FUNCTIONS ^======
 
-Export-ModuleMember -Function backup-ModuleBuild,check-PsLocalRepoRegistration,close-ISEOpenfiles,close-ISEOtherOpenFiles.ps1,confirm-ModuleBuildSync,confirm-ModulePsd1Version,confirm-ModulePsm1Version,confirm-ModuleTestPs1Guid,convert-CommandLine2VSCDebugJson,Convert-CommandToSplatTDO,convertFrom-EscapedPSText,Convert-HelpToHtmlFile,Convert-ISEOpenFileToText,convert-ISEOpenSession,converto-VSCConfig,ConvertTo-Breakpoint,_extractBreakpoint,convertTo-EscapedPSText,ConvertTo-ModuleDynamicTDO,ConvertTo-ModuleMergedTDO,convertTo-UnwrappedPS,convertTo-WrappedPS,copy-ISELocalSourceToTab,copy-ISETabFileToLocal,disable-ISEBreakPointsThisTab,enable-ISEBreakPointsThisTab,export-CommentBasedHelpToFileTDO,export-FunctionsToFilesTDO,export-ISEBreakPoints,export-ISEBreakPointsALL,export-ISEOpenFiles,export-OpenNotepads,find-NounAliasesTDO,get-AliasAssignsAST,get-CodeProfileAST,get-CodeRiskProfileAST,Get-CommentBlocks,get-FunctionBlock,get-FunctionBlocks,get-HelpParsed,get-ISEBreakPointsThisTab,get-ISEOpenFilesExported,get-ModuleRevisedCommands,get-NounAliasTDO,get-OpenNotepadsExported,get-ProjectNameTDO,Get-PSBreakpointSorted,Get-PSModuleFile,Get-ScriptCommentsTDO,get-StrictMode,Version,ToString,get-VariableAssignsAST,get-VerbAliasTDO,Get-VerbSynonymTDO,get-VersionInfo,import-ISEBreakPoints,import-ISEBreakPointsALL,import-ISEConsoleColors,import-ISEOpenFiles,import-OpenNotepads,Initialize-ModuleFingerprint,Get-PSModuleFile,Initialize-PSModuleDirectories,move-ISEBreakPoints,new-CBH,New-GitHubGist,Out-ISETab,pop-FunctionDev,push-FunctionDev,Reset-ISEFile,restore-ISEConsoleColors,restore-ModuleBuild,save-ISEConsoleColors,save-ISEOpenfiles,Set-ISEScriptLocation,show-ISEOpenTab,show-ISEOpenTabPaths,show-Verbs,Split-CommandLine,Step-ModuleVersionCalculated,Get-PSModuleFile,Test-ModuleTMPFiles,test-VerbStandard,Uninstall-ModuleForce,update-NewModule,get-FolderEmpty,reset-ModulePublishingDirectory,populate-ModulePublishingDirectory -Alias *
+Export-ModuleMember -Function backup-ModuleBuild,check-PsLocalRepoRegistration,close-ISEOpenfiles,close-ISEOtherOpenFiles,confirm-ModuleBuildSync,confirm-ModulePsd1Version,confirm-ModulePsm1Version,confirm-ModuleTestPs1Guid,convert-CommandLine2VSCDebugJson,Convert-CommandToSplatTDO,convertFrom-EscapedPSText,Convert-HelpToHtmlFile,Convert-ISEOpenFileToText,convert-ISEOpenSession,converto-VSCConfig,ConvertTo-Breakpoint,_extractBreakpoint,convertTo-EscapedPSText,ConvertTo-ModuleDynamicTDO,ConvertTo-ModuleMergedTDO,convertTo-UnwrappedPS,convertTo-WrappedPS,copy-ISELocalSourceToTab,copy-ISETabFileToLocal,disable-ISEBreakPointsThisTab,enable-ISEBreakPointsThisTab,export-CommentBasedHelpToFileTDO,export-FunctionsToFilesTDO,export-ISEBreakPoints,export-ISEBreakPointsALL,export-ISEOpenFiles,export-OpenNotepads,find-NounAliasesTDO,get-AliasAssignsAST,get-CodeProfileAST,get-CodeRiskProfileAST,Get-CommentBlocks,get-FunctionBlock,get-FunctionBlocks,get-HelpParsed,get-ISEBreakPointsThisTab,get-ISEOpenFilesExported,get-ModuleRevisedCommands,get-NounAliasTDO,get-OpenNotepadsExported,get-ProjectNameTDO,Get-PSBreakpointSorted,Get-PSModuleFile,Get-ScriptCommentsTDO,get-StrictMode,Version,ToString,get-VariableAssignsAST,get-VerbAliasTDO,Get-VerbSynonymTDO,get-VersionInfo,import-ISEBreakPoints,import-ISEBreakPointsALL,import-ISEConsoleColors,import-ISEOpenFiles,import-OpenNotepads,Initialize-ModuleFingerprint,Get-PSModuleFile,Initialize-PSModuleDirectories,move-ISEBreakPoints,new-CBH,New-GitHubGist,Out-ISETab,pop-FunctionDev,push-FunctionDev,Reset-ISEFile,restore-ISEConsoleColors,restore-ModuleBuild,save-ISEConsoleColors,save-ISEOpenfiles,Set-ISEScriptLocation,show-ISEOpenTab,show-ISEOpenTabPaths,show-Verbs,Split-CommandLine,Step-ModuleVersionCalculated,Get-PSModuleFile,Test-ModuleTMPFiles,test-VerbStandard,Uninstall-ModuleForce,update-NewModule,get-FolderEmpty,reset-ModulePublishingDirectory,populate-ModulePublishingDirectory -Alias *
 
 
 
@@ -17508,8 +17525,8 @@ Export-ModuleMember -Function backup-ModuleBuild,check-PsLocalRepoRegistration,c
 # SIG # Begin signature block
 # MIIELgYJKoZIhvcNAQcCoIIEHzCCBBsCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUZtAERKevC4EIblDtHf+7UC0y
-# 8vqgggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUX2jxRf/3kJB/2G6zyHSbBOkS
+# YuegggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
 # MCwxKjAoBgNVBAMTIVBvd2VyU2hlbGwgTG9jYWwgQ2VydGlmaWNhdGUgUm9vdDAe
 # Fw0xNDEyMjkxNzA3MzNaFw0zOTEyMzEyMzU5NTlaMBUxEzARBgNVBAMTClRvZGRT
 # ZWxmSUkwgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBALqRVt7uNweTkZZ+16QG
@@ -17524,9 +17541,9 @@ Export-ModuleMember -Function backup-ModuleBuild,check-PsLocalRepoRegistration,c
 # AWAwggFcAgEBMEAwLDEqMCgGA1UEAxMhUG93ZXJTaGVsbCBMb2NhbCBDZXJ0aWZp
 # Y2F0ZSBSb290AhBaydK0VS5IhU1Hy6E1KUTpMAkGBSsOAwIaBQCgeDAYBgorBgEE
 # AYI3AgEMMQowCKACgAChAoAAMBkGCSqGSIb3DQEJAzEMBgorBgEEAYI3AgEEMBwG
-# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBSe4yAI
-# p4ixdGchK6dw8bM5RPGnmjANBgkqhkiG9w0BAQEFAASBgD8xqkMPdtE1CBjmZQ7M
-# tnlyd3fH2YAcpzXteiHvZc9CZqVRElVkdJ2aHh6VgH24/+dD+11mu+WSMK0nZnA/
-# d53I5JHkCSP7PKUZfBT8/JqGV3B2lGIhAgKWcE2riG/xGIFpmkWY1iOTkb76JuUy
-# LIgUJ9VqT/Ths9mW1J9X2kht
+# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBTc6DTq
+# dx31dqyR7WI1wPfKNMB70DANBgkqhkiG9w0BAQEFAASBgDfH0NkaL5ZAEZE7D9Vw
+# 4oyDsieexf88nLV3ysciZjTY56llLj6otsmqBUScUNsRgET6C2L3NXJlaJfjmhXM
+# nixUF1A3I9dSBZChdjCLJPTWlNn+P2WpYXJNvCntsaheRjbNYWtKNziBmk7sVExu
+# /JETiWC5VZQ9xAuvU1KCsi61
 # SIG # End signature block
