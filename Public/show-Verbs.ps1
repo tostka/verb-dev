@@ -4,7 +4,7 @@
 Function show-Verbs {
     <#
     .SYNOPSIS
-    show-Verbs.ps1 - Test specified verb for presense in the PS get-verb list.
+    show-Verbs.ps1 - Display standard Verbs grouped into Categories
     .NOTES
     Version     : 1.0.0
     Author      : Todd Kadrie
@@ -20,11 +20,13 @@ Function show-Verbs {
     AddedWebsite: https://github.com/arsscriptum/PowerShell.Module.Core/blob/master/src/Miscellaneous.ps1
     AddedTwitter: 
     REVISION
+    * 8:48 AM 5/18/2026 corrected CBH syn & desc; revised demo's added echos
     * 4:35 PM 7/20/2022 init; cached & subbed out redundant calls to get-verb; ; explict write-out v return ; fixed fails on single object counts; added pipeline support; 
         flipped DarkRed outputs to foreground/background combos (visibility on any given bg color)
     * 5/13/22 arsscriptum's posted copy (found in google search)
     .DESCRIPTION
-    show-Verbs.ps1 - Test specified verb for presense in the PS get-verb list.
+    show-Verbs.ps1 - Display standard Verbs grouped into Categories
+    If -verb is used, only the specified verb's info and group/category is output.
     .PARAMETER Verb
     Verb string to be tested[-verb report]
     .INPUTS
@@ -32,13 +34,47 @@ Function show-Verbs {
     .OUTPUTS
     Boolean
     .EXAMPLE
-    'New' | show-Verbs ;
-    Test the string as a standard verb
+    PS> 'New' | show-Verbs ;
+    
+      Found 1 verbs
+      Verb Group
+      ---- -----
+      New  Common
+
+    Show the info on the new standard verb
     .EXAMPLE
-    show-verbs ; 
+    PS> show-verbs ; 
+    
+        Verbs in category Common (34) :
+        Add       Clear     Close     Copy     Enter    Exit     Find     Format   Get      Hide     Join     Lock     Move     New      Open
+        Optimize  Pop       Push      Redo     Remove   Rename   Reset    Resize   Search   Select   Set      Show     Skip     Split    Step
+        Switch    Undo      Unlock    Watch
+        Verbs in category Data (24) :
+        Backup       Checkpoint   Compare      Compress     Convert      ConvertFrom  ConvertTo   Dismount    Edit        Expand      Export
+        Group        Import       Initialize   Limit        Merge        Mount        Out         Publish     Restore     Save        Sync
+        Unpublish    Update
+        Verbs in category Lifecycle (20) :
+        Approve     Assert      Complete    Confirm     Deny        Disable     Enable     Install    Invoke     Register   Request    Restart
+        Resume      Start       Stop        Submit      Suspend     Uninstall   Unregister Wait
+        Verbs in category Diagnostic (7) :
+        Debug    Measure  Ping    Repair  Resolve Test    Trace
+        Verbs in category Communications (6) :
+        Connect     Disconnect  Read        Receive     Send        Write
+        Verbs in category Security (6) :
+        Block      Grant      Protect    Revoke     Unblock    Unprotect
+        Verbs in category Other (1) :
+        Use    
+
     Output formatted display of all standard verbs (as per get-verb)
     .EXAMPLE
-    'show','new','delete','invoke' | show-verbs -verbose  ; 
+    PS> 'show','new','delete','invoke' | show-verbs -verbose  ; 
+    
+        Verb   Group
+        ----   -----
+        Show   Common
+        New    Common
+        Invoke Lifecycle    
+
     Show specs on an array of verbs with verbose output and pipeline input
     .EXAMPLE
     gcm -mod verb-io | ? commandType -eq 'Function' | select -expand verb -unique | show-Verbs -verbo
@@ -66,10 +102,10 @@ Function show-Verbs {
             $Formatted = ($verbs | where Verb -match $item| sort -Property Verb)
             if($Formatted){
                 $FormattedCount = $Formatted |  measure | select -expand count ;
-                Write-Host "Found $FormattedCount verbs" -f Black -b Gray -n ; 
+                Write-Host "Found $FormattedCount verbs`n" -f Black -b Gray -n ; 
                 $Formatted | write-output ;  
             }else{
-                Write-Host "No verb found" -f DarkGray -b White; 
+                Write-Host "No verb found`n" -f DarkGray -b White; 
             } ; 
             return ; 
         } ; 

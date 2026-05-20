@@ -17,6 +17,7 @@ Function find-NounAliasesTDO {
     Github      : https://github.com/tostka/verb-dev
     Tags        : Powershell,development,verbs
     REVISION
+    * 8:16 AM 5/18/2026 fixed alias get-verbalias -> 'get-NounAlias'
     * 1:32 PM 12/13/2023 init
     .DESCRIPTION
     find-NounAliasesTDO.ps1 - Polls current Aliases defined on the local system, to try to discern 'standard' but non-formally-documented 'noun' aliases for a given Powershell Noun (as Verb's have aliases have formal/recommended aliases in MS documentation, but Noun's are not covered with the same guidence). (E.g. the common Noun 'module' uses the standard alias 'mo', in get-module (gmo), import-module (ipmo), etc))
@@ -272,13 +273,13 @@ wr | Write
     .OUTPUTS
     System.string
     .EXAMPLE
-    PS> $NounAliasesFound = find-NounAliasesTDO ;
-    Return the 'standard' MS alias for the 'Compare' verb (returns 'cr')
+    PS> $NounAliasesFound = find-NounAliasesTDO -noun ChildItem;
+    Return the 'standard' MS alias for the 'ChildItem' noun (returns 'ci')
     .LINK
     https://github.com/tostka/verb-dev
     #>
     [CmdletBinding()]
-    [Alias('get-VerbAlias')]
+    [Alias('get-NounAlias')]
     [OutputType([boolean])]
     PARAM (
         #[Parameter(Mandatory=$true,ValueFromPipeline=$true,HelpMessage="Verb to find the assoicated standard alias[-verb report]")]
