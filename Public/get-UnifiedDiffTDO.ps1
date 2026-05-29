@@ -75,6 +75,17 @@ function get-UnifiedDiffTDO {
     Does not accept pipeline input.
     .EXAMPLE
     PS> $results = get-UnifiedDiffTDO -Ref C:\sc\powershell\MergerScripts\CreateCloudOnlyUsers_catapult_20221019vers.ps1 -Diff C:\sc\powershell\MergerScripts\CreateCloudOnlyUsers_KADRITS.ps1 
+    
+            LastWriteTime         Lines Length Name
+            -------------         ----- ------ ----
+            5/12/2026 10:52:17 AM  1072  61942 CreateCloudOnlyUsers_catapult_20221019vers.ps1
+            5/28/2026 1:51:40 PM   3044 211778 CreateCloudOnlyUsers_KADRITS.ps1
+
+            Action Count
+            ------ -----
+            ^\+     2904
+            ^-       932
+
     PS> write-verbose "filter adds & count " ; 
     PS> $results |?{$_ -match '^\+'} ; 
     
