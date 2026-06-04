@@ -19,6 +19,7 @@ Function Reset-ISEFile {
     AddedWebsite: https://github.com/jdhitsolutions/ISEScriptingGeek/
     AddedTwitter: URL
     REVISIONS
+    * 1:21 PM 6/4/2026 added code to return to original editing loc
     * 10:29 AM 4/10/2026 added confirming tooltip 
     * 12:15 PM 4/9/2026 added -force; init, added check for breakpoints, and pre-exported status prompt.
     * Jul 3, 2023 jdh posted vers
@@ -46,9 +47,12 @@ Function Reset-ISEFile {
             [switch]$Force
     )
     if ($psISE) {
+        # save work loc
+        $CurrentLine = $psISE.CurrentFile.Editor.CaretLine
+        $CurrentColumn = $psISE.CurrentFile.Editor.CaretColumn
         #save the current file path
         #$path = $psISE.CurrentFile.FullPath
-        $tScript = $psise.CurrentFile.FullPath ;
+        $tScript = $psise.CurrentFile.FullPath ;        
         $xBPs= get-psbreakpoint |?{ ($_.Script -eq $tScript) -AND ($_.line)} ;
         if($xBPs){        
             # default to same loc, variant name of script in currenttab of ise
@@ -94,6 +98,8 @@ Function Reset-ISEFile {
         [void]$psISE.CurrentPowerShellTab.Files.Add($tScript)
         #file always added to the end
         [void]$psISE.CurrentPowerShellTab.files.Move(($psISE.CurrentPowerShellTab.files.count - 1), $i)
+        # return to original loc        
+        $psISE.CurrentFile.Editor.SetCaretPosition($CurrentLine,$CurrentColumn)
         # traytip the update status
         $TipTimeSecs = 2   ; 
         $tipTitle = "ISE update";
