@@ -5,7 +5,7 @@
 .SYNOPSIS
 VERB-dev - Development PS Module-related generic functions
 .NOTES
-Version     : 1.5.94
+Version     : 1.5.93
 Author      : Todd Kadrie
 Website     :	https://www.toddomation.com
 Twitter     :	@tostka
@@ -18624,8 +18624,8 @@ Export-ModuleMember -Function backup-ModuleBuild,check-PsLocalRepoRegistration,c
 # SIG # Begin signature block
 # MIIELgYJKoZIhvcNAQcCoIIEHzCCBBsCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUkaR99U0cxDvOfTIr/mEvvf19
-# gqWgggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUJo//QevAlCuhhkBeZkGy8XtQ
+# 3oagggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
 # MCwxKjAoBgNVBAMTIVBvd2VyU2hlbGwgTG9jYWwgQ2VydGlmaWNhdGUgUm9vdDAe
 # Fw0xNDEyMjkxNzA3MzNaFw0zOTEyMzEyMzU5NTlaMBUxEzARBgNVBAMTClRvZGRT
 # ZWxmSUkwgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBALqRVt7uNweTkZZ+16QG
@@ -18640,9 +18640,9 @@ Export-ModuleMember -Function backup-ModuleBuild,check-PsLocalRepoRegistration,c
 # AWAwggFcAgEBMEAwLDEqMCgGA1UEAxMhUG93ZXJTaGVsbCBMb2NhbCBDZXJ0aWZp
 # Y2F0ZSBSb290AhBaydK0VS5IhU1Hy6E1KUTpMAkGBSsOAwIaBQCgeDAYBgorBgEE
 # AYI3AgEMMQowCKACgAChAoAAMBkGCSqGSIb3DQEJAzEMBgorBgEEAYI3AgEEMBwG
-# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBSHqSfO
-# mahR3WUW7LwmLazfVRn+EDANBgkqhkiG9w0BAQEFAASBgDGg3aq0GPIjqgLe/GWT
-# 73Sn/WLO0vrWYMxyK434V5KeJD1D1BsXs6jWEky8/Ke7iz2jyqdMuKUVIwsvM0xr
-# 9IbdQJk88Zlrt8iiSsH/ocJpCXXl76pjBBMeg5rOY6ZruxJe0vrS09Pim9XGrcJd
-# 4yHDUCOy7d7zEJRwP/qsTMu3
+# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBSMR2OI
+# idaMzvRZ/JW8ZCrGvKIY3jANBgkqhkiG9w0BAQEFAASBgIDWtPsgeqGhi7AQgOBJ
+# I9rnB31lUBVs7hBuf7ngoX4eF9YyItC5YSwEEga7eYcaYbndSL9EfSY2N1nS1mm+
+# pZKGxGbdzVe2k3p8KbVwYDT/teugQnsyRFpA9lrYk5bM+uRvPhuEWPv51EqpcQkm
+# Sp/x09t3GxTG5EonxV3OMEUS
 # SIG # End signature block
