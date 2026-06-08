@@ -1,11 +1,11 @@
-﻿# VERB-dev.psm1
+﻿# verb-dev.psm1
 
 
 <#
 .SYNOPSIS
 VERB-dev - Development PS Module-related generic functions
 .NOTES
-Version     : 1.5.89
+Version     : 1.5.92
 Author      : Todd Kadrie
 Website     :	https://www.toddomation.com
 Twitter     :	@tostka
@@ -296,6 +296,7 @@ Function close-ISEOpenfiles {
     AddedWebsite: https://github.com/jdhitsolutions/ISEScriptingGeek/
     AddedTwitter: URL
     REVISIONS
+    * 3:03 PM 4/29/2026 added -path, optional fullname spec for tabs to target (vs all tabs)
     * 12:15 PM 4/9/2026 added -force; init, added psie check
     * Jul 3, 2023 jdh posted vers
     .DESCRIPTION
@@ -311,45 +312,79 @@ Function close-ISEOpenfiles {
     PS> close-ISEOpenfiles
     EXSAMPLEOUTPUT
     Run with whatif & verbose
+    .EXAMPLE
+    PS> write-verbose 'dump listing of fullpath of all open tabs, from which to pick -Path array targets' ; 
+    PS> show-ISEOpenTabPaths | sort | ?{$_ -match '_func\.ps1'} | close-ISEOpenFiles ; 
+    Demo use of the -Path spec (via pipeline) to close a list/subset of open files
+    .EXAMPLE
+    PS> if ((gcm close-ISEOpenfiles -ea 0) -AND -not($psISE.CurrentPowerShellTab.AddOnsMenu.Submenus | Where-Object { $_.DisplayName -eq "Close All" })){
+    PS>    $psISE.CurrentPowerShellTab.AddOnsMenu.Submenus.Add("Close All",{close-ISEOpenfiles},"")
+    PS> } ; 
     .LINK
     https://github.com/tostka/verb-dev
     .LINK
     https://github.com/jdhitsolutions/ISEScriptingGeek/
     #>
     [CmdletBinding()]
-    Param(
+    PARAM(
         [Parameter(HelpMessage="Force (Confirm-override switch[-force]")]
-            [switch]$Force
+            [switch]$Force,
+        [Parameter(ValueFromPipeline=$true,HelpMessage="Optional Path to filter against the ISE .files Fullname string (for direct ISE console use)[-Path ' D:\scripts\show-ISEOpenTab_func.ps1']")]
+            [string[]]$Path,
+        [switch]$whatif
     )
-    if ($psISE) {
-        $smsg = "Closing all Tabs in this ISE!" ;
-        write-warning $smsg ; 
-        if(-not $Force){
-            $bRet=Read-Host "Enter YYY to continue. Anything else will exit"  ;
-            if ($bRet.ToUpper() -eq "YYY") {
-                $smsg = "(Moving on)" ;
-                write-host -foregroundcolor green $smsg  ;
-            } else {
-                $smsg = "(*skip* use of -NoFunc)" ;
-                write-host -foregroundcolor yellow $smsg  ;
-                return; # return (exits script or function); break (exits loop/switch) ; exit 1 (terms context,can close ps)
+    BEGIN{
+        if ($psISE) {
+            if($Path){
+                $smsg = "Closing matching Tabs in this ISE!" ;
+                $smsg += "`n`n$(($Path|out-string).trim())" ; 
+
+            }else{
+                $smsg = "Closing all Tabs in this ISE!" ;
             } ; 
-        } ; 
-        $saved = $psISE.CurrentPowerShellTab.Files.Where( { $_.isSaved })
+            write-warning $smsg ; 
+            if(-not $Force){
+                $bRet=Read-Host "Enter YYY to continue. Anything else will exit"  ;
+                if ($bRet.ToUpper() -eq "YYY") {
+                    $smsg = "(Moving on)" ;
+                    write-host -foregroundcolor green $smsg  ;
+                } else {
+                    $smsg = "(*skip* use of -NoFunc)" ;
+                    write-host -foregroundcolor yellow $smsg  ;
+                    return; # return (exits script or function); break (exits loop/switch) ; exit 1 (terms context,can close ps)
+                } ; 
+            } ; 
+            $saved = $psISE.CurrentPowerShellTab.Files.Where( { $_.isSaved })
+        } else {
+            Write-Warning 'This function requires the Windows PowerShell ISE.'
+            return  ; 
+        }
+        $aggpath = @() ; 
+    }
+    PROCESS{
+        $aggPath += $path ; 
+    }
+    END{
+        #$saved = $saved | ?{$Path -contains $_.Fullpath  } ; 
+        if($aggPath){
+            $saved = $saved | ?{$aggPath -contains $_.Fullpath  } ;
+        }  ; 
         foreach ($file in $saved) {
             Write-Verbose "closing $($file.FullPath)"
-            [void]$psISE.CurrentPowerShellTab.files.Remove($file)
-        }
-    } else {
-        Write-Warning 'This function requires the Windows PowerShell ISE.'
-    }
+            if(-not $whatif){
+                [void]$psISE.CurrentPowerShellTab.files.Remove($file)
+            }else{
+                write-host "-whatif:`$psISE.CurrentPowerShellTab.files.Remove($($file.fullpath))" ; 
+            } ; 
+        }   
+    } ;      
 }
 
 #*------^ close-ISEOpenfiles.ps1 ^------
 
 
 #*------v close-ISEOtherOpenFiles.ps1 v------
-Function close-ISEOtherOpenFiles.ps1 {
+Function close-ISEOtherOpenFiles {
      <#
     .SYNOPSIS
     close-ISEOtherOpenFiles - Close all _saved_ open tabs in ISE, other than Current Tab\File
@@ -368,6 +403,7 @@ Function close-ISEOtherOpenFiles.ps1 {
     AddedWebsite: https://github.com/jdhitsolutions/ISEScriptingGeek/
     AddedTwitter: URL
     REVISIONS
+    * 2:12 PM 5/4/2026 fixed function name typo
     * 12:15 PM 4/9/2026 added -force;init, added psie check
     * Jul 3, 2023 jdh posted vers
     .DESCRIPTION
@@ -418,6 +454,361 @@ Function close-ISEOtherOpenFiles.ps1 {
 }
 
 #*------^ close-ISEOtherOpenFiles.ps1 ^------
+
+
+#*------v Compare-FilesTDO.ps1 v------
+function Compare-FilesTDO {
+    <#
+    .SYNOPSIS
+    Compare-FilesTDO() - Compares two files, displaying differences in a manner similar to traditional console-based diff utilities (like the difflib tool for python).
+    .NOTES
+    Version     : 0.0.
+    Author      : Todd Kadrie
+    Website     : http://www.toddomation.com
+    Twitter     : @tostka / http://twitter.com/tostka
+    CreatedDate : 2026-
+    FileName    : Compare-FilesTDO.ps1
+    License     : (none asserted)
+    Copyright   : (none asserted)
+    Github      : https://github.com/tostka/verb-dev
+    Tags        : Powershell,Git,SourceControl,Diff,format
+    AddedCredit : Doug Finke
+    AddedWebsite: https://dfinke.github.io/powershell,%20ai,%20chatgpt,%20codegen/2024/09/03/git-diff-tool-in-powershell.html
+    AddedTwitter: URL
+    REVISIONS
+    * 9:09 AM 5/28/2026 init, minor formatting tweaks, updated CBH, added proc{}; added -DiffStyle, to flip from added/deleted -> +/-; added == support which prefixes \s.
+    * 9/3/2024 Doug Finke's blog post example (code generated via ChatGPT)
+    .DESCRIPTION
+    Compare-FilesTDO() - Compares two files, displaying differences in a manner similar to traditional console-based diff utilities (like the difflib tool for python).
+    
+    .PARAMETER Ref
+    The first file to compare
+    .PARAMETER Diff
+    The second file to compare
+    .PARAMETER pattern
+    The regex pattern (if any) to use as a -match filter for file
+    .PARAMETER DiffStyle
+    Switch to specify traditional Diff +/-/\s prefix (over add/remove)
+    .INPUTS
+    Accepts pipeline input.
+    .OUTPUTS
+    System.Array returns array of matched file properties ('Name','FullName','Extension','Length','LastWriteTime','LinkType','PSParentPath','PSPath','Directory')
+    .EXAMPLE
+    PS> Compare-Filestdo -Ref C:\sc\powershell\MergerScripts\CreateCloudOnlyUsers_catapult_20221019vers.ps1 -Diff C:\sc\powershell\MergerScripts\CreateCloudOnlyUsers_KADRITS.ps1
+    .LINK
+    https://dfinke.github.io/powershell,%20ai,%20chatgpt,%20codegen/2024/09/03/git-diff-tool-in-powershell.html
+    .LINK
+    https://github.com/tostka/verb-dev
+    #>
+    #[CmdletBinding(DefaultParameterSetName="NoExpectation")]
+    [CmdletBinding()]
+    [Alias('Compare-Files')]
+    PARAM (
+        [Parameter(Position=0,Mandatory=$true,HelpMessage="The first file to compare")]
+            [ValidateScript({Test-Path $_})]
+            [system.io.fileinfo[]]$Ref,
+        [Parameter(Position=1,Mandatory=$true,HelpMessage="The second file to compare")]
+            ## The second file to compare
+            [ValidateScript({Test-Path $_})]
+            [system.io.fileinfo[]]$Diff,
+        [Parameter(HelpMessage="Lines of context to compare")]
+            [int]$ContextLines = 3
+    ) ;  
+    Process {
+        $RefFile = Get-Content -Path $Ref
+        $DiffFile = Get-Content -Path $Diff
+        $diffs = [System.Collections.Generic.List[PSObject]]::new()
+        $oldIndex = 0
+        $newIndex = 0
+        while ($oldIndex -lt $RefFile.Count -or $newIndex -lt $DiffFile.Count) {
+            $oldLine = if ($oldIndex -lt $RefFile.Count) { $RefFile[$oldIndex] } else { $null }
+            $newLine = if ($newIndex -lt $DiffFile.Count) { $DiffFile[$newIndex] } else { $null }
+            if ($oldLine -eq $newLine) {
+                $oldIndex++
+                $newIndex++
+            }
+            else {
+                $diffs.Add([pscustomobject]@{
+                        ChangeType    = if ($null -eq $oldLine) { 'Added' } elseif ($newLine -eq $null) { 'Deleted' } else { 'Modified' }
+                        OldLineNumber = if ($null -ne $oldLine) { $oldIndex + 1 } else { $null }
+                        NewLineNumber = if ($null -ne $newLine) { $newIndex + 1 } else { $null }
+                        OldLine       = $oldLine
+                        NewLine       = $newLine
+                    })
+                if ($null -ne $oldLine) { $oldIndex++ }
+                if ($null -ne $newLine) { $newIndex++ }
+            }
+        }
+        return $diffs
+    } # PROC-E 
+}
+
+#*------^ Compare-FilesTDO.ps1 ^------
+
+
+#*------v Compare-FileTDO.ps1 v------
+function Compare-FileTDO {
+    <#
+    .SYNOPSIS
+    Compare-FileTDO() - Compares two files, displaying differences in a manner similar to traditional console-based diff utilities.
+    .NOTES
+    Version     : 0.0.
+    Author      : Todd Kadrie
+    Website     : http://www.toddomation.com
+    Twitter     : @tostka / http://twitter.com/tostka
+    CreatedDate : 2026-
+    FileName    : Compare-FileTDO.ps1
+    License     : (none asserted)
+    Copyright   : (none asserted)
+    Github      : https://github.com/tostka/verb-dev
+    Tags        : Powershell,Git,SourceControl,Diff,format
+    AddedCredit : Lee Holmes
+    AddedWebsite: https://www.leeholmes.com/using-powershell-to-compare-diff-files/
+    AddedTwitter: URL
+    REVISIONS
+    * 9:09 AM 5/28/2026 init, minor formatting tweaks, updated CBH, added proc{}; added -DiffStyle, to flip from added/deleted -> +/-; added == support which prefixes \s.
+    * Nov 30, 2013 Lee Holmes blog post example
+    .DESCRIPTION
+    Compare-FileTDO() - Compares two files, displaying differences in a manner similar to traditional console-based diff utilities.
+    
+    .PARAMETER Ref
+    The first file to compare
+    .PARAMETER Diff
+    The second file to compare
+    .PARAMETER pattern
+    The regex pattern (if any) to use as a -match filter for file
+    .PARAMETER DiffStyle
+    Switch to specify traditional Diff +/-/\s prefix (over add/remove)
+    .INPUTS
+    Accepts pipeline input.
+    .OUTPUTS
+    System.Array returns array of matched file properties ('Name','FullName','Extension','Length','LastWriteTime','LinkType','PSParentPath','PSPath','Directory')
+    .EXAMPLE
+    PS> compare-filetdo -Ref C:\sc\powershell\MergerScripts\CreateCloudOnlyUsers_catapult_20221019vers.ps1 -Diff C:\sc\powershell\MergerScripts\CreateCloudOnlyUsers_KADRITS.ps1
+    .LINK
+    https://www.leeholmes.com/using-powershell-to-compare-diff-files/
+    .LINK
+    https://github.com/tostka/verb-dev
+    #>
+    #[CmdletBinding(DefaultParameterSetName="NoExpectation")]
+    [CmdletBinding()]
+    [Alias('Compare-File')]
+    PARAM (
+        [Parameter(Position=0,Mandatory=$true,HelpMessage="The first file to compare")]
+            [ValidateScript({Test-Path $_})]
+            [system.io.fileinfo[]]$Ref,
+        [Parameter(Position=0,Mandatory=$true,HelpMessage="The second file to compare")]
+            ## The second file to compare
+            [ValidateScript({Test-Path $_})]
+            [system.io.fileinfo[]]$Diff,
+        [Parameter(HelpMessage="The regex pattern (if any) to use as a -match filter for file")]
+            [string]$pattern = ".*",
+        [Parameter(HelpMessage="Switch to specify traditional Diff +/-/\s prefix (over add/remove)")]
+            [switch]$DiffStyle = $true 
+    ) ;  
+    Process {
+        ## Get the content from each file
+        $content1 = Get-Content $Ref
+        $content2 = Get-Content $Diff
+        ## Compare the two files. Get-Content annotates output objects with
+        ## a 'ReadCount' property that represents the line number in the file
+        ## that the text came from.
+        $comparedLines = Compare-Object $content1 $content2 -IncludeEqual |
+            Sort-Object { $_.InputObject.ReadCount }
+        $lineNumber = 0
+        $comparedLines | foreach {
+            ## Keep track of the current line number, using the line
+            ## numbers in the "after" file for reference.
+            if($_.SideIndicator -eq "==" -or $_.SideIndicator -eq "=>"){
+                $lineNumber = $_.InputObject.ReadCount
+            }
+            ## If the text matches the pattern, output a custom object
+            ## that displays text like this:
+            ##
+            ## Line Operation Text
+            ## ---- --------- ----
+            ## 59 added New text added
+            ##
+            if($_.InputObject -match $pattern){
+                if($_.SideIndicator -ne "=="){
+                    if($_.SideIndicator -eq "=>"){
+                        if($DiffStyle){$lineOperation = "+"
+                        }else{$lineOperation = "added"} ; 
+                    }elseif($_.SideIndicator -eq "<="){
+                        if($DiffStyle){$lineOperation = "-"
+                        }else{$lineOperation = "deleted"} ; 
+                    }elseif($_.SideIndicator -eq "=="){
+                       if($DiffStyle){$lineOperation = " "
+                        }else{$lineOperation = " "} ; 
+                    }                    
+                    [PSCustomObject] @{
+                        Line = $lineNumber
+                        #Operation =< span style="color: "> $lineOperation
+                        #Operation ="< span style=`"color: `"> $($lineOperation)"
+                        Operation =" $($lineOperation)"
+                        Text = $_.InputObject
+                    }
+                }
+            }
+        } # loop-E
+    } # PROC-E 
+}
+
+#*------^ Compare-FileTDO.ps1 ^------
+
+
+#*------v Compare-ObjectsTDO.ps1 v------
+function Compare-ObjectsTDO {
+    <#
+    .SYNOPSIS
+    Compare-ObjectsTDO() - Used to Compare two powershell objects
+    .NOTES
+    Version     : 0.0.
+    Author      : Todd Kadrie
+    Website     : http://www.toddomation.com
+    Twitter     : @tostka / http://twitter.com/tostka
+    CreatedDate : 2026-
+    FileName    : Compare-ObjectsTDO.ps1
+    License     : (none asserted)
+    Copyright   : (none asserted)
+    Github      : https://github.com/tostka/verb-dev
+    Tags        : Powershell,Git,SourceControl,Diff,format
+    AddedCredit : Phil-Factor
+    AddedWebsite: https://github.com/Phil-Factor/PowerShell-Utility-Cmdlets/blob/main/Diff-Objects/Diff-Objects.ps1
+    AddedTwitter: URL
+    REVISIONS
+    * 12:43 PM 5/28/2026 init, ren Diff-Objects -> Compare-Objects (use std verb) ; minor formatting tweaks, updated CBH, added proc{}; added -DiffStyle, to flip from added/deleted -> +/-; added == support which prefixes \s.
+    * 7/7/21 Phil-Factor blog post example
+    .DESCRIPTION
+    Compare-ObjectsTDO() - Used to Compare two powershell objects
+    This compares two powershell objects by determining their shared 
+    keys or array sizes and comparing the values of each. It uses the 
+    show-Object cmdlet for the heavy lifting
+    
+    .PARAMETER Ref
+    The source object
+    .PARAMETER diff
+    The target object
+    .PARAMETER Avoid
+    a list of any object you wish to avoid comparing
+    .PARAMETER Parent
+    Only used for recursion
+    .PARAMETER Depth
+    The depth to which you wish to recurse
+    .PARAMETER NullAndBlankSame
+    Do we regard null and Blank the same for the purpose of comparisons.
+    .PARAMETER ReportNodes
+    Do you wish to report on nodes containing objects as well as values?
+    .INPUTS
+    Does not accept pipeline input.
+    .EXAMPLE
+    PS> write-verbose "We have the reference version of what the data should be in #ref" ; 
+    PS> $Ref=@'
+#TYPE System.Management.Automation.PSCustomObject
+"Path","Value"
+"$.Ham.Downtime",
+"$.Ham.Location","Floor two rack"
+"$.Ham.Users[0]","Fred"
+"$.Ham.Users[1]","Jane"
+"$.Ham.Users[2]","Mo"
+"$.Ham.Users[3]","Phil"
+"$.Ham.Users[4]","Tony"
+"$.Ham.version","2019"
+"$.Japeth.Location","basement rack"
+"$.Japeth.Users[0]","Karen"
+"$.Japeth.Users[1]","Wyonna"
+"$.Japeth.Users[2]","Henry"
+"$.Japeth.version","2008"
+"$.Shem.Location","Server room"
+"$.Shem.Users[0]","Fred"
+"$.Shem.Users[1]","Jane"
+"$.Shem.Users[2]","Mo"
+"$.Shem.version","2017"
+'@ |ConvertFrom-Csv ; 
+    PS> write-verbose "We now have the reference result. we now create the test input" ; 
+    PS> $ServersAndUsers = @{
+      'Shem' = @{
+          'version' = '2017'; 'Location' = 'Server room';
+              'Users'=@('Fred','Jane','Mo') ; 
+           }; 
+      'Ham' =@{
+          'version' = '2019'; 
+          'Location' = 'Floor two rack';
+          'Downtime'=$null
+          'Users'=@('Fred','Jane','Mo','Phil','Tony')
+      }; 
+      'Japeth' =@{
+          'version' = '2008'; 
+          'Location' = 'basement rack';
+          'Users'=@('Karen','Wyonna','Henry') ; 
+      } ; 
+    } ; 
+    PS> write-verbose "run the 'show-Object' ; "
+    PS> $Diff= show-Object $ServersAndUsers ; 
+    PS> write-verbose "we now have a #Ref object with what the output should be, and we have the $diff object of what is produced by the current version "
+    PS> write-verbose "We test to see if the $Ref and $Diff match."
+    PS> $TestResult=Compare-ObjectsTDO -Ref $ref -Diff $diff -NullAndBlankSame $True | where {$_.Match -ne '=='} ; 
+    PS> if ($TestResult) {
+    PS>     Write-warning 'Test for show-Object with  ServersAndUsers failed' ; 
+    PS>     $TestResult|format-table
+    PS> } ; 
+    .EXAMPLE
+    PS> $process=(get-process pwsh) ; 
+    PS> #<some time later>
+    PS> Compare-ObjectsTDO  $process (get-process pwsh) -Depth 3 -Avoid @('Modules','Threads','StartInfo') -NullAndBlankSame $true ;     
+    Demo eval of object status changes over time
+    .LINK
+    https://github.com/Phil-Factor/PowerShell-Utility-Cmdlets/blob/main/Diff-Objects/Diff-Objects.ps1
+    .LINK
+    https://github.com/tostka/verb-dev
+    #>
+    #[CmdletBinding(DefaultParameterSetName="NoExpectation")]
+    [CmdletBinding()]
+    [Alias('Compare-Objects','Diff-Objects')]
+    PARAM (
+        [Parameter(Mandatory = $true,Position = 1,HelpMessage="The first file to compare")]
+            [object]$Ref,
+        [Parameter(Mandatory = $true,Position = 2,HelpMessage="The first file to compare")]
+            [object]$Diff,
+        [Parameter(Mandatory = $false,Position = 3,HelpMessage="The first file to compare")]
+            [object[]]$Avoid = @('Metadata', '#comment'),
+        [Parameter(Mandatory = $false,Position = 4,HelpMessage="The first file to compare")]
+            [string]$Parent = '$',
+        [Parameter(Mandatory = $false,Position = 5,HelpMessage="The first file to compare")]
+            [string]$NullAndBlankSame = $true,
+        [Parameter(Mandatory = $false,Position = 6,HelpMessage="The first file to compare")]
+            [int]$ReportNodes = $true,
+        [Parameter(Mandatory = $false,Position = 7)]
+            [int]$Depth =10
+    ) ;  
+    PROCESS {
+        $Left = show-ObjectTDO $Ref -Avoid $Avoid -Parent $Parent -Depth $Depth -reportNodes $ReportNodes
+        $right = show-ObjectTDO $Diff -Avoid $Avoid -Parent $Parent -depth $Depth -reportNodes $ReportNodes
+        $Paths = $Left + $Right | Select path -Unique
+        $Paths | foreach{
+          $ThePath = $_.Path;
+          $Lvalue = $Left | where { $_.Path -eq $ThePath } | Foreach{ $_.Value };
+          $Rvalue = $Right | where { $_.Path -eq $ThePath } | Foreach{ $_.Value };
+          if ($RValue -eq $Lvalue)
+          { $equality = '==' }
+              elseif ([string]::IsNullOrEmpty($Lvalue) -and 
+                     [string]::IsNullOrEmpty($rvalue) -and 
+                     $NullAndBlankSame)
+                     {$equality = '=='}
+       
+          else
+          {
+            $equality = "$(if ($lvalue -eq $null) { '-' }
+              else { '<' })$(if ($Rvalue -eq $null) { '-' }
+              else { '>' })"
+          }
+          [pscustomobject]@{ 'Ref' = $ThePath; 'Source' = $Lvalue; 'Target' = $Rvalue; 'Match' = $Equality }
+          
+        }
+    } # PROC-E 
+}
+
+#*------^ Compare-ObjectsTDO.ps1 ^------
 
 
 #*------v confirm-ModuleBuildSync.ps1 v------
@@ -6063,9 +6454,9 @@ function export-ISEOpenFiles {
     [Alias('epIseOpen')]
     PARAM(
         [Parameter(Position=0,HelpMessage="Optional Tag to apply to filename[-Tag MFA]")]
-        [string]$Tag,
+            [string]$Tag,
         [Parameter(HelpMessage="Whatif Flag  [-whatIf]")]
-        [switch] $whatIf
+            [switch] $whatIf
     ) ;
     BEGIN {
         ${CmdletName} = $PSCmdlet.MyInvocation.MyCommand.Name ;
@@ -6279,6 +6670,7 @@ Function find-NounAliasesTDO {
     Github      : https://github.com/tostka/verb-dev
     Tags        : Powershell,development,verbs
     REVISION
+    * 8:16 AM 5/18/2026 fixed alias get-verbalias -> 'get-NounAlias'
     * 1:32 PM 12/13/2023 init
     .DESCRIPTION
     find-NounAliasesTDO.ps1 - Polls current Aliases defined on the local system, to try to discern 'standard' but non-formally-documented 'noun' aliases for a given Powershell Noun (as Verb's have aliases have formal/recommended aliases in MS documentation, but Noun's are not covered with the same guidence). (E.g. the common Noun 'module' uses the standard alias 'mo', in get-module (gmo), import-module (ipmo), etc))
@@ -6534,13 +6926,13 @@ wr | Write
     .OUTPUTS
     System.string
     .EXAMPLE
-    PS> $NounAliasesFound = find-NounAliasesTDO ;
-    Return the 'standard' MS alias for the 'Compare' verb (returns 'cr')
+    PS> $NounAliasesFound = find-NounAliasesTDO -noun ChildItem;
+    Return the 'standard' MS alias for the 'ChildItem' noun (returns 'ci')
     .LINK
     https://github.com/tostka/verb-dev
     #>
     [CmdletBinding()]
-    [Alias('get-VerbAlias')]
+    [Alias('get-NounAlias')]
     [OutputType([boolean])]
     PARAM (
         #[Parameter(Mandatory=$true,ValueFromPipeline=$true,HelpMessage="Verb to find the assoicated standard alias[-verb report]")]
@@ -9282,6 +9674,178 @@ to your $profile.
 #*------^ get-StrictMode.ps1 ^------
 
 
+#*------v get-UnifiedDiffTDO.ps1 v------
+function get-UnifiedDiffTDO {
+    <#
+    .SYNOPSIS
+    get-UnifiedDiffTDO() - Produce a UnifiedDiff output of two files, without both being in a git repo (or even same git repo ; leverages: git diff --no-index --unified=3)
+    .NOTES
+    Version     : 0.0.
+    Author      : Todd Kadrie
+    Website     : http://www.toddomation.com
+    Twitter     : @tostka / http://twitter.com/tostka
+    CreatedDate : 2026-
+    FileName    : get-UnifiedDiffTDO.ps1
+    License     : MIT License
+    Copyright   : (c) 2026 Todd Kadrie
+    Github      : https://github.com/tostka/verb-dev
+    Tags        : Powershell,Git,SourceControl,Diff,format
+    AddedCredit : 
+    AddedWebsite: 
+    AddedTwitter: URL
+    REVISIONS
+    * 8:38 AM 5/29/2026 added trailing reports; flipped -nopager -> -pager; updated CBH, and demos.
+    * 2:00 PM 5/28/2026 init
+    .DESCRIPTION
+    get-UnifiedDiffTDO() - Produce a UnifiedDiff file of two files, without both being in a git repo (or even same git repo ; leverages: git diff --no-index --unified=3)
+    
+    When run without the -pager paramter, outputs a trailing summary of the files, lines count, and added/subtracted lines.
+    
+    
+        LastWriteTime         Lines Length Name
+        -------------         ----- ------ ----
+        5/12/2026 10:52:17 AM  1072  61942 CreateCloudOnlyUsers_catapult_20221019vers.ps1
+        5/28/2026 1:51:40 PM   3044 211778 CreateCloudOnlyUsers_KADRITS.ps1
+
+        Action Count
+        ------ -----
+        ^\+     2904
+        ^-       932
+
+    Wraps underlying commandline:
+    git diff --no-index --unified=3 -- $OldFile $NewFile
+    
+    By default outputs a streamed output to console (for pipeline into variables or postfiltering)
+    -pager enables underlying git.exe paged onscreen output
+    
+    ## Git Pager Navigation Commands
+
+    Command | Action
+    --- | --- 
+    k or â†‘ (Up Arrow) | Move up one line.
+    j or â†“ (Down Arrow) |	Move down one line.
+    Spacebar or f |	Move forward a full screen/page.
+    b |	Move backward a full screen/page.
+    d |	Move forward a half screen.
+    u |	Move backward a half screen.
+    G |	Go to the end of the output.
+    g |	Go to the beginning of the output.
+    / |	Search for a specific pattern.
+
+    ## Exiting the Pager
+
+    To exit the git diff display and return to your regular command prompt:
+
+      â€¢ Press the q key (for "quit"). 
+      â€¢ If you are on Windows and pressing q alone doesn't work, you may need to press q followed by Enter. 
+        
+    .PARAMETER Ref
+    The first file to compare(generally the earlier rev)[-Ref c:\pathto\file1.ps1]
+    .PARAMETER diff
+    The second file to compare(generally the later rev)[-Diff c:\pathto\file2.ps1]
+    .PARAMETER pager
+    switch to enable git default pager output, dumps one screen at a time to console (disabled by default)[-pager]
+    .INPUTS
+    Does not accept pipeline input.
+    .EXAMPLE
+    PS> $results = get-UnifiedDiffTDO -Ref C:\sc\powershell\MergerScripts\CreateCloudOnlyUsers_catapult_20221019vers.ps1 -Diff C:\sc\powershell\MergerScripts\CreateCloudOnlyUsers_KADRITS.ps1 
+    
+            LastWriteTime         Lines Length Name
+            -------------         ----- ------ ----
+            5/12/2026 10:52:17 AM  1072  61942 CreateCloudOnlyUsers_catapult_20221019vers.ps1
+            5/28/2026 1:51:40 PM   3044 211778 CreateCloudOnlyUsers_KADRITS.ps1
+
+            Action Count
+            ------ -----
+            ^\+     2904
+            ^-       932
+
+    PS> write-verbose "filter adds & count " ; 
+    PS> $results |?{$_ -match '^\+'} ; 
+    
+        +++ "b/C:\\sc\\powershell\\MergerScripts\\CreateCloudOnlyUsers_KADRITS.ps1"
+        +# C:\usr\work\MergerScripts\CreateCloudOnlyUsers_KADRITS.ps1
+        +# D:\scripts\TON\CreateCloudOnlyUsers_KADRITS.ps1
+        +        
+        ...
+        
+    PS> write-verbose "filter removes" ; 
+    PS> $results |?{$_ -match '^\-'} ; 
+
+        --- "a/C:\\sc\\powershell\\MergerScripts\\CreateCloudOnlyUsers_catapult_20221019vers.ps1"
+        -âˆ©â•—â”# CreateCloudOnlyUsers_catapult_20221019vers.ps1
+        -
+        -#Requires -Module AzureAD
+        -
+        ...
+        
+    PS> @('+','-') | %{ $rgxthis = [regex]"^$([regex]::escape($_))" ; write-host "==$($rgxthis.tostring()) count:`t" -nonewline ; $results | ?{$_ -match $rgxthis} |  measure | select -expand count } ;
+
+        ==^\+ count:    2904
+        ==^- count:     932
+    
+    Demo eval of object status changes over time, without pager paged ouput (to assign stream to variable), with postfiltering for change types and metrics
+    .EXAMPLE
+    PS> $results = get-UnifiedDiffTDO -Ref C:\sc\powershell\MergerScripts\CreateCloudOnlyUsers_catapult_20221019vers.ps1 -Diff C:\sc\powershell\MergerScripts\CreateCloudOnlyUsers_KADRITS.ps1 -pager
+    Demo that enables git default pager interface (one page at a time, vs streamed)
+    .LINK
+    https://github.com/Phil-Factor/PowerShell-Utility-Cmdlets/blob/main/Diff-Objects/Diff-Objects.ps1
+    .LINK
+    https://github.com/tostka/verb-dev
+    #>
+    #[CmdletBinding(DefaultParameterSetName="NoExpectation")]
+    [CmdletBinding()]
+    [Alias('get-UnifiedDiff')]
+    PARAM (
+        [Parameter(Mandatory = $true,Position = 0,HelpMessage="The first file to compare(generally the earlier rev)[-Ref c:\pathto\file1.ps1]")]
+            [ValidateScript({Test-Path $_ -type:leaf})]
+            [system.io.fileinfo[]]$Ref,
+        [Parameter(Mandatory = $true,Position = 1,HelpMessage="The second file to compare(generally the later rev)[-Diff c:\pathto\file2.ps1]")]
+            [ValidateScript({Test-Path $_ -type:leaf})]
+            [system.io.fileinfo[]]$Diff,        
+        [Parameter(HelpMessage="switch to enable git default pager output, dumps one screen at a time to console (disabled by default)[-pager]")]
+            [switch]$pager
+    ) ;  
+    BEGIN{
+        $prpFiles = 'Lastwritetime',
+            @{Name='Lines';Expression={gc $_.fullname |  measure | select -expand count }},
+            'length','name'   
+        if(-not (get-command git.exe -ea 0) -OR -not (get-command git -ea 0)){
+            throw "missing required dependancy: git.exe/git!" ; 
+            return ; 
+        }
+    }
+    PROCESS {        
+        if($Ref.fullname -AND $Diff.FullName){            
+            write-verbose "`n$((@($Ref.fullname,$Diff.FullName)| gci |out-string).trim())" ; 
+            if($pager){
+                #git diff --no-index --unified=3 -- $Ref.fullname $Diff.FullName           
+                 git.exe diff --no-index --unified=3 -- "$($Ref.fullname)" "$($Diff.FullName)"
+            }else{
+                #git diff --no-index --unified=3 -- $Ref.fullname $Diff.FullName --no-pager 
+                $result = git.exe --no-pager diff --no-index --unified=3 -- "$($Ref.fullname)" "$($Diff.FullName)" 
+            }
+        } ; 
+    } # PROC-E 
+    END{
+        if($result){ $result | write-output } ;                  
+        write-host -foregroundcolor green "`n$((@($Ref.fullname,$Diff.FullName)| gci | ft -a $prpFiles |out-string).trim())" ;         
+        if($result){
+            $Summary = @('+','-') | %{
+                $rgxthis = [regex]"^$([regex]::escape($_))" ;                
+                [pscustomobject]@{
+                    Action = "$($rgxthis.tostring())";
+                    Count = ($results | ?{$_ -match $rgxthis} |  measure | select -expand count);
+                } 
+            } ; 
+            write-host -foregroundcolor green "`n$(($Summary|out-string).trim())" ;         
+        }
+    } 
+}
+
+#*------^ get-UnifiedDiffTDO.ps1 ^------
+
+
 #*------v get-VariableAssignsAST.ps1 v------
 function get-VariableAssignsAST {
     <#
@@ -11505,6 +12069,103 @@ Function New-GitHubGist {
 #*------^ New-GitHubGist.ps1 ^------
 
 
+#*------v out-diff.ps1 v------
+function out-diffTDO {
+    <#
+    .SYNOPSIS
+    out-diffTDO() - Redirects a Universal DIFF encoded text from the pipeline to the host using colors to highlight the differences.
+    .NOTES
+    Version     : 0.0.
+    Author      : Todd Kadrie
+    Website     : http://www.toddomation.com
+    Twitter     : @tostka / http://twitter.com/tostka
+    CreatedDate : 2026-
+    FileName    : out-diffTDO.ps1
+    License     : (none asserted)
+    Copyright   : (none asserted)
+    Github      : https://github.com/tostka/verb-dev
+    Tags        : Powershell,Git,SourceControl,Diff,format
+    AddedCredit : Enrico Campidoglio
+    AddedWebsite: https://megakemp.com/2012/01/19/better-diffs-with-powershell/
+    AddedTwitter: URL
+    REVISIONS
+    * 9:09 AM 5/28/2026 init
+    * January 19, 2012 Enrico Campidoglio's blog post example
+    .DESCRIPTION
+    out-diffTDO() - Redirects a Universal DIFF encoded text from the pipeline to the host using colors to highlight the differences.
+    Helper function to highlight the differences in a Universal DIFF text using color coding.
+    
+    [Better Diffs with PowerShell - megakemp.com/](https://megakemp.com/2012/01/19/better-diffs-with-powershell/)
+
+    ### Unified DIFFs
+
+    One of the most basic features of any source control system is the ability to compare two versions of the same file to see whatâ€™s changed. The output of such comparison, or [DIFF](http://en.wikipedia.org/wiki/Diff), is commonly represented in text using the [Unified DIFF format](http://en.wikipedia.org/wiki/Diff#Unified_format), which looks something like this:
+
+    @@ -6,12 +6,10 @@
+    -#import <SenTestingKit/SenTestingKit.h>
+    -#import <UIKit/UIKit.h>
+    -
+    @interface QuoteTest : SenTestCase {
+    }
+
+    - (void)testQuoteForInsert_ReturnsNotNull;
+    +- (void)testQuoteForInsert_ReturnsPersistedQuote;
+
+    @end
+
+
+    In the Unified DIFF format changes are displayed at the line level through a set of well-known prefixes. The rule is simple:
+
+    A line can either be **added**, in which case it will be preceded by a `+` sign, or **removed**, in which case it will be preceded by a `-` sign. **Unchanged** lines are preceded by a whitespace.
+
+    In addition to that, each modified section, referred to as _hunk_, is preceded by a header that indicates the position and size of the section in the original and modified file respectively. For example this _hunk header_:
+
+    @@ -6,12 +6,10 @@
+
+
+    means that in **the original file** the modified lines start at `line 6` and continue for `12 lines`. In **the new file**, instead, that same change starts at `line 6` and includes a total of `10 lines`.    
+    .PARAMETER InputObject
+    The text to display as Universal DIFF.
+    .INPUTS
+    Accepts pipeline input.
+    .OUTPUTS
+    System.Array returns array of matched file properties ('Name','FullName','Extension','Length','LastWriteTime','LinkType','PSParentPath','PSPath','Directory')
+    .EXAMPLE
+    PS> . .\Out-Diff.ps1
+    PS> git diff | Out-Diff
+    .LINK
+    https://megakemp.com/2012/01/19/better-diffs-with-powershell/
+    .LINK
+    https://github.com/tostka/verb-dev
+    #>
+    #[CmdletBinding(DefaultParameterSetName="NoExpectation")]
+    [CmdletBinding()]
+    [Alias('out-diff')]
+    PARAM (
+        [Parameter(Position=0,Mandatory=$true, ValueFromPipeline=$true)]
+            [PSObject]$InputObject        
+    ) ;  
+    Process {
+        $contentLine = $InputObject | Out-String
+        if ($contentLine -match "^Index:") {
+            Write-Host $contentLine -ForegroundColor Cyan -NoNewline
+        } elseif ($contentLine -match "^(\+|\-|\=){3}") {
+            Write-Host $contentLine -ForegroundColor Gray -NoNewline
+        } elseif ($contentLine -match "^\@{2}") {
+            Write-Host $contentLine -ForegroundColor Gray -NoNewline
+        } elseif ($contentLine -match "^\+") {
+            Write-Host $contentLine -ForegroundColor Green -NoNewline
+        } elseif ($contentLine -match "^\-") {
+            Write-Host $contentLine -ForegroundColor Red -NoNewline
+        } else {
+            Write-Host $contentLine -NoNewline
+        }
+    }
+}
+
+#*------^ out-diff.ps1 ^------
+
+
 #*------v Out-ISETab.ps1 v------
 Function Out-ISETab {
     <#
@@ -12669,6 +13330,7 @@ Function save-ISEOpenfiles {
     AddedWebsite: https://github.com/jdhitsolutions/ISEScriptingGeek/
     AddedTwitter: URL
     REVISIONS
+    * 1:12 PM 5/4/2026 added demo mnu add
     * 3:00 PM 4/14/2026 the presave portion of close-iseopenfiles
     .DESCRIPTION
     save-ISEOpenfiles - Save all open tabs in ISE
@@ -12680,6 +13342,11 @@ Function save-ISEOpenfiles {
     PS> save-ISEOpenfiles
     EXSAMPLEOUTPUT
     Run with whatif & verbose
+    .EXAMPLE
+    # updated, precheck existing before blindly adding
+    PS> if ((gcm save-ISEOpenfiles --ea 0) -AND -not($psISE.CurrentPowerShellTab.AddOnsMenu.Submenus | Where-Object { $_.DisplayName -eq "Save All" })){
+    PS>    $psISE.CurrentPowerShellTab.AddOnsMenu.Submenus.Add("Save All",{save-ISEOpenfiles},"Ctrl+Shift+S")
+    PS> } ; 
     .LINK
     https://github.com/tostka/verb-dev
     .LINK
@@ -12756,6 +13423,76 @@ Function Set-ISEScriptLocation {
 }
 
 #*------^ Set-ISEScriptLocation.ps1 ^------
+
+
+#*------v Show-DiffTDO.ps1 v------
+function Show-DiffTDO {
+    <#
+    .SYNOPSIS
+    Show-DiffTDO() - Produces a git-diff-like output for file comparison (wraps CompareFilesTDO, & Writed-DiffTDO)
+    .NOTES
+    Version     : 0.0.
+    Author      : Todd Kadrie
+    Website     : http://www.toddomation.com
+    Twitter     : @tostka / http://twitter.com/tostka
+    CreatedDate : 2026-
+    FileName    : Show-DiffTDO.ps1
+    License     : (none asserted)
+    Copyright   : (none asserted)
+    Github      : https://github.com/tostka/verb-dev
+    Tags        : Powershell,Git,SourceControl,Diff,format
+    AddedCredit : Doug Finke
+    AddedWebsite: https://dfinke.github.io/powershell,%20ai,%20chatgpt,%20codegen/2024/09/03/git-diff-tool-in-powershell.html
+    AddedTwitter: URL
+    REVISIONS
+    * 9:09 AM 5/28/2026 init, minor formatting tweaks, updated CBH, added proc{}; added -DiffStyle, to flip from added/deleted -> +/-; added == support which prefixes \s.
+    * 9/3/2024 Doug Finke's blog post example (code generated via ChatGPT)
+    .DESCRIPTION
+    Show-DiffTDO() - Produces a git-diff-like output for file comparison (wraps CompareFilesTDO, & Writed-DiffTDO)
+    
+    .PARAMETER Diffs
+    Diffs result of a Compare-FilesTDO() pass on a pair of files
+    .PARAMETER Ref
+    The first file to compare
+    .PARAMETER Diff
+    The second file to compare
+    .PARAMETER ContextLines
+    Lines of context to compare
+    .INPUTS
+    Accepts pipeline input.
+    .OUTPUTS
+    System.Array returns array of matched file properties ('Name','FullName','Extension','Length','LastWriteTime','LinkType','PSParentPath','PSPath','Directory')
+    .EXAMPLE
+    PS> Show-DiffTDO -Ref C:\sc\powershell\MergerScripts\CreateCloudOnlyUsers_catapult_20221019vers.ps1 -Diff C:\sc\powershell\MergerScripts\CreateCloudOnlyUsers_KADRITS.ps1
+    .LINK
+    AddedWebsite: https://dfinke.github.io/powershell,%20ai,%20chatgpt,%20codegen/2024/09/03/git-diff-tool-in-powershell.html
+    .LINK
+    https://github.com/tostka/verb-dev
+    #>
+    #[CmdletBinding(DefaultParameterSetName="NoExpectation")]
+    [CmdletBinding()]
+    [Alias('Show-Diff')]
+    PARAM (        
+         [Parameter(Position=0,Mandatory=$true,HelpMessage="The first file to compare")]
+            [ValidateScript({Test-Path $_})]
+            [system.io.fileinfo[]]$Ref, 
+        [Parameter(Position=1,Mandatory=$true,HelpMessage="The second file to compare")]
+            ## The second file to compare
+            [ValidateScript({Test-Path $_})]
+            [system.io.fileinfo[]]$Diff,
+        [Parameter(HelpMessage="Lines of context to compare")]
+            [int]$ContextLines = 3
+    ) ;  
+    Process {
+        $oldFile = Get-Content -Path $Ref.fullname
+        $newFile = Get-Content -Path $Diff.fullname
+        $diffs = Compare-FilesTDO -Ref $Ref.fullname -Diff $Diff.fullname -ContextLines $ContextLines
+        Write-DiffTDO -Diffs $diffs -OldFile $oldFile -NewFile $newFile -ContextLines $ContextLines
+
+    } # PROC-E 
+}
+
+#*------^ Show-DiffTDO.ps1 ^------
 
 
 #*------v show-ISEOpenTab.ps1 v------
@@ -12918,11 +13655,186 @@ function show-ISEOpenTabPaths {
 #*------^ show-ISEOpenTabPaths.ps1 ^------
 
 
+#*------v Show-ObjectTDO.ps1 v------
+function Show-ObjectTDO {
+    <#
+    .SYNOPSIS
+    Show-ObjectTDO() - Displays an object's values and the 'dot' paths to them
+    .NOTES
+    Version     : 0.0.
+    Author      : Todd Kadrie
+    Website     : http://www.toddomation.com
+    Twitter     : @tostka / http://twitter.com/tostka
+    CreatedDate : 2026-
+    FileName    : Show-ObjectTDO.ps1
+    License     : (none asserted)
+    Copyright   : (none asserted)
+    Github      : https://github.com/tostka/verb-dev
+    Tags        : Powershell,Git,SourceControl,Diff,format
+    AddedCredit : Phil-Factor
+    AddedWebsite: https://www.leeholmes.com/using-powershell-to-compare-diff-files/
+    AddedTwitter: URL
+    REVISIONS
+    * 9:24 AM 5/28/2026 init, ren Diff-Objects -> Show-Object (use std verb) ; minor formatting tweaks, updated CBH, added proc{}; added -DiffStyle, to flip from added/deleted -> +/-; added == support which prefixes \s.
+    * 7/7/21 Phil-Factor blog post example
+    .DESCRIPTION
+    Show-ObjectTDO() - Displays an object's values and the 'dot' paths to them
+    A detailed description of the Display-Object function.
+    
+    .PARAMETER TheObject
+    The object that you wish to display
+    .PARAMETER depth
+    the depth of recursion (keep it low!)
+    .PARAMETER Avoid
+    an array of names of pbjects or arrays you wish to avoid.
+    .PARAMETER Parent
+    For internal use, but you can specify the name of the variable
+    .PARAMETER CurrentDepth
+    For internal use
+    .PARAMETER RerportNodes
+    Do you wish to report on nodes containing objects as well as values?
+
+    .INPUTS
+    Accepts pipeline input.
+    .OUTPUTS
+    System.Array returns array of matched file properties ('Name','FullName','Extension','Length','LastWriteTime','LinkType','PSParentPath','PSPath','Directory')
+    .EXAMPLE
+    PS> Show-objectTDO (get-date);
+    
+        Path                Value
+        ----                -----
+        $.Date              5/28/2026 12:00:00 AM
+        $.Day               28
+        $.DayOfWeek.value__ 4
+        $.DayOfYear         148
+        $.Hour              12
+        $.Kind.value__      2
+        $.Millisecond       58
+        $.Minute            21
+        $.Month             5
+        $.Second            46
+        $.Ticks             639155677060581841
+        $.TimeOfDay         12:21:46.0581841
+        $.Year              2026    
+    
+    Demo 
+    PS> get-date| Show-ObjectTDO ; 
+    Pipeline Demo (output matches above)
+    PS> $current=Dir $pwd; Show-ObjectTDO $current ; 
+    Demo using a variable
+    .LINK
+    https://www.red-gate.com/simple-talk/blogs/display-object-a-powershell-utility-cmdlet/
+    .LINK
+    https://github.com/Phil-Factor/PowerShell-Utility-Cmdlets/blob/main/Display-Object/Display-Object.ps1
+    .LINK
+    https://github.com/tostka/verb-io
+    #>
+    #[CmdletBinding(DefaultParameterSetName="NoExpectation")]
+    [CmdletBinding()]
+    [Alias('Display-Object','Show-Object')]
+    PARAM (
+        [Parameter(Mandatory = $true,ValueFromPipeline = $true,HelpMessage="The object that you wish to display")]
+            $TheObject,
+        [Parameter(HelpMessage="the depth of recursion (keep it low!)")]
+            [int]$depth = 5,
+        [Parameter(HelpMessage="an array of names of pbjects or arrays you wish to avoid.")]
+            [Object[]]$Avoid = @('#comment'),
+        [Parameter(HelpMessage="For internal use, but you can specify the name of the variable")]
+            [string]$Parent = '$',
+        [Parameter(HelpMessage="For internal use")]
+            [int]$CurrentDepth = 0,
+        [Parameter(HelpMessage="Do you wish to report on nodes containing objects as well as values?")]
+            [int]$reportNodes = 0,
+        [Parameter(HelpMessage="(doesn't appear to be used in the function??)")]
+            [int]$ordered = $True
+    ) ;  
+    PROCESS {
+        if (($CurrentDepth -ge $Depth) -or ($TheObject -eq $Null)) { return; } #prevent runaway recursion
+          $ObjectTypeName = $TheObject.GetType().Name #find out what type it is
+          if ($ObjectTypeName -in 'HashTable', 'OrderedDictionary'){
+              #If you can, force it to be a PSCustomObject
+              $TheObject = [pscustomObject]$TheObject;
+              $ObjectTypeName = 'PSCustomObject'
+          }elseif ($ObjectTypeName -eq 'Collection`1') {
+              #and anything else it spits on 
+              $TheOldObject = $TheObject
+              $TheObject = $TheOldObject | foreach{
+                  [pscustomobject]$_
+              };
+          }
+          #first do objects that cannot be treated as an array.
+          if ($TheObject.Count -le 1 -and $ObjectTypeName -ne 'object[]') {
+              #not something that behaves like an array
+              # figure out where you get the names from
+              if ($ObjectTypeName -in @('PSCustomObject')){ 
+                  # Name-Value pair properties created by Powershell 
+                  $MemberType = 'NoteProperty' 
+              }else{ $MemberType = 'Property' }
+              #now go through the property names, fetching them via GM
+              if ($ordered){ 
+                  $TheMembers = $TheObject | gm -MemberType $MemberType | where { $_.Name -notin $Avoid } 
+              }else{
+                  $TheMembers = $TheObject.PSObject.Properties | Select-Object Name | where { $_.Name -notin $Avoid } 
+              }
+              $TheMembers | Foreach{
+                  Try{
+                      $child = $TheObject.($_.Name);
+                      $ChildType = $child.GetType().Name; #what is this value
+                  }Catch { $Child = $null; } # avoid crashing on write-only objects
+                  $brackets = ''; 
+                  if ($_.Name -like '*.*') { $brackets = "'" }
+                  #is the current child a value or a null?
+                  if ($child -eq $null -or $child.GetType().BaseType.Name -eq 'ValueType' -or $ChildType -in @('String', 'String[]')){
+                      [pscustomobject]@{ 
+                          'Path' = "$Parent.$brackets$($_.Name)$brackets";
+                          'Value' = $Child;                      
+                      } 
+                  }elseif (($CurrentDepth + 1) -eq $Depth){
+                      [pscustomobject]@{
+                          'Path' = "$Parent.$brackets$($_.Name)$brackets";
+                          'Value' = $Child;
+                      }
+                  }else {
+                      #not a value but an object of some sort
+                      if ($ReportNodes -and $childType -ne 'Object[]'){
+                          [pscustomobject]@{
+                              'Path' = "$Parent.$brackets$($_.Name)$brackets";
+                              'Value' = "($ChildType)"                        
+                          } 
+                      }
+                      Show-ObjectTDO -TheObject $child -depth $Depth -Avoid $Avoid -Parent "$Parent.$brackets$($_.Name)$brackets" -CurrentDepth ($currentDepth + 1) -ReportNodes $reportNodes
+                  }                
+              } # loop-E
+          }else {
+              #it is an array
+              if ($TheObject.Count -gt 0){
+                  0..($TheObject.Count - 1) | Foreach{
+                      $child = $TheObject[$_];
+                      #is the current child a value or a null?
+                      if (($child -eq $null) -or ($child.GetType().BaseType.Name -eq 'ValueType') -or ($child.GetType().Name -in @('String', 'String[]'))) 
+                      {
+                          #if so display it 
+                          [pscustomobject]@{ 'Path' = "$Parent[$_]"; 'Value' = "$($child)"; } 
+                      }elseif (($CurrentDepth + 1) -eq $Depth){
+                          [pscustomobject]@{ 'Path' = "$Parent[$_]"; 'Value' = "$($child)"; }
+                      }else {
+                          #not a value but an object of some sort so do a recursive call
+                          Show-ObjectTDO -TheObject $child -depth $Depth -Avoid $Avoid -parent "$Parent[$_]" -CurrentDepth ($currentDepth + 1) -ReportNodes $reportNodes
+                      }
+                  }
+              }else { [pscustomobject]@{ 'Path' = "$Parent"; 'Value' = $Null } }
+          }
+    } # PROC-E 
+}
+
+#*------^ Show-ObjectTDO.ps1 ^------
+
+
 #*------v show-Verbs.ps1 v------
 Function show-Verbs {
     <#
     .SYNOPSIS
-    show-Verbs.ps1 - Test specified verb for presense in the PS get-verb list.
+    show-Verbs.ps1 - Display standard Verbs grouped into Categories
     .NOTES
     Version     : 1.0.0
     Author      : Todd Kadrie
@@ -12938,11 +13850,13 @@ Function show-Verbs {
     AddedWebsite: https://github.com/arsscriptum/PowerShell.Module.Core/blob/master/src/Miscellaneous.ps1
     AddedTwitter: 
     REVISION
+    * 8:48 AM 5/18/2026 corrected CBH syn & desc; revised demo's added echos
     * 4:35 PM 7/20/2022 init; cached & subbed out redundant calls to get-verb; ; explict write-out v return ; fixed fails on single object counts; added pipeline support; 
         flipped DarkRed outputs to foreground/background combos (visibility on any given bg color)
     * 5/13/22 arsscriptum's posted copy (found in google search)
     .DESCRIPTION
-    show-Verbs.ps1 - Test specified verb for presense in the PS get-verb list.
+    show-Verbs.ps1 - Display standard Verbs grouped into Categories
+    If -verb is used, only the specified verb's info and group/category is output.
     .PARAMETER Verb
     Verb string to be tested[-verb report]
     .INPUTS
@@ -12950,13 +13864,47 @@ Function show-Verbs {
     .OUTPUTS
     Boolean
     .EXAMPLE
-    'New' | show-Verbs ;
-    Test the string as a standard verb
+    PS> 'New' | show-Verbs ;
+    
+      Found 1 verbs
+      Verb Group
+      ---- -----
+      New  Common
+
+    Show the info on the new standard verb
     .EXAMPLE
-    show-verbs ; 
+    PS> show-verbs ; 
+    
+        Verbs in category Common (34) :
+        Add       Clear     Close     Copy     Enter    Exit     Find     Format   Get      Hide     Join     Lock     Move     New      Open
+        Optimize  Pop       Push      Redo     Remove   Rename   Reset    Resize   Search   Select   Set      Show     Skip     Split    Step
+        Switch    Undo      Unlock    Watch
+        Verbs in category Data (24) :
+        Backup       Checkpoint   Compare      Compress     Convert      ConvertFrom  ConvertTo   Dismount    Edit        Expand      Export
+        Group        Import       Initialize   Limit        Merge        Mount        Out         Publish     Restore     Save        Sync
+        Unpublish    Update
+        Verbs in category Lifecycle (20) :
+        Approve     Assert      Complete    Confirm     Deny        Disable     Enable     Install    Invoke     Register   Request    Restart
+        Resume      Start       Stop        Submit      Suspend     Uninstall   Unregister Wait
+        Verbs in category Diagnostic (7) :
+        Debug    Measure  Ping    Repair  Resolve Test    Trace
+        Verbs in category Communications (6) :
+        Connect     Disconnect  Read        Receive     Send        Write
+        Verbs in category Security (6) :
+        Block      Grant      Protect    Revoke     Unblock    Unprotect
+        Verbs in category Other (1) :
+        Use    
+
     Output formatted display of all standard verbs (as per get-verb)
     .EXAMPLE
-    'show','new','delete','invoke' | show-verbs -verbose  ; 
+    PS> 'show','new','delete','invoke' | show-verbs -verbose  ; 
+    
+        Verb   Group
+        ----   -----
+        Show   Common
+        New    Common
+        Invoke Lifecycle    
+
     Show specs on an array of verbs with verbose output and pipeline input
     .EXAMPLE
     gcm -mod verb-io | ? commandType -eq 'Function' | select -expand verb -unique | show-Verbs -verbo
@@ -12984,10 +13932,10 @@ Function show-Verbs {
             $Formatted = ($verbs | where Verb -match $item| sort -Property Verb)
             if($Formatted){
                 $FormattedCount = $Formatted |  measure | select -expand count ;
-                Write-Host "Found $FormattedCount verbs" -f Black -b Gray -n ; 
+                Write-Host "Found $FormattedCount verbs`n" -f Black -b Gray -n ; 
                 $Formatted | write-output ;  
             }else{
-                Write-Host "No verb found" -f DarkGray -b White; 
+                Write-Host "No verb found`n" -f DarkGray -b White; 
             } ; 
             return ; 
         } ; 
@@ -17473,9 +18421,97 @@ $($logfile)
 #*------^ update-NewModule.ps1 ^------
 
 
+#*------v Write-DiffTDO.ps1 v------
+function Write-DiffTDO {
+    <#
+    .SYNOPSIS
+    Write-DiffTDO() - Outputs the results of Compare-FilesTDO as formatted console text
+    .NOTES
+    Version     : 0.0.
+    Author      : Todd Kadrie
+    Website     : http://www.toddomation.com
+    Twitter     : @tostka / http://twitter.com/tostka
+    CreatedDate : 2026-
+    FileName    : Write-DiffTDO.ps1
+    License     : (none asserted)
+    Copyright   : (none asserted)
+    Github      : https://github.com/tostka/verb-dev
+    Tags        : Powershell,Git,SourceControl,Diff,format
+    AddedCredit : Doug Finke
+    AddedWebsite: https://dfinke.github.io/powershell,%20ai,%20chatgpt,%20codegen/2024/09/03/git-diff-tool-in-powershell.html
+    AddedTwitter: URL
+    REVISIONS
+    * 9:09 AM 5/28/2026 init, minor formatting tweaks, updated CBH, added proc{}; added -DiffStyle, to flip from added/deleted -> +/-; added == support which prefixes \s.
+    * 9/3/2024 Doug Finke's blog post example (code generated via ChatGPT)
+    .DESCRIPTION
+    Write-DiffTDO() - Outputs the results of Compare-FilesTDO as formatted console text
+    
+    .PARAMETER Diffs
+    Diffs result of a Compare-FilesTDO() pass on a pair of files
+    .PARAMETER Ref
+    The first file to compare
+    .PARAMETER Diff
+    The second file to compare
+    .PARAMETER ContextLines
+    Lines of context to compare
+    .INPUTS
+    Accepts pipeline input.
+    .OUTPUTS
+    System.Array returns array of matched file properties ('Name','FullName','Extension','Length','LastWriteTime','LinkType','PSParentPath','PSPath','Directory')
+    .EXAMPLE
+    PS> $oldFile = Get-Content -Path $OldFilePath ; 
+    PS> $newFile = Get-Content -Path $NewFilePath ; 
+    PS> $diffs = Compare-FilesTDO -Ref $OldFilePath -Diff $NewFilePath -ContextLines $ContextLines ; 
+    PS> Write-DiffTDO -Diffs $diffs -OldFile $oldFile -NewFile $newFile -ContextLines 3 ; 
+    .LINK
+    AddedWebsite: https://dfinke.github.io/powershell,%20ai,%20chatgpt,%20codegen/2024/09/03/git-diff-tool-in-powershell.html
+    .LINK
+    https://github.com/tostka/verb-dev
+    #>
+    #[CmdletBinding(DefaultParameterSetName="NoExpectation")]
+    [CmdletBinding()]
+    [Alias('Write-Diff')]
+    PARAM (        
+        [Parameter(Mandatory=$true,HelpMessage="Diffs result of a Compare-FilesTDO() pass on a pair of files")]
+            [psobject[]]$Diffs,
+        [Parameter(Mandatory=$true,HelpMessage="The first file to compare")]
+            [string[]]$Ref,
+            #[string[]]$OldFile,
+        [Parameter(Mandatory=$true,HelpMessage="The second file to compare")]
+            ## The second file to compare
+            [string[]]$Diff,
+            #[string[]]$NewFile,
+        [Parameter(HelpMessage="Lines of context to compare")]
+            [int]$ContextLines = 3
+    ) ;  
+    Process {
+        foreach ($diff in $Diffs) {
+            if ($diff.ChangeType -eq 'Modified') {
+                Write-Host "Line $($diff.OldLineNumber),$($diff.NewLineNumber) Modified:" -ForegroundColor Yellow
+                for ($i = [Math]::Max(0, $diff.OldLineNumber - $ContextLines - 1); $i -lt [Math]::Min($Ref.Count, $diff.OldLineNumber + $ContextLines); $i++) {
+                    Write-Host "  $($Ref[$i])"
+                }
+                Write-Host "- $($diff.OldLine)" -ForegroundColor Red
+                Write-Host "+ $($diff.NewLine)" -ForegroundColor Green
+            }
+            elseif ($diff.ChangeType -eq 'Added') {
+                Write-Host "Line $($diff.NewLineNumber) Added:" -ForegroundColor Green
+                Write-Host "+ $($diff.NewLine)" -ForegroundColor Green
+            }
+            elseif ($diff.ChangeType -eq 'Deleted') {
+                Write-Host "Line $($diff.OldLineNumber) Deleted:" -ForegroundColor Red
+                Write-Host "- $($diff.OldLine)" -ForegroundColor Red
+            }
+        }
+    } # PROC-E 
+}
+
+#*------^ Write-DiffTDO.ps1 ^------
+
+
 #*======^ END FUNCTIONS ^======
 
-Export-ModuleMember -Function backup-ModuleBuild,check-PsLocalRepoRegistration,close-ISEOpenfiles,close-ISEOtherOpenFiles.ps1,confirm-ModuleBuildSync,confirm-ModulePsd1Version,confirm-ModulePsm1Version,confirm-ModuleTestPs1Guid,convert-CommandLine2VSCDebugJson,Convert-CommandToSplatTDO,convertFrom-EscapedPSText,Convert-HelpToHtmlFile,Convert-ISEOpenFileToText,convert-ISEOpenSession,converto-VSCConfig,ConvertTo-Breakpoint,_extractBreakpoint,convertTo-EscapedPSText,ConvertTo-ModuleDynamicTDO,ConvertTo-ModuleMergedTDO,convertTo-UnwrappedPS,convertTo-WrappedPS,copy-ISELocalSourceToTab,copy-ISETabFileToLocal,disable-ISEBreakPointsThisTab,enable-ISEBreakPointsThisTab,export-CommentBasedHelpToFileTDO,export-FunctionsToFilesTDO,export-ISEBreakPoints,export-ISEBreakPointsALL,export-ISEOpenFiles,export-OpenNotepads,find-NounAliasesTDO,get-AliasAssignsAST,get-CodeProfileAST,get-CodeRiskProfileAST,Get-CommentBlocks,get-FunctionBlock,get-FunctionBlocks,get-HelpParsed,get-ISEBreakPointsThisTab,get-ISEOpenFilesExported,get-ModuleRevisedCommands,get-NounAliasTDO,get-OpenNotepadsExported,get-ProjectNameTDO,Get-PSBreakpointSorted,Get-PSModuleFile,Get-ScriptCommentsTDO,get-StrictMode,Version,ToString,get-VariableAssignsAST,get-VerbAliasTDO,Get-VerbSynonymTDO,get-VersionInfo,import-ISEBreakPoints,import-ISEBreakPointsALL,import-ISEConsoleColors,import-ISEOpenFiles,import-OpenNotepads,Initialize-ModuleFingerprint,Get-PSModuleFile,Initialize-PSModuleDirectories,move-ISEBreakPoints,new-CBH,New-GitHubGist,Out-ISETab,pop-FunctionDev,push-FunctionDev,Reset-ISEFile,restore-ISEConsoleColors,restore-ModuleBuild,save-ISEConsoleColors,save-ISEOpenfiles,Set-ISEScriptLocation,show-ISEOpenTab,show-ISEOpenTabPaths,show-Verbs,Split-CommandLine,Step-ModuleVersionCalculated,Get-PSModuleFile,Test-ModuleTMPFiles,test-VerbStandard,Uninstall-ModuleForce,update-NewModule,get-FolderEmpty,reset-ModulePublishingDirectory,populate-ModulePublishingDirectory -Alias *
+Export-ModuleMember -Function backup-ModuleBuild,check-PsLocalRepoRegistration,close-ISEOpenfiles,close-ISEOtherOpenFiles,Compare-FilesTDO,Compare-FileTDO,Compare-ObjectsTDO,confirm-ModuleBuildSync,confirm-ModulePsd1Version,confirm-ModulePsm1Version,confirm-ModuleTestPs1Guid,convert-CommandLine2VSCDebugJson,Convert-CommandToSplatTDO,convertFrom-EscapedPSText,Convert-HelpToHtmlFile,Convert-ISEOpenFileToText,convert-ISEOpenSession,converto-VSCConfig,ConvertTo-Breakpoint,_extractBreakpoint,convertTo-EscapedPSText,ConvertTo-ModuleDynamicTDO,ConvertTo-ModuleMergedTDO,convertTo-UnwrappedPS,convertTo-WrappedPS,copy-ISELocalSourceToTab,copy-ISETabFileToLocal,disable-ISEBreakPointsThisTab,enable-ISEBreakPointsThisTab,export-CommentBasedHelpToFileTDO,export-FunctionsToFilesTDO,export-ISEBreakPoints,export-ISEBreakPointsALL,export-ISEOpenFiles,export-OpenNotepads,find-NounAliasesTDO,get-AliasAssignsAST,get-CodeProfileAST,get-CodeRiskProfileAST,Get-CommentBlocks,get-FunctionBlock,get-FunctionBlocks,get-HelpParsed,get-ISEBreakPointsThisTab,get-ISEOpenFilesExported,get-ModuleRevisedCommands,get-NounAliasTDO,get-OpenNotepadsExported,get-ProjectNameTDO,Get-PSBreakpointSorted,Get-PSModuleFile,Get-ScriptCommentsTDO,get-StrictMode,Version,ToString,get-UnifiedDiffTDO,get-VariableAssignsAST,get-VerbAliasTDO,Get-VerbSynonymTDO,get-VersionInfo,import-ISEBreakPoints,import-ISEBreakPointsALL,import-ISEConsoleColors,import-ISEOpenFiles,import-OpenNotepads,Initialize-ModuleFingerprint,Get-PSModuleFile,Initialize-PSModuleDirectories,move-ISEBreakPoints,new-CBH,New-GitHubGist,out-diffTDO,Out-ISETab,pop-FunctionDev,push-FunctionDev,Reset-ISEFile,restore-ISEConsoleColors,restore-ModuleBuild,save-ISEConsoleColors,save-ISEOpenfiles,Set-ISEScriptLocation,Show-DiffTDO,show-ISEOpenTab,show-ISEOpenTabPaths,Show-ObjectTDO,show-Verbs,Split-CommandLine,Step-ModuleVersionCalculated,Get-PSModuleFile,Test-ModuleTMPFiles,test-VerbStandard,Uninstall-ModuleForce,update-NewModule,get-FolderEmpty,reset-ModulePublishingDirectory,populate-ModulePublishingDirectory,Write-DiffTDO -Alias *
 
 
 
@@ -17483,8 +18519,8 @@ Export-ModuleMember -Function backup-ModuleBuild,check-PsLocalRepoRegistration,c
 # SIG # Begin signature block
 # MIIELgYJKoZIhvcNAQcCoIIEHzCCBBsCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQU/gUQgp7Dt0fJld/jebs03c6V
-# SvWgggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUA+9F9/1Syju8MXhiYhwfxsF7
+# U1agggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
 # MCwxKjAoBgNVBAMTIVBvd2VyU2hlbGwgTG9jYWwgQ2VydGlmaWNhdGUgUm9vdDAe
 # Fw0xNDEyMjkxNzA3MzNaFw0zOTEyMzEyMzU5NTlaMBUxEzARBgNVBAMTClRvZGRT
 # ZWxmSUkwgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBALqRVt7uNweTkZZ+16QG
@@ -17499,9 +18535,9 @@ Export-ModuleMember -Function backup-ModuleBuild,check-PsLocalRepoRegistration,c
 # AWAwggFcAgEBMEAwLDEqMCgGA1UEAxMhUG93ZXJTaGVsbCBMb2NhbCBDZXJ0aWZp
 # Y2F0ZSBSb290AhBaydK0VS5IhU1Hy6E1KUTpMAkGBSsOAwIaBQCgeDAYBgorBgEE
 # AYI3AgEMMQowCKACgAChAoAAMBkGCSqGSIb3DQEJAzEMBgorBgEEAYI3AgEEMBwG
-# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBRTp8/8
-# D2uPIDR5+op/9DPpI9tRLjANBgkqhkiG9w0BAQEFAASBgFpwArlw5Ss+/t6B8yHZ
-# NbrFKEdWkQjoQSgJphIEqJLjJtvZkVWR8h9rNz9YhxvQgIlRNf1Nk29PioJrxJD1
-# x1hBbH0MaNQtohqP42c8+2HKNrUka8bM1XVytMWU3vVK0laBytsj9PJavF4kCvtd
-# j19Ex7dZhfTCiBBvQoV3d5ZH
+# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBRW6Wss
+# 1OkEjgdKbvkEa9XrpLaCmjANBgkqhkiG9w0BAQEFAASBgCjq5CTI5/Vja/gFuAtQ
+# F3o2VWdkzE+3/jdjBfL7CgbCWpLw/I6Lx7m2xwZ4pREDvHZnEiOdB8pyEBwlUnnq
+# n3GIkC2MfG221U6/touK793BCfCkn9urkbHc+gXaPKJnj9InPSRjQxAPW29sbIkr
+# 1IsTDM+bPOmErdQNVwOjbF18
 # SIG # End signature block

@@ -5,7 +5,7 @@
 .SYNOPSIS
 VERB-dev - Development PS Module-related generic functions
 .NOTES
-Version     : 1.5.92
+Version     : 1.5.93
 Author      : Todd Kadrie
 Website     :	https://www.toddomation.com
 Twitter     :	@tostka
@@ -9455,6 +9455,105 @@ function Get-PSModuleFile {
 #*------^ Get-PSModuleFile.ps1 ^------
 
 
+#*------v get-ScriptComments.ps1 v------
+Function Get-ScriptComments {
+    <#
+    .SYNOPSIS
+    get-ScriptComments - parse a script file for comments only
+    .NOTES
+    Version     : 0.0.
+    .NOTES
+    Author: Jeffery Hicks
+    Website:	https://jdhitsolutions.com/blog/powershell/5410/creating-a-github-gist-with-powershell/
+    Twitter:	@tostka, http://twitter.com/tostka
+    Additional Credits: REFERENCE
+    Website:	URL
+    Twitter:	URL
+    CreatedDate : 2026-
+    FileName    : get-ScriptComments.ps1
+    License     : (non asserted)
+    Copyright   : (non asserted)
+    Github      : https://github.com/tostka/verb-dev
+    Tags        : Powershell,Git,SourceControl
+    AddedCredit : 
+    AddedWebsite: 
+    AddedTwitter: URL
+    REVISIONS
+    * 10:07 AM 6/4/2026 added CBH, minor tweaks
+    * 3.5.0, isescriptinggeek posted copy from psg
+    .DESCRIPTION
+    get-ScriptComments - parse a script file for comments only
+    
+    Simple wrapper of the [math]::ieeeremainder( $number,$devisor) function
+    
+    Although the moduls operator '%' : ($number % $divisor) should work, I find the ieeeremainder() to be more dependable. 
+    Unfortunately it's an ugly/long command to contruct. 
+    So wrap it with get-reminder -number 20 -divisor 5, 
+    or even better use the gRmdr alias with positional params:
+    
+    if((gRmdr $xdots $dcLen) -eq 0){write-host -fore yellow "`n."}
+    
+    .PARAMETER number
+    The number to be divided by the divisor
+    .PARAMETER divisor
+    The number to divide the number by
+    .INPUTS
+    Does not accept pipeline input.
+    .OUTPUTS
+    returns the parsed comments to the pipeline
+    .EXAMPLE
+    PS> get-ScriptComments -Path C:\sc\verb-dev\Public\get-ScriptComments.ps1
+    
+        #*------v AST-PARSED COMMENTS : C:\sc\verb-dev\Public\get-ScriptComments.ps1 v------
+        # get-ScriptComments.ps1
+        ...
+        #endregion GET_SCRIPTCOMMENTS ; #*------^ END get-ScriptComments ^------
+        10:04:34:
+        #*------^ AST-PARSED COMMENTS : C:\sc\verb-dev\Public\get-ScriptComments.ps1 ^------    
+        
+    demo
+    .LINK
+    https://www.powershellgallery.com/packages/ISEScriptingGeek/3.5.0/Content/functions%5CGet-ScriptComments.ps1
+    .LINK
+    https://github.com/tostka/verb-dev
+    #>
+    [CmdletBinding()]
+    PARAM(
+        [Parameter(Position = 0, Mandatory, HelpMessage = 'Enter the path of a PS1 file',ValueFromPipeline, ValueFromPipelineByPropertyName)]
+          [Alias('PSPath', 'Name')]
+          [ValidateScript( { Test-Path $_ })]
+          [ValidatePattern('\.ps(1|m1)$')]
+          [String]$Path
+    )
+    BEGIN {
+        #Begin scriptblock
+        Write-Verbose -Message "Starting $($MyInvocation.MyCommand)"
+        #initialization commands
+        #explicitly define some AST variables
+        New-Variable $AstTokens -Force
+        New-Variable astErr -Force
+    } #close begin
+    PROCESS {
+        #Process scriptblock
+        #convert each path to a nice filesystem path
+        $Path = Convert-Path -Path $Path
+
+        Write-Verbose -Message "Parsing $Path"
+        #Parse the file
+        $AST = [System.Management.Automation.Language.Parser]::ParseFile($Path, [ref]$AstTokens, [ref]$astErr)
+
+        #filter tokens for comments and display text
+        $AstTokens.where( { $_.kind -eq 'comment' }) |
+        Select-Object -ExpandProperty Text
+    } #close process
+    END {
+        Write-Verbose -Message "Ending $($MyInvocation.MyCommand)"
+    } #close end
+}
+
+#*------^ get-ScriptComments.ps1 ^------
+
+
 #*------v Get-ScriptCommentsTDO.ps1 v------
 Function Get-ScriptCommentsTDO {
     <#
@@ -12915,6 +13014,7 @@ Function Reset-ISEFile {
     AddedWebsite: https://github.com/jdhitsolutions/ISEScriptingGeek/
     AddedTwitter: URL
     REVISIONS
+    * 1:21 PM 6/4/2026 added code to return to original editing loc
     * 10:29 AM 4/10/2026 added confirming tooltip 
     * 12:15 PM 4/9/2026 added -force; init, added check for breakpoints, and pre-exported status prompt.
     * Jul 3, 2023 jdh posted vers
@@ -12942,9 +13042,12 @@ Function Reset-ISEFile {
             [switch]$Force
     )
     if ($psISE) {
+        # save work loc
+        $CurrentLine = $psISE.CurrentFile.Editor.CaretLine
+        $CurrentColumn = $psISE.CurrentFile.Editor.CaretColumn
         #save the current file path
         #$path = $psISE.CurrentFile.FullPath
-        $tScript = $psise.CurrentFile.FullPath ;
+        $tScript = $psise.CurrentFile.FullPath ;        
         $xBPs= get-psbreakpoint |?{ ($_.Script -eq $tScript) -AND ($_.line)} ;
         if($xBPs){        
             # default to same loc, variant name of script in currenttab of ise
@@ -12990,6 +13093,8 @@ Function Reset-ISEFile {
         [void]$psISE.CurrentPowerShellTab.Files.Add($tScript)
         #file always added to the end
         [void]$psISE.CurrentPowerShellTab.files.Move(($psISE.CurrentPowerShellTab.files.count - 1), $i)
+        # return to original loc        
+        $psISE.CurrentFile.Editor.SetCaretPosition($CurrentLine,$CurrentColumn)
         # traytip the update status
         $TipTimeSecs = 2   ; 
         $tipTitle = "ISE update";
@@ -18511,7 +18616,7 @@ function Write-DiffTDO {
 
 #*======^ END FUNCTIONS ^======
 
-Export-ModuleMember -Function backup-ModuleBuild,check-PsLocalRepoRegistration,close-ISEOpenfiles,close-ISEOtherOpenFiles,Compare-FilesTDO,Compare-FileTDO,Compare-ObjectsTDO,confirm-ModuleBuildSync,confirm-ModulePsd1Version,confirm-ModulePsm1Version,confirm-ModuleTestPs1Guid,convert-CommandLine2VSCDebugJson,Convert-CommandToSplatTDO,convertFrom-EscapedPSText,Convert-HelpToHtmlFile,Convert-ISEOpenFileToText,convert-ISEOpenSession,converto-VSCConfig,ConvertTo-Breakpoint,_extractBreakpoint,convertTo-EscapedPSText,ConvertTo-ModuleDynamicTDO,ConvertTo-ModuleMergedTDO,convertTo-UnwrappedPS,convertTo-WrappedPS,copy-ISELocalSourceToTab,copy-ISETabFileToLocal,disable-ISEBreakPointsThisTab,enable-ISEBreakPointsThisTab,export-CommentBasedHelpToFileTDO,export-FunctionsToFilesTDO,export-ISEBreakPoints,export-ISEBreakPointsALL,export-ISEOpenFiles,export-OpenNotepads,find-NounAliasesTDO,get-AliasAssignsAST,get-CodeProfileAST,get-CodeRiskProfileAST,Get-CommentBlocks,get-FunctionBlock,get-FunctionBlocks,get-HelpParsed,get-ISEBreakPointsThisTab,get-ISEOpenFilesExported,get-ModuleRevisedCommands,get-NounAliasTDO,get-OpenNotepadsExported,get-ProjectNameTDO,Get-PSBreakpointSorted,Get-PSModuleFile,Get-ScriptCommentsTDO,get-StrictMode,Version,ToString,get-UnifiedDiffTDO,get-VariableAssignsAST,get-VerbAliasTDO,Get-VerbSynonymTDO,get-VersionInfo,import-ISEBreakPoints,import-ISEBreakPointsALL,import-ISEConsoleColors,import-ISEOpenFiles,import-OpenNotepads,Initialize-ModuleFingerprint,Get-PSModuleFile,Initialize-PSModuleDirectories,move-ISEBreakPoints,new-CBH,New-GitHubGist,out-diffTDO,Out-ISETab,pop-FunctionDev,push-FunctionDev,Reset-ISEFile,restore-ISEConsoleColors,restore-ModuleBuild,save-ISEConsoleColors,save-ISEOpenfiles,Set-ISEScriptLocation,Show-DiffTDO,show-ISEOpenTab,show-ISEOpenTabPaths,Show-ObjectTDO,show-Verbs,Split-CommandLine,Step-ModuleVersionCalculated,Get-PSModuleFile,Test-ModuleTMPFiles,test-VerbStandard,Uninstall-ModuleForce,update-NewModule,get-FolderEmpty,reset-ModulePublishingDirectory,populate-ModulePublishingDirectory,Write-DiffTDO -Alias *
+Export-ModuleMember -Function backup-ModuleBuild,check-PsLocalRepoRegistration,close-ISEOpenfiles,close-ISEOtherOpenFiles,Compare-FilesTDO,Compare-FileTDO,Compare-ObjectsTDO,confirm-ModuleBuildSync,confirm-ModulePsd1Version,confirm-ModulePsm1Version,confirm-ModuleTestPs1Guid,convert-CommandLine2VSCDebugJson,Convert-CommandToSplatTDO,convertFrom-EscapedPSText,Convert-HelpToHtmlFile,Convert-ISEOpenFileToText,convert-ISEOpenSession,converto-VSCConfig,ConvertTo-Breakpoint,_extractBreakpoint,convertTo-EscapedPSText,ConvertTo-ModuleDynamicTDO,ConvertTo-ModuleMergedTDO,convertTo-UnwrappedPS,convertTo-WrappedPS,copy-ISELocalSourceToTab,copy-ISETabFileToLocal,disable-ISEBreakPointsThisTab,enable-ISEBreakPointsThisTab,export-CommentBasedHelpToFileTDO,export-FunctionsToFilesTDO,export-ISEBreakPoints,export-ISEBreakPointsALL,export-ISEOpenFiles,export-OpenNotepads,find-NounAliasesTDO,get-AliasAssignsAST,get-CodeProfileAST,get-CodeRiskProfileAST,Get-CommentBlocks,get-FunctionBlock,get-FunctionBlocks,get-HelpParsed,get-ISEBreakPointsThisTab,get-ISEOpenFilesExported,get-ModuleRevisedCommands,get-NounAliasTDO,get-OpenNotepadsExported,get-ProjectNameTDO,Get-PSBreakpointSorted,Get-PSModuleFile,Get-ScriptComments,Get-ScriptCommentsTDO,get-StrictMode,Version,ToString,get-UnifiedDiffTDO,get-VariableAssignsAST,get-VerbAliasTDO,Get-VerbSynonymTDO,get-VersionInfo,import-ISEBreakPoints,import-ISEBreakPointsALL,import-ISEConsoleColors,import-ISEOpenFiles,import-OpenNotepads,Initialize-ModuleFingerprint,Get-PSModuleFile,Initialize-PSModuleDirectories,move-ISEBreakPoints,new-CBH,New-GitHubGist,out-diffTDO,Out-ISETab,pop-FunctionDev,push-FunctionDev,Reset-ISEFile,restore-ISEConsoleColors,restore-ModuleBuild,save-ISEConsoleColors,save-ISEOpenfiles,Set-ISEScriptLocation,Show-DiffTDO,show-ISEOpenTab,show-ISEOpenTabPaths,Show-ObjectTDO,show-Verbs,Split-CommandLine,Step-ModuleVersionCalculated,Get-PSModuleFile,Test-ModuleTMPFiles,test-VerbStandard,Uninstall-ModuleForce,update-NewModule,get-FolderEmpty,reset-ModulePublishingDirectory,populate-ModulePublishingDirectory,Write-DiffTDO -Alias *
 
 
 
@@ -18519,8 +18624,8 @@ Export-ModuleMember -Function backup-ModuleBuild,check-PsLocalRepoRegistration,c
 # SIG # Begin signature block
 # MIIELgYJKoZIhvcNAQcCoIIEHzCCBBsCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUA+9F9/1Syju8MXhiYhwfxsF7
-# U1agggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUJo//QevAlCuhhkBeZkGy8XtQ
+# 3oagggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
 # MCwxKjAoBgNVBAMTIVBvd2VyU2hlbGwgTG9jYWwgQ2VydGlmaWNhdGUgUm9vdDAe
 # Fw0xNDEyMjkxNzA3MzNaFw0zOTEyMzEyMzU5NTlaMBUxEzARBgNVBAMTClRvZGRT
 # ZWxmSUkwgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBALqRVt7uNweTkZZ+16QG
@@ -18535,9 +18640,9 @@ Export-ModuleMember -Function backup-ModuleBuild,check-PsLocalRepoRegistration,c
 # AWAwggFcAgEBMEAwLDEqMCgGA1UEAxMhUG93ZXJTaGVsbCBMb2NhbCBDZXJ0aWZp
 # Y2F0ZSBSb290AhBaydK0VS5IhU1Hy6E1KUTpMAkGBSsOAwIaBQCgeDAYBgorBgEE
 # AYI3AgEMMQowCKACgAChAoAAMBkGCSqGSIb3DQEJAzEMBgorBgEEAYI3AgEEMBwG
-# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBRW6Wss
-# 1OkEjgdKbvkEa9XrpLaCmjANBgkqhkiG9w0BAQEFAASBgCjq5CTI5/Vja/gFuAtQ
-# F3o2VWdkzE+3/jdjBfL7CgbCWpLw/I6Lx7m2xwZ4pREDvHZnEiOdB8pyEBwlUnnq
-# n3GIkC2MfG221U6/touK793BCfCkn9urkbHc+gXaPKJnj9InPSRjQxAPW29sbIkr
-# 1IsTDM+bPOmErdQNVwOjbF18
+# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBSMR2OI
+# idaMzvRZ/JW8ZCrGvKIY3jANBgkqhkiG9w0BAQEFAASBgIDWtPsgeqGhi7AQgOBJ
+# I9rnB31lUBVs7hBuf7ngoX4eF9YyItC5YSwEEga7eYcaYbndSL9EfSY2N1nS1mm+
+# pZKGxGbdzVe2k3p8KbVwYDT/teugQnsyRFpA9lrYk5bM+uRvPhuEWPv51EqpcQkm
+# Sp/x09t3GxTG5EonxV3OMEUS
 # SIG # End signature block

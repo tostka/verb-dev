@@ -1,7 +1,72 @@
 ﻿<Objs Version="1.1.0.1" xmlns="http://schemas.microsoft.com/powershell/2004/04">
+  <S>backup-ModuleBuild.md</S>
   <S>bootstrap.min.css</S>
   <S>bootstrap.min.js</S>
   <S>CHANGELOG.md</S>
+  <S>check-PsLocalRepoRegistration.md</S>
+  <S>close-ISEOpenfiles.md</S>
+  <S>close-ISEOtherOpenFiles.md</S>
+  <S>Compare-FilesTDO.md</S>
+  <S>Compare-FileTDO.md</S>
+  <S>Compare-ObjectsTDO.md</S>
+  <S>confirm-ModuleBuildSync.md</S>
+  <S>confirm-ModulePsd1Version.md</S>
+  <S>confirm-ModulePsm1Version.md</S>
+  <S>confirm-ModuleTestPs1Guid.md</S>
+  <S>convert-CommandLine2VSCDebugJson.md</S>
+  <S>Convert-CommandToSplatTDO.md</S>
+  <S>convertFrom-EscapedPSText.md</S>
+  <S>Convert-HelpToHtmlFile.md</S>
+  <S>Convert-ISEOpenFileToText.md</S>
+  <S>convert-ISEOpenSession.md</S>
+  <S>converto-VSCConfig.md</S>
+  <S>ConvertTo-Breakpoint.md</S>
+  <S>convertTo-EscapedPSText.md</S>
+  <S>ConvertTo-ModuleDynamicTDO.md</S>
+  <S>ConvertTo-ModuleMergedTDO.md</S>
+  <S>convertTo-UnwrappedPS.md</S>
+  <S>convertTo-WrappedPS.md</S>
+  <S>copy-ISELocalSourceToTab.md</S>
+  <S>copy-ISETabFileToLocal.md</S>
+  <S>disable-ISEBreakPointsThisTab.md</S>
+  <S>enable-ISEBreakPointsThisTab.md</S>
+  <S>export-CommentBasedHelpToFileTDO.md</S>
+  <S>export-FunctionsToFilesTDO.md</S>
+  <S>export-ISEBreakPoints.md</S>
+  <S>export-ISEBreakPointsALL.md</S>
+  <S>export-ISEOpenFiles.md</S>
+  <S>export-OpenNotepads.md</S>
+  <S>find-NounAliasesTDO.md</S>
+  <S>Generate-ScriptMarkdownHelp-ps1-BP.xml</S>
+  <S>get-AliasAssignsAST.md</S>
+  <S>get-CodeProfileAST.md</S>
+  <S>get-CodeRiskProfileAST.md</S>
+  <S>Get-CommentBlocks.md</S>
+  <S>get-FunctionBlock.md</S>
+  <S>get-FunctionBlocks.md</S>
+  <S>get-HelpParsed.md</S>
+  <S>get-ISEBreakPointsThisTab.md</S>
+  <S>get-ISEOpenFilesExported.md</S>
+  <S>get-ModuleRevisedCommands.md</S>
+  <S>get-NounAliasTDO.md</S>
+  <S>get-OpenNotepadsExported.md</S>
+  <S>get-ProjectNameTDO.md</S>
+  <S>Get-PSBreakpointSorted.md</S>
+  <S>Get-PSModuleFile.md</S>
+  <S>Get-ScriptCommentsTDO.md</S>
+  <S>get-StrictMode.md</S>
+  <S>get-UnifiedDiffTDO.md</S>
+  <S>get-VariableAssignsAST.md</S>
+  <S>get-VerbAliasTDO.md</S>
+  <S>Get-VerbSynonymTDO.md</S>
+  <S>get-VersionInfo.md</S>
+  <S>import-ISEBreakPoints.md</S>
+  <S>import-ISEBreakPointsALL.md</S>
+  <S>import-ISEConsoleColors.md</S>
+  <S>import-ISEOpenFiles.md</S>
+  <S>import-OpenNotepads.md</S>
+  <S>Initialize-ModuleFingerprint.md</S>
+  <S>Initialize-PSModuleDirectories.md</S>
   <S>jasny-bootstrap.min.css</S>
   <S>jasny-bootstrap.min.js</S>
   <S>jquery-1.11.1.min.js</S>
@@ -10,8 +75,33 @@
   <S>LICENSE_INVOKE-CREATEMODULEHELPFILE</S>
   <S>LICENSE_JASNY-BOOTSTRAP</S>
   <S>LICENSE_JQUERY</S>
+  <S>move-ISEBreakPoints.md</S>
   <S>navmenu.css</S>
+  <S>new-CBH.md</S>
+  <S>New-GitHubGist.md</S>
+  <S>out-diffTDO.md</S>
+  <S>Out-ISETab.md</S>
+  <S>pop-FunctionDev.md</S>
+  <S>push-FunctionDev.md</S>
   <S>Quick-Start-Installation-and-Example.md</S>
   <S>README.md</S>
+  <S>Reset-ISEFile.md</S>
+  <S>restore-ISEConsoleColors.md</S>
+  <S>restore-ModuleBuild.md</S>
+  <S>save-ISEConsoleColors.md</S>
+  <S>save-ISEOpenfiles.md</S>
   <S>screenshot.png</S>
+  <S>Set-ISEScriptLocation.md</S>
+  <S>Show-DiffTDO.md</S>
+  <S>show-ISEOpenTab.md</S>
+  <S>show-ISEOpenTabPaths.md</S>
+  <S>Show-ObjectTDO.md</S>
+  <S>show-Verbs.md</S>
+  <S>Split-CommandLine.md</S>
+  <S>Step-ModuleVersionCalculated.md</S>
+  <S>Test-ModuleTMPFiles.md</S>
+  <S>test-VerbStandard.md</S>
+  <S>Uninstall-ModuleForce.md</S>
+  <S>update-NewModule.md</S>
+  <S>Write-DiffTDO.md</S>
 </Objs>
