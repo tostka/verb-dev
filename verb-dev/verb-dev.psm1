@@ -5,7 +5,7 @@
 .SYNOPSIS
 VERB-dev - Development PS Module-related generic functions
 .NOTES
-Version     : 1.5.94
+Version     : 1.5.95
 Author      : Todd Kadrie
 Website     :	https://www.toddomation.com
 Twitter     :	@tostka
@@ -6508,6 +6508,7 @@ function export-OpenNotepads {
     Github      : https://github.com/tostka/verb-dev
     Tags        : Powershell,ISE,development,debugging
     REVISIONS
+    * 8:30 AM 7/7/2026 was getting a block of not hits, so added a range of $chkpaths, and added a recurssion option; added parse for notepad3.exe's inclusion of the full path in the wintitle
     * 1:53 PM 7/2/2025 converted to func;  init
     .DESCRIPTION
     export-OpenNotepads - Export a list of all currently open Notepad* variant (notepad2/3 curr) windows, to CU \WindowsPowershell\Scripts\data\NotePdSavedSession-....
@@ -6559,8 +6560,26 @@ function export-OpenNotepads {
         #$rgxNPAppNames = "\s-\s(Notepad\s2e\sx64|Notepad3)"
 
         [string[]]$chkpaths = @() ;
-        $chkpaths += @('c:\usr\work\incid\','c:\usr\work\ps\scripts\','c:\usr\work\exch\scripts\','C:\usr\work\o365\scripts\')
-        $chkpaths += @($(resolve-path c:\sc\verb-*\public))
+        #$chkpaths += @('c:\usr\work\incid\','c:\usr\work\ps\scripts\','c:\usr\work\exch\scripts\','C:\usr\work\o365\scripts\')
+        # 8:04 AM 7/7/2026 add tmp path
+        $chkpaths += @('c:\usr\work\incid\','c:\usr\work\ps\scripts\','c:\usr\work\exch\scripts\','C:\usr\work\o365\scripts\','c:\tmp\','c:\usr\work\')
+        $chkpaths += @($(resolve-path c:\sc\verb-*\public)) # do publics before full recurse, want to hit more likely early, save time
+        # do all subfolders
+        $chkpaths += @($(gci c:\sc\* -Directory | select -expand fullname))
+        # add cab folders
+        $chkpaths += @($(resolve-path c:\cab*))
+        # 8:07 AM 7/7/2026 add docs
+        $chkpaths += @([environment]::getfolderpath('mydocuments'))
+        # 8:09 AM 7/7/2026 onedrive comm, just do the work subtree (a ton of app level non-text items otherwise)
+        # 8:50 AM 7/7/2026 no, this is sim/hardlinked into c:\usr\work, simpler to search there, added recurse from that root to iniital static chkpaths
+        #if($env:OneDriveCommercial){$chkpaths += @("$($env:OneDriveCommercial)\work\")}
+        # 8:11 AM 7/7/2026 OD personal, no, I don't have anything text based in there, including it's \documents folder
+        #if($env:OneDriveConsumer){$chkpaths += @($env:OneDriveConsumer))}
+        #C:\Users\kadrits\OneDrive - The Toro Company\Documents
+        # add psmodulepath Module dirs
+        $chkpaths += @($env:psmodulepath.split(';') |?{$_ -match '\\Modules'})
+        # append trailing \ as needed
+        $chkpaths | ForEach-Object{ if($_ -notmatch '\\$'){"$($_)\"}else{$_}}
 
         $CUScripts = "$([Environment]::GetFolderPath('MyDocuments'))\WindowsPowershell\Scripts" ;
         # CREATE new WindowsPowershell\Scripts\data folder if nonexist, use it to park data .xml & jsons etc for script processing/output (should prob shift the ise export/import code to use it)
@@ -6603,32 +6622,64 @@ function export-OpenNotepads {
                 Resolved         = $false ;
                 NPAppPath        = $null ;
             }
-            if ($fname =[regex]::match($npp.MainWindowTitle,"^((\*\s)*)[\w\-. ]+(?=(\s-\sNotepad\s2e\sx64|\s-\sNotepad3))").groups[0].value){
-                $chkpaths |%{
-                    $testpath = (join-path $_ $fname);
-                    if($hit = gci -path $testpath -ea 0){
-                        write-verbose "HIT:$($testpath)"
-                        $fsummary.Name = $npp.Name ;
-                        $fsummary.Id               = $npp.Id ;
-                        $fsummary.Path             = $npp.Path ;
-                        $fsummary.Description      = $npp.Description ;
-                        $fsummary.MainWindowHandle = $npp.MainWindowHandle ;
-                        $fsummary.MainWindowTitle  = $npp.MainWindowTitle ;
-                        $fsummary.ProcessName      = $npp.ProcessName ;
-                        $fsummary.StartTime        = $npp.StartTime ;
-                        $fsummary.ExitCode         = $npp.ExitCode ;
-                        $fsummary.HasExited        = $npp.HasExited ;
-                        $fsummary.ExitTime         = $npp.ExitTime ;
-                        $fsummary.FilePath         = $hit.fullname ;
-                        $fsummary.Resolved         = $true ;
-                        $fsummary.NPAppPath        = $npp.Path ;
-                        #break
-                        $npExports += [PSCustomObject]$fsummary
-                    } else {
-                        write-verbose "no hit:$($testpath)"
-                    }
-                } ;
+            #if($npp.name -eq 'Notepad3' -AND ($fname =[regex]::match($npp.MainWindowTitle,"^((\*\s)*)([\w\-. ]+)\s\[(.*)\](?=(\s-\sNotepad\s2e\sx64|\s-\sNotepad3))"))){
+            if($npp.name -eq 'Notepad3' -AND ($npp.MainWindowTitle -match "^((\*\s)*)([\w\-. ]+)\s\[(.*)\](?=(\s-\sNotepad\s2e\sx64|\s-\sNotepad3))")){
+                if(([uri]$matches[4]).localpath -AND $matches[3]){
+                    $fname = (join-path $matches[4] $matches[3])
+                    write-verbose "Matched Notepad3.exe, in-title full path:`n$($fname)" ; 
+                }
+            }elseif ($fname =[regex]::match($npp.MainWindowTitle,"^((\*\s)*)[\w\-. ]+(?=(\s-\sNotepad\s2e\sx64|\s-\sNotepad3))").groups[0].value){
+                write-verbose "matched non-Np3 WinTitle" ; 
+            } else {
+                $smsg = "Unable to resolve a usable filename from:" ;
+                $smsg += "`n$(($npp | ft -a |out-string).trim())" ;
+                write-warning $smsg ;
+            }
+            if($fname){
+                if($fname -match '\*\s'){
+                    # unsaved edit, aren't going to find it w the *, replace it
+                    $fname = $fname -replace '\*\s','' ; 
+                } ; 
+                if($hit = gci -path $fname -ea 0){
+                    
+                }else{
+                    foreach($item in $chkpaths){                        
+                        $testpath = (join-path $item $fname);
+                        write-verbose "->checking:$($testpath)" ; 
+                        if($hit = gci -path $testpath -ea 0){
+                            write-verbose "HIT:$($testpath)"                        
+                            break ; 
+                        }elseif($hit = gci -path $testpath -recurse -ea 0){
+                            write-host -foregroundcolor yellow "had to RECURSE:gci -path $($testpath) -recurse..." 
+                            break ; 
+                        } else {
+                            write-verbose "no hit:$($testpath)"
+                        }                   
+                    } ;
+                }
                 #$hit ;
+                if($hit){
+                    $fsummary.Name = $npp.Name ;
+                    $fsummary.Id               = $npp.Id ;
+                    $fsummary.Path             = $npp.Path ;
+                    $fsummary.Description      = $npp.Description ;
+                    $fsummary.MainWindowHandle = $npp.MainWindowHandle ;
+                    $fsummary.MainWindowTitle  = $npp.MainWindowTitle ;
+                    $fsummary.ProcessName      = $npp.ProcessName ;
+                    $fsummary.StartTime        = $npp.StartTime ;
+                    $fsummary.ExitCode         = $npp.ExitCode ;
+                    $fsummary.HasExited        = $npp.HasExited ;
+                    $fsummary.ExitTime         = $npp.ExitTime ;
+                    $fsummary.FilePath         = $hit.fullname ;
+                    $fsummary.Resolved         = $true ;
+                    $fsummary.NPAppPath        = $npp.Path ;
+                    #break
+                    $npExports += [PSCustomObject]$fsummary
+                }else{
+                    $smsg = "Unable to resolve a usable filename from:" ;
+                    $smsg += "`n$(($npp | ft -a |out-string).trim())" ;
+                    write-warning $smsg ;
+                }
             } else {
                 $smsg = "Unable to resolve a usable filename from:" ;
                 $smsg += "`n$(($npp | ft -a |out-string).trim())" ;
@@ -18624,8 +18675,8 @@ Export-ModuleMember -Function backup-ModuleBuild,check-PsLocalRepoRegistration,c
 # SIG # Begin signature block
 # MIIELgYJKoZIhvcNAQcCoIIEHzCCBBsCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUkaR99U0cxDvOfTIr/mEvvf19
-# gqWgggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUTgF096H6VSCyyYdd/FJu0dLd
+# Pl6gggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
 # MCwxKjAoBgNVBAMTIVBvd2VyU2hlbGwgTG9jYWwgQ2VydGlmaWNhdGUgUm9vdDAe
 # Fw0xNDEyMjkxNzA3MzNaFw0zOTEyMzEyMzU5NTlaMBUxEzARBgNVBAMTClRvZGRT
 # ZWxmSUkwgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBALqRVt7uNweTkZZ+16QG
@@ -18640,9 +18691,9 @@ Export-ModuleMember -Function backup-ModuleBuild,check-PsLocalRepoRegistration,c
 # AWAwggFcAgEBMEAwLDEqMCgGA1UEAxMhUG93ZXJTaGVsbCBMb2NhbCBDZXJ0aWZp
 # Y2F0ZSBSb290AhBaydK0VS5IhU1Hy6E1KUTpMAkGBSsOAwIaBQCgeDAYBgorBgEE
 # AYI3AgEMMQowCKACgAChAoAAMBkGCSqGSIb3DQEJAzEMBgorBgEEAYI3AgEEMBwG
-# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBSHqSfO
-# mahR3WUW7LwmLazfVRn+EDANBgkqhkiG9w0BAQEFAASBgDGg3aq0GPIjqgLe/GWT
-# 73Sn/WLO0vrWYMxyK434V5KeJD1D1BsXs6jWEky8/Ke7iz2jyqdMuKUVIwsvM0xr
-# 9IbdQJk88Zlrt8iiSsH/ocJpCXXl76pjBBMeg5rOY6ZruxJe0vrS09Pim9XGrcJd
-# 4yHDUCOy7d7zEJRwP/qsTMu3
+# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBReZR1C
+# 1cmTRpL9W5aPgnwwmJZX0DANBgkqhkiG9w0BAQEFAASBgKl63VB3ORFisCqsp+vG
+# eMn9+r3baF9OBamV8Gt7Yzv3gkAWTHrgGVYahoerZLNMRdQevX9o5K2R4XEniQyJ
+# 3kyZRO9/PaIT8QFowugq8arq2Y9XNCLXbT751OG24bovejVSbsTboe3lBHUiKvVU
+# rnDSiNd0eJUDkP9he6upHS2z
 # SIG # End signature block
