@@ -20,6 +20,7 @@
         AddedWebsite:
         AddedTwitter:
         REVISIONS
+        * 9:21 AM 7/21/2026 cbh typo fix
         * 10:57 AM 5/19/2025 add: CBH for more extensive code profiling demo (for targeting action-verb cmds in code, from specific modules); fixed some missing CBH info.
         * 4:11 PM 5/15/2025 add psv2-ordered compat
         * 10:43 AM 5/14/2025 added SSP-suppressing -whatif:/-confirm:$false to nv's
@@ -68,7 +69,7 @@
         Profile a file, and return the raw $ASTProfile object to the piepline (default behavior)
         PS> $ASTProfile = get-CodeProfileAST -File c:\pathto\script.ps1 -All -showdebug:$($showdebug) -verbose:$VerbosePreference -whatif:$($whatif) ;
         PS> $sb = [scriptblock]::Create((gc 'c:\pathto\script.ps1' -raw))  ; 
-        PS> $ASTProfile = get-CodeProfileAST  = get-CodeProfileAST -scriptblock $sb -All ;     
+        PS> $ASTProfile = get-CodeProfileAST -scriptblock $sb -All ;     
         Profile a scriptblock (created by loading a file into a scriptblock variable )
         .EXAMPLE
         PS> $FunctionNames = (get-CodeProfileAST -File c:\usr\work\exch\scripts\verb-dev.ps1 -Functions).functions.name ;
