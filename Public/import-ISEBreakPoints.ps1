@@ -15,6 +15,7 @@ function import-ISEBreakPoints {
     Github      : https://github.com/tostka
     Tags        : Powershell,ISE,development,debugging
     REVISIONS
+    * 3:22 PM 8/4/2026 it was exporting w .ps1 ext on the bp files, fixed filename calc.
     * 8:28 AM 3/26/2024 chg iIseBp -> ipIseBP
     * 10:20 AM 5/11/2022 added whatif support
     * 8:58 AM 5/9/2022 err suppress: test for bps before importing (emtpy bp xml files happen)
@@ -64,7 +65,7 @@ function import-ISEBreakPoints {
                 write-verbose "`$Script:$($Script)" ; 
                 if( ($tScript = (gci $Script).fullname) -AND ($psise.powershelltabs.files.fullpath -contains $tScript)){
                     write-host "-Script specified diverting target to:`n$($Script)" ;
-                    $iFname = "$($Script.replace('.ps1','-ps1.xml').replace('.psm1','-psm1.xml').replace('.','-BP.'))" ;
+                    $iFname = $tScript -replace "\.ps1","-ps1.xml" -replace "\.psm1","-psm1.xml" -replace "\.","-BP." ;  
                 } else {
                     throw "-Script specified is not a valid path!`n$($Script)`n(or is not currently open in ISE)" ;
                 } ;
@@ -73,13 +74,13 @@ function import-ISEBreakPoints {
                 # array of paths to be preferred (in order)
                 # - script's current path (with either -[ext]-BP or -BP suffix)
                 # make firmly typed array
-                $tfiles = @("$($tScript.replace('.ps1','-ps1.xml').replace('.psm1','-psm1.xml').replace('.','-BP.'))",
+                $tfiles = @("$( $tScript -replace "\.ps1","-ps1.xml" -replace "\.psm1","-psm1.xml"  -replace "\.","-BP."  )",
                     # ^current path name variant 1
-                    "$($tScript.replace('ps1','xml').replace('.','-BP.'))",
+                    "$($tScript -replace 'ps1','xml' -replace '.','-BP.' )",
                     # ^current path name variant 2
-                    "$((join-path -path "$([Environment]::GetFolderPath('MyDocuments'))\WindowsPowershell\Scripts" -childpath (split-path $tScript -leaf)).replace('.ps1','-ps1.xml').replace('.psm1','-psm1.xml').replace('.','-BP.'))" ,
+                    "$((join-path -path "$([Environment]::GetFolderPath('MyDocuments'))\WindowsPowershell\Scripts" -childpath (split-path $tScript -leaf)) -replace '.ps1','-ps1.xml' -replace '.psm1','-psm1.xml' -replace '.','-BP.')" ,
                     # ^CU scripts dir
-                    "$((join-path -path $PathDefault -childpath (split-path $tScript -leaf)).replace('.ps1','-ps1.xml').replace('.psm1','-psm1.xml').replace('.','-BP.'))" ;
+                    "$((join-path -path $PathDefault -childpath (split-path $tScript -leaf)) -replace '.ps1','-ps1.xml' -replace '.psm1','-psm1.xml' -replace '.','-BP.' )" 
                     # ^ PathDefault dir
                 ) ;     
                 # loop ea, take first hit

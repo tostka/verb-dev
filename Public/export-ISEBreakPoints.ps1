@@ -17,6 +17,7 @@ function export-ISEBreakPoints {
     Github      : https://github.com/tostka
     Tags        : Powershell,ISE,development,debugging
     REVISIONS
+    * 3:22 PM 8/4/2026 it was exporting w .ps1 ext on the bp files, fixed filename calc.
     * 9:06 PM 8/12/2025 added code to create CUScripts if missing
     * 8:27 AM 3/26/2024 chg eIseBp -> epIseBp
     * 2:35 PM 5/24/2023 add: prompt for force deletion of existing .xml if no psbreakpoints defined in loaded ISE copy for script.
@@ -64,7 +65,8 @@ function export-ISEBreakPoints {
                 if( ($tScript = (gci $Script).FullName) -AND ($psise.powershelltabs.files.fullpath -contains $tScript)){
                     write-host "-Script specified diverting target to:`n$($Script)" ; 
                     $tScript = $Script ; 
-                    $xFname=$tScript.replace(".ps1","-ps1.xml").replace(".psm1","-psm1.xml").replace(".","-BP.") ;
+                    #$xFname=$tScript.replace(".ps1","-ps1.xml").replace(".psm1","-psm1.xml").replace(".","-BP.") ;                    
+                    $xFname= $tScript -replace "\.ps1","-ps1.xml" -replace "\.psm1","-psm1.xml" -replace "\.","-BP." ;  
                 } else { 
                     throw "-Script specified is not a valid path!`n$($Script)`n(or is not currently open in ISE)" ; 
                 } ; 
@@ -72,7 +74,8 @@ function export-ISEBreakPoints {
                 write-verbose "(processing `$psise.CurrentFile.FullPath:$($psise.CurrentFile.FullPath)...)"
                 $tScript = $psise.CurrentFile.FullPath ;
                 # default to same loc, variant name of script in currenttab of ise
-                $xFname=$tScript.replace(".ps1","-ps1.xml").replace(".psm1","-psm1.xml").replace(".","-BP.") ;
+                #$xFname=$tScript.replace(".ps1","-ps1.xml").replace(".psm1","-psm1.xml").replace(".","-BP.") ;
+                $xFname= $tScript -replace "\.ps1","-ps1.xml" -replace "\.psm1","-psm1.xml"  -replace "\.","-BP." 
                 $AllUsrsScripts = "$($env:ProgramFiles)\WindowsPowerShell\Scripts" ;                 
                 if(-not (test-path $AllUsrsScripts )){mkdir $AllUsrsScripts  -verbose } ; 
                 if( ( (split-path $xFname) -eq $AllUsrsScripts) -OR (-not(test-path (split-path $xFname))) ){

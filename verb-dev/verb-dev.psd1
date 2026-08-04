@@ -12,7 +12,7 @@
 RootModule = 'VERB-dev.psm1'
 
 # Version number of this module.
-ModuleVersion = '1.5.95'
+ModuleVersion = '1.5.98'
 
 # Supported PSEditions
 # CompatiblePSEditions = @()
@@ -69,7 +69,7 @@ Description = 'Development PS Module-related generic functions'
 # NestedModules = @()
 
 # Functions to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no functions to export.
-FunctionsToExport = @('backup-ModuleBuild','check-PsLocalRepoRegistration','close-ISEOpenfiles','close-ISEOtherOpenFiles','Compare-FilesTDO','Compare-FileTDO','Compare-ObjectsTDO','confirm-ModuleBuildSync','confirm-ModulePsd1Version','confirm-ModulePsm1Version','confirm-ModuleTestPs1Guid','convert-CommandLine2VSCDebugJson','Convert-CommandToSplatTDO','convertFrom-EscapedPSText','Convert-HelpToHtmlFile','Convert-ISEOpenFileToText','convert-ISEOpenSession','converto-VSCConfig','ConvertTo-Breakpoint','_extractBreakpoint','convertTo-EscapedPSText','ConvertTo-ModuleDynamicTDO','ConvertTo-ModuleMergedTDO','convertTo-UnwrappedPS','convertTo-WrappedPS','copy-ISELocalSourceToTab','copy-ISETabFileToLocal','disable-ISEBreakPointsThisTab','enable-ISEBreakPointsThisTab','export-CommentBasedHelpToFileTDO','export-FunctionsToFilesTDO','export-ISEBreakPoints','export-ISEBreakPointsALL','export-ISEOpenFiles','export-OpenNotepads','find-NounAliasesTDO','get-AliasAssignsAST','get-CodeProfileAST','get-CodeRiskProfileAST','Get-CommentBlocks','get-FunctionBlock','get-FunctionBlocks','get-HelpParsed','get-ISEBreakPointsThisTab','get-ISEOpenFilesExported','get-ModuleRevisedCommands','get-NounAliasTDO','get-OpenNotepadsExported','get-ProjectNameTDO','Get-PSBreakpointSorted','Get-PSModuleFile','Get-ScriptComments','Get-ScriptCommentsTDO','get-StrictMode','Version','ToString','get-UnifiedDiffTDO','get-VariableAssignsAST','get-VerbAliasTDO','Get-VerbSynonymTDO','get-VersionInfo','import-ISEBreakPoints','import-ISEBreakPointsALL','import-ISEConsoleColors','import-ISEOpenFiles','import-OpenNotepads','Initialize-ModuleFingerprint','Get-PSModuleFile','Initialize-PSModuleDirectories','move-ISEBreakPoints','new-CBH','New-GitHubGist','out-diffTDO','Out-ISETab','pop-FunctionDev','push-FunctionDev','Reset-ISEFile','restore-ISEConsoleColors','restore-ModuleBuild','save-ISEConsoleColors','save-ISEOpenfiles','Set-ISEScriptLocation','Show-DiffTDO','show-ISEOpenTab','show-ISEOpenTabPaths','Show-ObjectTDO','show-Verbs','Split-CommandLine','Step-ModuleVersionCalculated','Get-PSModuleFile','Test-ModuleTMPFiles','test-VerbStandard','Uninstall-ModuleForce','update-NewModule','get-FolderEmpty','reset-ModulePublishingDirectory','populate-ModulePublishingDirectory','Write-DiffTDO')
+FunctionsToExport = @('backup-ModuleBuild','check-PsLocalRepoRegistration','close-ISEOpenfiles','close-ISEOtherOpenFiles','Compare-FilesTDO','Compare-FileTDO','Compare-ObjectsTDO','confirm-ModuleBuildSync','confirm-ModulePsd1Version','confirm-ModulePsm1Version','confirm-ModuleTestPs1Guid','convert-CommandLine2VSCDebugJson','Convert-CommandToSplatTDO','convertFrom-EscapedPSText','Convert-HelpToHtmlFile','Convert-ISEOpenFileToText','convert-ISEOpenSession','converto-VSCConfig','ConvertTo-Breakpoint','_extractBreakpoint','convertTo-EscapedPSText','ConvertTo-ModuleDynamicTDO','ConvertTo-ModuleMergedTDO','convertTo-UnwrappedPS','convertTo-WrappedPS','copy-ISELocalSourceToTab','copy-ISETabFileToLocal','disable-ISEBreakPointsThisTab','enable-ISEBreakPointsThisTab','export-CommentBasedHelpToFileTDO','export-FunctionsToFilesTDO','export-ISEBreakPoints','export-ISEBreakPointsALL','export-ISEOpenFiles','export-OpenNotepads','find-NounAliasesTDO','get-AliasAssignsAST','get-CodeProfileAST','get-CodeRiskProfileAST','Get-CommentBlocks','get-FileVerbNounCmdletSummaries','get-FunctionBlock','get-FunctionBlocks','get-HelpParsed','get-ISEBreakPointsThisTab','get-ISEOpenFilesExported','get-ModuleRevisedCommands','get-NounAliasTDO','get-OpenNotepadsExported','get-ProjectNameTDO','Get-PSBreakpointSorted','Get-PSModuleFile','Get-ScriptComments','Get-ScriptCommentsTDO','get-StrictMode','Version','ToString','get-UnifiedDiffTDO','get-VariableAssignsAST','get-VerbAliasTDO','Get-VerbSynonymTDO','get-VersionInfo','import-ISEBreakPoints','import-ISEBreakPointsALL','import-ISEConsoleColors','import-ISEOpenFiles','import-OpenNotepads','Initialize-ModuleFingerprint','Get-PSModuleFile','Initialize-PSModuleDirectories','move-ISEBreakPoints','new-CBH','New-GitHubGist','out-diffTDO','Out-ISETab','pop-FunctionDev','push-FunctionDev','Reset-ISEFile','restore-ISEConsoleColors','restore-ModuleBuild','save-ISEConsoleColors','save-ISEOpenfiles','Set-ISEScriptLocation','Show-DiffTDO','show-ISEOpenTab','show-ISEOpenTabPaths','Show-ObjectTDO','show-Verbs','Split-CommandLine','Step-ModuleVersionCalculated','Get-PSModuleFile','Test-ModuleTMPFiles','test-VerbStandard','Uninstall-ModuleForce','update-NewModule','get-FolderEmpty','reset-ModulePublishingDirectory','populate-ModulePublishingDirectory','Write-DiffTDO')
 
 # Cmdlets to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no cmdlets to export.
 CmdletsToExport = '*'
@@ -87,7 +87,7 @@ AliasesToExport = '*'
 # ModuleList = @()
 
 # List of all files packaged with this module
-FileList = @('Quick-Start-Installation-and-Example.md','LICENSE.txt','LICENSE_BOOTSTRAP','LICENSE_INVOKE-CREATEMODULEHELPFILE','LICENSE_JASNY-BOOTSTRAP','LICENSE_JQUERY','bootstrap.min.css','bootstrap.min.js','jasny-bootstrap.min.css','jasny-bootstrap.min.js','jquery-1.11.1.min.js','navmenu.css','screenshot.png','CHANGELOG.md','README.md','Generate-ScriptMarkdownHelp-ps1-BP.xml')
+FileList = @('Quick-Start-Installation-and-Example.md','LICENSE.txt','LICENSE_BOOTSTRAP','LICENSE_INVOKE-CREATEMODULEHELPFILE','LICENSE_JASNY-BOOTSTRAP','LICENSE_JQUERY','bootstrap.min.css','bootstrap.min.js','jasny-bootstrap.min.css','jasny-bootstrap.min.js','jquery-1.11.1.min.js','navmenu.css','screenshot.png','CHANGELOG.md','README.md')
 
 # Private data to pass to the module specified in RootModule/ModuleToProcess. This may also contain a PSData hashtable with additional module metadata used by PowerShell.
 PrivateData = @{
@@ -126,8 +126,8 @@ PrivateData = @{
 # SIG # Begin signature block
 # MIIELgYJKoZIhvcNAQcCoIIEHzCCBBsCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQU8chm8QFKQs2XeUtXZicc/ye6
-# YgKgggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUCro1wV6mqL/yD8ey1uTkZgrH
+# qBSgggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
 # MCwxKjAoBgNVBAMTIVBvd2VyU2hlbGwgTG9jYWwgQ2VydGlmaWNhdGUgUm9vdDAe
 # Fw0xNDEyMjkxNzA3MzNaFw0zOTEyMzEyMzU5NTlaMBUxEzARBgNVBAMTClRvZGRT
 # ZWxmSUkwgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBALqRVt7uNweTkZZ+16QG
@@ -142,9 +142,9 @@ PrivateData = @{
 # AWAwggFcAgEBMEAwLDEqMCgGA1UEAxMhUG93ZXJTaGVsbCBMb2NhbCBDZXJ0aWZp
 # Y2F0ZSBSb290AhBaydK0VS5IhU1Hy6E1KUTpMAkGBSsOAwIaBQCgeDAYBgorBgEE
 # AYI3AgEMMQowCKACgAChAoAAMBkGCSqGSIb3DQEJAzEMBgorBgEEAYI3AgEEMBwG
-# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBQ+XwHn
-# nlYMhxvZZ++TGcOVwsgVojANBgkqhkiG9w0BAQEFAASBgFBvg7rKzOxPFp3ZYO4C
-# 3Wpdir3YLmCkDCskYryszTQIxVGIIVz1SOjtXlkHOGvTlJhQ8nf5nwOIpxmp0W1P
-# gpJJPOTuUMl9PzkcJ4M0eR1AmHi1w0HYlv51lAOLbGAtTLaPTpt33a2PG+1em1C+
-# avjt3tUOEToZ7d9PqREN8/Pd
+# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBSjEXFr
+# ZHbFwYbHI0vDNCMYAwIAuzANBgkqhkiG9w0BAQEFAASBgAvysXO3jsO92PqgoSEB
+# TacNV6gYuVx5ZS/QzvoBTDrUGmofuRmZt1p9BdWobM0b54efXyBuAOzrK30E+3ZZ
+# ZWnWwMxFTN6vOVlzPuOfm/wMvmd3uxxcBacXe7o6w61CnZj/5+uJPxS5+oYVuaUq
+# LtUyhQd4o8gg5YBlTThIvdue
 # SIG # End signature block

@@ -5,7 +5,7 @@
 .SYNOPSIS
 VERB-dev - Development PS Module-related generic functions
 .NOTES
-Version     : 1.5.92
+Version     : 1.5.96
 Author      : Todd Kadrie
 Website     :	https://www.toddomation.com
 Twitter     :	@tostka
@@ -6508,6 +6508,7 @@ function export-OpenNotepads {
     Github      : https://github.com/tostka/verb-dev
     Tags        : Powershell,ISE,development,debugging
     REVISIONS
+    * 8:30 AM 7/7/2026 was getting a block of not hits, so added a range of $chkpaths, and added a recurssion option; added parse for notepad3.exe's inclusion of the full path in the wintitle
     * 1:53 PM 7/2/2025 converted to func;  init
     .DESCRIPTION
     export-OpenNotepads - Export a list of all currently open Notepad* variant (notepad2/3 curr) windows, to CU \WindowsPowershell\Scripts\data\NotePdSavedSession-....
@@ -6559,8 +6560,26 @@ function export-OpenNotepads {
         #$rgxNPAppNames = "\s-\s(Notepad\s2e\sx64|Notepad3)"
 
         [string[]]$chkpaths = @() ;
-        $chkpaths += @('c:\usr\work\incid\','c:\usr\work\ps\scripts\','c:\usr\work\exch\scripts\','C:\usr\work\o365\scripts\')
-        $chkpaths += @($(resolve-path c:\sc\verb-*\public))
+        #$chkpaths += @('c:\usr\work\incid\','c:\usr\work\ps\scripts\','c:\usr\work\exch\scripts\','C:\usr\work\o365\scripts\')
+        # 8:04 AM 7/7/2026 add tmp path
+        $chkpaths += @('c:\usr\work\incid\','c:\usr\work\ps\scripts\','c:\usr\work\exch\scripts\','C:\usr\work\o365\scripts\','c:\tmp\','c:\usr\work\')
+        $chkpaths += @($(resolve-path c:\sc\verb-*\public)) # do publics before full recurse, want to hit more likely early, save time
+        # do all subfolders
+        $chkpaths += @($(gci c:\sc\* -Directory | select -expand fullname))
+        # add cab folders
+        $chkpaths += @($(resolve-path c:\cab*))
+        # 8:07 AM 7/7/2026 add docs
+        $chkpaths += @([environment]::getfolderpath('mydocuments'))
+        # 8:09 AM 7/7/2026 onedrive comm, just do the work subtree (a ton of app level non-text items otherwise)
+        # 8:50 AM 7/7/2026 no, this is sim/hardlinked into c:\usr\work, simpler to search there, added recurse from that root to iniital static chkpaths
+        #if($env:OneDriveCommercial){$chkpaths += @("$($env:OneDriveCommercial)\work\")}
+        # 8:11 AM 7/7/2026 OD personal, no, I don't have anything text based in there, including it's \documents folder
+        #if($env:OneDriveConsumer){$chkpaths += @($env:OneDriveConsumer))}
+        #C:\Users\kadrits\OneDrive - The Toro Company\Documents
+        # add psmodulepath Module dirs
+        $chkpaths += @($env:psmodulepath.split(';') |?{$_ -match '\\Modules'})
+        # append trailing \ as needed
+        $chkpaths | ForEach-Object{ if($_ -notmatch '\\$'){"$($_)\"}else{$_}}
 
         $CUScripts = "$([Environment]::GetFolderPath('MyDocuments'))\WindowsPowershell\Scripts" ;
         # CREATE new WindowsPowershell\Scripts\data folder if nonexist, use it to park data .xml & jsons etc for script processing/output (should prob shift the ise export/import code to use it)
@@ -6603,32 +6622,64 @@ function export-OpenNotepads {
                 Resolved         = $false ;
                 NPAppPath        = $null ;
             }
-            if ($fname =[regex]::match($npp.MainWindowTitle,"^((\*\s)*)[\w\-. ]+(?=(\s-\sNotepad\s2e\sx64|\s-\sNotepad3))").groups[0].value){
-                $chkpaths |%{
-                    $testpath = (join-path $_ $fname);
-                    if($hit = gci -path $testpath -ea 0){
-                        write-verbose "HIT:$($testpath)"
-                        $fsummary.Name = $npp.Name ;
-                        $fsummary.Id               = $npp.Id ;
-                        $fsummary.Path             = $npp.Path ;
-                        $fsummary.Description      = $npp.Description ;
-                        $fsummary.MainWindowHandle = $npp.MainWindowHandle ;
-                        $fsummary.MainWindowTitle  = $npp.MainWindowTitle ;
-                        $fsummary.ProcessName      = $npp.ProcessName ;
-                        $fsummary.StartTime        = $npp.StartTime ;
-                        $fsummary.ExitCode         = $npp.ExitCode ;
-                        $fsummary.HasExited        = $npp.HasExited ;
-                        $fsummary.ExitTime         = $npp.ExitTime ;
-                        $fsummary.FilePath         = $hit.fullname ;
-                        $fsummary.Resolved         = $true ;
-                        $fsummary.NPAppPath        = $npp.Path ;
-                        #break
-                        $npExports += [PSCustomObject]$fsummary
-                    } else {
-                        write-verbose "no hit:$($testpath)"
-                    }
-                } ;
+            #if($npp.name -eq 'Notepad3' -AND ($fname =[regex]::match($npp.MainWindowTitle,"^((\*\s)*)([\w\-. ]+)\s\[(.*)\](?=(\s-\sNotepad\s2e\sx64|\s-\sNotepad3))"))){
+            if($npp.name -eq 'Notepad3' -AND ($npp.MainWindowTitle -match "^((\*\s)*)([\w\-. ]+)\s\[(.*)\](?=(\s-\sNotepad\s2e\sx64|\s-\sNotepad3))")){
+                if(([uri]$matches[4]).localpath -AND $matches[3]){
+                    $fname = (join-path $matches[4] $matches[3])
+                    write-verbose "Matched Notepad3.exe, in-title full path:`n$($fname)" ; 
+                }
+            }elseif ($fname =[regex]::match($npp.MainWindowTitle,"^((\*\s)*)[\w\-. ]+(?=(\s-\sNotepad\s2e\sx64|\s-\sNotepad3))").groups[0].value){
+                write-verbose "matched non-Np3 WinTitle" ; 
+            } else {
+                $smsg = "Unable to resolve a usable filename from:" ;
+                $smsg += "`n$(($npp | ft -a |out-string).trim())" ;
+                write-warning $smsg ;
+            }
+            if($fname){
+                if($fname -match '\*\s'){
+                    # unsaved edit, aren't going to find it w the *, replace it
+                    $fname = $fname -replace '\*\s','' ; 
+                } ; 
+                if($hit = gci -path $fname -ea 0){
+                    
+                }else{
+                    foreach($item in $chkpaths){                        
+                        $testpath = (join-path $item $fname);
+                        write-verbose "->checking:$($testpath)" ; 
+                        if($hit = gci -path $testpath -ea 0){
+                            write-verbose "HIT:$($testpath)"                        
+                            break ; 
+                        }elseif($hit = gci -path $testpath -recurse -ea 0){
+                            write-host -foregroundcolor yellow "had to RECURSE:gci -path $($testpath) -recurse..." 
+                            break ; 
+                        } else {
+                            write-verbose "no hit:$($testpath)"
+                        }                   
+                    } ;
+                }
                 #$hit ;
+                if($hit){
+                    $fsummary.Name = $npp.Name ;
+                    $fsummary.Id               = $npp.Id ;
+                    $fsummary.Path             = $npp.Path ;
+                    $fsummary.Description      = $npp.Description ;
+                    $fsummary.MainWindowHandle = $npp.MainWindowHandle ;
+                    $fsummary.MainWindowTitle  = $npp.MainWindowTitle ;
+                    $fsummary.ProcessName      = $npp.ProcessName ;
+                    $fsummary.StartTime        = $npp.StartTime ;
+                    $fsummary.ExitCode         = $npp.ExitCode ;
+                    $fsummary.HasExited        = $npp.HasExited ;
+                    $fsummary.ExitTime         = $npp.ExitTime ;
+                    $fsummary.FilePath         = $hit.fullname ;
+                    $fsummary.Resolved         = $true ;
+                    $fsummary.NPAppPath        = $npp.Path ;
+                    #break
+                    $npExports += [PSCustomObject]$fsummary
+                }else{
+                    $smsg = "Unable to resolve a usable filename from:" ;
+                    $smsg += "`n$(($npp | ft -a |out-string).trim())" ;
+                    write-warning $smsg ;
+                }
             } else {
                 $smsg = "Unable to resolve a usable filename from:" ;
                 $smsg += "`n$(($npp | ft -a |out-string).trim())" ;
@@ -7197,6 +7248,7 @@ function get-CodeProfileAST {
         AddedWebsite:
         AddedTwitter:
         REVISIONS
+        * 9:21 AM 7/21/2026 cbh typo fix
         * 10:57 AM 5/19/2025 add: CBH for more extensive code profiling demo (for targeting action-verb cmds in code, from specific modules); fixed some missing CBH info.
         * 4:11 PM 5/15/2025 add psv2-ordered compat
         * 10:43 AM 5/14/2025 added SSP-suppressing -whatif:/-confirm:$false to nv's
@@ -7245,7 +7297,7 @@ function get-CodeProfileAST {
         Profile a file, and return the raw $ASTProfile object to the piepline (default behavior)
         PS> $ASTProfile = get-CodeProfileAST -File c:\pathto\script.ps1 -All -showdebug:$($showdebug) -verbose:$VerbosePreference -whatif:$($whatif) ;
         PS> $sb = [scriptblock]::Create((gc 'c:\pathto\script.ps1' -raw))  ; 
-        PS> $ASTProfile = get-CodeProfileAST  = get-CodeProfileAST -scriptblock $sb -All ;     
+        PS> $ASTProfile = get-CodeProfileAST -scriptblock $sb -All ;     
         Profile a scriptblock (created by loading a file into a scriptblock variable )
         .EXAMPLE
         PS> $FunctionNames = (get-CodeProfileAST -File c:\usr\work\exch\scripts\verb-dev.ps1 -Functions).functions.name ;
@@ -7838,6 +7890,91 @@ function Get-CommentBlocks {
 }
 
 #*------^ Get-CommentBlocks.ps1 ^------
+
+
+#*------v get-FileVerbNounCmdletSummaries.ps1 v------
+function get-FileVerbNounCmdletSummaries {
+        <#
+        .SYNOPSIS
+        get-FileVerbNounCmdletSummaries - Leverages verb-dev\get-CodeProfileAST (and underlying [System.Management.Automation.Language.Parser]) to Parse out 'GenericCommands'; isolate those in verb-noun name format; gcm the information and source/Module for each; and echo the summary to the pipeline. 
+        .NOTES
+        Author: Todd Kadrie
+        Based on Code by: Philip Giuliani (broken example), functional AST code & example by Bartek Bielawski
+        Website:	http://tinstoys.blogspot.com
+        Twitter:	http://twitter.com/tostka
+        REVISIONS   :
+        * 8:51 AM 7/21/2026 init
+        .DESCRIPTION
+        get-FileVerbNounCmdletSummaries - Leverages verb-dev\get-CodeProfileAST (and underlying [System.Management.Automation.Language.Parser]) to Parse out 'GenericCommands'; isolate those in verb-noun name format; gcm the information and source/Module for each; and echo the summary to the pipeline. 
+        .PARAMETER  ParseFile
+        Powershell file to be parsed [path-to\script.ps1
+        .INPUTS
+        Accepts piped input.
+        .OUTPUTS
+        PsCustomobject summary of matched GenericCommands with verb-noun names, to pipeline.
+        .EXAMPLE
+        $CmdletsVerbNoun = get-FileVerbNounCmdletSummaries C:\usr\work\exch\scripts\Set-Empl-Offboard-20160601-1217PM.ps1 ;
+        Pull ALL VerbNoun-named GenericCommands and store in a variable for further processing.
+        .LINK
+        https://stackoverflow.com/questions/22335439/get-the-last-line-of-a-specific-function-in-a-ps1-file (returns 440 to the pipeline)
+        https://blogs.technet.microsoft.com/heyscriptingguy/2012/09/26/learn-how-it-pros-can-use-the-powershell-ast/
+        #>
+        [CmdletBinding()]
+        #[Alias('show-TrayTip')]
+        Param(
+            [Parameter(Position = 0, Mandatory = $True, ValueFromPipeline = $true, HelpMessage = "Powershell file to be parsed [path-to\script.ps1]")][ValidateNotNullOrEmpty()]
+                [Alias('ParseFile')]
+                [system.io.fileinfo]$Path
+        )  ;
+        BEGIN{
+            $rgxverbNounNames = "\b\w+\-\w+\b" ;
+            if(get-command -name get-CodeProfileAST){}else{
+                $smsg = "missing dependant verb-dev\get-CodeProfileAST()!" ; 
+                write-warning $smsg ; 
+                throw $smsg ; 
+                return ; 
+            } ; 
+        } ; 
+        PROCESS{
+            $sw = [Diagnostics.Stopwatch]::StartNew();
+            write-verbose "$((get-date).ToString('HH:mm:ss')):(running AST parse...)" ; 
+            if($GCmds = (get-CodeProfileAST -File $Path.fullname -GenericCommands).GenericCommands){            
+                # match extents with verb-noun substrings
+                $CmdletNames = @() ;
+                ($GCmds|where-object{$_.extent -match $rgxverbNounNames}) | foreach-object{
+                  $isolatedlines = $_ ;
+                  # isolate the actual verb-noun substrings
+                  $CmdletNames += $isolatedlines.extent.text | foreach-object{if($_ -match $rgxverbNounNames){ $matches[0]}}
+                } ;
+                # unique the list
+                #$CmdletNames = $CmdletNames | select -unique | sort ; # isn't unbiqueing for some reason (passes dupes), use group
+                $CmdletNames = $CmdletNames | group | select -expand  name | sort ;
+                # resolve each to a source (and properly case the name), or default source to 'unresolved' if fails gcm (note function [Alias()] names in use will come back with $null source: they gcm, but there's no source to return)
+                $ResolvedCmds = $CmdletNames | foreach-object{
+                    $thiscmd = $_ ;
+                    $hsCmdSummary = [ordered]@{'name'=$null;'source'=$null;'verb'=$null;'noun'=$null; CommandType=$null} ;
+                    if($rvGcm = gcm $thiscmd  -ea 0){
+                        $hsCmdSummary.name = $rvGcm.name ; $hsCmdSummary.source = $rvGcm.source ;;
+                        $hsCmdSummary.verb = $rvGcm.verb ; $hsCmdSummary.noun = $rvGcm.noun ; $hsCmdSummary.CommandType=$rvGcm.CommandType ;
+                    }else {
+                        # fake it from what we know
+                        $hsCmdSummary.name = $thiscmd  ; $hsCmdSummary.source = 'UNRESOLVED' ;
+                        $hsCmdSummary.verb,$hsCmdSummary.noun = $thiscmd.split('-');
+                        $hsCmdSummary.CommandType="UNRESOLVED" ;
+                    };
+                    [pscustomobject]$hsCmdSummary ;
+                } | sort source,name ;
+                $ResolvedCmds | write-output  ; 
+            }else{
+                $smsg = "AST Parser failed to parse and return any GenericCommands from the specified file" ; 
+                $smsg += "`n$($Path.fullname)" ;
+            }
+            $sw.Stop() ;
+            write-verbose ("Elapsed Time: {0:dd}d {0:hh}h {0:mm}m {0:ss}s {0:fff}ms" -f $sw.Elapsed) ; 
+        } ;     
+    }
+
+#*------^ get-FileVerbNounCmdletSummaries.ps1 ^------
 
 
 #*------v get-FunctionBlock.ps1 v------
@@ -9453,6 +9590,105 @@ function Get-PSModuleFile {
 }
 
 #*------^ Get-PSModuleFile.ps1 ^------
+
+
+#*------v get-ScriptComments.ps1 v------
+Function Get-ScriptComments {
+    <#
+    .SYNOPSIS
+    get-ScriptComments - parse a script file for comments only
+    .NOTES
+    Version     : 0.0.
+    .NOTES
+    Author: Jeffery Hicks
+    Website:	https://jdhitsolutions.com/blog/powershell/5410/creating-a-github-gist-with-powershell/
+    Twitter:	@tostka, http://twitter.com/tostka
+    Additional Credits: REFERENCE
+    Website:	URL
+    Twitter:	URL
+    CreatedDate : 2026-
+    FileName    : get-ScriptComments.ps1
+    License     : (non asserted)
+    Copyright   : (non asserted)
+    Github      : https://github.com/tostka/verb-dev
+    Tags        : Powershell,Git,SourceControl
+    AddedCredit : 
+    AddedWebsite: 
+    AddedTwitter: URL
+    REVISIONS
+    * 10:07 AM 6/4/2026 added CBH, minor tweaks
+    * 3.5.0, isescriptinggeek posted copy from psg
+    .DESCRIPTION
+    get-ScriptComments - parse a script file for comments only
+    
+    Simple wrapper of the [math]::ieeeremainder( $number,$devisor) function
+    
+    Although the moduls operator '%' : ($number % $divisor) should work, I find the ieeeremainder() to be more dependable. 
+    Unfortunately it's an ugly/long command to contruct. 
+    So wrap it with get-reminder -number 20 -divisor 5, 
+    or even better use the gRmdr alias with positional params:
+    
+    if((gRmdr $xdots $dcLen) -eq 0){write-host -fore yellow "`n."}
+    
+    .PARAMETER number
+    The number to be divided by the divisor
+    .PARAMETER divisor
+    The number to divide the number by
+    .INPUTS
+    Does not accept pipeline input.
+    .OUTPUTS
+    returns the parsed comments to the pipeline
+    .EXAMPLE
+    PS> get-ScriptComments -Path C:\sc\verb-dev\Public\get-ScriptComments.ps1
+    
+        #*------v AST-PARSED COMMENTS : C:\sc\verb-dev\Public\get-ScriptComments.ps1 v------
+        # get-ScriptComments.ps1
+        ...
+        #endregion GET_SCRIPTCOMMENTS ; #*------^ END get-ScriptComments ^------
+        10:04:34:
+        #*------^ AST-PARSED COMMENTS : C:\sc\verb-dev\Public\get-ScriptComments.ps1 ^------    
+        
+    demo
+    .LINK
+    https://www.powershellgallery.com/packages/ISEScriptingGeek/3.5.0/Content/functions%5CGet-ScriptComments.ps1
+    .LINK
+    https://github.com/tostka/verb-dev
+    #>
+    [CmdletBinding()]
+    PARAM(
+        [Parameter(Position = 0, Mandatory, HelpMessage = 'Enter the path of a PS1 file',ValueFromPipeline, ValueFromPipelineByPropertyName)]
+          [Alias('PSPath', 'Name')]
+          [ValidateScript( { Test-Path $_ })]
+          [ValidatePattern('\.ps(1|m1)$')]
+          [String]$Path
+    )
+    BEGIN {
+        #Begin scriptblock
+        Write-Verbose -Message "Starting $($MyInvocation.MyCommand)"
+        #initialization commands
+        #explicitly define some AST variables
+        New-Variable $AstTokens -Force
+        New-Variable astErr -Force
+    } #close begin
+    PROCESS {
+        #Process scriptblock
+        #convert each path to a nice filesystem path
+        $Path = Convert-Path -Path $Path
+
+        Write-Verbose -Message "Parsing $Path"
+        #Parse the file
+        $AST = [System.Management.Automation.Language.Parser]::ParseFile($Path, [ref]$AstTokens, [ref]$astErr)
+
+        #filter tokens for comments and display text
+        $AstTokens.where( { $_.kind -eq 'comment' }) |
+        Select-Object -ExpandProperty Text
+    } #close process
+    END {
+        Write-Verbose -Message "Ending $($MyInvocation.MyCommand)"
+    } #close end
+}
+
+#*------^ get-ScriptComments.ps1 ^------
 
 
 #*------v Get-ScriptCommentsTDO.ps1 v------
@@ -12915,6 +13151,7 @@ Function Reset-ISEFile {
     AddedWebsite: https://github.com/jdhitsolutions/ISEScriptingGeek/
     AddedTwitter: URL
     REVISIONS
+    * 1:21 PM 6/4/2026 added code to return to original editing loc
     * 10:29 AM 4/10/2026 added confirming tooltip 
     * 12:15 PM 4/9/2026 added -force; init, added check for breakpoints, and pre-exported status prompt.
     * Jul 3, 2023 jdh posted vers
@@ -12942,9 +13179,12 @@ Function Reset-ISEFile {
             [switch]$Force
     )
     if ($psISE) {
+        # save work loc
+        $CurrentLine = $psISE.CurrentFile.Editor.CaretLine
+        $CurrentColumn = $psISE.CurrentFile.Editor.CaretColumn
         #save the current file path
         #$path = $psISE.CurrentFile.FullPath
-        $tScript = $psise.CurrentFile.FullPath ;
+        $tScript = $psise.CurrentFile.FullPath ;        
         $xBPs= get-psbreakpoint |?{ ($_.Script -eq $tScript) -AND ($_.line)} ;
         if($xBPs){        
             # default to same loc, variant name of script in currenttab of ise
@@ -12990,6 +13230,8 @@ Function Reset-ISEFile {
         [void]$psISE.CurrentPowerShellTab.Files.Add($tScript)
         #file always added to the end
         [void]$psISE.CurrentPowerShellTab.files.Move(($psISE.CurrentPowerShellTab.files.count - 1), $i)
+        # return to original loc        
+        $psISE.CurrentFile.Editor.SetCaretPosition($CurrentLine,$CurrentColumn)
         # traytip the update status
         $TipTimeSecs = 2   ; 
         $tipTitle = "ISE update";
@@ -18511,7 +18753,7 @@ function Write-DiffTDO {
 
 #*======^ END FUNCTIONS ^======
 
-Export-ModuleMember -Function backup-ModuleBuild,check-PsLocalRepoRegistration,close-ISEOpenfiles,close-ISEOtherOpenFiles,Compare-FilesTDO,Compare-FileTDO,Compare-ObjectsTDO,confirm-ModuleBuildSync,confirm-ModulePsd1Version,confirm-ModulePsm1Version,confirm-ModuleTestPs1Guid,convert-CommandLine2VSCDebugJson,Convert-CommandToSplatTDO,convertFrom-EscapedPSText,Convert-HelpToHtmlFile,Convert-ISEOpenFileToText,convert-ISEOpenSession,converto-VSCConfig,ConvertTo-Breakpoint,_extractBreakpoint,convertTo-EscapedPSText,ConvertTo-ModuleDynamicTDO,ConvertTo-ModuleMergedTDO,convertTo-UnwrappedPS,convertTo-WrappedPS,copy-ISELocalSourceToTab,copy-ISETabFileToLocal,disable-ISEBreakPointsThisTab,enable-ISEBreakPointsThisTab,export-CommentBasedHelpToFileTDO,export-FunctionsToFilesTDO,export-ISEBreakPoints,export-ISEBreakPointsALL,export-ISEOpenFiles,export-OpenNotepads,find-NounAliasesTDO,get-AliasAssignsAST,get-CodeProfileAST,get-CodeRiskProfileAST,Get-CommentBlocks,get-FunctionBlock,get-FunctionBlocks,get-HelpParsed,get-ISEBreakPointsThisTab,get-ISEOpenFilesExported,get-ModuleRevisedCommands,get-NounAliasTDO,get-OpenNotepadsExported,get-ProjectNameTDO,Get-PSBreakpointSorted,Get-PSModuleFile,Get-ScriptCommentsTDO,get-StrictMode,Version,ToString,get-UnifiedDiffTDO,get-VariableAssignsAST,get-VerbAliasTDO,Get-VerbSynonymTDO,get-VersionInfo,import-ISEBreakPoints,import-ISEBreakPointsALL,import-ISEConsoleColors,import-ISEOpenFiles,import-OpenNotepads,Initialize-ModuleFingerprint,Get-PSModuleFile,Initialize-PSModuleDirectories,move-ISEBreakPoints,new-CBH,New-GitHubGist,out-diffTDO,Out-ISETab,pop-FunctionDev,push-FunctionDev,Reset-ISEFile,restore-ISEConsoleColors,restore-ModuleBuild,save-ISEConsoleColors,save-ISEOpenfiles,Set-ISEScriptLocation,Show-DiffTDO,show-ISEOpenTab,show-ISEOpenTabPaths,Show-ObjectTDO,show-Verbs,Split-CommandLine,Step-ModuleVersionCalculated,Get-PSModuleFile,Test-ModuleTMPFiles,test-VerbStandard,Uninstall-ModuleForce,update-NewModule,get-FolderEmpty,reset-ModulePublishingDirectory,populate-ModulePublishingDirectory,Write-DiffTDO -Alias *
+Export-ModuleMember -Function backup-ModuleBuild,check-PsLocalRepoRegistration,close-ISEOpenfiles,close-ISEOtherOpenFiles,Compare-FilesTDO,Compare-FileTDO,Compare-ObjectsTDO,confirm-ModuleBuildSync,confirm-ModulePsd1Version,confirm-ModulePsm1Version,confirm-ModuleTestPs1Guid,convert-CommandLine2VSCDebugJson,Convert-CommandToSplatTDO,convertFrom-EscapedPSText,Convert-HelpToHtmlFile,Convert-ISEOpenFileToText,convert-ISEOpenSession,converto-VSCConfig,ConvertTo-Breakpoint,_extractBreakpoint,convertTo-EscapedPSText,ConvertTo-ModuleDynamicTDO,ConvertTo-ModuleMergedTDO,convertTo-UnwrappedPS,convertTo-WrappedPS,copy-ISELocalSourceToTab,copy-ISETabFileToLocal,disable-ISEBreakPointsThisTab,enable-ISEBreakPointsThisTab,export-CommentBasedHelpToFileTDO,export-FunctionsToFilesTDO,export-ISEBreakPoints,export-ISEBreakPointsALL,export-ISEOpenFiles,export-OpenNotepads,find-NounAliasesTDO,get-AliasAssignsAST,get-CodeProfileAST,get-CodeRiskProfileAST,Get-CommentBlocks,get-FileVerbNounCmdletSummaries,get-FunctionBlock,get-FunctionBlocks,get-HelpParsed,get-ISEBreakPointsThisTab,get-ISEOpenFilesExported,get-ModuleRevisedCommands,get-NounAliasTDO,get-OpenNotepadsExported,get-ProjectNameTDO,Get-PSBreakpointSorted,Get-PSModuleFile,Get-ScriptComments,Get-ScriptCommentsTDO,get-StrictMode,Version,ToString,get-UnifiedDiffTDO,get-VariableAssignsAST,get-VerbAliasTDO,Get-VerbSynonymTDO,get-VersionInfo,import-ISEBreakPoints,import-ISEBreakPointsALL,import-ISEConsoleColors,import-ISEOpenFiles,import-OpenNotepads,Initialize-ModuleFingerprint,Get-PSModuleFile,Initialize-PSModuleDirectories,move-ISEBreakPoints,new-CBH,New-GitHubGist,out-diffTDO,Out-ISETab,pop-FunctionDev,push-FunctionDev,Reset-ISEFile,restore-ISEConsoleColors,restore-ModuleBuild,save-ISEConsoleColors,save-ISEOpenfiles,Set-ISEScriptLocation,Show-DiffTDO,show-ISEOpenTab,show-ISEOpenTabPaths,Show-ObjectTDO,show-Verbs,Split-CommandLine,Step-ModuleVersionCalculated,Get-PSModuleFile,Test-ModuleTMPFiles,test-VerbStandard,Uninstall-ModuleForce,update-NewModule,get-FolderEmpty,reset-ModulePublishingDirectory,populate-ModulePublishingDirectory,Write-DiffTDO -Alias *
 
 
 
@@ -18519,8 +18761,8 @@ Export-ModuleMember -Function backup-ModuleBuild,check-PsLocalRepoRegistration,c
 # SIG # Begin signature block
 # MIIELgYJKoZIhvcNAQcCoIIEHzCCBBsCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUA+9F9/1Syju8MXhiYhwfxsF7
-# U1agggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUb/RHWWkwDG2P/xCh+IvqDQlh
+# dI6gggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
 # MCwxKjAoBgNVBAMTIVBvd2VyU2hlbGwgTG9jYWwgQ2VydGlmaWNhdGUgUm9vdDAe
 # Fw0xNDEyMjkxNzA3MzNaFw0zOTEyMzEyMzU5NTlaMBUxEzARBgNVBAMTClRvZGRT
 # ZWxmSUkwgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBALqRVt7uNweTkZZ+16QG
@@ -18535,9 +18777,9 @@ Export-ModuleMember -Function backup-ModuleBuild,check-PsLocalRepoRegistration,c
 # AWAwggFcAgEBMEAwLDEqMCgGA1UEAxMhUG93ZXJTaGVsbCBMb2NhbCBDZXJ0aWZp
 # Y2F0ZSBSb290AhBaydK0VS5IhU1Hy6E1KUTpMAkGBSsOAwIaBQCgeDAYBgorBgEE
 # AYI3AgEMMQowCKACgAChAoAAMBkGCSqGSIb3DQEJAzEMBgorBgEEAYI3AgEEMBwG
-# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBRW6Wss
-# 1OkEjgdKbvkEa9XrpLaCmjANBgkqhkiG9w0BAQEFAASBgCjq5CTI5/Vja/gFuAtQ
-# F3o2VWdkzE+3/jdjBfL7CgbCWpLw/I6Lx7m2xwZ4pREDvHZnEiOdB8pyEBwlUnnq
-# n3GIkC2MfG221U6/touK793BCfCkn9urkbHc+gXaPKJnj9InPSRjQxAPW29sbIkr
-# 1IsTDM+bPOmErdQNVwOjbF18
+# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBRQDxyV
+# +ieX6KK+T7tsM8UGZ6HyCjANBgkqhkiG9w0BAQEFAASBgJ+N9KbcAx9IAKzYHemR
+# FXrSUQ8M9a07pIlEYQSN+Ig3n+5QgfMUsZRh7MpDAT0VWHBaQZrHYVy9PvOfms+D
+# AgzJQOlYpxfCrJQv5j3y52EVteQo1R6eaA7MO4frwbQ7rwLwNOHrBRmMegWemb28
+# 3Khy1NNxk28rEH9LlGKTrkkD
 # SIG # End signature block

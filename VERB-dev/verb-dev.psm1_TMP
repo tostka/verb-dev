@@ -5,7 +5,7 @@
 .SYNOPSIS
 VERB-dev - Development PS Module-related generic functions
 .NOTES
-Version     : 1.5.95
+Version     : 1.5.98
 Author      : Todd Kadrie
 Website     :	https://www.toddomation.com
 Twitter     :	@tostka
@@ -6233,6 +6233,7 @@ function export-ISEBreakPoints {
     Github      : https://github.com/tostka
     Tags        : Powershell,ISE,development,debugging
     REVISIONS
+    * 3:22 PM 8/4/2026 it was exporting w .ps1 ext on the bp files, fixed filename calc.
     * 9:06 PM 8/12/2025 added code to create CUScripts if missing
     * 8:27 AM 3/26/2024 chg eIseBp -> epIseBp
     * 2:35 PM 5/24/2023 add: prompt for force deletion of existing .xml if no psbreakpoints defined in loaded ISE copy for script.
@@ -6280,7 +6281,8 @@ function export-ISEBreakPoints {
                 if( ($tScript = (gci $Script).FullName) -AND ($psise.powershelltabs.files.fullpath -contains $tScript)){
                     write-host "-Script specified diverting target to:`n$($Script)" ; 
                     $tScript = $Script ; 
-                    $xFname=$tScript.replace(".ps1","-ps1.xml").replace(".psm1","-psm1.xml").replace(".","-BP.") ;
+                    #$xFname=$tScript.replace(".ps1","-ps1.xml").replace(".psm1","-psm1.xml").replace(".","-BP.") ;                    
+                    $xFname= $tScript -replace "\.ps1","-ps1.xml" -replace "\.psm1","-psm1.xml" -replace "\.","-BP." ;  
                 } else { 
                     throw "-Script specified is not a valid path!`n$($Script)`n(or is not currently open in ISE)" ; 
                 } ; 
@@ -6288,7 +6290,8 @@ function export-ISEBreakPoints {
                 write-verbose "(processing `$psise.CurrentFile.FullPath:$($psise.CurrentFile.FullPath)...)"
                 $tScript = $psise.CurrentFile.FullPath ;
                 # default to same loc, variant name of script in currenttab of ise
-                $xFname=$tScript.replace(".ps1","-ps1.xml").replace(".psm1","-psm1.xml").replace(".","-BP.") ;
+                #$xFname=$tScript.replace(".ps1","-ps1.xml").replace(".psm1","-psm1.xml").replace(".","-BP.") ;
+                $xFname= $tScript -replace "\.ps1","-ps1.xml" -replace "\.psm1","-psm1.xml"  -replace "\.","-BP." 
                 $AllUsrsScripts = "$($env:ProgramFiles)\WindowsPowerShell\Scripts" ;                 
                 if(-not (test-path $AllUsrsScripts )){mkdir $AllUsrsScripts  -verbose } ; 
                 if( ( (split-path $xFname) -eq $AllUsrsScripts) -OR (-not(test-path (split-path $xFname))) ){
@@ -7248,6 +7251,7 @@ function get-CodeProfileAST {
         AddedWebsite:
         AddedTwitter:
         REVISIONS
+        * 9:21 AM 7/21/2026 cbh typo fix
         * 10:57 AM 5/19/2025 add: CBH for more extensive code profiling demo (for targeting action-verb cmds in code, from specific modules); fixed some missing CBH info.
         * 4:11 PM 5/15/2025 add psv2-ordered compat
         * 10:43 AM 5/14/2025 added SSP-suppressing -whatif:/-confirm:$false to nv's
@@ -7296,7 +7300,7 @@ function get-CodeProfileAST {
         Profile a file, and return the raw $ASTProfile object to the piepline (default behavior)
         PS> $ASTProfile = get-CodeProfileAST -File c:\pathto\script.ps1 -All -showdebug:$($showdebug) -verbose:$VerbosePreference -whatif:$($whatif) ;
         PS> $sb = [scriptblock]::Create((gc 'c:\pathto\script.ps1' -raw))  ; 
-        PS> $ASTProfile = get-CodeProfileAST  = get-CodeProfileAST -scriptblock $sb -All ;     
+        PS> $ASTProfile = get-CodeProfileAST -scriptblock $sb -All ;     
         Profile a scriptblock (created by loading a file into a scriptblock variable )
         .EXAMPLE
         PS> $FunctionNames = (get-CodeProfileAST -File c:\usr\work\exch\scripts\verb-dev.ps1 -Functions).functions.name ;
@@ -7889,6 +7893,91 @@ function Get-CommentBlocks {
 }
 
 #*------^ Get-CommentBlocks.ps1 ^------
+
+
+#*------v get-FileVerbNounCmdletSummaries.ps1 v------
+function get-FileVerbNounCmdletSummaries {
+        <#
+        .SYNOPSIS
+        get-FileVerbNounCmdletSummaries - Leverages verb-dev\get-CodeProfileAST (and underlying [System.Management.Automation.Language.Parser]) to Parse out 'GenericCommands'; isolate those in verb-noun name format; gcm the information and source/Module for each; and echo the summary to the pipeline. 
+        .NOTES
+        Author: Todd Kadrie
+        Based on Code by: Philip Giuliani (broken example), functional AST code & example by Bartek Bielawski
+        Website:	http://tinstoys.blogspot.com
+        Twitter:	http://twitter.com/tostka
+        REVISIONS   :
+        * 8:51 AM 7/21/2026 init
+        .DESCRIPTION
+        get-FileVerbNounCmdletSummaries - Leverages verb-dev\get-CodeProfileAST (and underlying [System.Management.Automation.Language.Parser]) to Parse out 'GenericCommands'; isolate those in verb-noun name format; gcm the information and source/Module for each; and echo the summary to the pipeline. 
+        .PARAMETER  ParseFile
+        Powershell file to be parsed [path-to\script.ps1
+        .INPUTS
+        Accepts piped input.
+        .OUTPUTS
+        PsCustomobject summary of matched GenericCommands with verb-noun names, to pipeline.
+        .EXAMPLE
+        $CmdletsVerbNoun = get-FileVerbNounCmdletSummaries C:\usr\work\exch\scripts\Set-Empl-Offboard-20160601-1217PM.ps1 ;
+        Pull ALL VerbNoun-named GenericCommands and store in a variable for further processing.
+        .LINK
+        https://stackoverflow.com/questions/22335439/get-the-last-line-of-a-specific-function-in-a-ps1-file (returns 440 to the pipeline)
+        https://blogs.technet.microsoft.com/heyscriptingguy/2012/09/26/learn-how-it-pros-can-use-the-powershell-ast/
+        #>
+        [CmdletBinding()]
+        #[Alias('show-TrayTip')]
+        Param(
+            [Parameter(Position = 0, Mandatory = $True, ValueFromPipeline = $true, HelpMessage = "Powershell file to be parsed [path-to\script.ps1]")][ValidateNotNullOrEmpty()]
+                [Alias('ParseFile')]
+                [system.io.fileinfo]$Path
+        )  ;
+        BEGIN{
+            $rgxverbNounNames = "\b\w+\-\w+\b" ;
+            if(get-command -name get-CodeProfileAST){}else{
+                $smsg = "missing dependant verb-dev\get-CodeProfileAST()!" ; 
+                write-warning $smsg ; 
+                throw $smsg ; 
+                return ; 
+            } ; 
+        } ; 
+        PROCESS{
+            $sw = [Diagnostics.Stopwatch]::StartNew();
+            write-verbose "$((get-date).ToString('HH:mm:ss')):(running AST parse...)" ; 
+            if($GCmds = (get-CodeProfileAST -File $Path.fullname -GenericCommands).GenericCommands){            
+                # match extents with verb-noun substrings
+                $CmdletNames = @() ;
+                ($GCmds|where-object{$_.extent -match $rgxverbNounNames}) | foreach-object{
+                  $isolatedlines = $_ ;
+                  # isolate the actual verb-noun substrings
+                  $CmdletNames += $isolatedlines.extent.text | foreach-object{if($_ -match $rgxverbNounNames){ $matches[0]}}
+                } ;
+                # unique the list
+                #$CmdletNames = $CmdletNames | select -unique | sort ; # isn't unbiqueing for some reason (passes dupes), use group
+                $CmdletNames = $CmdletNames | group | select -expand  name | sort ;
+                # resolve each to a source (and properly case the name), or default source to 'unresolved' if fails gcm (note function [Alias()] names in use will come back with $null source: they gcm, but there's no source to return)
+                $ResolvedCmds = $CmdletNames | foreach-object{
+                    $thiscmd = $_ ;
+                    $hsCmdSummary = [ordered]@{'name'=$null;'source'=$null;'verb'=$null;'noun'=$null; CommandType=$null} ;
+                    if($rvGcm = gcm $thiscmd  -ea 0){
+                        $hsCmdSummary.name = $rvGcm.name ; $hsCmdSummary.source = $rvGcm.source ;;
+                        $hsCmdSummary.verb = $rvGcm.verb ; $hsCmdSummary.noun = $rvGcm.noun ; $hsCmdSummary.CommandType=$rvGcm.CommandType ;
+                    }else {
+                        # fake it from what we know
+                        $hsCmdSummary.name = $thiscmd  ; $hsCmdSummary.source = 'UNRESOLVED' ;
+                        $hsCmdSummary.verb,$hsCmdSummary.noun = $thiscmd.split('-');
+                        $hsCmdSummary.CommandType="UNRESOLVED" ;
+                    };
+                    [pscustomobject]$hsCmdSummary ;
+                } | sort source,name ;
+                $ResolvedCmds | write-output  ; 
+            }else{
+                $smsg = "AST Parser failed to parse and return any GenericCommands from the specified file" ; 
+                $smsg += "`n$($Path.fullname)" ;
+            }
+            $sw.Stop() ;
+            write-verbose ("Elapsed Time: {0:dd}d {0:hh}h {0:mm}m {0:ss}s {0:fff}ms" -f $sw.Elapsed) ; 
+        } ;     
+    }
+
+#*------^ get-FileVerbNounCmdletSummaries.ps1 ^------
 
 
 #*------v get-FunctionBlock.ps1 v------
@@ -10796,6 +10885,7 @@ function import-ISEBreakPoints {
     Github      : https://github.com/tostka
     Tags        : Powershell,ISE,development,debugging
     REVISIONS
+    * 3:22 PM 8/4/2026 it was exporting w .ps1 ext on the bp files, fixed filename calc.
     * 8:28 AM 3/26/2024 chg iIseBp -> ipIseBP
     * 10:20 AM 5/11/2022 added whatif support
     * 8:58 AM 5/9/2022 err suppress: test for bps before importing (emtpy bp xml files happen)
@@ -10845,7 +10935,7 @@ function import-ISEBreakPoints {
                 write-verbose "`$Script:$($Script)" ; 
                 if( ($tScript = (gci $Script).fullname) -AND ($psise.powershelltabs.files.fullpath -contains $tScript)){
                     write-host "-Script specified diverting target to:`n$($Script)" ;
-                    $iFname = "$($Script.replace('.ps1','-ps1.xml').replace('.psm1','-psm1.xml').replace('.','-BP.'))" ;
+                    $iFname = $tScript -replace "\.ps1","-ps1.xml" -replace "\.psm1","-psm1.xml" -replace "\.","-BP." ;  
                 } else {
                     throw "-Script specified is not a valid path!`n$($Script)`n(or is not currently open in ISE)" ;
                 } ;
@@ -10854,13 +10944,13 @@ function import-ISEBreakPoints {
                 # array of paths to be preferred (in order)
                 # - script's current path (with either -[ext]-BP or -BP suffix)
                 # make firmly typed array
-                $tfiles = @("$($tScript.replace('.ps1','-ps1.xml').replace('.psm1','-psm1.xml').replace('.','-BP.'))",
+                $tfiles = @("$( $tScript -replace "\.ps1","-ps1.xml" -replace "\.psm1","-psm1.xml"  -replace "\.","-BP."  )",
                     # ^current path name variant 1
-                    "$($tScript.replace('ps1','xml').replace('.','-BP.'))",
+                    "$($tScript -replace 'ps1','xml' -replace '.','-BP.' )",
                     # ^current path name variant 2
-                    "$((join-path -path "$([Environment]::GetFolderPath('MyDocuments'))\WindowsPowershell\Scripts" -childpath (split-path $tScript -leaf)).replace('.ps1','-ps1.xml').replace('.psm1','-psm1.xml').replace('.','-BP.'))" ,
+                    "$((join-path -path "$([Environment]::GetFolderPath('MyDocuments'))\WindowsPowershell\Scripts" -childpath (split-path $tScript -leaf)) -replace '.ps1','-ps1.xml' -replace '.psm1','-psm1.xml' -replace '.','-BP.')" ,
                     # ^CU scripts dir
-                    "$((join-path -path $PathDefault -childpath (split-path $tScript -leaf)).replace('.ps1','-ps1.xml').replace('.psm1','-psm1.xml').replace('.','-BP.'))" ;
+                    "$((join-path -path $PathDefault -childpath (split-path $tScript -leaf)) -replace '.ps1','-ps1.xml' -replace '.psm1','-psm1.xml' -replace '.','-BP.' )" 
                     # ^ PathDefault dir
                 ) ;     
                 # loop ea, take first hit
@@ -18667,7 +18757,7 @@ function Write-DiffTDO {
 
 #*======^ END FUNCTIONS ^======
 
-Export-ModuleMember -Function backup-ModuleBuild,check-PsLocalRepoRegistration,close-ISEOpenfiles,close-ISEOtherOpenFiles,Compare-FilesTDO,Compare-FileTDO,Compare-ObjectsTDO,confirm-ModuleBuildSync,confirm-ModulePsd1Version,confirm-ModulePsm1Version,confirm-ModuleTestPs1Guid,convert-CommandLine2VSCDebugJson,Convert-CommandToSplatTDO,convertFrom-EscapedPSText,Convert-HelpToHtmlFile,Convert-ISEOpenFileToText,convert-ISEOpenSession,converto-VSCConfig,ConvertTo-Breakpoint,_extractBreakpoint,convertTo-EscapedPSText,ConvertTo-ModuleDynamicTDO,ConvertTo-ModuleMergedTDO,convertTo-UnwrappedPS,convertTo-WrappedPS,copy-ISELocalSourceToTab,copy-ISETabFileToLocal,disable-ISEBreakPointsThisTab,enable-ISEBreakPointsThisTab,export-CommentBasedHelpToFileTDO,export-FunctionsToFilesTDO,export-ISEBreakPoints,export-ISEBreakPointsALL,export-ISEOpenFiles,export-OpenNotepads,find-NounAliasesTDO,get-AliasAssignsAST,get-CodeProfileAST,get-CodeRiskProfileAST,Get-CommentBlocks,get-FunctionBlock,get-FunctionBlocks,get-HelpParsed,get-ISEBreakPointsThisTab,get-ISEOpenFilesExported,get-ModuleRevisedCommands,get-NounAliasTDO,get-OpenNotepadsExported,get-ProjectNameTDO,Get-PSBreakpointSorted,Get-PSModuleFile,Get-ScriptComments,Get-ScriptCommentsTDO,get-StrictMode,Version,ToString,get-UnifiedDiffTDO,get-VariableAssignsAST,get-VerbAliasTDO,Get-VerbSynonymTDO,get-VersionInfo,import-ISEBreakPoints,import-ISEBreakPointsALL,import-ISEConsoleColors,import-ISEOpenFiles,import-OpenNotepads,Initialize-ModuleFingerprint,Get-PSModuleFile,Initialize-PSModuleDirectories,move-ISEBreakPoints,new-CBH,New-GitHubGist,out-diffTDO,Out-ISETab,pop-FunctionDev,push-FunctionDev,Reset-ISEFile,restore-ISEConsoleColors,restore-ModuleBuild,save-ISEConsoleColors,save-ISEOpenfiles,Set-ISEScriptLocation,Show-DiffTDO,show-ISEOpenTab,show-ISEOpenTabPaths,Show-ObjectTDO,show-Verbs,Split-CommandLine,Step-ModuleVersionCalculated,Get-PSModuleFile,Test-ModuleTMPFiles,test-VerbStandard,Uninstall-ModuleForce,update-NewModule,get-FolderEmpty,reset-ModulePublishingDirectory,populate-ModulePublishingDirectory,Write-DiffTDO -Alias *
+Export-ModuleMember -Function backup-ModuleBuild,check-PsLocalRepoRegistration,close-ISEOpenfiles,close-ISEOtherOpenFiles,Compare-FilesTDO,Compare-FileTDO,Compare-ObjectsTDO,confirm-ModuleBuildSync,confirm-ModulePsd1Version,confirm-ModulePsm1Version,confirm-ModuleTestPs1Guid,convert-CommandLine2VSCDebugJson,Convert-CommandToSplatTDO,convertFrom-EscapedPSText,Convert-HelpToHtmlFile,Convert-ISEOpenFileToText,convert-ISEOpenSession,converto-VSCConfig,ConvertTo-Breakpoint,_extractBreakpoint,convertTo-EscapedPSText,ConvertTo-ModuleDynamicTDO,ConvertTo-ModuleMergedTDO,convertTo-UnwrappedPS,convertTo-WrappedPS,copy-ISELocalSourceToTab,copy-ISETabFileToLocal,disable-ISEBreakPointsThisTab,enable-ISEBreakPointsThisTab,export-CommentBasedHelpToFileTDO,export-FunctionsToFilesTDO,export-ISEBreakPoints,export-ISEBreakPointsALL,export-ISEOpenFiles,export-OpenNotepads,find-NounAliasesTDO,get-AliasAssignsAST,get-CodeProfileAST,get-CodeRiskProfileAST,Get-CommentBlocks,get-FileVerbNounCmdletSummaries,get-FunctionBlock,get-FunctionBlocks,get-HelpParsed,get-ISEBreakPointsThisTab,get-ISEOpenFilesExported,get-ModuleRevisedCommands,get-NounAliasTDO,get-OpenNotepadsExported,get-ProjectNameTDO,Get-PSBreakpointSorted,Get-PSModuleFile,Get-ScriptComments,Get-ScriptCommentsTDO,get-StrictMode,Version,ToString,get-UnifiedDiffTDO,get-VariableAssignsAST,get-VerbAliasTDO,Get-VerbSynonymTDO,get-VersionInfo,import-ISEBreakPoints,import-ISEBreakPointsALL,import-ISEConsoleColors,import-ISEOpenFiles,import-OpenNotepads,Initialize-ModuleFingerprint,Get-PSModuleFile,Initialize-PSModuleDirectories,move-ISEBreakPoints,new-CBH,New-GitHubGist,out-diffTDO,Out-ISETab,pop-FunctionDev,push-FunctionDev,Reset-ISEFile,restore-ISEConsoleColors,restore-ModuleBuild,save-ISEConsoleColors,save-ISEOpenfiles,Set-ISEScriptLocation,Show-DiffTDO,show-ISEOpenTab,show-ISEOpenTabPaths,Show-ObjectTDO,show-Verbs,Split-CommandLine,Step-ModuleVersionCalculated,Get-PSModuleFile,Test-ModuleTMPFiles,test-VerbStandard,Uninstall-ModuleForce,update-NewModule,get-FolderEmpty,reset-ModulePublishingDirectory,populate-ModulePublishingDirectory,Write-DiffTDO -Alias *
 
 
 
