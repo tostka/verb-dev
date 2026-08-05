@@ -5,7 +5,7 @@
 .SYNOPSIS
 VERB-dev - Development PS Module-related generic functions
 .NOTES
-Version     : 1.5.98
+Version     : 1.5.99
 Author      : Todd Kadrie
 Website     :	https://www.toddomation.com
 Twitter     :	@tostka
@@ -6291,7 +6291,7 @@ function export-ISEBreakPoints {
                 $tScript = $psise.CurrentFile.FullPath ;
                 # default to same loc, variant name of script in currenttab of ise
                 #$xFname=$tScript.replace(".ps1","-ps1.xml").replace(".psm1","-psm1.xml").replace(".","-BP.") ;
-                $xFname= $tScript -replace "\.ps1","-ps1.xml" -replace "\.psm1","-psm1.xml"  -replace "\.","-BP." 
+                $xFname= $tScript -replace "\.ps1","-ps1.xml" -replace "\.psm1","-psm1.xml"  -replace "\.","-BP."  ; 
                 $AllUsrsScripts = "$($env:ProgramFiles)\WindowsPowerShell\Scripts" ;                 
                 if(-not (test-path $AllUsrsScripts )){mkdir $AllUsrsScripts  -verbose } ; 
                 if( ( (split-path $xFname) -eq $AllUsrsScripts) -OR (-not(test-path (split-path $xFname))) ){
@@ -10946,11 +10946,11 @@ function import-ISEBreakPoints {
                 # make firmly typed array
                 $tfiles = @("$( $tScript -replace "\.ps1","-ps1.xml" -replace "\.psm1","-psm1.xml"  -replace "\.","-BP."  )",
                     # ^current path name variant 1
-                    "$($tScript -replace 'ps1','xml' -replace '.','-BP.' )",
+                    "$($tScript -replace 'ps1','xml' -replace '\.','-BP.' )",
                     # ^current path name variant 2
-                    "$((join-path -path "$([Environment]::GetFolderPath('MyDocuments'))\WindowsPowershell\Scripts" -childpath (split-path $tScript -leaf)) -replace '.ps1','-ps1.xml' -replace '.psm1','-psm1.xml' -replace '.','-BP.')" ,
+                    "$((join-path -path "$([Environment]::GetFolderPath('MyDocuments'))\WindowsPowershell\Scripts" -childpath (split-path $tScript -leaf)) -replace '\.ps1','-ps1.xml' -replace '\.psm1','-psm1.xml' -replace '\.','-BP.')" ,
                     # ^CU scripts dir
-                    "$((join-path -path $PathDefault -childpath (split-path $tScript -leaf)) -replace '.ps1','-ps1.xml' -replace '.psm1','-psm1.xml' -replace '.','-BP.' )" 
+                    "$((join-path -path $PathDefault -childpath (split-path $tScript -leaf)) -replace '\.ps1','-ps1.xml' -replace '\.psm1','-psm1.xml' -replace '\.','-BP.' )" 
                     # ^ PathDefault dir
                 ) ;     
                 # loop ea, take first hit

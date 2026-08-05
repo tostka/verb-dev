@@ -5,7 +5,7 @@
 .SYNOPSIS
 VERB-dev - Development PS Module-related generic functions
 .NOTES
-Version     : 1.5.98
+Version     : 1.5.99
 Author      : Todd Kadrie
 Website     :	https://www.toddomation.com
 Twitter     :	@tostka
@@ -6291,7 +6291,7 @@ function export-ISEBreakPoints {
                 $tScript = $psise.CurrentFile.FullPath ;
                 # default to same loc, variant name of script in currenttab of ise
                 #$xFname=$tScript.replace(".ps1","-ps1.xml").replace(".psm1","-psm1.xml").replace(".","-BP.") ;
-                $xFname= $tScript -replace "\.ps1","-ps1.xml" -replace "\.psm1","-psm1.xml"  -replace "\.","-BP." 
+                $xFname= $tScript -replace "\.ps1","-ps1.xml" -replace "\.psm1","-psm1.xml"  -replace "\.","-BP."  ; 
                 $AllUsrsScripts = "$($env:ProgramFiles)\WindowsPowerShell\Scripts" ;                 
                 if(-not (test-path $AllUsrsScripts )){mkdir $AllUsrsScripts  -verbose } ; 
                 if( ( (split-path $xFname) -eq $AllUsrsScripts) -OR (-not(test-path (split-path $xFname))) ){
@@ -10946,11 +10946,11 @@ function import-ISEBreakPoints {
                 # make firmly typed array
                 $tfiles = @("$( $tScript -replace "\.ps1","-ps1.xml" -replace "\.psm1","-psm1.xml"  -replace "\.","-BP."  )",
                     # ^current path name variant 1
-                    "$($tScript -replace 'ps1','xml' -replace '.','-BP.' )",
+                    "$($tScript -replace 'ps1','xml' -replace '\.','-BP.' )",
                     # ^current path name variant 2
-                    "$((join-path -path "$([Environment]::GetFolderPath('MyDocuments'))\WindowsPowershell\Scripts" -childpath (split-path $tScript -leaf)) -replace '.ps1','-ps1.xml' -replace '.psm1','-psm1.xml' -replace '.','-BP.')" ,
+                    "$((join-path -path "$([Environment]::GetFolderPath('MyDocuments'))\WindowsPowershell\Scripts" -childpath (split-path $tScript -leaf)) -replace '\.ps1','-ps1.xml' -replace '\.psm1','-psm1.xml' -replace '\.','-BP.')" ,
                     # ^CU scripts dir
-                    "$((join-path -path $PathDefault -childpath (split-path $tScript -leaf)) -replace '.ps1','-ps1.xml' -replace '.psm1','-psm1.xml' -replace '.','-BP.' )" 
+                    "$((join-path -path $PathDefault -childpath (split-path $tScript -leaf)) -replace '\.ps1','-ps1.xml' -replace '\.psm1','-psm1.xml' -replace '\.','-BP.' )" 
                     # ^ PathDefault dir
                 ) ;     
                 # loop ea, take first hit
@@ -18765,8 +18765,8 @@ Export-ModuleMember -Function backup-ModuleBuild,check-PsLocalRepoRegistration,c
 # SIG # Begin signature block
 # MIIELgYJKoZIhvcNAQcCoIIEHzCCBBsCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUt4GpqgBZpNA4YBKyO+jo/ip5
-# CwygggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUOiomwdpPrnXe60FHyWt674kg
+# fcOgggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
 # MCwxKjAoBgNVBAMTIVBvd2VyU2hlbGwgTG9jYWwgQ2VydGlmaWNhdGUgUm9vdDAe
 # Fw0xNDEyMjkxNzA3MzNaFw0zOTEyMzEyMzU5NTlaMBUxEzARBgNVBAMTClRvZGRT
 # ZWxmSUkwgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBALqRVt7uNweTkZZ+16QG
@@ -18781,9 +18781,9 @@ Export-ModuleMember -Function backup-ModuleBuild,check-PsLocalRepoRegistration,c
 # AWAwggFcAgEBMEAwLDEqMCgGA1UEAxMhUG93ZXJTaGVsbCBMb2NhbCBDZXJ0aWZp
 # Y2F0ZSBSb290AhBaydK0VS5IhU1Hy6E1KUTpMAkGBSsOAwIaBQCgeDAYBgorBgEE
 # AYI3AgEMMQowCKACgAChAoAAMBkGCSqGSIb3DQEJAzEMBgorBgEEAYI3AgEEMBwG
-# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBQPmShq
-# x9Nch3HmLthCurFJ1FlgHjANBgkqhkiG9w0BAQEFAASBgCqbGAIOqH9JYClcS/e2
-# 0p4lm75EnjP1XfTAA0OuNBoYGG5ZoryJk+XC7gysU8RUUZ0TG6JnZlBKqRZBRY0W
-# 5KlXXDF8aTW9mXaGjA7Q0YAozsF8jxko2i21KrWBJouUr54nc2PthYU6JcTKfPh0
-# nQHqB91u9ORROZt3z9OXXqXH
+# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBSsjRgu
+# VnGHleRlRX8gOfoZ2D+I3DANBgkqhkiG9w0BAQEFAASBgEqI59NLnVL/gTnMadMh
+# STtjUd2ml/ck00Phf1z+PNYlA/pOZxMDdw55UFMnpgp/rXADJpcW2vLATVvodMDW
+# DFnAfTaPX66in892HkVFeUMlmszhKae2FE6bOkFiViicAXumCMrR7RGVVRVvkxY6
+# AVmKatGINB4Xjz0kaTJjusGx
 # SIG # End signature block
