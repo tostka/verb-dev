@@ -76,11 +76,11 @@ function import-ISEBreakPoints {
                 # make firmly typed array
                 $tfiles = @("$( $tScript -replace "\.ps1","-ps1.xml" -replace "\.psm1","-psm1.xml"  -replace "\.","-BP."  )",
                     # ^current path name variant 1
-                    "$($tScript -replace 'ps1','xml' -replace '.','-BP.' )",
+                    "$($tScript -replace 'ps1','xml' -replace '\.','-BP.' )",
                     # ^current path name variant 2
-                    "$((join-path -path "$([Environment]::GetFolderPath('MyDocuments'))\WindowsPowershell\Scripts" -childpath (split-path $tScript -leaf)) -replace '.ps1','-ps1.xml' -replace '.psm1','-psm1.xml' -replace '.','-BP.')" ,
+                    "$((join-path -path "$([Environment]::GetFolderPath('MyDocuments'))\WindowsPowershell\Scripts" -childpath (split-path $tScript -leaf)) -replace '\.ps1','-ps1.xml' -replace '\.psm1','-psm1.xml' -replace '\.','-BP.')" ,
                     # ^CU scripts dir
-                    "$((join-path -path $PathDefault -childpath (split-path $tScript -leaf)) -replace '.ps1','-ps1.xml' -replace '.psm1','-psm1.xml' -replace '.','-BP.' )" 
+                    "$((join-path -path $PathDefault -childpath (split-path $tScript -leaf)) -replace '\.ps1','-ps1.xml' -replace '\.psm1','-psm1.xml' -replace '\.','-BP.' )" 
                     # ^ PathDefault dir
                 ) ;     
                 # loop ea, take first hit
