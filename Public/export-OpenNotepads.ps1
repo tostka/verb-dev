@@ -17,6 +17,7 @@ function export-OpenNotepads {
     Github      : https://github.com/tostka/verb-dev
     Tags        : Powershell,ISE,development,debugging
     REVISIONS
+    * 7:18 AM 8/10/2026 added echo to recurse blocks - long string of outputs makes it look like it's gone off the rails
     * 8:30 AM 7/7/2026 was getting a block of not hits, so added a range of $chkpaths, and added a recurssion option; added parse for notepad3.exe's inclusion of the full path in the wintitle
     * 1:53 PM 7/2/2025 converted to func;  init
     .DESCRIPTION
@@ -152,6 +153,7 @@ function export-OpenNotepads {
                 if($hit = gci -path $fname -ea 0){
                     
                 }else{
+                    write-host "attempting to locate/recurse for specified:$($fname)..." ; 
                     foreach($item in $chkpaths){                        
                         $testpath = (join-path $item $fname);
                         write-verbose "->checking:$($testpath)" ; 
