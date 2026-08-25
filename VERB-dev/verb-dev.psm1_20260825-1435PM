@@ -5,7 +5,7 @@
 .SYNOPSIS
 VERB-dev - Development PS Module-related generic functions
 .NOTES
-Version     : 1.5.96
+Version     : 1.5.99
 Author      : Todd Kadrie
 Website     :	https://www.toddomation.com
 Twitter     :	@tostka
@@ -6233,6 +6233,7 @@ function export-ISEBreakPoints {
     Github      : https://github.com/tostka
     Tags        : Powershell,ISE,development,debugging
     REVISIONS
+    * 3:22 PM 8/4/2026 it was exporting w .ps1 ext on the bp files, fixed filename calc.
     * 9:06 PM 8/12/2025 added code to create CUScripts if missing
     * 8:27 AM 3/26/2024 chg eIseBp -> epIseBp
     * 2:35 PM 5/24/2023 add: prompt for force deletion of existing .xml if no psbreakpoints defined in loaded ISE copy for script.
@@ -6280,7 +6281,8 @@ function export-ISEBreakPoints {
                 if( ($tScript = (gci $Script).FullName) -AND ($psise.powershelltabs.files.fullpath -contains $tScript)){
                     write-host "-Script specified diverting target to:`n$($Script)" ; 
                     $tScript = $Script ; 
-                    $xFname=$tScript.replace(".ps1","-ps1.xml").replace(".psm1","-psm1.xml").replace(".","-BP.") ;
+                    #$xFname=$tScript.replace(".ps1","-ps1.xml").replace(".psm1","-psm1.xml").replace(".","-BP.") ;                    
+                    $xFname= $tScript -replace "\.ps1","-ps1.xml" -replace "\.psm1","-psm1.xml" -replace "\.","-BP." ;  
                 } else { 
                     throw "-Script specified is not a valid path!`n$($Script)`n(or is not currently open in ISE)" ; 
                 } ; 
@@ -6288,7 +6290,8 @@ function export-ISEBreakPoints {
                 write-verbose "(processing `$psise.CurrentFile.FullPath:$($psise.CurrentFile.FullPath)...)"
                 $tScript = $psise.CurrentFile.FullPath ;
                 # default to same loc, variant name of script in currenttab of ise
-                $xFname=$tScript.replace(".ps1","-ps1.xml").replace(".psm1","-psm1.xml").replace(".","-BP.") ;
+                #$xFname=$tScript.replace(".ps1","-ps1.xml").replace(".psm1","-psm1.xml").replace(".","-BP.") ;
+                $xFname= $tScript -replace "\.ps1","-ps1.xml" -replace "\.psm1","-psm1.xml"  -replace "\.","-BP."  ; 
                 $AllUsrsScripts = "$($env:ProgramFiles)\WindowsPowerShell\Scripts" ;                 
                 if(-not (test-path $AllUsrsScripts )){mkdir $AllUsrsScripts  -verbose } ; 
                 if( ( (split-path $xFname) -eq $AllUsrsScripts) -OR (-not(test-path (split-path $xFname))) ){
@@ -10882,6 +10885,7 @@ function import-ISEBreakPoints {
     Github      : https://github.com/tostka
     Tags        : Powershell,ISE,development,debugging
     REVISIONS
+    * 3:22 PM 8/4/2026 it was exporting w .ps1 ext on the bp files, fixed filename calc.
     * 8:28 AM 3/26/2024 chg iIseBp -> ipIseBP
     * 10:20 AM 5/11/2022 added whatif support
     * 8:58 AM 5/9/2022 err suppress: test for bps before importing (emtpy bp xml files happen)
@@ -10931,7 +10935,7 @@ function import-ISEBreakPoints {
                 write-verbose "`$Script:$($Script)" ; 
                 if( ($tScript = (gci $Script).fullname) -AND ($psise.powershelltabs.files.fullpath -contains $tScript)){
                     write-host "-Script specified diverting target to:`n$($Script)" ;
-                    $iFname = "$($Script.replace('.ps1','-ps1.xml').replace('.psm1','-psm1.xml').replace('.','-BP.'))" ;
+                    $iFname = $tScript -replace "\.ps1","-ps1.xml" -replace "\.psm1","-psm1.xml" -replace "\.","-BP." ;  
                 } else {
                     throw "-Script specified is not a valid path!`n$($Script)`n(or is not currently open in ISE)" ;
                 } ;
@@ -10940,13 +10944,13 @@ function import-ISEBreakPoints {
                 # array of paths to be preferred (in order)
                 # - script's current path (with either -[ext]-BP or -BP suffix)
                 # make firmly typed array
-                $tfiles = @("$($tScript.replace('.ps1','-ps1.xml').replace('.psm1','-psm1.xml').replace('.','-BP.'))",
+                $tfiles = @("$( $tScript -replace "\.ps1","-ps1.xml" -replace "\.psm1","-psm1.xml"  -replace "\.","-BP."  )",
                     # ^current path name variant 1
-                    "$($tScript.replace('ps1','xml').replace('.','-BP.'))",
+                    "$($tScript -replace 'ps1','xml' -replace '\.','-BP.' )",
                     # ^current path name variant 2
-                    "$((join-path -path "$([Environment]::GetFolderPath('MyDocuments'))\WindowsPowershell\Scripts" -childpath (split-path $tScript -leaf)).replace('.ps1','-ps1.xml').replace('.psm1','-psm1.xml').replace('.','-BP.'))" ,
+                    "$((join-path -path "$([Environment]::GetFolderPath('MyDocuments'))\WindowsPowershell\Scripts" -childpath (split-path $tScript -leaf)) -replace '\.ps1','-ps1.xml' -replace '\.psm1','-psm1.xml' -replace '\.','-BP.')" ,
                     # ^CU scripts dir
-                    "$((join-path -path $PathDefault -childpath (split-path $tScript -leaf)).replace('.ps1','-ps1.xml').replace('.psm1','-psm1.xml').replace('.','-BP.'))" ;
+                    "$((join-path -path $PathDefault -childpath (split-path $tScript -leaf)) -replace '\.ps1','-ps1.xml' -replace '\.psm1','-psm1.xml' -replace '\.','-BP.' )" 
                     # ^ PathDefault dir
                 ) ;     
                 # loop ea, take first hit
@@ -18761,8 +18765,8 @@ Export-ModuleMember -Function backup-ModuleBuild,check-PsLocalRepoRegistration,c
 # SIG # Begin signature block
 # MIIELgYJKoZIhvcNAQcCoIIEHzCCBBsCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUb/RHWWkwDG2P/xCh+IvqDQlh
-# dI6gggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUOiomwdpPrnXe60FHyWt674kg
+# fcOgggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
 # MCwxKjAoBgNVBAMTIVBvd2VyU2hlbGwgTG9jYWwgQ2VydGlmaWNhdGUgUm9vdDAe
 # Fw0xNDEyMjkxNzA3MzNaFw0zOTEyMzEyMzU5NTlaMBUxEzARBgNVBAMTClRvZGRT
 # ZWxmSUkwgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBALqRVt7uNweTkZZ+16QG
@@ -18777,9 +18781,9 @@ Export-ModuleMember -Function backup-ModuleBuild,check-PsLocalRepoRegistration,c
 # AWAwggFcAgEBMEAwLDEqMCgGA1UEAxMhUG93ZXJTaGVsbCBMb2NhbCBDZXJ0aWZp
 # Y2F0ZSBSb290AhBaydK0VS5IhU1Hy6E1KUTpMAkGBSsOAwIaBQCgeDAYBgorBgEE
 # AYI3AgEMMQowCKACgAChAoAAMBkGCSqGSIb3DQEJAzEMBgorBgEEAYI3AgEEMBwG
-# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBRQDxyV
-# +ieX6KK+T7tsM8UGZ6HyCjANBgkqhkiG9w0BAQEFAASBgJ+N9KbcAx9IAKzYHemR
-# FXrSUQ8M9a07pIlEYQSN+Ig3n+5QgfMUsZRh7MpDAT0VWHBaQZrHYVy9PvOfms+D
-# AgzJQOlYpxfCrJQv5j3y52EVteQo1R6eaA7MO4frwbQ7rwLwNOHrBRmMegWemb28
-# 3Khy1NNxk28rEH9LlGKTrkkD
+# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBSsjRgu
+# VnGHleRlRX8gOfoZ2D+I3DANBgkqhkiG9w0BAQEFAASBgEqI59NLnVL/gTnMadMh
+# STtjUd2ml/ck00Phf1z+PNYlA/pOZxMDdw55UFMnpgp/rXADJpcW2vLATVvodMDW
+# DFnAfTaPX66in892HkVFeUMlmszhKae2FE6bOkFiViicAXumCMrR7RGVVRVvkxY6
+# AVmKatGINB4Xjz0kaTJjusGx
 # SIG # End signature block
