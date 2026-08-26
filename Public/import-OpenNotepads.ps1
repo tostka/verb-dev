@@ -16,12 +16,16 @@ function import-OpenNotepads {
     Github      : https://github.com/tostka/verb-dev
     Tags        : Powershell,ISE,development,debugging
     REVISIONS
+    * 4:26 PM 8/26/2026 spliced over concepts - uniquing from '* 10:08 AM 2/5/2026 retooled uniq logic & splatting, suppress dupes' spuriously put in scvio\public. (uses indexed hash uniquing instead of trying to use contains etc)
     * 1:00 PM 11/20/2025 added support for edit flags (*\s), optional, as part of dupe suppress
         added dupe-suppression, both retroactively - searches launched process.mainwindowtitle for array status, closes all but oldest id - and proactively - 
         runs a collection of processname-filtered existing processes, and appends the newly opened to the list, then builds and checks for each filename in the MainWindowTitle list, skipping open dupes.
     * 2:21 PM 7/2/2025 works init
     .DESCRIPTION
     import-OpenNotepads - Import & open a previously-exported list of  Notepad* variant (notepad2/3 curr) sessions
+    
+    .psxml Datafiles are stored in profile below \Documents\WindowsPowerShell\Scripts\data
+
     .PARAMETER File
     Path to an exported .psxml file reflecting previously opened Notepad* variant windows & documents, to be reopened.
     .PARAMETER Tag
@@ -81,14 +85,31 @@ function import-OpenNotepads {
     } ;
     PROCESS {
         # for debugging, -Script permits targeting another script *not* being currently debugged
-
+        <#
+        Name             : notepad2
+        Id               : 26564
+        Path             : C:\Program Files\TortoiseGit\bin\notepad2.exe
+        Description      : Notepad 2e x64
+        MainWindowHandle : 529900
+        MainWindowTitle  : 26169.txt - Notepad 2e x64
+        ProcessName      : notepad2
+        StartTime        : 1/21/2026 8:30:21 AM
+        ExitCode         :
+        HasExited        : False
+        ExitTime         :
+        FilePath         : C:\usr\work\incid\26169.txt
+        Resolved         : True
+        NPAppPath        : C:\Program Files\TortoiseGit\bin\notepad2.exe
+        #>
 
             if($txmlf){
                 write-host "*Importing exported file:$($txmlf) and setting specified files for open file`n$($tScript)" ;
                 
                 # set apps & files in found .xml file
                 $ipFiles = Import-Clixml -path $txmlf ;
-                
+                $NPAppPath = $ipfiles.NPAppPath | group | sort count | select -first 1 | select -expand name ; 
+                $UnqFilePaths = $ipfiles.filepath |select -unique | sort ; 
+                $loadedFilePaths = @{} # @() ; 
                 # patch over empty existing file (file w no specs, happens)
                 if($ipFiles){
 
@@ -102,6 +123,13 @@ function import-OpenNotepads {
                         } ;
                         if($ipFile.Path){$pltSaPS.FilePath = $ipFile.Path }else{throw "missing FilePath!"} 
                         if($ipFile.FilePath){$pltSaPS.ArgumentList = $ipFile.FilePath }else{throw "missing notepad app Path!"}
+                        TRY{
+                            # try to add $loadedFilePaths[$ipFile.FilePath] = $ipFile.FilePath ; indexed hash will throw up on any preexisting add
+                            $loadedFilePaths[$ipFile.FilePath] = $ipFile.FilePath 
+                        }CATCH{
+                            write-host -foregroundcolor yellow "($($ipFile.FilePath) already loaded, skipping)" ; 
+                            CONTINUE; 
+                        } ; 
                         if($thisfile = get-childitem -path $ipFile.FilePath -ea STOP){
                             if ($thisfile.name -eq 'Ex16-Build-ExInstall-20250707-0138PM.txt'){
                                 write-verbose "gotcha!" ; 
