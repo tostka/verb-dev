@@ -12,7 +12,7 @@
 RootModule = 'VERB-dev.psm1'
 
 # Version number of this module.
-ModuleVersion = '1.5.101'
+ModuleVersion = '1.5.102'
 
 # Supported PSEditions
 # CompatiblePSEditions = @()
@@ -69,7 +69,7 @@ Description = 'Development PS Module-related generic functions'
 # NestedModules = @()
 
 # Functions to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no functions to export.
-FunctionsToExport = @('backup-ModuleBuild','check-PsLocalRepoRegistration','close-ISEOpenfiles','close-ISEOtherOpenFiles','Compare-FilesTDO','Compare-FileTDO','Compare-ObjectsTDO','confirm-ModuleBuildSync','confirm-ModulePsd1Version','confirm-ModulePsm1Version','confirm-ModuleTestPs1Guid','convert-CommandLine2VSCDebugJson','Convert-CommandToSplatTDO','convertFrom-EscapedPSText','Convert-HelpToHtmlFile','Convert-ISEOpenFileToText','convert-ISEOpenSession','converto-VSCConfig','ConvertTo-Breakpoint','_extractBreakpoint','convertTo-EscapedPSText','ConvertTo-ModuleDynamicTDO','ConvertTo-ModuleMergedTDO','convertTo-UnwrappedPS','convertTo-WrappedPS','copy-ISELocalSourceToTab','copy-ISETabFileToLocal','disable-ISEBreakPointsThisTab','enable-ISEBreakPointsThisTab','export-CommentBasedHelpToFileTDO','export-FunctionsToFilesTDO','export-ISEBreakPoints','export-ISEBreakPointsALL','export-ISEOpenFiles','export-OpenNotepads','find-NounAliasesTDO','get-AliasAssignsAST','get-CodeProfileAST','get-CodeRiskProfileAST','Get-CommentBlocks','get-FileVerbNounCmdletSummaries','get-FunctionBlock','get-FunctionBlocks','get-HelpParsed','get-ISEBreakPointsThisTab','get-ISEOpenFilesExported','get-ModuleRevisedCommands','get-NounAliasTDO','get-OpenNotepadsExported','get-ProjectNameTDO','Get-PSBreakpointSorted','Get-PSModuleFile','Get-ScriptComments','Get-ScriptCommentsTDO','get-StrictMode','Version','ToString','get-UnifiedDiffTDO','get-VariableAssignsAST','get-VerbAliasTDO','Get-VerbSynonymTDO','get-VersionInfo','import-ISEBreakPoints','import-ISEBreakPointsALL','import-ISEConsoleColors','import-ISEOpenFiles','import-OpenNotepads','Initialize-ModuleFingerprint','Get-PSModuleFile','Initialize-PSModuleDirectories','move-ISEBreakPoints','new-CBH','New-GitHubGist','out-diffTDO','Out-ISETab','pop-FunctionDev','push-FunctionDev','Reset-ISEFile','restore-ISEConsoleColors','restore-ModuleBuild','save-ISEConsoleColors','save-ISEOpenfiles','Set-ISEScriptLocation','Show-DiffTDO','show-ISEOpenTab','show-ISEOpenTabPaths','Show-ObjectTDO','show-Verbs','Split-CommandLine','Step-ModuleVersionCalculated','Get-PSModuleFile','Test-ModuleTMPFiles','test-VerbStandard','Uninstall-ModuleForce','Update-DebugDateTDO','update-NewModule','get-FolderEmpty','reset-ModulePublishingDirectory','populate-ModulePublishingDirectory','Write-DiffTDO')
+FunctionsToExport = @('backup-ModuleBuild','check-PsLocalRepoRegistration','close-ISEOpenfiles','close-ISEOtherOpenFiles','Compare-FilesTDO','Compare-FileTDO','Compare-ObjectsTDO','confirm-ModuleBuildSync','confirm-ModulePsd1Version','confirm-ModulePsm1Version','confirm-ModuleTestPs1Guid','Connect-EXO','Test-Uri','Test-MGAuthConflict','Test-MGAuthConflict','convert-CommandLine2VSCDebugJson','Convert-CommandToSplatTDO','convertFrom-EscapedPSText','Convert-HelpToHtmlFile','Convert-ISEOpenFileToText','convert-ISEOpenSession','converto-VSCConfig','ConvertTo-Breakpoint','_extractBreakpoint','convertTo-EscapedPSText','ConvertTo-ModuleDynamicTDO','ConvertTo-ModuleMergedTDO','convertTo-UnwrappedPS','convertTo-WrappedPS','copy-ISELocalSourceToTab','copy-ISETabFileToLocal','disable-ISEBreakPointsThisTab','enable-ISEBreakPointsThisTab','export-CommentBasedHelpToFileTDO','export-FunctionsToFilesTDO','export-ISEBreakPoints','export-ISEBreakPointsALL','export-ISEOpenFiles','export-OpenNotepads','find-NounAliasesTDO','get-AliasAssignsAST','get-CodeProfileAST','get-CodeRiskProfileAST','Get-CommentBlocks','get-FileVerbNounCmdletSummaries','get-FunctionBlock','get-FunctionBlocks','get-HelpParsed','get-ISEBreakPointsThisTab','get-ISEOpenFilesExported','get-ModuleRevisedCommands','get-NounAliasTDO','get-OpenNotepadsExported','get-ProjectNameTDO','Get-PSBreakpointSorted','Get-PSModuleFile','Get-ScriptComments','Get-ScriptCommentsTDO','get-StrictMode','Version','ToString','get-UnifiedDiffTDO','get-VariableAssignsAST','get-VerbAliasTDO','Get-VerbSynonymTDO','get-VersionInfo','import-ISEBreakPoints','import-ISEBreakPointsALL','import-ISEConsoleColors','import-ISEOpenFiles','import-OpenNotepads','Initialize-ModuleFingerprint','Get-PSModuleFile','Initialize-PSModuleDirectories','move-ISEBreakPoints','new-CBH','New-GitHubGist','out-diffTDO','Out-ISETab','pop-FunctionDev','push-FunctionDev','Reset-ISEFile','restore-ISEConsoleColors','restore-ModuleBuild','save-ISEConsoleColors','save-ISEOpenfiles','Set-ISEScriptLocation','Show-DiffTDO','show-ISEOpenTab','show-ISEOpenTabPaths','Show-ObjectTDO','show-Verbs','Split-CommandLine','Step-ModuleVersionCalculated','Get-PSModuleFile','Test-ModuleTMPFiles','test-VerbStandard','Uninstall-ModuleForce','Update-DebugDateTDO','update-NewModule','get-FolderEmpty','reset-ModulePublishingDirectory','populate-ModulePublishingDirectory','Write-DiffTDO')
 
 # Cmdlets to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no cmdlets to export.
 CmdletsToExport = '*'
@@ -126,8 +126,8 @@ PrivateData = @{
 # SIG # Begin signature block
 # MIIELgYJKoZIhvcNAQcCoIIEHzCCBBsCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQU1GpKqEZOTsmZ92aqGVlrvxhZ
-# lfKgggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQU4D32eTuMcUpZeKEYC6AxHc8r
+# zXKgggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
 # MCwxKjAoBgNVBAMTIVBvd2VyU2hlbGwgTG9jYWwgQ2VydGlmaWNhdGUgUm9vdDAe
 # Fw0xNDEyMjkxNzA3MzNaFw0zOTEyMzEyMzU5NTlaMBUxEzARBgNVBAMTClRvZGRT
 # ZWxmSUkwgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBALqRVt7uNweTkZZ+16QG
@@ -142,10 +142,10 @@ PrivateData = @{
 # AWAwggFcAgEBMEAwLDEqMCgGA1UEAxMhUG93ZXJTaGVsbCBMb2NhbCBDZXJ0aWZp
 # Y2F0ZSBSb290AhBaydK0VS5IhU1Hy6E1KUTpMAkGBSsOAwIaBQCgeDAYBgorBgEE
 # AYI3AgEMMQowCKACgAChAoAAMBkGCSqGSIb3DQEJAzEMBgorBgEEAYI3AgEEMBwG
-# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBTO/+zL
-# ndD3BgAbikj9iDEmNYznfjANBgkqhkiG9w0BAQEFAASBgDkivAv+lKc65HVJZtZd
-# kJmH3b5G4mhdW97NdkMf5w6leajpCN4iaXHnKlX86XuFYQ6bvfxdCTi3m0pW+otg
-# 7Gx1Z1zWqZTRlUASYKzuXQXidZ3QgE0WB8jkzoAELwMPx9T0gUherm6TWPd52Wo6
-# XzJzwrUARSL2Z/WptyWSfxkE
+# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBQNvTtM
+# mbAwZcXyvBjUEAL75oMYPTANBgkqhkiG9w0BAQEFAASBgLjLaTruW650XaE3H53M
+# FUcesXJormpcz2vBByIt6Gtwc+fD63RNqz6Ag849VISs4s9DaufC5Pt4HtFvDL/D
+# UTFuX61UJSTu0AQckFbBq5rrkjlTEDrq8n5HQTBwZN0/7hluoKowhaFcIpMp9Zqi
+# ebNYnAGxJmDPiV5q6y6juNfL
 # SIG # End signature block
 
