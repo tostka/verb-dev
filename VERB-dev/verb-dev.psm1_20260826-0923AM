@@ -5,7 +5,7 @@
 .SYNOPSIS
 VERB-dev - Development PS Module-related generic functions
 .NOTES
-Version     : 1.5.97
+Version     : 1.5.100
 Author      : Todd Kadrie
 Website     :	https://www.toddomation.com
 Twitter     :	@tostka
@@ -6282,7 +6282,7 @@ function export-ISEBreakPoints {
                     write-host "-Script specified diverting target to:`n$($Script)" ; 
                     $tScript = $Script ; 
                     #$xFname=$tScript.replace(".ps1","-ps1.xml").replace(".psm1","-psm1.xml").replace(".","-BP.") ;                    
-                    $xFname= $tScript -replace("\.ps1","-ps1.xml") -replace("\.psm1","-psm1.xml") -replace("\.","-BP.") 
+                    $xFname= $tScript -replace "\.ps1","-ps1.xml" -replace "\.psm1","-psm1.xml" -replace "\.","-BP." ;  
                 } else { 
                     throw "-Script specified is not a valid path!`n$($Script)`n(or is not currently open in ISE)" ; 
                 } ; 
@@ -6291,7 +6291,7 @@ function export-ISEBreakPoints {
                 $tScript = $psise.CurrentFile.FullPath ;
                 # default to same loc, variant name of script in currenttab of ise
                 #$xFname=$tScript.replace(".ps1","-ps1.xml").replace(".psm1","-psm1.xml").replace(".","-BP.") ;
-                $xFname= $tScript -replace("\.ps1","-ps1.xml") -replace("\.psm1","-psm1.xml") -replace("\.","-BP.") 
+                $xFname= $tScript -replace "\.ps1","-ps1.xml" -replace "\.psm1","-psm1.xml"  -replace "\.","-BP."  ; 
                 $AllUsrsScripts = "$($env:ProgramFiles)\WindowsPowerShell\Scripts" ;                 
                 if(-not (test-path $AllUsrsScripts )){mkdir $AllUsrsScripts  -verbose } ; 
                 if( ( (split-path $xFname) -eq $AllUsrsScripts) -OR (-not(test-path (split-path $xFname))) ){
@@ -6511,6 +6511,7 @@ function export-OpenNotepads {
     Github      : https://github.com/tostka/verb-dev
     Tags        : Powershell,ISE,development,debugging
     REVISIONS
+    * 7:18 AM 8/10/2026 added echo to recurse blocks - long string of outputs makes it look like it's gone off the rails
     * 8:30 AM 7/7/2026 was getting a block of not hits, so added a range of $chkpaths, and added a recurssion option; added parse for notepad3.exe's inclusion of the full path in the wintitle
     * 1:53 PM 7/2/2025 converted to func;  init
     .DESCRIPTION
@@ -6646,6 +6647,7 @@ function export-OpenNotepads {
                 if($hit = gci -path $fname -ea 0){
                     
                 }else{
+                    write-host "attempting to locate/recurse for specified:$($fname)..." ; 
                     foreach($item in $chkpaths){                        
                         $testpath = (join-path $item $fname);
                         write-verbose "->checking:$($testpath)" ; 
@@ -10885,6 +10887,7 @@ function import-ISEBreakPoints {
     Github      : https://github.com/tostka
     Tags        : Powershell,ISE,development,debugging
     REVISIONS
+    * 3:22 PM 8/4/2026 it was exporting w .ps1 ext on the bp files, fixed filename calc.
     * 8:28 AM 3/26/2024 chg iIseBp -> ipIseBP
     * 10:20 AM 5/11/2022 added whatif support
     * 8:58 AM 5/9/2022 err suppress: test for bps before importing (emtpy bp xml files happen)
@@ -10934,7 +10937,7 @@ function import-ISEBreakPoints {
                 write-verbose "`$Script:$($Script)" ; 
                 if( ($tScript = (gci $Script).fullname) -AND ($psise.powershelltabs.files.fullpath -contains $tScript)){
                     write-host "-Script specified diverting target to:`n$($Script)" ;
-                    $iFname = "$($Script.replace('.ps1','-ps1.xml').replace('.psm1','-psm1.xml').replace('.','-BP.'))" ;
+                    $iFname = $tScript -replace "\.ps1","-ps1.xml" -replace "\.psm1","-psm1.xml" -replace "\.","-BP." ;  
                 } else {
                     throw "-Script specified is not a valid path!`n$($Script)`n(or is not currently open in ISE)" ;
                 } ;
@@ -10943,13 +10946,13 @@ function import-ISEBreakPoints {
                 # array of paths to be preferred (in order)
                 # - script's current path (with either -[ext]-BP or -BP suffix)
                 # make firmly typed array
-                $tfiles = @("$($tScript.replace('.ps1','-ps1.xml').replace('.psm1','-psm1.xml').replace('.','-BP.'))",
+                $tfiles = @("$( $tScript -replace "\.ps1","-ps1.xml" -replace "\.psm1","-psm1.xml"  -replace "\.","-BP."  )",
                     # ^current path name variant 1
-                    "$($tScript.replace('ps1','xml').replace('.','-BP.'))",
+                    "$($tScript -replace 'ps1','xml' -replace '\.','-BP.' )",
                     # ^current path name variant 2
-                    "$((join-path -path "$([Environment]::GetFolderPath('MyDocuments'))\WindowsPowershell\Scripts" -childpath (split-path $tScript -leaf)).replace('.ps1','-ps1.xml').replace('.psm1','-psm1.xml').replace('.','-BP.'))" ,
+                    "$((join-path -path "$([Environment]::GetFolderPath('MyDocuments'))\WindowsPowershell\Scripts" -childpath (split-path $tScript -leaf)) -replace '\.ps1','-ps1.xml' -replace '\.psm1','-psm1.xml' -replace '\.','-BP.')" ,
                     # ^CU scripts dir
-                    "$((join-path -path $PathDefault -childpath (split-path $tScript -leaf)).replace('.ps1','-ps1.xml').replace('.psm1','-psm1.xml').replace('.','-BP.'))" ;
+                    "$((join-path -path $PathDefault -childpath (split-path $tScript -leaf)) -replace '\.ps1','-ps1.xml' -replace '\.psm1','-psm1.xml' -replace '\.','-BP.' )" 
                     # ^ PathDefault dir
                 ) ;     
                 # loop ea, take first hit
@@ -15733,6 +15736,142 @@ Function Uninstall-ModuleForce {
 #*------^ Uninstall-ModuleForce.ps1 ^------
 
 
+#*------v Update-DebugDateTDO.ps1 v------
+function Update-DebugDateTDO {
+        <#
+        .SYNOPSIS
+        Update-DebugDateTDO - Search specified path for .ps1 files, optionally filtered by -Days 'old' parameter, and replace specified `$dbgdate variable mm/dd/yyyy value with an updated value (defaults to current date)
+        .NOTES
+        Version     : 1.1.0
+        Author      : Todd Kadrie
+        Website     : https://www.toddomation.com
+        Twitter     : @tostka / http://twitter.com/tostka
+        CreatedDate : 3:56 PM 12/8/2019
+        FileName    : Update-DebugDateTDO.ps1.ps1
+        License     : MIT License
+        Copyright   : (c) 2025 Todd Kadrie
+        Github      : https://github.com/tostka/verb-dev
+        AddedCredit :
+        AddedWebsite:
+        AddedTwitter:
+        REVISIONS
+        * 12:50 PM 8/25/2026 INIT
+        .DESCRIPTION
+        Update-DebugDateTDO - Search specified path for .ps1 files, optionally filtered by -Days 'old' parameter, and replace specified `$dbgdate variable mm/dd/yyyy value with an updated value (defaults to current date)
+        .PARAMETER DateOld
+        Existing `$dbgdate= 'mm/dd/yyyy' Date value to be updated [-DateOld '8/21/2026']
+        .PARAMETER DateOld
+        Existing `$dbgdate= 'mm/dd/yyyy' Date value to be updated FROM[-DateOld '8/21/2026']
+        .PARAMETER DateNew
+        New `$dbgdate= 'mm/dd/yyyy' Date value to be updated TO[-DateNew '8/25/2026']
+        .PARAMETER 
+        Days back to filter for LastWriteTimd[-Days 14]
+        .PARAMETER Extension
+        Array of extensions to be filtered[-Extension '.psm1']
+        .PARAMETER Whatif
+        Parameter to run a Test no-change pass [-Whatif switch]
+        .INPUTS
+        None
+        .OUTPUTS
+        Outputs a system.object containing:
+        * Parameters : Details on all Parameters in the file
+        * Functions : Details on all Functions in the file
+        * VariableAssignments : Details on all Variables assigned in the file
+        .EXAMPLE
+        PS> Update-DebugDateTDO -Path d:\scripts\ -DateOld '8/21/2026' -DateNew '8/25/2026' -Days 21 -whatIf:$true;  
+        Demo updating all (default extension:.ps1) files Lastwritten in 21d, updating dbgdate variable references from DateOld to DateNew
+        .LINK
+        https://github.com/tostka/verb-dev
+        #>
+        [CmdletBinding()]
+        [Alias('get-ScriptProfileAST')]
+        PARAM(
+            [Parameter(Position = 0, Mandatory = $true, ValueFromPipeline = $true, HelpMessage = "Path to folder containing scripts/functions to be updated[-Path c:\path-to\]")]
+                [ValidateScript({Test-Path $_ -PathType 'Container'})]
+                [Alias('Folder')]
+                [System.IO.DirectoryInfo[]]$Path,            
+            [Parameter(Position = 1, Mandatory = $true, HelpMessage = "Existing `$dbgdate= 'mm/dd/yyyy' Date value to be updated [-DateOld '8/21/2026']")]
+                [ValidatePattern('\d{1,2}/\d{2}/\d{4}')]
+                [string]$DateOld,
+            [Parameter(Position = 2, Mandatory = $true, HelpMessage = "New `$dbgdate= 'mm/dd/yyyy' Date value to be updated TO[-DateNew '8/25/2026']")]               
+                [ValidatePattern('\d{1,2}/\d{2}/\d{4}')]
+                [string]$DateNew,
+            [Parameter(Position = 3, Mandatory = $false, HelpMessage = "Days back to filter for LastWriteTimd[-Days 14]")]
+                [int]$Days,
+            [Parameter(Position = 2, Mandatory = $false, ValueFromPipeline = $true, HelpMessage = "Array of extensions to be filtered[-Extension '.psm1']")]                [ValidatePattern( "\.(ps1|psm1)$")]
+                [ValidatePattern( "\.(ps1|psm1)$")]
+                [string[]]$Extension = '.ps1',
+            [Parameter(HelpMessage = "Whatif Flag  [-whatIf]")]
+                [switch] $whatIf
+        ) ;
+        BEGIN {            
+        } ;
+        PROCESS {
+            #[regex]$DateLineFilter = "\`$dbgdate((\s+)*)=((\s+)*)'$([regex]::Escape($DateOld))'"
+            [regex]$DateLineFilter = "dbgdate((\s)*)=((\s)*)'$([regex]::Escape($dateOld))'"
+            $UpdatedDateLine = "dbgdate = '$($dateNew)'"
+            foreach($Pth in $Path){
+                $rawfiles = Get-ChildItem -Path (join-path $pth.fullname "*") -Filter "*$($extension)" -File ; 
+                if($Days){
+                    write-verbose "Reducing hits by specified recent -Days:$($Days)" 
+                    $rawfiles = $rawfiles | ?{$_.LastWriteTime -ge (get-date ).adddays(-1 * $Days)} ; 
+                } ; 
+                $rawfiles  | ForEach-Object {
+                    $thisitem = $_ ; 
+                    $content = Get-Content $thisitem.FullName -Raw ;
+                    #if ($content -match [regex]($DateOld)) {                    
+                    if ($content -match $DateLineFilter) {
+                        $referenceLines = $thisitem | sls -Pattern $DateLineFilter ;                                                     
+                        $newContent = $content ; 
+                        $revd = $false; 
+                        $referencelines | foreach-object{ 
+                            $thisSlsHit = $_  ;
+                            if($thisSlsHit.matches[0].groups[0].Captures.value){
+                                $newContent = $newContent.replace($thisSlsHit.matches[0].groups[0].Captures.value,$UpdatedDateLine) ; 
+                                $revd = $true; 
+                                #$newContent | 
+                                #    Set-Content $thisitem.FullName -WhatIf:$($whatif) -Verbose:$true ; 
+                                #Write-Host "Updated: $($thisitem.FullName)" ;
+                            } ;                                 
+                        } ; 
+                        if($revd -eq $true){                                
+                            $ref = $content.Split([Environment]::NewLine)  | %{$i = 1} { new-object psobject -prop @{LineNum=$i;Text=$_}; $i++} ;
+                            $rev = $newcontent.Split([Environment]::NewLine) | %{$i = 1} { new-object psobject -prop @{LineNum=$i;Text=$_}; $i++} ;
+                            #$diff = Compare-Object $ref $rev -Property Text -PassThru  ; 
+                            $diff = Compare-Object $rev $ref -Property Text -PassThru  ; 
+                            write-host -foregroundcolor green "Diff:$($thisitem.fullname))`n$(($diff | ft -a LineNum,Text,SideIndicator|out-string).trim())" ;    
+                            $PTitle  = "# Confirm Update:" ; 
+                            $PMsg = "Update?: $($thisitem.fullname)"
+                            $PMsg += "`n$(($referenceLines | ft -a LineNumber,Line|out-string).trim())" ; 
+                            # Define choices. The '&' character sets the keyboard shortcut key.
+                            $PChoices = [System.Management.Automation.Host.ChoiceDescription[]] @(
+                                [System.Management.Automation.Host.ChoiceDescription]::new("&Yes", "Proceed."),
+                                [System.Management.Automation.Host.ChoiceDescription]::new("&No", "Cancel.")
+                            )
+                            $iPDefault = 0
+                            $PResult = $Host.UI.PromptForChoice($PTitle, $PMsg, $PChoices, $iPDefault)
+                            if ($PResult -eq 0) {
+                                $newContent | 
+                                    Set-Content $thisitem.FullName -WhatIf:$($whatif) -Verbose:$true -Encoding utf8; 
+                            } else {
+                                #Write-Host "You chose No. Aborting..." -ForegroundColor Red
+                                write-host -foregroundcolor red "(skipped:$($thisitem.fullname))"
+                            } ; 
+                        }else{
+                            write-host -foregroundcolor gray "unrevised content" ; 
+                        } ; 
+                    } ;
+                } ;                         
+            } ;  # loop-E
+        } ;
+        END {
+            
+        } ;
+    }
+
+#*------^ Update-DebugDateTDO.ps1 ^------
+
+
 #*------v update-NewModule.ps1 v------
 function update-NewModule {
     <#
@@ -18756,7 +18895,7 @@ function Write-DiffTDO {
 
 #*======^ END FUNCTIONS ^======
 
-Export-ModuleMember -Function backup-ModuleBuild,check-PsLocalRepoRegistration,close-ISEOpenfiles,close-ISEOtherOpenFiles,Compare-FilesTDO,Compare-FileTDO,Compare-ObjectsTDO,confirm-ModuleBuildSync,confirm-ModulePsd1Version,confirm-ModulePsm1Version,confirm-ModuleTestPs1Guid,convert-CommandLine2VSCDebugJson,Convert-CommandToSplatTDO,convertFrom-EscapedPSText,Convert-HelpToHtmlFile,Convert-ISEOpenFileToText,convert-ISEOpenSession,converto-VSCConfig,ConvertTo-Breakpoint,_extractBreakpoint,convertTo-EscapedPSText,ConvertTo-ModuleDynamicTDO,ConvertTo-ModuleMergedTDO,convertTo-UnwrappedPS,convertTo-WrappedPS,copy-ISELocalSourceToTab,copy-ISETabFileToLocal,disable-ISEBreakPointsThisTab,enable-ISEBreakPointsThisTab,export-CommentBasedHelpToFileTDO,export-FunctionsToFilesTDO,export-ISEBreakPoints,export-ISEBreakPointsALL,export-ISEOpenFiles,export-OpenNotepads,find-NounAliasesTDO,get-AliasAssignsAST,get-CodeProfileAST,get-CodeRiskProfileAST,Get-CommentBlocks,get-FileVerbNounCmdletSummaries,get-FunctionBlock,get-FunctionBlocks,get-HelpParsed,get-ISEBreakPointsThisTab,get-ISEOpenFilesExported,get-ModuleRevisedCommands,get-NounAliasTDO,get-OpenNotepadsExported,get-ProjectNameTDO,Get-PSBreakpointSorted,Get-PSModuleFile,Get-ScriptComments,Get-ScriptCommentsTDO,get-StrictMode,Version,ToString,get-UnifiedDiffTDO,get-VariableAssignsAST,get-VerbAliasTDO,Get-VerbSynonymTDO,get-VersionInfo,import-ISEBreakPoints,import-ISEBreakPointsALL,import-ISEConsoleColors,import-ISEOpenFiles,import-OpenNotepads,Initialize-ModuleFingerprint,Get-PSModuleFile,Initialize-PSModuleDirectories,move-ISEBreakPoints,new-CBH,New-GitHubGist,out-diffTDO,Out-ISETab,pop-FunctionDev,push-FunctionDev,Reset-ISEFile,restore-ISEConsoleColors,restore-ModuleBuild,save-ISEConsoleColors,save-ISEOpenfiles,Set-ISEScriptLocation,Show-DiffTDO,show-ISEOpenTab,show-ISEOpenTabPaths,Show-ObjectTDO,show-Verbs,Split-CommandLine,Step-ModuleVersionCalculated,Get-PSModuleFile,Test-ModuleTMPFiles,test-VerbStandard,Uninstall-ModuleForce,update-NewModule,get-FolderEmpty,reset-ModulePublishingDirectory,populate-ModulePublishingDirectory,Write-DiffTDO -Alias *
+Export-ModuleMember -Function backup-ModuleBuild,check-PsLocalRepoRegistration,close-ISEOpenfiles,close-ISEOtherOpenFiles,Compare-FilesTDO,Compare-FileTDO,Compare-ObjectsTDO,confirm-ModuleBuildSync,confirm-ModulePsd1Version,confirm-ModulePsm1Version,confirm-ModuleTestPs1Guid,convert-CommandLine2VSCDebugJson,Convert-CommandToSplatTDO,convertFrom-EscapedPSText,Convert-HelpToHtmlFile,Convert-ISEOpenFileToText,convert-ISEOpenSession,converto-VSCConfig,ConvertTo-Breakpoint,_extractBreakpoint,convertTo-EscapedPSText,ConvertTo-ModuleDynamicTDO,ConvertTo-ModuleMergedTDO,convertTo-UnwrappedPS,convertTo-WrappedPS,copy-ISELocalSourceToTab,copy-ISETabFileToLocal,disable-ISEBreakPointsThisTab,enable-ISEBreakPointsThisTab,export-CommentBasedHelpToFileTDO,export-FunctionsToFilesTDO,export-ISEBreakPoints,export-ISEBreakPointsALL,export-ISEOpenFiles,export-OpenNotepads,find-NounAliasesTDO,get-AliasAssignsAST,get-CodeProfileAST,get-CodeRiskProfileAST,Get-CommentBlocks,get-FileVerbNounCmdletSummaries,get-FunctionBlock,get-FunctionBlocks,get-HelpParsed,get-ISEBreakPointsThisTab,get-ISEOpenFilesExported,get-ModuleRevisedCommands,get-NounAliasTDO,get-OpenNotepadsExported,get-ProjectNameTDO,Get-PSBreakpointSorted,Get-PSModuleFile,Get-ScriptComments,Get-ScriptCommentsTDO,get-StrictMode,Version,ToString,get-UnifiedDiffTDO,get-VariableAssignsAST,get-VerbAliasTDO,Get-VerbSynonymTDO,get-VersionInfo,import-ISEBreakPoints,import-ISEBreakPointsALL,import-ISEConsoleColors,import-ISEOpenFiles,import-OpenNotepads,Initialize-ModuleFingerprint,Get-PSModuleFile,Initialize-PSModuleDirectories,move-ISEBreakPoints,new-CBH,New-GitHubGist,out-diffTDO,Out-ISETab,pop-FunctionDev,push-FunctionDev,Reset-ISEFile,restore-ISEConsoleColors,restore-ModuleBuild,save-ISEConsoleColors,save-ISEOpenfiles,Set-ISEScriptLocation,Show-DiffTDO,show-ISEOpenTab,show-ISEOpenTabPaths,Show-ObjectTDO,show-Verbs,Split-CommandLine,Step-ModuleVersionCalculated,Get-PSModuleFile,Test-ModuleTMPFiles,test-VerbStandard,Uninstall-ModuleForce,Update-DebugDateTDO,update-NewModule,get-FolderEmpty,reset-ModulePublishingDirectory,populate-ModulePublishingDirectory,Write-DiffTDO -Alias *
 
 
 
@@ -18764,8 +18903,8 @@ Export-ModuleMember -Function backup-ModuleBuild,check-PsLocalRepoRegistration,c
 # SIG # Begin signature block
 # MIIELgYJKoZIhvcNAQcCoIIEHzCCBBsCAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQU2bLJDeeJQW2gHUs2/odcUh8P
-# 7r2gggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUUjQIyP2++mGkop5A5HhLGBbF
+# i2CgggI4MIICNDCCAaGgAwIBAgIQWsnStFUuSIVNR8uhNSlE6TAJBgUrDgMCHQUA
 # MCwxKjAoBgNVBAMTIVBvd2VyU2hlbGwgTG9jYWwgQ2VydGlmaWNhdGUgUm9vdDAe
 # Fw0xNDEyMjkxNzA3MzNaFw0zOTEyMzEyMzU5NTlaMBUxEzARBgNVBAMTClRvZGRT
 # ZWxmSUkwgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBALqRVt7uNweTkZZ+16QG
@@ -18780,9 +18919,9 @@ Export-ModuleMember -Function backup-ModuleBuild,check-PsLocalRepoRegistration,c
 # AWAwggFcAgEBMEAwLDEqMCgGA1UEAxMhUG93ZXJTaGVsbCBMb2NhbCBDZXJ0aWZp
 # Y2F0ZSBSb290AhBaydK0VS5IhU1Hy6E1KUTpMAkGBSsOAwIaBQCgeDAYBgorBgEE
 # AYI3AgEMMQowCKACgAChAoAAMBkGCSqGSIb3DQEJAzEMBgorBgEEAYI3AgEEMBwG
-# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBQvSzLl
-# BMhOosfSj+a8uG3UmJX6yjANBgkqhkiG9w0BAQEFAASBgJ1201JfR8r/mmEG/M/N
-# 4SM53/nxGj86iAzePeZYRL2dE8qgXYlN71PO6nRPzlxV/odjQauKu3DbgfUDBStU
-# u3tgbm2tjES5iw+Me7nVeSMN3VJT1/KPpFlwiy/H+/dWVjQWpKcnLBsCS6fX5tno
-# abTX0ZncO+06Tu2DNSVvaTbn
+# CisGAQQBgjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBSY0+ai
+# TrysZk59xbkN5ZHuPnbWnjANBgkqhkiG9w0BAQEFAASBgFf+Mgar0De/OT8Va5pJ
+# sQ5mn3sssW4h/VYVAyIner7KGPJ/QQNx6eW4uI1usnHaUlhaObRCLoaqguRExOhK
+# wjzg8FE/b/WJG0LCIBeTKVi73ADDm+V7qtlxWZRwpSV+c56rPWrO+lDn5fow5KOm
+# YFwgMXvRD+T3T8yhR7Wmqtbp
 # SIG # End signature block

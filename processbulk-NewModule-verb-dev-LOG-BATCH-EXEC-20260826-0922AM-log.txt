@@ -1,42 +1,42 @@
-﻿2026-08-04 16:26:57 INFO:  : #*======v update-NewModule.ps1:verb-dev v======
-2026-08-04 16:27:00 INFO:  : Run: reset-ModulePublishingDirectory -ModuleName verb-dev
-2026-08-04 16:27:00 ##  : 
+﻿2026-08-26 09:22:54 INFO:  : #*======v update-NewModule.ps1:verb-dev v======
+2026-08-26 09:22:56 INFO:  : Run: reset-ModulePublishingDirectory -ModuleName verb-dev
+2026-08-26 09:22:56 ##  : 
 #*------v PROCESSING : verb-dev v------
-2026-08-04 16:27:01 INFO:  : Pre-purge (CHANGELOG|README)\.md$ Root dir matches from :
-2026-08-04 16:27:02 INFO:  : verb-dev resolved $ModPubPath:C:\sc\verb-dev\verb-dev\
+2026-08-26 09:22:57 INFO:  : Pre-purge (CHANGELOG|README)\.md$ Root dir matches from :
+2026-08-26 09:22:57 INFO:  : verb-dev resolved $ModPubPath:C:\sc\verb-dev\verb-dev\
 $ModResPath:C:\sc\verb-dev\Resource\
-2026-08-04 16:27:03 INFO:  : verb-dev resolved $ModPubPath:C:\sc\verb-dev\verb-dev\
+2026-08-26 09:22:58 INFO:  : verb-dev resolved $ModPubPath:C:\sc\verb-dev\verb-dev\
 $ModResPath:C:\sc\verb-dev\Licenses\
-2026-08-04 16:27:04 INFO:  : verb-dev resolved $ModPubPath:C:\sc\verb-dev\verb-dev\
+2026-08-26 09:22:58 INFO:  : verb-dev resolved $ModPubPath:C:\sc\verb-dev\verb-dev\
 $ModResPath:C:\sc\verb-dev\Docs\
-2026-08-04 16:27:05 INFO:  : ==C:\sc\verb-dev\CHANGELOG.md:
-2026-08-04 16:27:05 INFO:  : ==C:\sc\verb-dev\README.md:
-2026-08-04 16:27:06 INFO:  : ==C:\sc\verb-dev\Resource\bootstrap.min.css:
-2026-08-04 16:27:07 INFO:  : ==C:\sc\verb-dev\Resource\bootstrap.min.js:
-2026-08-04 16:27:07 INFO:  : ==C:\sc\verb-dev\Resource\jasny-bootstrap.min.css:
-2026-08-04 16:27:08 INFO:  : ==C:\sc\verb-dev\Resource\jasny-bootstrap.min.js:
-2026-08-04 16:27:09 INFO:  : ==C:\sc\verb-dev\Resource\jquery-1.11.1.min.js:
-2026-08-04 16:27:09 INFO:  : ==C:\sc\verb-dev\Resource\navmenu.css:
-2026-08-04 16:27:10 INFO:  : ==C:\sc\verb-dev\Resource\screenshot.png:
-2026-08-04 16:27:11 INFO:  : ==C:\sc\verb-dev\Licenses\LICENSE.txt:
-2026-08-04 16:27:13 INFO:  : ==C:\sc\verb-dev\Licenses\LICENSE_BOOTSTRAP:
-2026-08-04 16:27:13 INFO:  : ==C:\sc\verb-dev\Licenses\LICENSE_INVOKE-CREATEMODULEHELPFILE:
-2026-08-04 16:27:14 INFO:  : ==C:\sc\verb-dev\Licenses\LICENSE_JASNY-BOOTSTRAP:
-2026-08-04 16:27:15 INFO:  : ==C:\sc\verb-dev\Licenses\LICENSE_JQUERY:
-2026-08-04 16:27:15 INFO:  : ==C:\sc\verb-dev\Docs\Quick-Start-Installation-and-Example.md:
-2026-08-04 16:27:16 ##  : 
+2026-08-26 09:22:59 INFO:  : ==C:\sc\verb-dev\CHANGELOG.md:
+2026-08-26 09:23:00 INFO:  : ==C:\sc\verb-dev\README.md:
+2026-08-26 09:23:00 INFO:  : ==C:\sc\verb-dev\Resource\bootstrap.min.css:
+2026-08-26 09:23:01 INFO:  : ==C:\sc\verb-dev\Resource\bootstrap.min.js:
+2026-08-26 09:23:01 INFO:  : ==C:\sc\verb-dev\Resource\jasny-bootstrap.min.css:
+2026-08-26 09:23:01 INFO:  : ==C:\sc\verb-dev\Resource\jasny-bootstrap.min.js:
+2026-08-26 09:23:02 INFO:  : ==C:\sc\verb-dev\Resource\jquery-1.11.1.min.js:
+2026-08-26 09:23:02 INFO:  : ==C:\sc\verb-dev\Resource\navmenu.css:
+2026-08-26 09:23:03 INFO:  : ==C:\sc\verb-dev\Resource\screenshot.png:
+2026-08-26 09:23:03 INFO:  : ==C:\sc\verb-dev\Licenses\LICENSE.txt:
+2026-08-26 09:23:04 INFO:  : ==C:\sc\verb-dev\Licenses\LICENSE_BOOTSTRAP:
+2026-08-26 09:23:04 INFO:  : ==C:\sc\verb-dev\Licenses\LICENSE_INVOKE-CREATEMODULEHELPFILE:
+2026-08-26 09:23:05 INFO:  : ==C:\sc\verb-dev\Licenses\LICENSE_JASNY-BOOTSTRAP:
+2026-08-26 09:23:05 INFO:  : ==C:\sc\verb-dev\Licenses\LICENSE_JQUERY:
+2026-08-26 09:23:06 INFO:  : ==C:\sc\verb-dev\Docs\Quick-Start-Installation-and-Example.md:
+2026-08-26 09:23:06 ##  : 
 #*------^ PROCESSING : verb-dev ^------
-2026-08-04 16:27:17 INFO:  : Run: populate-ModulePublishingDirectory -ModuleName verb-dev
-2026-08-04 16:27:18 ##  : 
+2026-08-26 09:23:06 INFO:  : Run: populate-ModulePublishingDirectory -ModuleName verb-dev
+2026-08-26 09:23:07 ##  : 
 #*------v PROCESSING : verb-dev v------
-2026-08-04 16:27:19 INFO:  : Locating (CHANGELOG|README)\.md$ Root dir matches from :
-2026-08-04 16:27:19 INFO:  : verb-dev resolved $ModPubPath:C:\sc\verb-dev\verb-dev\
+2026-08-26 09:23:07 INFO:  : Locating (CHANGELOG|README)\.md$ Root dir matches from :
+2026-08-26 09:23:08 INFO:  : verb-dev resolved $ModPubPath:C:\sc\verb-dev\verb-dev\
 $ModResPath:C:\sc\verb-dev\Resource\
-2026-08-04 16:27:20 INFO:  : verb-dev resolved $ModPubPath:C:\sc\verb-dev\verb-dev\
+2026-08-26 09:23:08 INFO:  : verb-dev resolved $ModPubPath:C:\sc\verb-dev\verb-dev\
 $ModResPath:C:\sc\verb-dev\Licenses\
-2026-08-04 16:27:20 INFO:  : verb-dev resolved $ModPubPath:C:\sc\verb-dev\verb-dev\
+2026-08-26 09:23:09 INFO:  : verb-dev resolved $ModPubPath:C:\sc\verb-dev\verb-dev\
 $ModResPath:C:\sc\verb-dev\Docs\
-2026-08-04 16:27:21 INFO:  : copy-item w
+2026-08-26 09:23:09 INFO:  : copy-item w
 Name                           Value                                                                                                                                                                                                                                          
 ----                           -----                                                                                                                                                                                                                                          
 path                           {C:\sc\verb-dev\CHANGELOG.md, C:\sc\verb-dev\README.md, C:\sc\verb-dev\Resource\bootstrap.min.css, C:\sc\verb-dev\Resource\bootstrap.min.js...}                                                                                                
@@ -61,12 +61,12 @@ C:\sc\verb-dev\Licenses\LICENSE_INVOKE-CREATEMODULEHELPFILE
 C:\sc\verb-dev\Licenses\LICENSE_JASNY-BOOTSTRAP
 C:\sc\verb-dev\Licenses\LICENSE_JQUERY
 C:\sc\verb-dev\Docs\Quick-Start-Installation-and-Example.md
-2026-08-04 16:27:22 ##  : 
+2026-08-26 09:23:10 ##  : 
 #*------^ PROCESSING : verb-dev ^------
-2026-08-04 16:27:22 INFO:  : Run: Remove any non-pub garbage cp'd into c:\sc\verb-dev\verb-dev -ModuleName verb-dev
-2026-08-04 16:27:23 INFO:  : Validate updated verb-dev\verb-dev dir contents against Manifest:
+2026-08-26 09:23:10 INFO:  : Run: Remove any non-pub garbage cp'd into c:\sc\verb-dev\verb-dev -ModuleName verb-dev
+2026-08-26 09:23:11 INFO:  : Validate updated verb-dev\verb-dev dir contents against Manifest:
 Run: test-modulemanifest -Path C:\sc\verb-dev\verb-dev\verb-dev.psd1
-2026-08-04 16:27:24 INFO:  : NON-Republish pass detected:
+2026-08-26 09:23:11 INFO:  : NON-Republish pass detected:
 MERGE parm specified as well:`n-Merge Public|Internal|Classes include subdirs module content into updated .psm1
 -Sign updated files.
 -Uninstall/Remove existing profile module
@@ -77,220 +77,221 @@ MERGE parm specified as well:`n-Merge Public|Internal|Classes include subdirs mo
 -Remove existing installed profile module
 -Test Install-Module
 -Test Import-Module
-2026-08-04 16:27:25 INFO:  : -Merge specified...
-2026-08-04 16:27:26 INFO:  : ConvertTo-ModuleMergedTDO w
+2026-08-26 09:23:12 INFO:  : -Merge specified...
+2026-08-26 09:23:12 INFO:  : ConvertTo-ModuleMergedTDO w
 Name                           Value                                                                                                                                                                                                                                          
 ----                           -----                                                                                                                                                                                                                                          
 ModuleName                     verb-dev                                                                                                                                                                                                                                       
 ModuleSourcePath               {c:\sc\verb-dev\Public, c:\sc\verb-dev\Internal}                                                                                                                                                                                               
 ModuleDestinationPath          c:\sc\verb-dev\verb-dev                                                                                                                                                                                                                        
-RequiredVersion                1.5.98                                                                                                                                                                                                                                         
+RequiredVersion                1.5.101                                                                                                                                                                                                                                        
 LogSpec                        {logging, logfile, transcript}                                                                                                                                                                                                                 
 NoAliasExport                                                                                                                                                                                                                                                                 
 ErrorAction                    Stop                                                                                                                                                                                                                                           
 showdebug                      False                                                                                                                                                                                                                                          
 whatif                         False
-2026-08-04 16:27:27 INFO:  : ConvertTo-ModuleMergedTDO w
+2026-08-26 09:23:13 INFO:  : ConvertTo-ModuleMergedTDO w
 Name                           Value                                                                                                                                                                                                                                          
 ----                           -----                                                                                                                                                                                                                                          
 ModuleName                     verb-dev                                                                                                                                                                                                                                       
 ModuleSourcePath               {c:\sc\verb-dev\Public, c:\sc\verb-dev\Internal}                                                                                                                                                                                               
 ModuleDestinationPath          c:\sc\verb-dev\verb-dev                                                                                                                                                                                                                        
-RequiredVersion                1.5.98                                                                                                                                                                                                                                         
+RequiredVersion                1.5.101                                                                                                                                                                                                                                        
 LogSpec                        {logging, logfile, transcript}                                                                                                                                                                                                                 
 NoAliasExport                                                                                                                                                                                                                                                                 
 ErrorAction                    Stop                                                                                                                                                                                                                                           
 showdebug                      False                                                                                                                                                                                                                                          
 whatif                         False
-2026-08-04 16:27:29 INFO:  : (NON-dyn psm1 detected - purging existing non-CBH content...)
-2026-08-04 16:27:32 INFO:  : Initialize-PSModuleDirectories w
+2026-08-26 09:23:14 INFO:  : (NON-dyn psm1 detected - purging existing non-CBH content...)
+2026-08-26 09:23:15 INFO:  : Initialize-PSModuleDirectories w
 Name                           Value                                                                                                                                                                                                                                          
 ----                           -----                                                                                                                                                                                                                                          
 ModuleSourcePath               {c:\sc\verb-dev\Public, c:\sc\verb-dev\Internal}                                                                                                                                                                                               
 ModuleDestinationPath          c:\sc\verb-dev\verb-dev                                                                                                                                                                                                                        
 ErrorAction                    Stop                                                                                                                                                                                                                                           
 whatif                         False
-2026-08-04 16:27:33 INFO:  : 
+2026-08-26 09:23:16 INFO:  : 
 #*------v (1/2):C:\sc\verb-dev\Public v------
-2026-08-04 16:27:33 INFO:  : Processing 91 $ComponentScripts files through Remove-AuthenticodeSignature...
-2026-08-04 16:27:34 INFO:  : Processing (1/91):C:\sc\verb-dev\Public\backup-ModuleBuild.ps1...
-2026-08-04 16:27:35 INFO:  : Processing (2/91):C:\sc\verb-dev\Public\check-PsLocalRepoRegistration.ps1...
-2026-08-04 16:27:36 INFO:  : Processing (3/91):C:\sc\verb-dev\Public\close-ISEOpenfiles.ps1...
-2026-08-04 16:27:37 INFO:  : Processing (4/91):C:\sc\verb-dev\Public\close-ISEOtherOpenFiles.ps1...
-2026-08-04 16:27:38 INFO:  : Processing (5/91):C:\sc\verb-dev\Public\Compare-FilesTDO.ps1...
-2026-08-04 16:27:39 INFO:  : Processing (6/91):C:\sc\verb-dev\Public\Compare-FileTDO.ps1...
-2026-08-04 16:27:40 INFO:  : Processing (7/91):C:\sc\verb-dev\Public\Compare-ObjectsTDO.ps1...
-2026-08-04 16:27:41 INFO:  : Processing (8/91):C:\sc\verb-dev\Public\confirm-ModuleBuildSync.ps1...
-2026-08-04 16:27:43 INFO:  : Processing (9/91):C:\sc\verb-dev\Public\confirm-ModulePsd1Version.ps1...
-2026-08-04 16:27:44 INFO:  : Processing (10/91):C:\sc\verb-dev\Public\confirm-ModulePsm1Version.ps1...
-2026-08-04 16:27:45 INFO:  : Processing (11/91):C:\sc\verb-dev\Public\confirm-ModuleTestPs1Guid.ps1...
-2026-08-04 16:27:46 INFO:  : Processing (12/91):C:\sc\verb-dev\Public\convert-CommandLine2VSCDebugJson.ps1...
-2026-08-04 16:27:48 INFO:  : Processing (13/91):C:\sc\verb-dev\Public\Convert-CommandToSplatTDO.ps1...
-2026-08-04 16:27:49 INFO:  : Processing (14/91):C:\sc\verb-dev\Public\convertFrom-EscapedPSText.ps1...
-2026-08-04 16:27:50 INFO:  : Processing (15/91):C:\sc\verb-dev\Public\Convert-HelpToHtmlFile.ps1...
-2026-08-04 16:27:51 INFO:  : Processing (16/91):C:\sc\verb-dev\Public\Convert-ISEOpenFileToText.ps1...
-2026-08-04 16:27:51 INFO:  : Processing (17/91):C:\sc\verb-dev\Public\convert-ISEOpenSession.ps1...
-2026-08-04 16:27:52 INFO:  : Processing (18/91):C:\sc\verb-dev\Public\converto-VSCConfig.ps1...
-2026-08-04 16:27:53 INFO:  : Processing (19/91):C:\sc\verb-dev\Public\ConvertTo-Breakpoint.ps1...
-2026-08-04 16:27:54 INFO:  : Processing (20/91):C:\sc\verb-dev\Public\convertTo-EscapedPSText.ps1...
-2026-08-04 16:27:55 INFO:  : Processing (21/91):C:\sc\verb-dev\Public\ConvertTo-ModuleDynamicTDO.ps1...
-2026-08-04 16:27:56 INFO:  : Processing (22/91):C:\sc\verb-dev\Public\ConvertTo-ModuleMergedTDO.ps1...
-2026-08-04 16:27:57 INFO:  : Processing (23/91):C:\sc\verb-dev\Public\convertTo-UnwrappedPS.ps1...
-2026-08-04 16:27:57 INFO:  : Processing (24/91):C:\sc\verb-dev\Public\convertTo-WrappedPS.ps1...
-2026-08-04 16:27:58 INFO:  : Processing (25/91):C:\sc\verb-dev\Public\copy-ISELocalSourceToTab.ps1...
-2026-08-04 16:28:01 INFO:  : Processing (26/91):C:\sc\verb-dev\Public\copy-ISETabFileToLocal.ps1...
-2026-08-04 16:28:02 INFO:  : Processing (27/91):C:\sc\verb-dev\Public\disable-ISEBreakPointsThisTab.ps1...
-2026-08-04 16:28:03 INFO:  : Processing (28/91):C:\sc\verb-dev\Public\enable-ISEBreakPointsThisTab.ps1...
-2026-08-04 16:28:03 INFO:  : Processing (29/91):C:\sc\verb-dev\Public\export-CommentBasedHelpToFileTDO.ps1...
-2026-08-04 16:28:04 INFO:  : Processing (30/91):C:\sc\verb-dev\Public\export-FunctionsToFilesTDO.ps1...
-2026-08-04 16:28:05 INFO:  : Processing (31/91):C:\sc\verb-dev\Public\export-ISEBreakPoints.ps1...
-2026-08-04 16:28:06 INFO:  : Processing (32/91):C:\sc\verb-dev\Public\export-ISEBreakPointsALL.ps1...
-2026-08-04 16:28:06 INFO:  : Processing (33/91):C:\sc\verb-dev\Public\export-ISEOpenFiles.ps1...
-2026-08-04 16:28:07 INFO:  : Processing (34/91):C:\sc\verb-dev\Public\export-OpenNotepads.ps1...
-2026-08-04 16:28:07 INFO:  : Processing (35/91):C:\sc\verb-dev\Public\find-NounAliasesTDO.ps1...
-2026-08-04 16:28:08 INFO:  : Processing (36/91):C:\sc\verb-dev\Public\get-AliasAssignsAST.ps1...
-2026-08-04 16:28:08 INFO:  : Processing (37/91):C:\sc\verb-dev\Public\get-CodeProfileAST.ps1...
-2026-08-04 16:28:09 INFO:  : Processing (38/91):C:\sc\verb-dev\Public\get-CodeRiskProfileAST.ps1...
-2026-08-04 16:28:09 INFO:  : Processing (39/91):C:\sc\verb-dev\Public\Get-CommentBlocks.ps1...
-2026-08-04 16:28:10 INFO:  : Processing (40/91):C:\sc\verb-dev\Public\get-FileVerbNounCmdletSummaries.ps1...
-2026-08-04 16:28:10 INFO:  : Processing (41/91):C:\sc\verb-dev\Public\get-FunctionBlock.ps1...
-2026-08-04 16:28:11 INFO:  : Processing (42/91):C:\sc\verb-dev\Public\get-FunctionBlocks.ps1...
-2026-08-04 16:28:11 INFO:  : Processing (43/91):C:\sc\verb-dev\Public\get-HelpParsed.ps1...
-2026-08-04 16:28:11 INFO:  : Processing (44/91):C:\sc\verb-dev\Public\get-ISEBreakPointsThisTab.ps1...
-2026-08-04 16:28:12 INFO:  : Processing (45/91):C:\sc\verb-dev\Public\get-ISEOpenFilesExported.ps1...
-2026-08-04 16:28:12 INFO:  : Processing (46/91):C:\sc\verb-dev\Public\get-ModuleRevisedCommands.ps1...
-2026-08-04 16:28:13 INFO:  : Processing (47/91):C:\sc\verb-dev\Public\get-NounAliasTDO.ps1...
-2026-08-04 16:28:13 INFO:  : Processing (48/91):C:\sc\verb-dev\Public\get-OpenNotepadsExported.ps1...
-2026-08-04 16:28:14 INFO:  : Processing (49/91):C:\sc\verb-dev\Public\get-ProjectNameTDO.ps1...
-2026-08-04 16:28:14 INFO:  : Processing (50/91):C:\sc\verb-dev\Public\Get-PSBreakpointSorted.ps1...
-2026-08-04 16:28:15 INFO:  : Processing (51/91):C:\sc\verb-dev\Public\Get-PSModuleFile.ps1...
-2026-08-04 16:28:15 INFO:  : Processing (52/91):C:\sc\verb-dev\Public\get-ScriptComments.ps1...
-2026-08-04 16:28:16 INFO:  : Processing (53/91):C:\sc\verb-dev\Public\Get-ScriptCommentsTDO.ps1...
-2026-08-04 16:28:17 INFO:  : Processing (54/91):C:\sc\verb-dev\Public\get-StrictMode.ps1...
-2026-08-04 16:28:17 INFO:  : Processing (55/91):C:\sc\verb-dev\Public\get-UnifiedDiffTDO.ps1...
-2026-08-04 16:28:18 INFO:  : Processing (56/91):C:\sc\verb-dev\Public\get-VariableAssignsAST.ps1...
-2026-08-04 16:28:18 INFO:  : Processing (57/91):C:\sc\verb-dev\Public\get-VerbAliasTDO.ps1...
-2026-08-04 16:28:19 INFO:  : Processing (58/91):C:\sc\verb-dev\Public\Get-VerbSynonymTDO.ps1...
-2026-08-04 16:28:20 INFO:  : Processing (59/91):C:\sc\verb-dev\Public\get-VersionInfo.ps1...
-2026-08-04 16:28:21 INFO:  : Processing (60/91):C:\sc\verb-dev\Public\import-ISEBreakPoints.ps1...
-2026-08-04 16:28:21 INFO:  : Processing (61/91):C:\sc\verb-dev\Public\import-ISEBreakPointsALL.ps1...
-2026-08-04 16:28:22 INFO:  : Processing (62/91):C:\sc\verb-dev\Public\import-ISEConsoleColors.ps1...
-2026-08-04 16:28:22 INFO:  : Processing (63/91):C:\sc\verb-dev\Public\import-ISEOpenFiles.ps1...
-2026-08-04 16:28:23 INFO:  : Processing (64/91):C:\sc\verb-dev\Public\import-OpenNotepads.ps1...
-2026-08-04 16:28:24 INFO:  : Processing (65/91):C:\sc\verb-dev\Public\Initialize-ModuleFingerprint.ps1...
-2026-08-04 16:28:25 INFO:  : Processing (66/91):C:\sc\verb-dev\Public\Initialize-PSModuleDirectories.ps1...
-2026-08-04 16:28:25 INFO:  : Processing (67/91):C:\sc\verb-dev\Public\move-ISEBreakPoints.ps1...
-2026-08-04 16:28:26 INFO:  : Processing (68/91):C:\sc\verb-dev\Public\new-CBH.ps1...
-2026-08-04 16:28:27 INFO:  : Processing (69/91):C:\sc\verb-dev\Public\New-GitHubGist.ps1...
-2026-08-04 16:28:27 INFO:  : Processing (70/91):C:\sc\verb-dev\Public\out-diff.ps1...
-2026-08-04 16:28:28 INFO:  : Processing (71/91):C:\sc\verb-dev\Public\Out-ISETab.ps1...
-2026-08-04 16:28:29 INFO:  : Processing (72/91):C:\sc\verb-dev\Public\pop-FunctionDev.ps1...
-2026-08-04 16:28:30 INFO:  : Processing (73/91):C:\sc\verb-dev\Public\push-FunctionDev.ps1...
-2026-08-04 16:28:30 INFO:  : Processing (74/91):C:\sc\verb-dev\Public\Reset-ISEFile.ps1...
-2026-08-04 16:28:31 INFO:  : Processing (75/91):C:\sc\verb-dev\Public\restore-ISEConsoleColors.ps1...
-2026-08-04 16:28:32 INFO:  : Processing (76/91):C:\sc\verb-dev\Public\restore-ModuleBuild.ps1...
-2026-08-04 16:28:32 INFO:  : Processing (77/91):C:\sc\verb-dev\Public\save-ISEConsoleColors.ps1...
-2026-08-04 16:28:33 INFO:  : Processing (78/91):C:\sc\verb-dev\Public\save-ISEOpenfiles.ps1...
-2026-08-04 16:28:33 INFO:  : Processing (79/91):C:\sc\verb-dev\Public\Set-ISEScriptLocation.ps1...
-2026-08-04 16:28:34 INFO:  : Processing (80/91):C:\sc\verb-dev\Public\Show-DiffTDO.ps1...
-2026-08-04 16:28:34 INFO:  : Processing (81/91):C:\sc\verb-dev\Public\show-ISEOpenTab.ps1...
-2026-08-04 16:28:35 INFO:  : Processing (82/91):C:\sc\verb-dev\Public\show-ISEOpenTabPaths.ps1...
-2026-08-04 16:28:36 INFO:  : Processing (83/91):C:\sc\verb-dev\Public\Show-ObjectTDO.ps1...
-2026-08-04 16:28:37 INFO:  : Processing (84/91):C:\sc\verb-dev\Public\show-Verbs.ps1...
-2026-08-04 16:28:37 INFO:  : Processing (85/91):C:\sc\verb-dev\Public\split-CommandLine.ps1...
-2026-08-04 16:28:38 INFO:  : Processing (86/91):C:\sc\verb-dev\Public\Step-ModuleVersionCalculated.ps1...
-2026-08-04 16:28:40 INFO:  : Processing (87/91):C:\sc\verb-dev\Public\Test-ModuleTMPFiles.ps1...
-2026-08-04 16:28:40 INFO:  : Processing (88/91):C:\sc\verb-dev\Public\test-VerbStandard.ps1...
-2026-08-04 16:28:41 INFO:  : Processing (89/91):C:\sc\verb-dev\Public\Uninstall-ModuleForce.ps1...
-2026-08-04 16:28:42 INFO:  : Processing (90/91):C:\sc\verb-dev\Public\update-NewModule.ps1...
-2026-08-04 16:28:44 INFO:  : Processing (91/91):C:\sc\verb-dev\Public\Write-DiffTDO.ps1...
-2026-08-04 16:28:45 INFO:  : 
+2026-08-26 09:23:16 INFO:  : Processing 92 $ComponentScripts files through Remove-AuthenticodeSignature...
+2026-08-26 09:23:17 INFO:  : Processing (1/92):C:\sc\verb-dev\Public\backup-ModuleBuild.ps1...
+2026-08-26 09:23:17 INFO:  : Processing (2/92):C:\sc\verb-dev\Public\check-PsLocalRepoRegistration.ps1...
+2026-08-26 09:23:18 INFO:  : Processing (3/92):C:\sc\verb-dev\Public\close-ISEOpenfiles.ps1...
+2026-08-26 09:23:18 INFO:  : Processing (4/92):C:\sc\verb-dev\Public\close-ISEOtherOpenFiles.ps1...
+2026-08-26 09:23:19 INFO:  : Processing (5/92):C:\sc\verb-dev\Public\Compare-FilesTDO.ps1...
+2026-08-26 09:23:20 INFO:  : Processing (6/92):C:\sc\verb-dev\Public\Compare-FileTDO.ps1...
+2026-08-26 09:23:20 INFO:  : Processing (7/92):C:\sc\verb-dev\Public\Compare-ObjectsTDO.ps1...
+2026-08-26 09:23:21 INFO:  : Processing (8/92):C:\sc\verb-dev\Public\confirm-ModuleBuildSync.ps1...
+2026-08-26 09:23:21 INFO:  : Processing (9/92):C:\sc\verb-dev\Public\confirm-ModulePsd1Version.ps1...
+2026-08-26 09:23:22 INFO:  : Processing (10/92):C:\sc\verb-dev\Public\confirm-ModulePsm1Version.ps1...
+2026-08-26 09:23:22 INFO:  : Processing (11/92):C:\sc\verb-dev\Public\confirm-ModuleTestPs1Guid.ps1...
+2026-08-26 09:23:23 INFO:  : Processing (12/92):C:\sc\verb-dev\Public\convert-CommandLine2VSCDebugJson.ps1...
+2026-08-26 09:23:23 INFO:  : Processing (13/92):C:\sc\verb-dev\Public\Convert-CommandToSplatTDO.ps1...
+2026-08-26 09:23:24 INFO:  : Processing (14/92):C:\sc\verb-dev\Public\convertFrom-EscapedPSText.ps1...
+2026-08-26 09:23:24 INFO:  : Processing (15/92):C:\sc\verb-dev\Public\Convert-HelpToHtmlFile.ps1...
+2026-08-26 09:23:25 INFO:  : Processing (16/92):C:\sc\verb-dev\Public\Convert-ISEOpenFileToText.ps1...
+2026-08-26 09:23:26 INFO:  : Processing (17/92):C:\sc\verb-dev\Public\convert-ISEOpenSession.ps1...
+2026-08-26 09:23:26 INFO:  : Processing (18/92):C:\sc\verb-dev\Public\converto-VSCConfig.ps1...
+2026-08-26 09:23:27 INFO:  : Processing (19/92):C:\sc\verb-dev\Public\ConvertTo-Breakpoint.ps1...
+2026-08-26 09:23:27 INFO:  : Processing (20/92):C:\sc\verb-dev\Public\convertTo-EscapedPSText.ps1...
+2026-08-26 09:23:28 INFO:  : Processing (21/92):C:\sc\verb-dev\Public\ConvertTo-ModuleDynamicTDO.ps1...
+2026-08-26 09:23:28 INFO:  : Processing (22/92):C:\sc\verb-dev\Public\ConvertTo-ModuleMergedTDO.ps1...
+2026-08-26 09:23:29 INFO:  : Processing (23/92):C:\sc\verb-dev\Public\convertTo-UnwrappedPS.ps1...
+2026-08-26 09:23:29 INFO:  : Processing (24/92):C:\sc\verb-dev\Public\convertTo-WrappedPS.ps1...
+2026-08-26 09:23:30 INFO:  : Processing (25/92):C:\sc\verb-dev\Public\copy-ISELocalSourceToTab.ps1...
+2026-08-26 09:23:31 INFO:  : Processing (26/92):C:\sc\verb-dev\Public\copy-ISETabFileToLocal.ps1...
+2026-08-26 09:23:31 INFO:  : Processing (27/92):C:\sc\verb-dev\Public\disable-ISEBreakPointsThisTab.ps1...
+2026-08-26 09:23:32 INFO:  : Processing (28/92):C:\sc\verb-dev\Public\enable-ISEBreakPointsThisTab.ps1...
+2026-08-26 09:23:32 INFO:  : Processing (29/92):C:\sc\verb-dev\Public\export-CommentBasedHelpToFileTDO.ps1...
+2026-08-26 09:23:33 INFO:  : Processing (30/92):C:\sc\verb-dev\Public\export-FunctionsToFilesTDO.ps1...
+2026-08-26 09:23:33 INFO:  : Processing (31/92):C:\sc\verb-dev\Public\export-ISEBreakPoints.ps1...
+2026-08-26 09:23:34 INFO:  : Processing (32/92):C:\sc\verb-dev\Public\export-ISEBreakPointsALL.ps1...
+2026-08-26 09:23:34 INFO:  : Processing (33/92):C:\sc\verb-dev\Public\export-ISEOpenFiles.ps1...
+2026-08-26 09:23:35 INFO:  : Processing (34/92):C:\sc\verb-dev\Public\export-OpenNotepads.ps1...
+2026-08-26 09:23:36 INFO:  : Processing (35/92):C:\sc\verb-dev\Public\find-NounAliasesTDO.ps1...
+2026-08-26 09:23:36 INFO:  : Processing (36/92):C:\sc\verb-dev\Public\get-AliasAssignsAST.ps1...
+2026-08-26 09:23:37 INFO:  : Processing (37/92):C:\sc\verb-dev\Public\get-CodeProfileAST.ps1...
+2026-08-26 09:23:37 INFO:  : Processing (38/92):C:\sc\verb-dev\Public\get-CodeRiskProfileAST.ps1...
+2026-08-26 09:23:38 INFO:  : Processing (39/92):C:\sc\verb-dev\Public\Get-CommentBlocks.ps1...
+2026-08-26 09:23:38 INFO:  : Processing (40/92):C:\sc\verb-dev\Public\get-FileVerbNounCmdletSummaries.ps1...
+2026-08-26 09:23:39 INFO:  : Processing (41/92):C:\sc\verb-dev\Public\get-FunctionBlock.ps1...
+2026-08-26 09:23:39 INFO:  : Processing (42/92):C:\sc\verb-dev\Public\get-FunctionBlocks.ps1...
+2026-08-26 09:23:40 INFO:  : Processing (43/92):C:\sc\verb-dev\Public\get-HelpParsed.ps1...
+2026-08-26 09:23:41 INFO:  : Processing (44/92):C:\sc\verb-dev\Public\get-ISEBreakPointsThisTab.ps1...
+2026-08-26 09:23:41 INFO:  : Processing (45/92):C:\sc\verb-dev\Public\get-ISEOpenFilesExported.ps1...
+2026-08-26 09:23:42 INFO:  : Processing (46/92):C:\sc\verb-dev\Public\get-ModuleRevisedCommands.ps1...
+2026-08-26 09:23:42 INFO:  : Processing (47/92):C:\sc\verb-dev\Public\get-NounAliasTDO.ps1...
+2026-08-26 09:23:43 INFO:  : Processing (48/92):C:\sc\verb-dev\Public\get-OpenNotepadsExported.ps1...
+2026-08-26 09:23:43 INFO:  : Processing (49/92):C:\sc\verb-dev\Public\get-ProjectNameTDO.ps1...
+2026-08-26 09:23:44 INFO:  : Processing (50/92):C:\sc\verb-dev\Public\Get-PSBreakpointSorted.ps1...
+2026-08-26 09:23:44 INFO:  : Processing (51/92):C:\sc\verb-dev\Public\Get-PSModuleFile.ps1...
+2026-08-26 09:23:45 INFO:  : Processing (52/92):C:\sc\verb-dev\Public\get-ScriptComments.ps1...
+2026-08-26 09:23:45 INFO:  : Processing (53/92):C:\sc\verb-dev\Public\Get-ScriptCommentsTDO.ps1...
+2026-08-26 09:23:46 INFO:  : Processing (54/92):C:\sc\verb-dev\Public\get-StrictMode.ps1...
+2026-08-26 09:23:46 INFO:  : Processing (55/92):C:\sc\verb-dev\Public\get-UnifiedDiffTDO.ps1...
+2026-08-26 09:23:47 INFO:  : Processing (56/92):C:\sc\verb-dev\Public\get-VariableAssignsAST.ps1...
+2026-08-26 09:23:47 INFO:  : Processing (57/92):C:\sc\verb-dev\Public\get-VerbAliasTDO.ps1...
+2026-08-26 09:23:48 INFO:  : Processing (58/92):C:\sc\verb-dev\Public\Get-VerbSynonymTDO.ps1...
+2026-08-26 09:23:48 INFO:  : Processing (59/92):C:\sc\verb-dev\Public\get-VersionInfo.ps1...
+2026-08-26 09:23:49 INFO:  : Processing (60/92):C:\sc\verb-dev\Public\import-ISEBreakPoints.ps1...
+2026-08-26 09:23:49 INFO:  : Processing (61/92):C:\sc\verb-dev\Public\import-ISEBreakPointsALL.ps1...
+2026-08-26 09:23:50 INFO:  : Processing (62/92):C:\sc\verb-dev\Public\import-ISEConsoleColors.ps1...
+2026-08-26 09:23:50 INFO:  : Processing (63/92):C:\sc\verb-dev\Public\import-ISEOpenFiles.ps1...
+2026-08-26 09:23:51 INFO:  : Processing (64/92):C:\sc\verb-dev\Public\import-OpenNotepads.ps1...
+2026-08-26 09:23:52 INFO:  : Processing (65/92):C:\sc\verb-dev\Public\Initialize-ModuleFingerprint.ps1...
+2026-08-26 09:23:52 INFO:  : Processing (66/92):C:\sc\verb-dev\Public\Initialize-PSModuleDirectories.ps1...
+2026-08-26 09:23:53 INFO:  : Processing (67/92):C:\sc\verb-dev\Public\move-ISEBreakPoints.ps1...
+2026-08-26 09:23:53 INFO:  : Processing (68/92):C:\sc\verb-dev\Public\new-CBH.ps1...
+2026-08-26 09:23:54 INFO:  : Processing (69/92):C:\sc\verb-dev\Public\New-GitHubGist.ps1...
+2026-08-26 09:23:54 INFO:  : Processing (70/92):C:\sc\verb-dev\Public\out-diff.ps1...
+2026-08-26 09:23:55 INFO:  : Processing (71/92):C:\sc\verb-dev\Public\Out-ISETab.ps1...
+2026-08-26 09:23:55 INFO:  : Processing (72/92):C:\sc\verb-dev\Public\pop-FunctionDev.ps1...
+2026-08-26 09:23:56 INFO:  : Processing (73/92):C:\sc\verb-dev\Public\push-FunctionDev.ps1...
+2026-08-26 09:23:56 INFO:  : Processing (74/92):C:\sc\verb-dev\Public\Reset-ISEFile.ps1...
+2026-08-26 09:23:57 INFO:  : Processing (75/92):C:\sc\verb-dev\Public\restore-ISEConsoleColors.ps1...
+2026-08-26 09:23:57 INFO:  : Processing (76/92):C:\sc\verb-dev\Public\restore-ModuleBuild.ps1...
+2026-08-26 09:23:58 INFO:  : Processing (77/92):C:\sc\verb-dev\Public\save-ISEConsoleColors.ps1...
+2026-08-26 09:23:58 INFO:  : Processing (78/92):C:\sc\verb-dev\Public\save-ISEOpenfiles.ps1...
+2026-08-26 09:23:59 INFO:  : Processing (79/92):C:\sc\verb-dev\Public\Set-ISEScriptLocation.ps1...
+2026-08-26 09:23:59 INFO:  : Processing (80/92):C:\sc\verb-dev\Public\Show-DiffTDO.ps1...
+2026-08-26 09:24:00 INFO:  : Processing (81/92):C:\sc\verb-dev\Public\show-ISEOpenTab.ps1...
+2026-08-26 09:24:00 INFO:  : Processing (82/92):C:\sc\verb-dev\Public\show-ISEOpenTabPaths.ps1...
+2026-08-26 09:24:01 INFO:  : Processing (83/92):C:\sc\verb-dev\Public\Show-ObjectTDO.ps1...
+2026-08-26 09:24:01 INFO:  : Processing (84/92):C:\sc\verb-dev\Public\show-Verbs.ps1...
+2026-08-26 09:24:02 INFO:  : Processing (85/92):C:\sc\verb-dev\Public\split-CommandLine.ps1...
+2026-08-26 09:24:02 INFO:  : Processing (86/92):C:\sc\verb-dev\Public\Step-ModuleVersionCalculated.ps1...
+2026-08-26 09:24:03 INFO:  : Processing (87/92):C:\sc\verb-dev\Public\Test-ModuleTMPFiles.ps1...
+2026-08-26 09:24:03 INFO:  : Processing (88/92):C:\sc\verb-dev\Public\test-VerbStandard.ps1...
+2026-08-26 09:24:04 INFO:  : Processing (89/92):C:\sc\verb-dev\Public\Uninstall-ModuleForce.ps1...
+2026-08-26 09:24:04 INFO:  : Processing (90/92):C:\sc\verb-dev\Public\Update-DebugDateTDO.ps1...
+2026-08-26 09:24:05 INFO:  : Processing (91/92):C:\sc\verb-dev\Public\update-NewModule.ps1...
+2026-08-26 09:24:05 INFO:  : Processing (92/92):C:\sc\verb-dev\Public\Write-DiffTDO.ps1...
+2026-08-26 09:24:06 INFO:  : 
 #*------v (2/2):C:\sc\verb-dev\Internal v------
-2026-08-04 16:28:47 INFO:  : Processing 0 $ComponentScripts files through Remove-AuthenticodeSignature...
-2026-08-04 16:28:48 INFO:  : (Updating Psm1 Export-ModuleMember -Function to reflect Public modules)
-2026-08-04 16:28:49 INFO:  : Adding:FooterBlock...
-2026-08-04 16:28:50 INFO:  : confirm-ModuleBuildSync w
+2026-08-26 09:24:06 INFO:  : Processing 0 $ComponentScripts files through Remove-AuthenticodeSignature...
+2026-08-26 09:24:07 INFO:  : (Updating Psm1 Export-ModuleMember -Function to reflect Public modules)
+2026-08-26 09:24:07 INFO:  : Adding:FooterBlock...
+2026-08-26 09:24:08 INFO:  : confirm-ModuleBuildSync w
 Name                           Value                                                                                                                                                                                                                                          
 ----                           -----                                                                                                                                                                                                                                          
 ModPsdPath                     c:\sc\verb-dev\verb-dev\verb-dev.psd1_TMP                                                                                                                                                                                                      
-RequiredVersion                1.5.98                                                                                                                                                                                                                                         
+RequiredVersion                1.5.101                                                                                                                                                                                                                                        
 NoTest                         True                                                                                                                                                                                                                                           
 whatif                         False                                                                                                                                                                                                                                          
 verbose                        False
-2026-08-04 16:28:51 INFO:  : (test-path confirms $ModPsm1 & $ModTestPs1)
-2026-08-04 16:28:52 INFO:  : Import-PowerShellDataFile w
+2026-08-26 09:24:08 INFO:  : (test-path confirms $ModPsm1 & $ModTestPs1)
+2026-08-26 09:24:09 INFO:  : Import-PowerShellDataFile w
 Name                           Value                                                                                                                                                                                                                                          
 ----                           -----                                                                                                                                                                                                                                          
 Path                           c:\sc\verb-dev\verb-dev\verb-dev.psd1_TMP                                                                                                                                                                                                      
 ErrorAction                    Stop                                                                                                                                                                                                                                           
 verbose                        False
-2026-08-04 16:28:53 INFO:  : (resolved Module attributes:
+2026-08-26 09:24:09 INFO:  : (resolved Module attributes:
 $ModuleName:	verb-dev
 $ModRoot:	c:\sc\verb-dev
 $ModPsd1:	c:\sc\verb-dev\verb-dev\verb-dev.psd1_TMP
 $ModPsm1:	c:\sc\verb-dev\verb-dev\verb-dev.psm1_TMP
 $ModTestPs1:	c:\sc\verb-dev\Tests\verb-dev.tests.ps1
-$psd1Vers:	1.5.98
+$psd1Vers:	1.5.101
 $psd1guid:	af7c9182-3b10-416d-bace-aab0aab77828)
-2026-08-04 16:28:54 INFO:  : confirm-ModulePsd1Version w
+2026-08-26 09:24:10 INFO:  : confirm-ModulePsd1Version w
 Name                           Value                                                                                                                                                                                                                                          
 ----                           -----                                                                                                                                                                                                                                          
 Path                           c:\sc\verb-dev\verb-dev\verb-dev.psd1_TMP                                                                                                                                                                                                      
-RequiredVersion                1.5.98                                                                                                                                                                                                                                         
+RequiredVersion                1.5.101                                                                                                                                                                                                                                        
 whatif                         False                                                                                                                                                                                                                                          
 verbose                        False
-2026-08-04 16:28:54 INFO:  : (Version already updated to match)
-2026-08-04 16:28:55 INFO:  : $objReport
+2026-08-26 09:24:10 INFO:  : (Version already updated to match)
+2026-08-26 09:24:11 INFO:  : $objReport
 Name                           Value                                                                                                                                                                                                                                          
 ----                           -----                                                                                                                                                                                                                                          
-Version                        1.5.98                                                                                                                                                                                                                                         
+Version                        1.5.101                                                                                                                                                                                                                                        
 Valid                          False
-2026-08-04 16:28:56 INFO:  : (SET:$objReport.Valid = $true ;)
-2026-08-04 16:28:56 INFO:  : (PIPELINE:New-Object PSObject -Property $objReport | write-output)
+2026-08-26 09:24:11 INFO:  : (SET:$objReport.Valid = $true ;)
+2026-08-26 09:24:12 INFO:  : (PIPELINE:New-Object PSObject -Property $objReport | write-output)
 $objReport
 Name                           Value                                                                                                                                                                                                                                          
 ----                           -----                                                                                                                                                                                                                                          
-Version                        1.5.98                                                                                                                                                                                                                                         
+Version                        1.5.101                                                                                                                                                                                                                                        
 Valid                          True
-2026-08-04 16:28:57 INFO:  : #*======^ confirm-ModulePsd1Version: c:\sc\verb-dev\verb-dev\verb-dev.psd1_TMP ^======
-2026-08-04 16:28:58 INFO:  : (confirm-ModulePsd1Version:Success)
-2026-08-04 16:28:59 INFO:  : confirm-ModulePsm1Version w
+2026-08-26 09:24:12 INFO:  : #*======^ confirm-ModulePsd1Version: c:\sc\verb-dev\verb-dev\verb-dev.psd1_TMP ^======
+2026-08-26 09:24:13 INFO:  : (confirm-ModulePsd1Version:Success)
+2026-08-26 09:24:13 INFO:  : confirm-ModulePsm1Version w
 Name                           Value                                                                                                                                                                                                                                          
 ----                           -----                                                                                                                                                                                                                                          
 Path                           c:\sc\verb-dev\verb-dev\verb-dev.psm1_TMP                                                                                                                                                                                                      
-RequiredVersion                1.5.98                                                                                                                                                                                                                                         
+RequiredVersion                1.5.101                                                                                                                                                                                                                                        
 whatif                         False                                                                                                                                                                                                                                          
 verbose                        False
-2026-08-04 16:29:00 WARNING:  : In:c:\sc\verb-dev\verb-dev\verb-dev.psm1_TMP
-Version present:(1.5.97)
-*does not* properly match:1.5.98
+2026-08-26 09:24:14 WARNING:  : In:c:\sc\verb-dev\verb-dev\verb-dev.psm1_TMP
+Version present:(1.5.100)
+*does not* properly match:1.5.101
 FORCING MATCHING UPDATE!
-2026-08-04 16:29:04 INFO:  : $objReport
+2026-08-26 09:24:15 INFO:  : $objReport
 Name                           Value                                                                                                                                                                                                                                          
 ----                           -----                                                                                                                                                                                                                                          
-Version                        1.5.98                                                                                                                                                                                                                                         
+Version                        1.5.101                                                                                                                                                                                                                                        
 Valid                          False
-2026-08-04 16:29:05 INFO:  : (SET:$objReport.Valid = $true ;)
-2026-08-04 16:29:06 INFO:  : (PIPELINE:New-Object PSObject -Property $objReport | write-output)
+2026-08-26 09:24:16 INFO:  : (SET:$objReport.Valid = $true ;)
+2026-08-26 09:24:16 INFO:  : (PIPELINE:New-Object PSObject -Property $objReport | write-output)
 $objReport
 Name                           Value                                                                                                                                                                                                                                          
 ----                           -----                                                                                                                                                                                                                                          
-Version                        1.5.98                                                                                                                                                                                                                                         
+Version                        1.5.101                                                                                                                                                                                                                                        
 Valid                          True
-2026-08-04 16:29:07 INFO:  : #*======^ confirm-ModulePsm1Version: c:\sc\verb-dev\verb-dev\verb-dev.psm1_TMP ^======
-2026-08-04 16:29:07 INFO:  : (confirm-ModulePsm1Version:Success)
-2026-08-04 16:29:08 INFO:  : (-NoTest: skipping confirm-ModuleTestPs1Guid)
-2026-08-04 16:29:08 INFO:  : $objReport
+2026-08-26 09:24:17 INFO:  : #*======^ confirm-ModulePsm1Version: c:\sc\verb-dev\verb-dev\verb-dev.psm1_TMP ^======
+2026-08-26 09:24:17 INFO:  : (confirm-ModulePsm1Version:Success)
+2026-08-26 09:24:17 INFO:  : (-NoTest: skipping confirm-ModuleTestPs1Guid)
+2026-08-26 09:24:18 INFO:  : $objReport
 Name                           Value                                                                                                                                                                                                                                          
 ----                           -----                                                                                                                                                                                                                                          
 Manifest                       c:\sc\verb-dev\verb-dev\verb-dev.psd1_TMP                                                                                                                                                                                                      
 Module                         c:\sc\verb-dev\verb-dev\verb-dev.psm1_TMP                                                                                                                                                                                                      
 Pester                         (SKIPPED)                                                                                                                                                                                                                                      
 Guid                           (SKIPPED)                                                                                                                                                                                                                                      
-Version                        1.5.98                                                                                                                                                                                                                                         
+Version                        1.5.101                                                                                                                                                                                                                                        
 Valid                          False
-2026-08-04 16:29:09 INFO:  : (SET:$objReport.Valid = $true ;)
-2026-08-04 16:29:10 INFO:  : (PIPELINE:New-Object PSObject -Property $objReport | write-output)
+2026-08-26 09:24:18 INFO:  : (SET:$objReport.Valid = $true ;)
+2026-08-26 09:24:19 INFO:  : (PIPELINE:New-Object PSObject -Property $objReport | write-output)
 $objReport
 Name                           Value                                                                                                                                                                                                                                          
 ----                           -----                                                                                                                                                                                                                                          
@@ -298,143 +299,143 @@ Manifest                       c:\sc\verb-dev\verb-dev\verb-dev.psd1_TMP
 Module                         c:\sc\verb-dev\verb-dev\verb-dev.psm1_TMP                                                                                                                                                                                                      
 Pester                         (SKIPPED)                                                                                                                                                                                                                                      
 Guid                           (SKIPPED)                                                                                                                                                                                                                                      
-Version                        1.5.98                                                                                                                                                                                                                                         
+Version                        1.5.101                                                                                                                                                                                                                                        
 Valid                          True
-2026-08-04 16:29:11 INFO:  : #*======^ confirm-ModuleBuildSync:  ^======
-2026-08-04 16:29:12 INFO:  : (confirm-ModuleBuildSync:Success)
-2026-08-04 16:29:13 INFO:  : Test-ModuleTMPFiles w
+2026-08-26 09:24:19 INFO:  : #*======^ confirm-ModuleBuildSync:  ^======
+2026-08-26 09:24:20 INFO:  : (confirm-ModuleBuildSync:Success)
+2026-08-26 09:24:20 INFO:  : Test-ModuleTMPFiles w
 Name                           Value                                                                                                                                                                                                                                          
 ----                           -----                                                                                                                                                                                                                                          
 ModuleNamePSM1Path             c:\sc\verb-dev\verb-dev\verb-dev.psm1_TMP                                                                                                                                                                                                      
 verbose                        False
-2026-08-04 16:29:13 INFO:  : #*======v Test-ModuleTMPFiles: c:\sc\verb-dev\verb-dev\verb-dev.psm1_TMP v======
-2026-08-04 16:29:14 INFO:  : 
+2026-08-26 09:24:21 INFO:  : #*======v Test-ModuleTMPFiles: c:\sc\verb-dev\verb-dev\verb-dev.psm1_TMP v======
+2026-08-26 09:24:21 INFO:  : 
 Psm1:c:\sc\verb-dev\verb-dev\verb-dev.psm1_TMP
 Psd1:c:\sc\verb-dev\verb-dev\verb-dev.psd1_TMP
-2026-08-04 16:29:15 INFO:  : Test-ModuleManifest:PASSED
-2026-08-04 16:29:16 INFO:  : Creating Testable c:\sc\verb-dev\verb-dev\a10859c7-de5f-4896-b771-cd8c9f2ea1a1.psm1
+2026-08-26 09:24:22 INFO:  : Test-ModuleManifest:PASSED
+2026-08-26 09:24:22 INFO:  : Creating Testable c:\sc\verb-dev\verb-dev\e2404f27-e84d-4810-9d55-ea425e641ab7.psm1
  to validate c:\sc\verb-dev\verb-dev\verb-dev.psm1_TMP will Import-Module
-2026-08-04 16:29:18 INFO:  : Ipmo: PASSED
-2026-08-04 16:29:18 INFO:  : (remove-module -name c:\sc\verb-dev\verb-dev\a10859c7-de5f-4896-b771-cd8c9f2ea1a1.psm1 -force)
-2026-08-04 16:29:19 INFO:  : (remove-item -path c:\sc\verb-dev\verb-dev\a10859c7-de5f-4896-b771-cd8c9f2ea1a1.psm1 -ErrorAction SilentlyContinue ; 
-2026-08-04 16:29:21 INFO:  : (remove-item -path c:\sc\verb-dev\verb-dev\a10859c7-de5f-4896-b771-cd8c9f2ea1a1.psd1 -ErrorAction SilentlyContinue ; 
-2026-08-04 16:29:22 INFO:  : $objReport
+2026-08-26 09:24:24 INFO:  : Ipmo: PASSED
+2026-08-26 09:24:25 INFO:  : (remove-module -name c:\sc\verb-dev\verb-dev\e2404f27-e84d-4810-9d55-ea425e641ab7.psm1 -force)
+2026-08-26 09:24:25 INFO:  : (remove-item -path c:\sc\verb-dev\verb-dev\e2404f27-e84d-4810-9d55-ea425e641ab7.psm1 -ErrorAction SilentlyContinue ; 
+2026-08-26 09:24:25 INFO:  : (remove-item -path c:\sc\verb-dev\verb-dev\e2404f27-e84d-4810-9d55-ea425e641ab7.psd1 -ErrorAction SilentlyContinue ; 
+2026-08-26 09:24:26 INFO:  : $objReport
 Name                           Value                                                                                                                                                                                                                                          
 ----                           -----                                                                                                                                                                                                                                          
-Manifest                       a10859c7-de5f-4896-b771-cd8c9f2ea1a1                                                                                                                                                                                                           
-Module                         a10859c7-de5f-4896-b771-cd8c9f2ea1a1                                                                                                                                                                                                           
+Manifest                       e2404f27-e84d-4810-9d55-ea425e641ab7                                                                                                                                                                                                           
+Module                         e2404f27-e84d-4810-9d55-ea425e641ab7                                                                                                                                                                                                           
 Valid                          False
-2026-08-04 16:29:23 INFO:  : (SET:$objReport.Valid = $true ;)
-2026-08-04 16:29:24 INFO:  : (PIPELINE:New-Object PSObject -Property $objReport | write-output)
+2026-08-26 09:24:26 INFO:  : (SET:$objReport.Valid = $true ;)
+2026-08-26 09:24:27 INFO:  : (PIPELINE:New-Object PSObject -Property $objReport | write-output)
 $objReport
 Name                           Value                                                                                                                                                                                                                                          
 ----                           -----                                                                                                                                                                                                                                          
-Manifest                       a10859c7-de5f-4896-b771-cd8c9f2ea1a1                                                                                                                                                                                                           
-Module                         a10859c7-de5f-4896-b771-cd8c9f2ea1a1                                                                                                                                                                                                           
+Manifest                       e2404f27-e84d-4810-9d55-ea425e641ab7                                                                                                                                                                                                           
+Module                         e2404f27-e84d-4810-9d55-ea425e641ab7                                                                                                                                                                                                           
 Valid                          True
-2026-08-04 16:29:25 INFO:  : #*======^ Test-ModuleTMPFiles: c:\sc\verb-dev\verb-dev\verb-dev.psm1_TMP ^======
-2026-08-04 16:29:26 INFO:  : #*======^ ConvertTo-ModuleMergedTDO: ^======
-2026-08-04 16:29:27 INFO:  : (Test-ModuleManifest:PASSED)
-2026-08-04 16:29:28 INFO:  : Checking sync of Psd1 module guid to the Pester Test Script: c:\sc\verb-dev\Tests\verb-dev.tests.ps1
-2026-08-04 16:29:28 INFO:  : confirm-ModuleBuildSync w
+2026-08-26 09:24:27 INFO:  : #*======^ Test-ModuleTMPFiles: c:\sc\verb-dev\verb-dev\verb-dev.psm1_TMP ^======
+2026-08-26 09:24:28 INFO:  : #*======^ ConvertTo-ModuleMergedTDO: ^======
+2026-08-26 09:24:28 INFO:  : (Test-ModuleManifest:PASSED)
+2026-08-26 09:24:29 INFO:  : Checking sync of Psd1 module guid to the Pester Test Script: c:\sc\verb-dev\Tests\verb-dev.tests.ps1
+2026-08-26 09:24:29 INFO:  : confirm-ModuleBuildSync w
 Name                           Value                                                                                                                                                                                                                                          
 ----                           -----                                                                                                                                                                                                                                          
 ModPsdPath                     C:\sc\verb-dev\verb-dev\verb-dev.psd1                                                                                                                                                                                                          
-RequiredVersion                1.5.98                                                                                                                                                                                                                                         
+RequiredVersion                1.5.101                                                                                                                                                                                                                                        
 whatif                         False                                                                                                                                                                                                                                          
 verbose                        False
-2026-08-04 16:29:29 INFO:  : (test-path confirms $ModPsm1 & $ModTestPs1)
-2026-08-04 16:29:30 INFO:  : Import-PowerShellDataFile w
+2026-08-26 09:24:30 INFO:  : (test-path confirms $ModPsm1 & $ModTestPs1)
+2026-08-26 09:24:30 INFO:  : Import-PowerShellDataFile w
 Name                           Value                                                                                                                                                                                                                                          
 ----                           -----                                                                                                                                                                                                                                          
 Path                           C:\sc\verb-dev\verb-dev\verb-dev.psd1                                                                                                                                                                                                          
 ErrorAction                    Stop                                                                                                                                                                                                                                           
 verbose                        False
-2026-08-04 16:29:31 INFO:  : (resolved Module attributes:
+2026-08-26 09:24:31 INFO:  : (resolved Module attributes:
 $ModuleName:	verb-dev
 $ModRoot:	c:\sc\verb-dev
 $ModPsd1:	C:\sc\verb-dev\verb-dev\verb-dev.psd1
 $ModPsm1:	C:\sc\verb-dev\verb-dev\verb-dev.psm1
 $ModTestPs1:	c:\sc\verb-dev\Tests\verb-dev.tests.ps1
-$psd1Vers:	1.5.98
+$psd1Vers:	1.5.101
 $psd1guid:	af7c9182-3b10-416d-bace-aab0aab77828)
-2026-08-04 16:29:32 INFO:  : confirm-ModulePsd1Version w
+2026-08-26 09:24:31 INFO:  : confirm-ModulePsd1Version w
 Name                           Value                                                                                                                                                                                                                                          
 ----                           -----                                                                                                                                                                                                                                          
 Path                           C:\sc\verb-dev\verb-dev\verb-dev.psd1                                                                                                                                                                                                          
-RequiredVersion                1.5.98                                                                                                                                                                                                                                         
+RequiredVersion                1.5.101                                                                                                                                                                                                                                        
 whatif                         False                                                                                                                                                                                                                                          
 verbose                        False
-2026-08-04 16:29:33 INFO:  : (Version already updated to match)
-2026-08-04 16:29:34 INFO:  : $objReport
+2026-08-26 09:24:32 INFO:  : (Version already updated to match)
+2026-08-26 09:24:32 INFO:  : $objReport
 Name                           Value                                                                                                                                                                                                                                          
 ----                           -----                                                                                                                                                                                                                                          
-Version                        1.5.98                                                                                                                                                                                                                                         
+Version                        1.5.101                                                                                                                                                                                                                                        
 Valid                          False
-2026-08-04 16:29:35 INFO:  : (SET:$objReport.Valid = $true ;)
-2026-08-04 16:29:35 INFO:  : (PIPELINE:New-Object PSObject -Property $objReport | write-output)
+2026-08-26 09:24:33 INFO:  : (SET:$objReport.Valid = $true ;)
+2026-08-26 09:24:33 INFO:  : (PIPELINE:New-Object PSObject -Property $objReport | write-output)
 $objReport
 Name                           Value                                                                                                                                                                                                                                          
 ----                           -----                                                                                                                                                                                                                                          
-Version                        1.5.98                                                                                                                                                                                                                                         
+Version                        1.5.101                                                                                                                                                                                                                                        
 Valid                          True
-2026-08-04 16:29:36 INFO:  : #*======^ confirm-ModulePsd1Version: C:\sc\verb-dev\verb-dev\verb-dev.psd1 ^======
-2026-08-04 16:29:38 INFO:  : (confirm-ModulePsd1Version:Success)
-2026-08-04 16:29:39 INFO:  : confirm-ModulePsm1Version w
+2026-08-26 09:24:34 INFO:  : #*======^ confirm-ModulePsd1Version: C:\sc\verb-dev\verb-dev\verb-dev.psd1 ^======
+2026-08-26 09:24:34 INFO:  : (confirm-ModulePsd1Version:Success)
+2026-08-26 09:24:35 INFO:  : confirm-ModulePsm1Version w
 Name                           Value                                                                                                                                                                                                                                          
 ----                           -----                                                                                                                                                                                                                                          
 Path                           C:\sc\verb-dev\verb-dev\verb-dev.psm1                                                                                                                                                                                                          
-RequiredVersion                1.5.98                                                                                                                                                                                                                                         
+RequiredVersion                1.5.101                                                                                                                                                                                                                                        
 whatif                         False                                                                                                                                                                                                                                          
 verbose                        False
-2026-08-04 16:29:40 INFO:  : (Version already updated to match)
-2026-08-04 16:29:41 INFO:  : $objReport
+2026-08-26 09:24:36 INFO:  : (Version already updated to match)
+2026-08-26 09:24:36 INFO:  : $objReport
 Name                           Value                                                                                                                                                                                                                                          
 ----                           -----                                                                                                                                                                                                                                          
-Version                        1.5.98                                                                                                                                                                                                                                         
+Version                        1.5.101                                                                                                                                                                                                                                        
 Valid                          False
-2026-08-04 16:29:43 INFO:  : (SET:$objReport.Valid = $true ;)
-2026-08-04 16:29:44 INFO:  : (PIPELINE:New-Object PSObject -Property $objReport | write-output)
+2026-08-26 09:24:36 INFO:  : (SET:$objReport.Valid = $true ;)
+2026-08-26 09:24:37 INFO:  : (PIPELINE:New-Object PSObject -Property $objReport | write-output)
 $objReport
 Name                           Value                                                                                                                                                                                                                                          
 ----                           -----                                                                                                                                                                                                                                          
-Version                        1.5.98                                                                                                                                                                                                                                         
+Version                        1.5.101                                                                                                                                                                                                                                        
 Valid                          True
-2026-08-04 16:29:45 INFO:  : #*======^ confirm-ModulePsm1Version: C:\sc\verb-dev\verb-dev\verb-dev.psm1 ^======
-2026-08-04 16:29:46 INFO:  : (confirm-ModulePsm1Version:Success)
-2026-08-04 16:29:47 INFO:  : Checking sync of Psd1 module guid to the Pester Test Script: c:\sc\verb-dev\Tests\verb-dev.tests.ps1
-2026-08-04 16:29:48 INFO:  : confirm-ModuleTestPs1Guid w
+2026-08-26 09:24:37 INFO:  : #*======^ confirm-ModulePsm1Version: C:\sc\verb-dev\verb-dev\verb-dev.psm1 ^======
+2026-08-26 09:24:38 INFO:  : (confirm-ModulePsm1Version:Success)
+2026-08-26 09:24:38 INFO:  : Checking sync of Psd1 module guid to the Pester Test Script: c:\sc\verb-dev\Tests\verb-dev.tests.ps1
+2026-08-26 09:24:39 INFO:  : confirm-ModuleTestPs1Guid w
 Name                           Value                                                                                                                                                                                                                                          
 ----                           -----                                                                                                                                                                                                                                          
 Path                           c:\sc\verb-dev\Tests\verb-dev.tests.ps1                                                                                                                                                                                                        
 RequiredGuid                   af7c9182-3b10-416d-bace-aab0aab77828                                                                                                                                                                                                           
 whatif                         False                                                                                                                                                                                                                                          
 verbose                        False
-2026-08-04 16:29:49 INFO:  : (Guid  already updated to match)
-2026-08-04 16:29:50 INFO:  : $objReport
+2026-08-26 09:24:39 INFO:  : (Guid  already updated to match)
+2026-08-26 09:24:40 INFO:  : $objReport
 Name                           Value                                                                                                                                                                                                                                          
 ----                           -----                                                                                                                                                                                                                                          
 Guid                           af7c9182-3b10-416d-bace-aab0aab77828                                                                                                                                                                                                           
 Valid                          False
-2026-08-04 16:29:51 INFO:  : (SET:$objReport.Valid = $true ;)
-2026-08-04 16:29:51 INFO:  : (PIPELINE:New-Object PSObject -Property $objReport | write-output)
+2026-08-26 09:24:40 INFO:  : (SET:$objReport.Valid = $true ;)
+2026-08-26 09:24:41 INFO:  : (PIPELINE:New-Object PSObject -Property $objReport | write-output)
 $objReport
 Name                           Value                                                                                                                                                                                                                                          
 ----                           -----                                                                                                                                                                                                                                          
 Guid                           af7c9182-3b10-416d-bace-aab0aab77828                                                                                                                                                                                                           
 Valid                          True
-2026-08-04 16:29:52 INFO:  : (confirm-ModuleTestPs1Guid:Success)
-2026-08-04 16:29:53 INFO:  : $objReport
+2026-08-26 09:24:42 INFO:  : (confirm-ModuleTestPs1Guid:Success)
+2026-08-26 09:24:42 INFO:  : $objReport
 Name                           Value                                                                                                                                                                                                                                          
 ----                           -----                                                                                                                                                                                                                                          
 Manifest                       C:\sc\verb-dev\verb-dev\verb-dev.psd1                                                                                                                                                                                                          
 Module                         C:\sc\verb-dev\verb-dev\verb-dev.psm1                                                                                                                                                                                                          
 Pester                         c:\sc\verb-dev\Tests\verb-dev.tests.ps1                                                                                                                                                                                                        
 Guid                           af7c9182-3b10-416d-bace-aab0aab77828                                                                                                                                                                                                           
-Version                        1.5.98                                                                                                                                                                                                                                         
+Version                        1.5.101                                                                                                                                                                                                                                        
 Valid                          False
-2026-08-04 16:29:55 INFO:  : (SET:$objReport.Valid = $true ;)
-2026-08-04 16:29:56 INFO:  : (PIPELINE:New-Object PSObject -Property $objReport | write-output)
+2026-08-26 09:24:42 INFO:  : (SET:$objReport.Valid = $true ;)
+2026-08-26 09:24:43 INFO:  : (PIPELINE:New-Object PSObject -Property $objReport | write-output)
 $objReport
 Name                           Value                                                                                                                                                                                                                                          
 ----                           -----                                                                                                                                                                                                                                          
@@ -442,38 +443,38 @@ Manifest                       C:\sc\verb-dev\verb-dev\verb-dev.psd1
 Module                         C:\sc\verb-dev\verb-dev\verb-dev.psm1                                                                                                                                                                                                          
 Pester                         c:\sc\verb-dev\Tests\verb-dev.tests.ps1                                                                                                                                                                                                        
 Guid                           af7c9182-3b10-416d-bace-aab0aab77828                                                                                                                                                                                                           
-Version                        1.5.98                                                                                                                                                                                                                                         
+Version                        1.5.101                                                                                                                                                                                                                                        
 Valid                          True
-2026-08-04 16:29:57 INFO:  : #*======^ confirm-ModuleBuildSync:  ^======
-2026-08-04 16:29:58 INFO:  : (confirm-ModuleBuildSync:Success)
-2026-08-04 16:29:59 INFO:  : Signing appropriate files...
-2026-08-04 16:30:00 INFO:  : set-AuthenticodeSignatureTDO w
+2026-08-26 09:24:43 INFO:  : #*======^ confirm-ModuleBuildSync:  ^======
+2026-08-26 09:24:44 INFO:  : (confirm-ModuleBuildSync:Success)
+2026-08-26 09:24:45 INFO:  : Signing appropriate files...
+2026-08-26 09:24:45 INFO:  : set-AuthenticodeSignatureTDO w
 Name                           Value                                                                                                                                                                                                                                          
 ----                           -----                                                                                                                                                                                                                                          
 file                           {C:\sc\verb-dev\Generate-ScriptMarkdownHelp.ps1, C:\sc\verb-dev\rebuild-module.ps1, C:\sc\verb-dev\requirements.psd1, C:\sc\verb-dev\Tests\PPoShScriptingStyle.psd1...}                                                                        
 ErrorAction                    Stop                                                                                                                                                                                                                                           
 whatif                         False
-2026-08-04 16:30:01 INFO:  : Removing existing profile verb-dev content...
-2026-08-04 16:30:02 INFO:  : Uninstall-ModuleForce w
+2026-08-26 09:24:46 INFO:  : Removing existing profile verb-dev content...
+2026-08-26 09:24:47 INFO:  : Uninstall-ModuleForce w
 Name                           Value                                                                                                                                                                                                                                          
 ----                           -----                                                                                                                                                                                                                                          
 ModuleName                     verb-dev                                                                                                                                                                                                                                       
 Verbose                        False                                                                                                                                                                                                                                          
 whatif                         False
-2026-08-04 16:30:13 INFO:  : 
-#*------v Uninstall PSGet Mod:verb-dev:v1.5.97 v------
-2026-08-04 16:31:12 INFO:  : 
-#*------^ Uninstall PSGet Mod:verb-dev:v1.5.97 ^------
-2026-08-04 16:31:14 INFO:  : (Processing $env:PSModulePath paths, for surviving locked copies of verb-dev to *manually* purge...)
-2026-08-04 16:31:16 INFO:  : Checking: verb-dev below: C:\Users\kadritss\Documents\WindowsPowerShell\Modules...
-2026-08-04 16:31:18 INFO:  : Checking: verb-dev below: C:\ProgramData\Boxstarter...
-2026-08-04 16:31:20 INFO:  : Checking: verb-dev below: C:\Program Files\WindowsPowerShell\Modules...
-2026-08-04 16:31:21 INFO:  : Checking: verb-dev below: C:\WINDOWS\system32\WindowsPowerShell\v1.0\Modules...
-2026-08-04 16:31:23 INFO:  : Checking: verb-dev below: C:\Program Files (x86)\AutoIt3\AutoItX...
-2026-08-04 16:31:25 INFO:  : Copying module to profile (net of .git & .vscode dirs, and backed up content)...
-2026-08-04 16:31:27 INFO:  : $srcFiles:post-filter out:
+2026-08-26 09:24:52 INFO:  : 
+#*------v Uninstall PSGet Mod:verb-dev:v1.5.100 v------
+2026-08-26 09:26:05 INFO:  : 
+#*------^ Uninstall PSGet Mod:verb-dev:v1.5.100 ^------
+2026-08-26 09:26:06 INFO:  : (Processing $env:PSModulePath paths, for surviving locked copies of verb-dev to *manually* purge...)
+2026-08-26 09:26:06 INFO:  : Checking: verb-dev below: C:\Users\kadritss\Documents\WindowsPowerShell\Modules...
+2026-08-26 09:26:07 INFO:  : Checking: verb-dev below: C:\ProgramData\Boxstarter...
+2026-08-26 09:26:07 INFO:  : Checking: verb-dev below: C:\Program Files\WindowsPowerShell\Modules...
+2026-08-26 09:26:08 INFO:  : Checking: verb-dev below: C:\WINDOWS\system32\WindowsPowerShell\v1.0\Modules...
+2026-08-26 09:26:08 INFO:  : Checking: verb-dev below: C:\Program Files (x86)\AutoIt3\AutoItX...
+2026-08-26 09:26:09 INFO:  : Copying module to profile (net of .git & .vscode dirs, and backed up content)...
+2026-08-26 09:26:09 INFO:  : $srcFiles:post-filter out:
 \\(Package|Tests|logs)\\|(\.ps[dm]1_(\d+-\d+[AP]M|TMP)|-LOG-BATCH-EXEC-\d+-\d+[AP]M-log\.txt|\\(fingerprint|Psd1filelist))$
-2026-08-04 16:31:28 INFO:  : Discovered mod-copy files ($srcFiles.fullname):w
+2026-08-26 09:26:10 INFO:  : Discovered mod-copy files ($srcFiles.fullname):w
 C:\sc\verb-dev\VERB-dev\bootstrap.min.css
 C:\sc\verb-dev\VERB-dev\bootstrap.min.js
 C:\sc\verb-dev\VERB-dev\CHANGELOG.md
@@ -491,97 +492,97 @@ C:\sc\verb-dev\VERB-dev\README.md
 C:\sc\verb-dev\VERB-dev\screenshot.png
 C:\sc\verb-dev\VERB-dev\verb-dev.psd1
 C:\sc\verb-dev\VERB-dev\verb-dev.psm1
-2026-08-04 16:31:29 INFO:  : Non-Pre-existing:$to:C:\Users\kadritss\Documents\WindowsPowerShell\Modules\verb-dev\verb-dev
+2026-08-26 09:26:10 INFO:  : Non-Pre-existing:$to:C:\Users\kadritss\Documents\WindowsPowerShell\Modules\verb-dev\verb-dev
 Pre-creating before copy...
-2026-08-04 16:31:31 INFO:  : Mode   LastWriteTime       Length Name    
-----   -------------       ------ ----    
-d----- 8/4/2026 4:31:31 PM        verb-dev
-2026-08-04 16:31:33 INFO:  : -Merge:exclude $MergeBuildExcl \\(Public|Internal|External|Private)\\.*.ps1$ files from temp build copy
-2026-08-04 16:31:35 INFO:  : Recursively remove empty subdirs below C:\Users\kadritss\Documents\WindowsPowerShell\Modules\verb-dev\verb-dev...
-2026-08-04 16:31:36 INFO:  : Move/Flatten Resource etc files into root of temp Build dir...
-2026-08-04 16:31:37 INFO:  : Unable to locate a problematic temp mod dir C:\Users\kadritss\Documents\WindowsPowerShell\Modules\verb-dev\verb-dev COPY of Quick-Start-Installation-and-Example.md
-2026-08-04 16:31:39 INFO:  : Unable to locate a problematic temp mod dir C:\Users\kadritss\Documents\WindowsPowerShell\Modules\verb-dev\verb-dev COPY of LICENSE.txt
-2026-08-04 16:31:40 INFO:  : Unable to locate a problematic temp mod dir C:\Users\kadritss\Documents\WindowsPowerShell\Modules\verb-dev\verb-dev COPY of LICENSE_BOOTSTRAP
-2026-08-04 16:31:41 INFO:  : Unable to locate a problematic temp mod dir C:\Users\kadritss\Documents\WindowsPowerShell\Modules\verb-dev\verb-dev COPY of LICENSE_INVOKE-CREATEMODULEHELPFILE
-2026-08-04 16:31:42 INFO:  : Unable to locate a problematic temp mod dir C:\Users\kadritss\Documents\WindowsPowerShell\Modules\verb-dev\verb-dev COPY of LICENSE_JASNY-BOOTSTRAP
-2026-08-04 16:31:43 INFO:  : Unable to locate a problematic temp mod dir C:\Users\kadritss\Documents\WindowsPowerShell\Modules\verb-dev\verb-dev COPY of LICENSE_JQUERY
-2026-08-04 16:31:44 INFO:  : Unable to locate a problematic temp mod dir C:\Users\kadritss\Documents\WindowsPowerShell\Modules\verb-dev\verb-dev COPY of bootstrap.min.css
-2026-08-04 16:31:46 INFO:  : Unable to locate a problematic temp mod dir C:\Users\kadritss\Documents\WindowsPowerShell\Modules\verb-dev\verb-dev COPY of bootstrap.min.js
-2026-08-04 16:31:47 INFO:  : Unable to locate a problematic temp mod dir C:\Users\kadritss\Documents\WindowsPowerShell\Modules\verb-dev\verb-dev COPY of jasny-bootstrap.min.css
-2026-08-04 16:31:48 INFO:  : Unable to locate a problematic temp mod dir C:\Users\kadritss\Documents\WindowsPowerShell\Modules\verb-dev\verb-dev COPY of jasny-bootstrap.min.js
-2026-08-04 16:31:49 INFO:  : Unable to locate a problematic temp mod dir C:\Users\kadritss\Documents\WindowsPowerShell\Modules\verb-dev\verb-dev COPY of jquery-1.11.1.min.js
-2026-08-04 16:31:50 INFO:  : Unable to locate a problematic temp mod dir C:\Users\kadritss\Documents\WindowsPowerShell\Modules\verb-dev\verb-dev COPY of navmenu.css
-2026-08-04 16:31:51 INFO:  : Unable to locate a problematic temp mod dir C:\Users\kadritss\Documents\WindowsPowerShell\Modules\verb-dev\verb-dev COPY of screenshot.png
-2026-08-04 16:31:52 INFO:  : Unable to locate a problematic temp mod dir C:\Users\kadritss\Documents\WindowsPowerShell\Modules\verb-dev\verb-dev COPY of CHANGELOG.md
-2026-08-04 16:31:53 INFO:  : Unable to locate a problematic temp mod dir C:\Users\kadritss\Documents\WindowsPowerShell\Modules\verb-dev\verb-dev COPY of README.md
-2026-08-04 16:31:54 INFO:  : copy/Flatten Resource etc files into source root c:\sc\verb-dev\verb-dev dir...
-2026-08-04 16:31:55 INFO:  : Resolved $ModPsdPath:
+2026-08-26 09:26:11 INFO:  : Mode   LastWriteTime        Length Name    
+----   -------------        ------ ----    
+d----- 8/26/2026 9:26:11 AM        verb-dev
+2026-08-26 09:26:11 INFO:  : -Merge:exclude $MergeBuildExcl \\(Public|Internal|External|Private)\\.*.ps1$ files from temp build copy
+2026-08-26 09:26:12 INFO:  : Recursively remove empty subdirs below C:\Users\kadritss\Documents\WindowsPowerShell\Modules\verb-dev\verb-dev...
+2026-08-26 09:26:13 INFO:  : Move/Flatten Resource etc files into root of temp Build dir...
+2026-08-26 09:26:14 INFO:  : Unable to locate a problematic temp mod dir C:\Users\kadritss\Documents\WindowsPowerShell\Modules\verb-dev\verb-dev COPY of Quick-Start-Installation-and-Example.md
+2026-08-26 09:26:14 INFO:  : Unable to locate a problematic temp mod dir C:\Users\kadritss\Documents\WindowsPowerShell\Modules\verb-dev\verb-dev COPY of LICENSE.txt
+2026-08-26 09:26:15 INFO:  : Unable to locate a problematic temp mod dir C:\Users\kadritss\Documents\WindowsPowerShell\Modules\verb-dev\verb-dev COPY of LICENSE_BOOTSTRAP
+2026-08-26 09:26:15 INFO:  : Unable to locate a problematic temp mod dir C:\Users\kadritss\Documents\WindowsPowerShell\Modules\verb-dev\verb-dev COPY of LICENSE_INVOKE-CREATEMODULEHELPFILE
+2026-08-26 09:26:16 INFO:  : Unable to locate a problematic temp mod dir C:\Users\kadritss\Documents\WindowsPowerShell\Modules\verb-dev\verb-dev COPY of LICENSE_JASNY-BOOTSTRAP
+2026-08-26 09:26:16 INFO:  : Unable to locate a problematic temp mod dir C:\Users\kadritss\Documents\WindowsPowerShell\Modules\verb-dev\verb-dev COPY of LICENSE_JQUERY
+2026-08-26 09:26:17 INFO:  : Unable to locate a problematic temp mod dir C:\Users\kadritss\Documents\WindowsPowerShell\Modules\verb-dev\verb-dev COPY of bootstrap.min.css
+2026-08-26 09:26:17 INFO:  : Unable to locate a problematic temp mod dir C:\Users\kadritss\Documents\WindowsPowerShell\Modules\verb-dev\verb-dev COPY of bootstrap.min.js
+2026-08-26 09:26:18 INFO:  : Unable to locate a problematic temp mod dir C:\Users\kadritss\Documents\WindowsPowerShell\Modules\verb-dev\verb-dev COPY of jasny-bootstrap.min.css
+2026-08-26 09:26:18 INFO:  : Unable to locate a problematic temp mod dir C:\Users\kadritss\Documents\WindowsPowerShell\Modules\verb-dev\verb-dev COPY of jasny-bootstrap.min.js
+2026-08-26 09:26:19 INFO:  : Unable to locate a problematic temp mod dir C:\Users\kadritss\Documents\WindowsPowerShell\Modules\verb-dev\verb-dev COPY of jquery-1.11.1.min.js
+2026-08-26 09:26:19 INFO:  : Unable to locate a problematic temp mod dir C:\Users\kadritss\Documents\WindowsPowerShell\Modules\verb-dev\verb-dev COPY of navmenu.css
+2026-08-26 09:26:20 INFO:  : Unable to locate a problematic temp mod dir C:\Users\kadritss\Documents\WindowsPowerShell\Modules\verb-dev\verb-dev COPY of screenshot.png
+2026-08-26 09:26:21 INFO:  : Unable to locate a problematic temp mod dir C:\Users\kadritss\Documents\WindowsPowerShell\Modules\verb-dev\verb-dev COPY of CHANGELOG.md
+2026-08-26 09:26:21 INFO:  : Unable to locate a problematic temp mod dir C:\Users\kadritss\Documents\WindowsPowerShell\Modules\verb-dev\verb-dev COPY of README.md
+2026-08-26 09:26:22 INFO:  : copy/Flatten Resource etc files into source root c:\sc\verb-dev\verb-dev dir...
+2026-08-26 09:26:22 INFO:  : Resolved $ModPsdPath:
 C:\sc\verb-dev\verb-dev\verb-dev.psd1
-2026-08-04 16:31:56 INFO:  : 
+2026-08-26 09:26:23 INFO:  : 
 ==Verifying CU:Mods\verb-dev\verb-dev\Quick-Start-Installation-and-Example.md:
-2026-08-04 16:31:57 INFO:  : 
+2026-08-26 09:26:23 INFO:  : 
 ==Verifying CU:Mods\verb-dev\verb-dev\LICENSE.txt:
-2026-08-04 16:31:58 INFO:  : 
+2026-08-26 09:26:24 INFO:  : 
 ==Verifying CU:Mods\verb-dev\verb-dev\LICENSE_BOOTSTRAP:
-2026-08-04 16:31:59 INFO:  : 
+2026-08-26 09:26:24 INFO:  : 
 ==Verifying CU:Mods\verb-dev\verb-dev\LICENSE_INVOKE-CREATEMODULEHELPFILE:
-2026-08-04 16:32:00 INFO:  : 
+2026-08-26 09:26:25 INFO:  : 
 ==Verifying CU:Mods\verb-dev\verb-dev\LICENSE_JASNY-BOOTSTRAP:
-2026-08-04 16:32:01 INFO:  : 
+2026-08-26 09:26:25 INFO:  : 
 ==Verifying CU:Mods\verb-dev\verb-dev\LICENSE_JQUERY:
-2026-08-04 16:32:01 INFO:  : 
+2026-08-26 09:26:26 INFO:  : 
 ==Verifying CU:Mods\verb-dev\verb-dev\bootstrap.min.css:
-2026-08-04 16:32:02 INFO:  : 
+2026-08-26 09:26:26 INFO:  : 
 ==Verifying CU:Mods\verb-dev\verb-dev\bootstrap.min.js:
-2026-08-04 16:32:03 INFO:  : 
+2026-08-26 09:26:27 INFO:  : 
 ==Verifying CU:Mods\verb-dev\verb-dev\jasny-bootstrap.min.css:
-2026-08-04 16:32:04 INFO:  : 
+2026-08-26 09:26:28 INFO:  : 
 ==Verifying CU:Mods\verb-dev\verb-dev\jasny-bootstrap.min.js:
-2026-08-04 16:32:05 INFO:  : 
+2026-08-26 09:26:28 INFO:  : 
 ==Verifying CU:Mods\verb-dev\verb-dev\jquery-1.11.1.min.js:
-2026-08-04 16:32:06 INFO:  : 
+2026-08-26 09:26:29 INFO:  : 
 ==Verifying CU:Mods\verb-dev\verb-dev\navmenu.css:
-2026-08-04 16:32:07 INFO:  : 
+2026-08-26 09:26:29 INFO:  : 
 ==Verifying CU:Mods\verb-dev\verb-dev\screenshot.png:
-2026-08-04 16:32:08 INFO:  : 
+2026-08-26 09:26:30 INFO:  : 
 ==Verifying CU:Mods\verb-dev\verb-dev\CHANGELOG.md:
-2026-08-04 16:32:09 INFO:  : 
+2026-08-26 09:26:30 INFO:  : 
 ==Verifying CU:Mods\verb-dev\verb-dev\README.md:
-2026-08-04 16:32:10 INFO:  : Running pre-Publish-Module .psd1 test:
+2026-08-26 09:26:31 INFO:  : Running pre-Publish-Module .psd1 test:
 Test-ModuleManifest -path C:\sc\verb-dev\verb-dev\verb-dev.psd1
-2026-08-04 16:32:12 INFO:  : (Test-ModuleManifest:PASSED)
-2026-08-04 16:32:14 INFO:  : (Profiling Repo: get-PSRepository -name lyncRepo...)
-2026-08-04 16:32:17 PROMPT:  : Large # of funcitons: array of function names char length (verb-devtagdemo.length) -gt $iSkipAutomaticTagsThreshold:2000
+2026-08-26 09:26:31 INFO:  : (Test-ModuleManifest:PASSED)
+2026-08-26 09:26:32 INFO:  : (Profiling Repo: get-PSRepository -name lyncRepo...)
+2026-08-26 09:26:33 PROMPT:  : Large # of funcitons: array of function names char length (;tagdemo.length) -gt $iSkipAutomaticTagsThreshold:2000
 Adding -SkipAutomaticTags param to Publish-Module call, to work around NuGit bug #344
-2026-08-04 16:32:18 INFO:  : 
+2026-08-26 09:26:33 INFO:  : 
 Publish-Module w
 Name                           Value                                                                                                                                                                                                                                          
 ----                           -----                                                                                                                                                                                                                                          
 Name                           verb-dev                                                                                                                                                                                                                                       
 Repository                     lyncRepo                                                                                                                                                                                                                                       
-RequiredVersion                1.5.98                                                                                                                                                                                                                                         
+RequiredVersion                1.5.101                                                                                                                                                                                                                                        
 Verbose                        True                                                                                                                                                                                                                                           
 ErrorAction                    Stop                                                                                                                                                                                                                                           
 errorVariable                  pbmo_Err                                                                                                                                                                                                                                       
 whatif                         False                                                                                                                                                                                                                                          
 SkipAutomaticTags              True
-2026-08-04 16:33:29 WARNING:  :  FOUND $pbmo_Err: import-module HAD ERRORS! (no action, could be non-impacting)
-2026-08-04 16:33:31 WARNING:  :  Publish-Module PBMO UNDEFINED ERROR! System.Management.Automation.StopUpstreamCommandsException: System error.     at Microsoft.PowerShell.Commands.SelectObjectCommand.ProcessRecord()     at System.Management.Automation.CommandProcessor.ProcessRecord() (But PublishModule doesn't bother to return a functional Error object with an Exception, so we can't trust/parse or act on it. Just echo)
-2026-08-04 16:33:33 INFO:  : Waiting for:find-module -name verb-dev -Repository lyncRepo ...
-2026-08-04 16:34:03 INFO:  : find-module returned Array, taking highest Version...
-2026-08-04 16:34:04 INFO:  : Install-Module w
+2026-08-26 09:27:58 WARNING:  :  FOUND $pbmo_Err: import-module HAD ERRORS! (no action, could be non-impacting)
+2026-08-26 09:27:59 WARNING:  :  Publish-Module PBMO UNDEFINED ERROR! System.Management.Automation.StopUpstreamCommandsException: System error.     at Microsoft.PowerShell.Commands.SelectObjectCommand.ProcessRecord()     at System.Management.Automation.CommandProcessor.ProcessRecord() (But PublishModule doesn't bother to return a functional Error object with an Exception, so we can't trust/parse or act on it. Just echo)
+2026-08-26 09:28:00 INFO:  : Waiting for:find-module -name verb-dev -Repository lyncRepo ...
+2026-08-26 09:28:37 INFO:  : find-module returned Array, taking highest Version...
+2026-08-26 09:28:37 INFO:  : Install-Module w
 Name                           Value                                                                                                                                                                                                                                          
 ----                           -----                                                                                                                                                                                                                                          
 Name                           verb-dev                                                                                                                                                                                                                                       
 Repository                     lyncRepo                                                                                                                                                                                                                                       
-RequiredVersion                1.5.98                                                                                                                                                                                                                                         
+RequiredVersion                1.5.101                                                                                                                                                                                                                                        
 scope                          CurrentUser                                                                                                                                                                                                                                    
 force                          True                                                                                                                                                                                                                                           
 AllowClobber                   True                                                                                                                                                                                                                                           
 errorVariable                  ismo_Err                                                                                                                                                                                                                                       
 ErrorAction                    Stop                                                                                                                                                                                                                                           
 whatif                         False
-2026-08-04 16:34:40 INFO:  : Testing Module:Import-Module w
+2026-08-26 09:29:32 INFO:  : Testing Module:Import-Module w
 Name                           Value                                                                                                                                                                                                                                          
 ----                           -----                                                                                                                                                                                                                                          
 Name                           verb-dev                                                                                                                                                                                                                                       
@@ -589,10 +590,10 @@ ErrorAction                    Stop
 errorVariable                  ipmo_Err                                                                                                                                                                                                                                       
 force                          True                                                                                                                                                                                                                                           
 verbose                        True
-2026-08-04 16:34:41 INFO:  : Retrieving matching Repo .nupkg file:
-gci \\lynmsv10\lync_fs\scripts\sc\verb-dev.1.5.98.nupkgl..
-2026-08-04 16:34:41 INFO:  : Proper updated .nupkg file found:verb-dev.1.5.98.nupkg, copying to local Pkg directory.
-2026-08-04 16:34:43 INFO:  : remove-UnneededFileVariants w
+2026-08-26 09:29:35 INFO:  : Retrieving matching Repo .nupkg file:
+gci \\lynmsv10\lync_fs\scripts\sc\verb-dev.1.5.101.nupkgl..
+2026-08-26 09:29:35 INFO:  : Proper updated .nupkg file found:verb-dev.1.5.101.nupkg, copying to local Pkg directory.
+2026-08-26 09:29:36 INFO:  : remove-UnneededFileVariants w
 Name                           Value                                                                                                                                                                                                                                          
 ----                           -----                                                                                                                                                                                                                                          
 Path                           c:\sc\verb-dev\Package                                                                                                                                                                                                                         
@@ -603,7 +604,7 @@ Keep                           2
 KeepToday                      True                                                                                                                                                                                                                                           
 verbose                        True                                                                                                                                                                                                                                           
 whatif                         False
-2026-08-04 16:34:43 INFO:  : remove-UnneededFileVariants w
+2026-08-26 09:29:37 INFO:  : remove-UnneededFileVariants w
 Name                           Value                                                                                                                                                                                                                                          
 ----                           -----                                                                                                                                                                                                                                          
 Path                           c:\sc\verb-dev\Tests                                                                                                                                                                                                                           
@@ -614,7 +615,7 @@ Keep                           4
 KeepToday                      True                                                                                                                                                                                                                                           
 verbose                        True                                                                                                                                                                                                                                           
 whatif                         False
-2026-08-04 16:34:44 INFO:  : 
+2026-08-26 09:29:37 INFO:  : 
 ---------------------------------------------------------------------------------
 Processing completed: verb-dev :: c:\sc\verb-dev
 - Script is currently installed (from PsRep: with scope:CurrentUser, under TORO\kadritss profile
@@ -626,14 +627,14 @@ Processing completed: verb-dev :: c:\sc\verb-dev
 
     2. Install the current version (or higher) from the Repo:lyncRepo:
 
-        install-Module -name verb-dev -Repository lyncRepo -RequiredVersion 1.5.98 -scope currentuser -whatif ;
+        install-Module -name verb-dev -Repository lyncRepo -RequiredVersion 1.5.101 -scope currentuser -whatif ;
 
     3. Reimport the module with -force, to ensure the current installed verison is loaded:
 
         import-Module -name verb-dev -force -verbose ;
 
 #-=-=-Stacked list for the above: CURRENTUSER=-=-=-=-=-=
-$whatif=$false ;  $tScop = 'CurrentUser' ; $tMod = 'verb-dev' ; $tVer = '1.5.98' ;
+$whatif=$false ;  $tScop = 'CurrentUser' ; $tMod = 'verb-dev' ; $tVer = '1.5.101' ;
 if($IsCoreCLR){
     write-warning "WARNING YOU'RE INSTALLING INTO POWERSHELLCORE (7+)!
 THE MODULE WILL GO INTO \DOCS\POWERSHELL\MODULES
@@ -672,7 +673,7 @@ $(($ErrTrapd | fl * -Force|out-string).trim())" ;
 } ;
 #-=-=-=-=-=-=-=-=
 #-=-=-Stacked list for the above: ALLUSERS=-=-=-=-=-=
-$whatif=$false ; $tScop = 'AllUsers' ; $tMod = 'verb-dev' ; $tVer = '1.5.98' ;  
+$whatif=$false ; $tScop = 'AllUsers' ; $tMod = 'verb-dev' ; $tVer = '1.5.101' ;  
 if($IsCoreCLR){
     write-warning "WARNING YOU'RE INSTALLING INTO POWERSHELLCORE (7+)!
 THE MODULE WILL GO INTO \DOCS\POWERSHELL\MODULES
@@ -717,10 +718,10 @@ $(($ErrTrapd | fl * -Force|out-string).trim())" ;
 
 Full Processing Details can be found in:
 
-C:\sc\powershell\PSScripts\logs\processbulk-NewModule-verb-dev-LOG-BATCH-EXEC-20260804-1626PM-log.txt
+C:\sc\powershell\PSScripts\logs\processbulk-NewModule-verb-dev-LOG-BATCH-EXEC-20260826-0922AM-log.txt
 
 ---------------------------------------------------------------------------------
 
-2026-08-04 16:34:45 INFO:  : 
-(Most recent processing log can be found at:c:\sc\verb-dev\processbulk-NewModule-verb-dev-LOG-BATCH-EXEC-20260804-1626PM-log.txt)
-(perm copy stored at:C:\sc\powershell\PSScripts\logs\processbulk-NewModule-verb-dev-LOG-BATCH-EXEC-20260804-1626PM-log.txt
+2026-08-26 09:29:38 INFO:  : 
+(Most recent processing log can be found at:c:\sc\verb-dev\processbulk-NewModule-verb-dev-LOG-BATCH-EXEC-20260826-0922AM-log.txt)
+(perm copy stored at:C:\sc\powershell\PSScripts\logs\processbulk-NewModule-verb-dev-LOG-BATCH-EXEC-20260826-0922AM-log.txt
